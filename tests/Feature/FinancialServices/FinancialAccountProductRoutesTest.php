@@ -397,7 +397,14 @@ it('creates a credit-life product and allows it to be selected for a loan applic
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('financial-services/loan-protection-products/index')
+            ->has('products.data', 0)
             ->where('can_manage', true));
+
+    $this->get(route('loan-protection-products.create'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/loan-protection-products/form')
+            ->where('product', null));
 
     $this->post(route('loan-protection-products.store'), [
         'code' => 'CL-1PCT',
@@ -405,9 +412,38 @@ it('creates a credit-life product and allows it to be selected for a loan applic
         'description' => 'Monthly cover against outstanding loan principal.',
         'monthly_rate_percent' => 1,
         'status' => true,
-    ])->assertRedirect();
+    ])->assertRedirect(route('loan-protection-products.index'));
 
     $protectionProduct = \App\FinancialServices\Models\LoanProtectionProduct::query()->firstOrFail();
+    $this->get(route('loan-protection-products.index', ['search' => 'CL-1PCT']))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->has('products.data', 1)
+            ->where('products.data.0.code', 'CL-1PCT')
+            ->where('filters.search', 'CL-1PCT'));
+
+    $this->get(route('loan-protection-products.index', ['search' => 'missing']))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page->has('products.data', 0));
+
+    $this->get(route('loan-protection-products.edit', $protectionProduct))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/loan-protection-products/form')
+            ->where('product.id', $protectionProduct->id)
+            ->where('product.code', 'CL-1PCT'));
+
+    $this->put(route('loan-protection-products.update', $protectionProduct), [
+        'code' => 'CL-1PCT',
+        'name' => 'Credit life 1 percent updated',
+        'description' => 'Monthly cover against outstanding loan principal.',
+        'monthly_rate_percent' => 1.25,
+        'status' => true,
+    ])->assertRedirect(route('loan-protection-products.index'));
+
+    $protectionProduct->refresh();
+    expect($protectionProduct->name)->toBe('Credit life 1 percent updated');
+
     $this->post(route('loan-applications.store'), [
         'customer_id' => $fixture['customer']->id,
         'financial_product_id' => $fixture['product']->id,

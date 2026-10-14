@@ -1,6 +1,5 @@
 import DataTablePagination from '@/components/data-table-pagination';
 import {
-    ResourceEmptyState,
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -141,38 +140,33 @@ export default function Index() {
                         setData('page', 1);
                     }}
                 />
-                {teller_sessions.data.length === 0 ? (
-                    <ResourceEmptyState
-                        title="No teller sessions found"
-                        description="Open a teller session to begin cash operations."
-                    />
-                ) : (
-                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                        <table className="w-full min-w-240 border-collapse text-sm">
-                            <thead className="bg-muted text-muted-foreground">
-                                <tr>
-                                    {[
-                                        '#',
-                                        'Teller',
-                                        'Branch',
-                                        'Business Date',
-                                        'Status',
-                                        'Opening Cash',
-                                        'Closing Cash',
-                                        'Difference',
-                                        'Actions',
-                                    ].map((header) => (
-                                        <th
-                                            key={header}
-                                            className="border-b p-2 text-left font-medium"
-                                        >
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {teller_sessions.data.map((session, index) => (
+                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                    <table className="w-full min-w-240 border-collapse text-sm">
+                        <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
+                            <tr>
+                                {[
+                                    '#',
+                                    'Teller',
+                                    'Branch',
+                                    'Business Date',
+                                    'Status',
+                                    'Opening Cash',
+                                    'Closing Cash',
+                                    'Difference',
+                                    'Actions',
+                                ].map((header) => (
+                                    <th
+                                        key={header}
+                                        className="border-b p-2 text-left font-medium"
+                                    >
+                                        {header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {teller_sessions.data.length > 0 ? (
+                                teller_sessions.data.map((session, index) => (
                                     <tr
                                         key={session.id}
                                         className="border-b even:bg-muted/40 hover:bg-accent/20"
@@ -250,11 +244,21 @@ export default function Index() {
                                                 )}
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={9} className="p-0">
+                                        <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                                            No teller sessions found. Open a
+                                            teller session to begin cash
+                                            operations.
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
                 <DataTablePagination
                     perPage={teller_sessions.per_page}
                     currentPage={teller_sessions.current_page}

@@ -179,6 +179,23 @@ export interface LoanProtectionClaim {
     decision_note?: string | null;
 }
 
+export interface LoanProtectionProductsPageProps extends SharedData {
+    products: {
+        data: LoanProtectionProduct[];
+        links: { url: string | null; label: string; active: boolean }[];
+        per_page: number;
+        current_page: number;
+        last_page: number;
+        total: number;
+    };
+    can_manage: boolean;
+    filters: {
+        search?: string;
+        per_page?: string | number;
+        page?: string | number;
+    };
+}
+
 export interface LoanApplicationIncomeDetail {
     id?: number;
     source: string;
@@ -675,6 +692,11 @@ export interface ProductPoliciesPageProps extends SharedData {
         per_page: number;
     };
     family?: 'deposit' | 'loan' | '';
+    filters: {
+        search?: string;
+        per_page?: string | number;
+        page?: string | number;
+    };
 }
 
 export interface AccountBalancesReportPageProps extends SharedData {

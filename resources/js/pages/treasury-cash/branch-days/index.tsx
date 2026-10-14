@@ -1,6 +1,5 @@
 import DataTablePagination from '@/components/data-table-pagination';
 import {
-    ResourceEmptyState,
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -99,36 +98,31 @@ export default function Index() {
                     />
                 </div>
 
-                {branch_days.data.length === 0 ? (
-                    <ResourceEmptyState
-                        title="No branch days found"
-                        description="Open a branch day to begin daily operations."
-                    />
-                ) : (
-                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                        <table className="w-full min-w-180 border-collapse text-sm">
-                            <thead className="bg-muted text-muted-foreground">
-                                <tr>
-                                    {[
-                                        '#',
-                                        'Branch',
-                                        'Business Date',
-                                        'Status',
-                                        'Opened By',
-                                        'Closed By',
-                                        'Actions',
-                                    ].map((header) => (
-                                        <th
-                                            key={header}
-                                            className="border-b p-2 text-left font-medium"
-                                        >
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {branch_days.data.map((branchDay, index) => (
+                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                    <table className="w-full min-w-180 border-collapse text-sm">
+                        <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
+                            <tr>
+                                {[
+                                    '#',
+                                    'Branch',
+                                    'Business Date',
+                                    'Status',
+                                    'Opened By',
+                                    'Closed By',
+                                    'Actions',
+                                ].map((header) => (
+                                    <th
+                                        key={header}
+                                        className="border-b p-2 text-left font-medium"
+                                    >
+                                        {header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {branch_days.data.length > 0 ? (
+                                branch_days.data.map((branchDay, index) => (
                                     <tr
                                         key={branchDay.id}
                                         className="border-b transition-colors even:bg-muted/40 hover:bg-accent/20"
@@ -195,11 +189,20 @@ export default function Index() {
                                             )}
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={7} className="p-0">
+                                        <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                                            No branch days found. Open a branch
+                                            day to begin daily operations.
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
                 <DataTablePagination
                     perPage={branch_days.per_page}
@@ -209,13 +212,8 @@ export default function Index() {
                     }}
                     onPageChange={(value) => setData('page', value)}
                     currentPage={branch_days.current_page}
-                    totalItems={branch_days.data.length}
-                    totalPages={Math.max(
-                        1,
-                        Math.ceil(
-                            branch_days.data.length / branch_days.per_page,
-                        ),
-                    )}
+                    totalItems={branch_days.total}
+                    totalPages={branch_days.last_page}
                     onNext={() => setData('page', branch_days.current_page + 1)}
                     onPrevious={() =>
                         setData(

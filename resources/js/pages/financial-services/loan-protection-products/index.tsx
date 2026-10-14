@@ -1,272 +1,220 @@
-import InputError from '@/components/input-error';
+import DataTablePagination from '@/components/data-table-pagination';
 import {
     ResourceEmptyState,
     ResourcePageHeader,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type { LoanProtectionProduct } from '@/types/financial-services';
+import type { BreadcrumbItem } from '@/types';
+import type { LoanProtectionProductsPageProps } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Check, Pencil, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { Pencil, Plus } from 'lucide-react';
+import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
-interface PageProps extends SharedData {
-    products: LoanProtectionProduct[];
-    can_manage: boolean;
-}
-
-const emptyProduct = {
-    code: '',
-    name: '',
-    description: '',
-    monthly_rate_percent: '',
-    status: true,
-};
-
 export default function LoanProtectionProductsIndex() {
-    const { products, can_manage: canManage } = usePage<PageProps>().props;
-    const { data, setData, post, put, processing, errors, reset } =
-        useForm(emptyProduct);
-    const [editingProductId, setEditingProductId] = useState<number | null>(
-        null,
-    );
+    const {
+        products,
+        can_manage: canManage,
+        filters,
+    } = usePage<LoanProtectionProductsPageProps>().props;
+    const { data, setData, get } = useForm({
+        search: filters.search || '',
+        page: Number(filters.page) || 1,
+        per_page: Number(filters.per_page) || 18,
+    });
+
+    useFlashToastHandler();
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            get(route('loan-protection-products.index'), {
+                preserveState: true,
+                replace: true,
+            });
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [data.search, data.page, data.per_page, get]);
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
-        { title: 'Loan Protection Products', href: '' },
+        {
+            title: 'Loan Protection Products',
+            href: route('loan-protection-products.index'),
+        },
     ];
-
-    const editProduct = (product: LoanProtectionProduct) => {
-        setEditingProductId(product.id);
-        setData({
-            code: product.code,
-            name: product.name,
-            description: product.description ?? '',
-            monthly_rate_percent: String(product.monthly_rate_percent),
-            status: product.status,
-        });
-    };
-
-    const clearForm = () => {
-        setEditingProductId(null);
-        reset();
-        setData(emptyProduct);
-    };
-
-    const submit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const options = { onSuccess: clearForm };
-        if (editingProductId) {
-            put(
-                route('loan-protection-products.update', editingProductId),
-                options,
-            );
-        } else {
-            post(route('loan-protection-products.store'), options);
-        }
-    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Loan Protection Products" />
-            <div className="space-y-5">
+            <div className="space-y-4">
                 <ResourcePageHeader
                     title="Credit-life products"
                     description="Configure optional insurance that pays the remaining loan principal after an approved death claim."
                     action={
-                        <Button asChild size="sm" variant="outline">
-                            <Link href={route('loan-applications.index')}>
-                                Back to applications
-                            </Link>
-                        </Button>
+                        canManage ? (
+                            <Button asChild size="sm">
+                                <Link
+                                    href={route(
+                                        'loan-protection-products.create',
+                                    )}
+                                >
+                                    <Plus className="mr-1 h-4 w-4" />
+                                    New product
+                                </Link>
+                            </Button>
+                        ) : null
                     }
                 />
 
-                {canManage && (
-                    <form
-                        onSubmit={submit}
-                        className="space-y-4 rounded-lg border bg-card p-4 sm:p-5"
-                    >
-                        <div>
-                            <h2 className="text-sm font-semibold">
-                                {editingProductId
-                                    ? 'Edit insurance product'
-                                    : 'Add insurance product'}
-                            </h2>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                The monthly premium is charged on principal
-                                remaining after each scheduled repayment.
-                            </p>
-                        </div>
-                        <div className="grid gap-3 sm:grid-cols-2">
-                            <div>
-                                <Label htmlFor="protection-code">
-                                    Product code
-                                </Label>
-                                <Input
-                                    id="protection-code"
-                                    value={data.code}
-                                    onChange={(event) =>
-                                        setData('code', event.target.value)
-                                    }
-                                    maxLength={60}
-                                />
-                                <InputError message={errors.code} />
-                            </div>
-                            <div>
-                                <Label htmlFor="protection-name">
-                                    Product name
-                                </Label>
-                                <Input
-                                    id="protection-name"
-                                    value={data.name}
-                                    onChange={(event) =>
-                                        setData('name', event.target.value)
-                                    }
-                                    maxLength={180}
-                                />
-                                <InputError message={errors.name} />
-                            </div>
-                            <div>
-                                <Label htmlFor="protection-rate">
-                                    Monthly premium rate (%)
-                                </Label>
-                                <Input
-                                    id="protection-rate"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    step="0.0001"
-                                    value={data.monthly_rate_percent}
-                                    onChange={(event) =>
-                                        setData(
-                                            'monthly_rate_percent',
-                                            event.target.value,
-                                        )
-                                    }
-                                />
-                                <InputError
-                                    message={errors.monthly_rate_percent}
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="protection-description">
-                                    Description
-                                </Label>
-                                <Input
-                                    id="protection-description"
-                                    value={data.description}
-                                    onChange={(event) =>
-                                        setData(
-                                            'description',
-                                            event.target.value,
-                                        )
-                                    }
-                                    maxLength={2000}
-                                />
-                                <InputError message={errors.description} />
-                            </div>
-                            <label className="flex items-center gap-2 text-sm sm:col-span-2">
-                                <input
-                                    type="checkbox"
-                                    checked={data.status}
-                                    onChange={(event) =>
-                                        setData('status', event.target.checked)
-                                    }
-                                />
-                                Available for new loan applications
-                            </label>
-                        </div>
-                        <div className="flex justify-end gap-2 border-t pt-3">
-                            {editingProductId && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={clearForm}
-                                >
-                                    Cancel edit
-                                </Button>
-                            )}
-                            <Button type="submit" disabled={processing}>
-                                {editingProductId ? (
-                                    <Check className="size-4" />
-                                ) : (
-                                    <Plus className="size-4" />
-                                )}
-                                {editingProductId
-                                    ? 'Save product'
-                                    : 'Create product'}
-                            </Button>
-                        </div>
-                    </form>
-                )}
+                <Input
+                    className="w-full bg-card sm:w-80"
+                    placeholder="Search product code or name..."
+                    value={data.search}
+                    onChange={(event) => {
+                        setData('search', event.target.value);
+                        setData('page', 1);
+                    }}
+                />
 
-                {products.length === 0 ? (
+                {products.data.length === 0 ? (
                     <ResourceEmptyState
-                        title="No credit-life products"
-                        description="Create a product before offering protection with a loan."
+                        title="No credit-life products found"
+                        description="Try a different search or create a new product."
                     />
                 ) : (
-                    <div className="overflow-x-auto rounded-lg border bg-card">
-                        <table className="w-full text-left text-sm">
-                            <thead className="border-b bg-muted/40 text-xs text-muted-foreground">
-                                <tr>
-                                    <th className="px-3 py-2">Code</th>
-                                    <th className="px-3 py-2">Product</th>
-                                    <th className="px-3 py-2">Monthly rate</th>
-                                    <th className="px-3 py-2">Status</th>
-                                    {canManage && (
-                                        <th className="px-3 py-2 text-right">
-                                            Actions
+                    <>
+                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
+                            <table className="w-full min-w-180 border-collapse text-sm">
+                                <thead className="sticky top-0 z-10 bg-muted text-sm text-muted-foreground">
+                                    <tr>
+                                        <th className="border-b p-2 text-left font-medium">
+                                            Code
                                         </th>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y">
-                                {products.map((product) => (
-                                    <tr key={product.id}>
-                                        <td className="px-3 py-2 font-medium">
-                                            {product.code}
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            <p>{product.name}</p>
-                                            {product.description && (
-                                                <p className="text-xs text-muted-foreground">
-                                                    {product.description}
-                                                </p>
-                                            )}
-                                        </td>
-                                        <td className="px-3 py-2 tabular-nums">
-                                            {product.monthly_rate_percent}%
-                                        </td>
-                                        <td className="px-3 py-2">
-                                            {product.status
-                                                ? 'Available'
-                                                : 'Inactive'}
-                                        </td>
+                                        <th className="border-b p-2 text-left font-medium">
+                                            Product
+                                        </th>
+                                        <th className="border-b p-2 text-left font-medium">
+                                            Monthly rate
+                                        </th>
+                                        <th className="border-b p-2 text-left font-medium">
+                                            Status
+                                        </th>
                                         {canManage && (
-                                            <td className="px-3 py-2 text-right">
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    aria-label={`Edit ${product.name}`}
-                                                    onClick={() =>
-                                                        editProduct(product)
-                                                    }
-                                                >
-                                                    <Pencil className="size-4" />
-                                                </Button>
-                                            </td>
+                                            <th className="border-b p-2 text-right font-medium">
+                                                Actions
+                                            </th>
                                         )}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {products.data.map((product) => (
+                                        <tr
+                                            key={product.id}
+                                            className="border-b even:bg-muted hover:bg-accent/20"
+                                        >
+                                            <td className="px-2 py-2 font-mono text-xs">
+                                                {product.code}
+                                            </td>
+                                            <td className="px-2 py-2">
+                                                <p className="font-medium">
+                                                    {product.name}
+                                                </p>
+                                                {product.description && (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {product.description}
+                                                    </p>
+                                                )}
+                                            </td>
+                                            <td className="px-2 py-2 tabular-nums">
+                                                {product.monthly_rate_percent}%
+                                            </td>
+                                            <td className="px-2 py-2">
+                                                {product.status
+                                                    ? 'Available'
+                                                    : 'Inactive'}
+                                            </td>
+                                            {canManage && (
+                                                <td className="px-2 py-2 text-right">
+                                                    <Button
+                                                        asChild
+                                                        variant="ghost"
+                                                        size="icon"
+                                                    >
+                                                        <Link
+                                                            href={route(
+                                                                'loan-protection-products.edit',
+                                                                product.id,
+                                                            )}
+                                                            aria-label={`Edit ${product.name}`}
+                                                            title="Edit product"
+                                                        >
+                                                            <Pencil className="size-4" />
+                                                        </Link>
+                                                    </Button>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="space-y-3 md:hidden">
+                            {products.data.map((product) => (
+                                <div
+                                    key={product.id}
+                                    className="space-y-2 rounded-md border bg-card p-3"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate font-medium">
+                                                {product.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {product.code}
+                                            </p>
+                                        </div>
+                                        {canManage && (
+                                            <Link
+                                                href={route(
+                                                    'loan-protection-products.edit',
+                                                    product.id,
+                                                )}
+                                                aria-label={`Edit ${product.name}`}
+                                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+                                            >
+                                                <Pencil className="size-4" />
+                                            </Link>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center justify-between gap-3 text-sm">
+                                        <span className="text-muted-foreground">
+                                            Monthly rate
+                                        </span>
+                                        <span className="tabular-nums">
+                                            {product.monthly_rate_percent}%
+                                        </span>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {product.status
+                                            ? 'Available for new applications'
+                                            : 'Inactive'}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <DataTablePagination
+                            perPage={products.per_page}
+                            onPerPageChange={(value) => {
+                                setData('per_page', value);
+                                setData('page', 1);
+                            }}
+                            links={products.links}
+                        />
+                    </>
                 )}
             </div>
         </CustomAuthLayout>

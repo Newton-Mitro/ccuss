@@ -1,6 +1,5 @@
 import DataTablePagination from '@/components/data-table-pagination';
 import {
-    ResourceEmptyState,
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -70,37 +69,32 @@ export default function Index() {
                         setData('page', 1);
                     }}
                 />
-                {adjustments.data.length === 0 ? (
-                    <ResourceEmptyState
-                        title="No cash adjustments found"
-                        description="Teller shortages and excesses will appear here."
-                    />
-                ) : (
-                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
-                        <table className="w-full min-w-240 border-collapse text-sm">
-                            <thead className="bg-muted text-muted-foreground">
-                                <tr>
-                                    {[
-                                        '#',
-                                        'Teller',
-                                        'Business Date',
-                                        'Type',
-                                        'Amount',
-                                        'Reason',
-                                        'Status',
-                                        'Actions',
-                                    ].map((header) => (
-                                        <th
-                                            key={header}
-                                            className="border-b p-2 text-left font-medium"
-                                        >
-                                            {header}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {adjustments.data.map((adjustment, index) => (
+                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                    <table className="w-full min-w-240 border-collapse text-sm">
+                        <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
+                            <tr>
+                                {[
+                                    '#',
+                                    'Teller',
+                                    'Business Date',
+                                    'Type',
+                                    'Amount',
+                                    'Reason',
+                                    'Status',
+                                    'Actions',
+                                ].map((header) => (
+                                    <th
+                                        key={header}
+                                        className="border-b p-2 text-left font-medium"
+                                    >
+                                        {header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {adjustments.data.length > 0 ? (
+                                adjustments.data.map((adjustment, index) => (
                                     <tr
                                         key={adjustment.id}
                                         className="border-b even:bg-muted/40 hover:bg-accent/20"
@@ -261,11 +255,21 @@ export default function Index() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={8} className="p-0">
+                                        <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                                            No cash adjustments found. Teller
+                                            shortages and excesses will appear
+                                            here.
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
                 <DataTablePagination
                     perPage={adjustments.per_page}
                     currentPage={adjustments.current_page}

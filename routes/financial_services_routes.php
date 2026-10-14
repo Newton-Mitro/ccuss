@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/loan-protection-products', [LoanProtectionProductController::class, 'index'])->name('loan-protection-products.index');
+    Route::get('/loan-protection-products/create', [LoanProtectionProductController::class, 'create'])->name('loan-protection-products.create');
     Route::post('/loan-protection-products', [LoanProtectionProductController::class, 'store'])->name('loan-protection-products.store');
+    Route::get('/loan-protection-products/{loan_protection_product}/edit', [LoanProtectionProductController::class, 'edit'])->name('loan-protection-products.edit');
     Route::put('/loan-protection-products/{loan_protection_product}', [LoanProtectionProductController::class, 'update'])->name('loan-protection-products.update');
 
     foreach (['deposit', 'loan'] as $family) {

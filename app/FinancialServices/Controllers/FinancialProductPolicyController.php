@@ -23,9 +23,14 @@ class FinancialProductPolicyController extends Controller
     {
         $family = $this->family($request);
         $productModel = $family === 'loan' ? LoanProduct::class : DepositProduct::class;
+        $search = $request->string('search')->trim()->toString();
         $products = $productModel::query()
             ->where('organization_id', $this->organizationId($request))
             ->with('policy')
+            ->when($search !== '', fn($query) => $query->where(function ($query) use ($search): void {
+                $query->where('code', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%");
+            }))
             ->when($family === 'deposit', fn($query) => $query->orderBy('category'))
             ->orderBy('name')
             ->paginate($request->integer('per_page', 18))
@@ -33,7 +38,7 @@ class FinancialProductPolicyController extends Controller
 
         return Inertia::render('financial-services/product-policies/index', [
             'products' => $products,
-            'filters' => $request->only(['per_page', 'page', 'family']),
+            'filters' => $request->only(['search', 'per_page', 'page', 'family']),
             'family' => $family,
         ]);
     }
