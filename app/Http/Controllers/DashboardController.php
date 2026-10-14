@@ -2,109 +2,150 @@
 
 namespace App\Http\Controllers;
 
+use App\CustomerModule\Models\Customer;
+use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\LoanApplication;
+use App\SystemAdministration\Models\Branch;
+use App\TreasuryAndCash\Models\BranchDay;
+use App\TreasuryAndCash\Models\TellerSession;
+use App\TreasuryAndCash\Models\VaultSession;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function home()
+    public function home(Request $request): Response
     {
-        return Inertia::render('welcome');
-    }
-    public function index()
-    {
-        // -----------------------------------------
-        // 📊 High-level KPIs — aligned with sidebar modules
-        // -----------------------------------------
-        $stats = [
-            'branches' => 12,
-            'customers' => 1240,
-            'savingsAccounts' => 870,
-            'shares' => 430,
-            'loans' => 215,
-            'cashTransactions' => 1260,
-            'assets' => 85,
-            'vendors' => 42,
-            'cheques' => 155,
-            'employees' => 56,
-            'loanApplications' => 34,
-            'users' => 20,
-            'auditLogs' => 460,
-            'settingsChanged' => 8,
-            'totalVisitors' => 10240,
-        ];
+        $organizationId = (int) $request->attributes->get('active_organization')->id;
+        $user = $request->user();
+        $pendingApplicationStatuses = ['SUBMITTED', 'UNDER_REVIEW'];
 
-        // -----------------------------------------
-        // 📈 Monthly Visitors (last 6 months)
-        // -----------------------------------------
-        $monthlyVisitors = [
-            'May' => 1200,
-            'Jun' => 950,
-            'Jul' => 1050,
-            'Aug' => 1300,
-            'Sep' => 1100,
-            'Oct' => 1420,
-        ];
+        $dailyAmounts = FinancialTransaction::query()
+            ->where('organization_id', $organizationId)
+            ->where('status', 'POSTED')
+            ->whereBetween('transaction_date', [today()->subDays(6)->startOfDay(), now()->endOfDay()])
+            ->selectRaw('DATE(transaction_date) as transaction_day, SUM(amount) as total_amount')
+            ->groupByRaw('DATE(transaction_date)')
+            ->pluck('total_amount', 'transaction_day');
 
-        // -----------------------------------------
-        // 📋 Route Visits (top 10)
-        // -----------------------------------------
-        $routeVisits = [
-            '/dashboard' => 2200,
-            '/customers' => 1800,
-            '/loans' => 1450,
-            '/branches' => 1300,
-            '/savings' => 1200,
-            '/vendors' => 980,
-            '/assets' => 870,
-            '/hr' => 740,
-            '/users' => 690,
-        ];
+        $dailyVolume = collect(range(6, 0))->map(function (int $daysAgo) use ($dailyAmounts): array {
+            $date = today()->subDays($daysAgo);
+            $key = $date->toDateString();
 
-        // -----------------------------------------
-        // 📰 Latest Notices
-        // -----------------------------------------
-        $latestNotices = collect([
-            ['id' => 1, 'title' => 'System Maintenance on Oct 25', 'created_at' => now()->subDays(1)],
-            ['id' => 2, 'title' => 'New Branch Opening', 'created_at' => now()->subDays(4)],
-            ['id' => 3, 'title' => 'Updated Loan Policy', 'created_at' => now()->subDays(6)],
-        ]);
+            return [
+                'date' => $key,
+                'label' => $date->format('D'),
+                'amount' => (float) ($dailyAmounts->get($key) ?? 0),
+            ];
+        })->values();
 
-        // -----------------------------------------
-        // 👥 Recent Customers
-        // -----------------------------------------
-        $customers = collect([
-            ['id' => 1, 'name' => 'John Doe', 'account_no' => 'CUS-00123', 'joined_at' => now()->subDays(2)],
-            ['id' => 2, 'name' => 'Sarah Lee', 'account_no' => 'CUS-00124', 'joined_at' => now()->subDays(3)],
-            ['id' => 3, 'name' => 'David Kim', 'account_no' => 'CUS-00125', 'joined_at' => now()->subDays(5)],
-        ]);
+        $accountMix = FinancialAccount::query()
+            ->where('organization_id', $organizationId)
+            ->selectRaw('account_type, COUNT(*) as total_accounts, SUM(balance) as total_balance')
+            ->groupBy('account_type')
+            ->orderBy('account_type')
+            ->get()
+            ->map(fn(FinancialAccount $account): array => [
+                'type' => $account->account_type,
+                'count' => (int) $account->total_accounts,
+                'balance' => (float) $account->total_balance,
+            ])
+            ->values();
 
-        // -----------------------------------------
-        // 💸 Loan Applications
-        // -----------------------------------------
-        $loanApplications = collect([
-            ['id' => 1, 'applicant' => 'Michael Scott', 'amount' => 5000, 'status' => 'Pending', 'created_at' => now()->subDays(2)],
-            ['id' => 2, 'applicant' => 'Pam Beesly', 'amount' => 3500, 'status' => 'Approved', 'created_at' => now()->subDays(4)],
-            ['id' => 3, 'applicant' => 'Jim Halpert', 'amount' => 7200, 'status' => 'Rejected', 'created_at' => now()->subDays(6)],
-        ]);
+        $recentTransactions = FinancialTransaction::query()
+            ->where('organization_id', $organizationId)
+            ->with('branch:id,name')
+            ->latest('transaction_date')
+            ->limit(6)
+            ->get(['id', 'branch_id', 'transaction_no', 'transaction_type', 'transaction_date', 'amount', 'status'])
+            ->map(fn(FinancialTransaction $transaction): array => [
+                'id' => $transaction->id,
+                'number' => $transaction->transaction_no,
+                'type' => $transaction->transaction_type,
+                'date' => $transaction->transaction_date?->toIso8601String(),
+                'amount' => (float) $transaction->amount,
+                'status' => $transaction->status,
+                'branch' => $transaction->branch?->name,
+            ])
+            ->values();
 
-        // -----------------------------------------
-        // 🧾 Audit Logs
-        // -----------------------------------------
-        $auditLogs = collect([
-            ['id' => 1, 'action' => 'User Login', 'user' => 'Admin', 'created_at' => now()->subHours(2)],
-            ['id' => 10, 'action' => 'User Login', 'user' => 'Admin', 'created_at' => now()->subHours(2)],
-            ['id' => 2, 'action' => 'Branch Created', 'user' => 'Manager', 'created_at' => now()->subHours(5)],
-            ['id' => 3, 'action' => 'Settings Updated', 'user' => 'Admin', 'created_at' => now()->subHours(8)],
-        ]);
+        $pendingApplications = LoanApplication::query()
+            ->where('organization_id', $organizationId)
+            ->whereIn('status', $pendingApplicationStatuses)
+            ->with('customer:id,name')
+            ->latest('created_at')
+            ->limit(5)
+            ->get(['id', 'customer_id', 'application_no', 'requested_amount', 'status', 'created_at'])
+            ->map(fn(LoanApplication $application): array => [
+                'id' => $application->id,
+                'number' => $application->application_no,
+                'applicant' => $application->customer?->name ?? 'Unknown customer',
+                'amount' => (float) $application->requested_amount,
+                'status' => $application->status,
+                'created_at' => $application->created_at?->toIso8601String(),
+            ])
+            ->values();
+
+        $quickLinks = collect([
+            ['permission' => 'financial.loan-applications.view', 'label' => 'Loan applications', 'href' => route('loan-applications.index', [], false)],
+            ['permission' => 'financial.accounts.view', 'label' => 'Financial accounts', 'href' => route('financial-accounts.index', [], false)],
+            ['permission' => 'financial.transactions.view', 'label' => 'Transactions', 'href' => route('financial-transactions.index', [], false)],
+            ['permission' => 'branch_days.view', 'label' => 'Branch days', 'href' => route('branch-days.index', [], false)],
+        ])->filter(fn(array $link): bool => $user?->hasPermission($link['permission']) ?? false)
+            ->map(fn(array $link): array => ['label' => $link['label'], 'href' => $link['href']])
+            ->values();
 
         return Inertia::render('dashboard', [
-            'stats' => $stats,
-            'monthlyVisitors' => $monthlyVisitors,
-            'routeVisits' => $routeVisits,
-            'latestNotices' => $latestNotices,
-            'customers' => $customers,
-            'loanApplications' => $loanApplications,
-            'auditLogs' => $auditLogs,
+            'stats' => [
+                'branches' => Branch::query()->where('organization_id', $organizationId)->count(),
+                'members' => Customer::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('type', Customer::TYPE_INDIVIDUAL)
+                    ->where('status', Customer::STATUS_ACTIVE)
+                    ->count(),
+                'activeAccounts' => FinancialAccount::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('status', 'ACTIVE')
+                    ->count(),
+                'loanPortfolio' => (float) FinancialAccount::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('account_type', 'LOAN')
+                    ->where('status', 'ACTIVE')
+                    ->sum('balance'),
+                'pendingApplications' => LoanApplication::query()
+                    ->where('organization_id', $organizationId)
+                    ->whereIn('status', $pendingApplicationStatuses)
+                    ->count(),
+                'pendingTransactions' => FinancialTransaction::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('status', 'PENDING')
+                    ->count(),
+                'monthTransactionVolume' => (float) FinancialTransaction::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('status', 'POSTED')
+                    ->whereBetween('transaction_date', [now()->startOfMonth(), now()->endOfMonth()])
+                    ->sum('amount'),
+                'openBranchDays' => BranchDay::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('status', BranchDay::STATUS_OPEN)
+                    ->count(),
+                'openTellerSessions' => TellerSession::query()
+                    ->where('status', 'OPEN')
+                    ->whereHas('branchDay', fn($query) => $query->where('organization_id', $organizationId))
+                    ->count(),
+                'openVaultSessions' => VaultSession::query()
+                    ->where('status', 'OPEN')
+                    ->whereHas('branchDay', fn($query) => $query->where('organization_id', $organizationId))
+                    ->count(),
+            ],
+            'dailyVolume' => $dailyVolume,
+            'accountMix' => $accountMix,
+            'recentTransactions' => $recentTransactions,
+            'pendingApplicationsList' => $pendingApplications,
+            'quickLinks' => $quickLinks,
+            'today' => today()->toDateString(),
         ]);
     }
 }

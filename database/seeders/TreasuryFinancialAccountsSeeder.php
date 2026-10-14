@@ -25,77 +25,100 @@ class TreasuryFinancialAccountsSeeder extends Seeder
         $branchId = $organization->branches()->oldest('id')->value('id');
         $ledgerAccounts = LedgerAccount::query()
             ->where('organization_id', $organization->id)
-            ->whereIn('code', ['1110', '1120', '1130', '1200', '1210', '1300'])
+            ->whereIn('code', ['1110', '1120', '1130', '1200', '1210'])
             ->get()
             ->keyBy('code');
 
         DB::transaction(function () use ($organization, $branchId, $ledgerAccounts): void {
-            $bank = Bank::query()->updateOrCreate(
+            foreach ([
                 [
-                    'organization_id' => $organization->id,
-                    'code' => 'DBBL',
-                ],
-                [
-                    'name' => 'Dutch-Bangla Bank PLC',
-                    'short_name' => 'DBBL',
-                    'status' => true,
-                ],
-            );
-
-            $bankFinancialAccount = FinancialAccount::query()->updateOrCreate(
-                [
-                    'organization_id' => $organization->id,
-                    'account_no' => 'BANK-DBBL-001',
-                ],
-                [
-                    'branch_id' => $branchId,
-                    'product_type' => null,
-                    'product_id' => null,
-                    'name' => 'Dutch-Bangla Bank Operating Account',
-                    'account_type' => 'BANK',
-                    'status' => 'ACTIVE',
-                    'balance' => 500000,
-                    'available_balance' => 500000,
-                    'opened_at' => self::OPENING_DATE,
-                    'metadata' => ['seeded' => true, 'bank_code' => $bank->code],
-                ],
-            );
-
-            BankAccount::query()->updateOrCreate(
-                [
-                    'organization_id' => $organization->id,
+                    'bank_code' => 'DBBL',
+                    'bank_name' => 'Dutch-Bangla Bank PLC',
+                    'bank_short_name' => 'DBBL',
+                    'financial_account_no' => 'BANK-DBBL-001',
+                    'financial_account_name' => 'Dutch-Bangla Bank Operating Account',
                     'account_number' => 'DBBL-CCUSS-001',
-                ],
-                [
-                    'branch_id' => $branchId,
-                    'bank_id' => $bank->id,
-                    'financial_account_id' => $bankFinancialAccount->id,
                     'account_name' => 'CCUSS Operating Account',
                     'routing_number' => '090274639',
-                    'account_type' => 'CURRENT',
                     'opening_balance' => 500000,
-                    'is_reconcilable' => true,
-                    'status' => 'ACTIVE',
                 ],
-            );
+                [
+                    'bank_code' => 'SONALI',
+                    'bank_name' => 'Sonali Bank PLC',
+                    'bank_short_name' => 'Sonali',
+                    'financial_account_no' => 'BANK-SONALI-001',
+                    'financial_account_name' => 'Sonali Bank Reserve Account',
+                    'account_number' => 'SONALI-CCUSS-001',
+                    'account_name' => 'CCUSS Reserve Account',
+                    'routing_number' => '200100101',
+                    'opening_balance' => 300000,
+                ],
+            ] as $bankDefinition) {
+                $bank = Bank::query()->updateOrCreate(
+                    [
+                        'organization_id' => $organization->id,
+                        'code' => $bankDefinition['bank_code'],
+                    ],
+                    [
+                        'name' => $bankDefinition['bank_name'],
+                        'short_name' => $bankDefinition['bank_short_name'],
+                        'status' => true,
+                    ],
+                );
 
-            $this->seedOpeningMovement(
-                $organization,
-                $branchId,
-                $bankFinancialAccount,
-                500000,
-                'DEPOSIT',
-                'DEBIT',
-                $ledgerAccounts->get('1200'),
-                $ledgerAccounts->get('1210'),
-                'BANK-DBBL-001',
-            );
+                $financialAccount = FinancialAccount::query()->updateOrCreate(
+                    [
+                        'organization_id' => $organization->id,
+                        'account_no' => $bankDefinition['financial_account_no'],
+                    ],
+                    [
+                        'branch_id' => $branchId,
+                        'product_type' => null,
+                        'product_id' => null,
+                        'name' => $bankDefinition['financial_account_name'],
+                        'account_type' => 'BANK',
+                        'status' => 'ACTIVE',
+                        'balance' => $bankDefinition['opening_balance'],
+                        'available_balance' => $bankDefinition['opening_balance'],
+                        'opened_at' => self::OPENING_DATE,
+                        'metadata' => ['seeded' => true, 'bank_code' => $bank->code],
+                    ],
+                );
+
+                BankAccount::query()->updateOrCreate(
+                    [
+                        'organization_id' => $organization->id,
+                        'account_number' => $bankDefinition['account_number'],
+                    ],
+                    [
+                        'branch_id' => $branchId,
+                        'bank_id' => $bank->id,
+                        'financial_account_id' => $financialAccount->id,
+                        'account_name' => $bankDefinition['account_name'],
+                        'routing_number' => $bankDefinition['routing_number'],
+                        'account_type' => 'CURRENT',
+                        'opening_balance' => $bankDefinition['opening_balance'],
+                        'is_reconcilable' => true,
+                        'status' => 'ACTIVE',
+                    ],
+                );
+
+                $this->seedOpeningMovement(
+                    $organization,
+                    $branchId,
+                    $financialAccount,
+                    $bankDefinition['opening_balance'],
+                    'DEPOSIT',
+                    'DEBIT',
+                    $ledgerAccounts->get('1200'),
+                    $ledgerAccounts->get('1210'),
+                    $bankDefinition['financial_account_no'],
+                );
+            }
 
             foreach ([
                 ['CASH-VAULT-001', 'Main Vault Cash Account', 'CASH', 'Main Vault', 1000000, '1110'],
-                ['CASH-VAULT-002', 'Secondary Vault Cash Account', 'CASH', 'Secondary Vault', 250000, '1110'],
                 ['CASH-TELLER-001', 'Main Teller Cash Account', 'CASH', 'Main Teller', 100000, '1120'],
-                ['CASH-TELLER-002', 'Secondary Teller Cash Account', 'CASH', 'Secondary Teller', 50000, '1120'],
                 ['CASH-PETTY-001', 'Operations Petty Cash Account', 'CASH', 'Operations Petty Cash', 10000, '1130'],
             ] as [$accountNo, $name, $accountType, $cashLocation, $amount, $ledgerCode]) {
                 $account = FinancialAccount::query()->updateOrCreate(
@@ -129,59 +152,6 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                     $accountNo,
                 );
             }
-
-            FinancialAccount::query()
-                ->where('organization_id', $organization->id)
-                ->whereIn('account_type', ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'])
-                ->orderBy('id')
-                ->get()
-                ->each(function (FinancialAccount $financialAccount) use ($organization, $branchId): void {
-                    $mapping = $financialAccount->product?->accountMappings()
-                        ->where('transaction_type', 'DEPOSIT')
-                        ->where('status', true)
-                        ->first();
-
-                    if (!$mapping) {
-                        return;
-                    }
-
-                    $this->seedOpeningMovement(
-                        $organization,
-                        $branchId,
-                        $financialAccount,
-                        (float) $financialAccount->balance,
-                        'DEPOSIT',
-                        'CREDIT',
-                        $mapping->debitAccount,
-                        $mapping->creditAccount,
-                        $financialAccount->account_no,
-                    );
-                });
-
-            $loanAccount = FinancialAccount::query()->where(
-                'organization_id',
-                $organization->id,
-            )->where('account_no', 'LOAN-SEED-0001')->firstOrFail();
-            $loanAccount->update([
-                'branch_id' => $branchId,
-                'account_type' => 'LOAN',
-                'balance' => 50000,
-                'available_balance' => 50000,
-                'opened_at' => self::OPENING_DATE,
-                'metadata' => ['seeded' => true],
-            ]);
-            $this->seedOpeningMovement(
-                $organization,
-                $branchId,
-                $loanAccount,
-                50000,
-                'LOAN_DISBURSEMENT',
-                'DEBIT',
-                $ledgerAccounts->get('1300'),
-                $ledgerAccounts->get('1200'),
-                'LOAN-SEED-0001',
-                $bankFinancialAccount,
-            );
         });
 
         $this->command?->info('Treasury financial accounts, transactions, and vouchers seeded.');

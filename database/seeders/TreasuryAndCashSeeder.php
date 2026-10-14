@@ -11,6 +11,8 @@ class TreasuryAndCashSeeder extends Seeder
     {
         DB::transaction(function (): void {
             $this->call([
+                TreasuryFinancialAccountsSeeder::class,
+                TreasuryCashLocationsSeeder::class,
                 TreasuryGlMappingSeeder::class,
             ]);
         });

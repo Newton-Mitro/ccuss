@@ -1,445 +1,526 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
-    ArcElement,
-    BarElement,
-    CategoryScale,
-    Chart as ChartJS,
-    DoughnutController,
-    Legend,
-    LineElement,
-    LinearScale,
-    PointElement,
-    RadarController,
-    RadialLinearScale,
-    Title,
-    Tooltip,
-} from 'chart.js';
-import { useEffect, useMemo, useState } from 'react';
-import { Bar, Doughnut, Line, Radar } from 'react-chartjs-2';
-import { ResourcePageHeader } from '../components/resource-page-shell';
+    Activity,
+    ArrowDownRight,
+    ArrowRight,
+    Banknote,
+    Building2,
+    CalendarDays,
+    Clock3,
+    FileClock,
+    HandCoins,
+    Landmark,
+    ReceiptText,
+    Users,
+    WalletCards,
+} from 'lucide-react';
+import { route } from 'ziggy-js';
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '../components/ui/card';
+    ResourcePageHeader,
+    StatusBadge,
+} from '../components/resource-page-shell';
 import CustomAuthLayout from '../layouts/custom-auth-layout';
 import { formatDateTime } from '../lib/date_util';
-import { BreadcrumbItem } from '../types';
+import type { BreadcrumbItem, SharedData } from '../types';
 
-// Register Chart.js modules
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    PointElement,
-    LineElement,
-    ArcElement,
-    RadialLinearScale,
-    DoughnutController,
-    RadarController,
-    Title,
-    Tooltip,
-    Legend,
-);
+interface DashboardProps extends SharedData {
+    stats: {
+        branches: number;
+        members: number;
+        activeAccounts: number;
+        loanPortfolio: number;
+        pendingApplications: number;
+        pendingTransactions: number;
+        monthTransactionVolume: number;
+        openBranchDays: number;
+        openTellerSessions: number;
+        openVaultSessions: number;
+    };
+    dailyVolume: { date: string; label: string; amount: number }[];
+    accountMix: { type: string; count: number; balance: number }[];
+    recentTransactions: {
+        id: number;
+        number: string;
+        type: string;
+        date: string | null;
+        amount: number;
+        status: string;
+        branch: string | null;
+    }[];
+    pendingApplicationsList: {
+        id: number;
+        number: string;
+        applicant: string;
+        amount: number;
+        status: string;
+        created_at: string | null;
+    }[];
+    quickLinks: { label: string; href: string }[];
+    today: string;
+}
+
+const numberFormat = new Intl.NumberFormat('en-BD');
+const compactNumberFormat = new Intl.NumberFormat('en-BD', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+});
+const moneyFormat = new Intl.NumberFormat('en-BD', {
+    style: 'currency',
+    currency: 'BDT',
+    maximumFractionDigits: 0,
+});
+
+const formatMoney = (amount: number) => moneyFormat.format(amount || 0);
+const formatType = (value: string) => value.replaceAll('_', ' ');
 
 export default function DashboardPage() {
-    const { stats, monthlyVisitors, routeVisits, auditLogs }: any =
-        usePage().props;
+    const {
+        stats,
+        dailyVolume,
+        accountMix,
+        recentTransactions,
+        pendingApplicationsList,
+        quickLinks,
+        today,
+        organization,
+    } = usePage<DashboardProps>().props;
 
-    // 🎨 Theme Colors
-    const [themeColors, setThemeColors] = useState({
-        background: '',
-        card: '',
-        border: '',
-        foreground: '',
-        chart1: '',
-        chart2: '',
-        chart3: '',
-        chart4: '',
-        chart5: '',
-    });
-
-    // Update theme colors dynamically
-    useEffect(() => {
-        const root = getComputedStyle(document.documentElement);
-        const getVar = (v: string) => root.getPropertyValue(v).trim();
-
-        const updateTheme = () => {
-            setThemeColors({
-                background: getVar('--color-background'),
-                card: getVar('--color-card'),
-                border: getVar('--color-border'),
-                foreground: getVar('--color-foreground'),
-                chart1: getVar('--color-chart-1'),
-                chart2: getVar('--color-chart-2'),
-                chart3: getVar('--color-chart-3'),
-                chart4: getVar('--color-chart-4'),
-                chart5: getVar('--color-chart-5'),
-            });
-        };
-
-        updateTheme();
-        const observer = new MutationObserver(updateTheme);
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['class'],
-        });
-
-        return () => observer.disconnect();
-    }, []);
-
-    // 💻 KPI Cards
-    const kpiCards = [
-        {
-            label: 'Branches',
-            value: stats.branches,
-            icon: 'fa-code-branch',
-            route: '/branches',
-            color: themeColors.chart1,
-        },
-        {
-            label: 'Customers',
-            value: stats.customers,
-            icon: 'fa-users',
-            route: '/customers',
-            color: themeColors.chart2,
-        },
-        {
-            label: 'Savings',
-            value: stats.savingsAccounts,
-            icon: 'fa-piggy-bank',
-            route: '/savings',
-            color: themeColors.chart3,
-        },
-        {
-            label: 'Shares',
-            value: stats.shares,
-            icon: 'fa-chart-pie',
-            route: '/shares',
-            color: themeColors.chart4,
-        },
-        {
-            label: 'Loans',
-            value: stats.loans,
-            icon: 'fa-money-check-dollar',
-            route: '/loans',
-            color: themeColors.chart5,
-        },
-        {
-            label: 'Vendors',
-            value: stats.vendors,
-            icon: 'fa-store',
-            route: '/vendors',
-            color: themeColors.chart1,
-        },
-        {
-            label: 'Assets',
-            value: stats.assets,
-            icon: 'fa-boxes-stacked',
-            route: '/assets',
-            color: themeColors.chart2,
-        },
-        {
-            label: 'Employees',
-            value: stats.employees,
-            icon: 'fa-user-tie',
-            route: '/hr/employees',
-            color: themeColors.chart3,
-        },
-        {
-            label: 'Audit Logs',
-            value: stats.auditLogs,
-            icon: 'fa-list-check',
-            route: '/audit-logs',
-            color: themeColors.chart4,
-        },
-        {
-            label: 'Users',
-            value: stats.users,
-            icon: 'fa-user-gear',
-            route: '/users',
-            color: themeColors.chart5,
-        },
-        {
-            label: 'Visitors',
-            value: stats.totalVisitors,
-            icon: 'fa-chart-line',
-            route: '/visitors',
-            color: themeColors.chart1,
-        },
-    ];
-
-    // 📊 Chart Options
-    const chartOptions = useMemo(
-        () => ({
-            responsive: true,
-            plugins: {
-                legend: { labels: { color: themeColors.foreground } },
-                title: { display: false, color: themeColors.foreground },
-            },
-            scales: {
-                x: {
-                    ticks: { color: themeColors.foreground },
-                    grid: { color: themeColors.border },
-                },
-                y: {
-                    ticks: { color: themeColors.foreground },
-                    grid: { color: themeColors.border },
-                },
-            },
-        }),
-        [themeColors],
+    const maxDailyVolume = Math.max(0, ...dailyVolume.map((day) => day.amount));
+    const maxAccountCount = Math.max(
+        0,
+        ...accountMix.map((item) => item.count),
     );
-
-    // Monthly Visitors (Line)
-    const monthlyVisitorsData = useMemo(
-        () => ({
-            labels: Object.keys(monthlyVisitors),
-            datasets: [
-                {
-                    label: 'Visitors',
-                    data: Object.values(monthlyVisitors),
-                    fill: true,
-                    backgroundColor: themeColors.chart1 + '33',
-                    borderColor: themeColors.chart1,
-                    tension: 0.3,
-                },
-            ],
-        }),
-        [monthlyVisitors, themeColors],
-    );
-
-    // Route Visits (Bar)
-    const routeVisitedData = useMemo(
-        () => ({
-            labels: Object.keys(routeVisits),
-            datasets: [
-                {
-                    label: 'Visits',
-                    data: Object.values(routeVisits),
-                    backgroundColor: [
-                        themeColors.chart1,
-                        themeColors.chart2,
-                        themeColors.chart3,
-                        themeColors.chart4,
-                        themeColors.chart5,
-                    ],
-                },
-            ],
-        }),
-        [routeVisits, themeColors],
-    );
-
-    // Doughnut Chart
-    const doughnutData = useMemo(
-        () => ({
-            labels: ['Branches', 'Customers', 'Loans', 'Assets', 'Employees'],
-            datasets: [
-                {
-                    data: [
-                        stats.branches,
-                        stats.customers,
-                        stats.loans,
-                        stats.assets,
-                        stats.employees,
-                    ],
-                    backgroundColor: [
-                        themeColors.chart1,
-                        themeColors.chart2,
-                        themeColors.chart3,
-                        themeColors.chart4,
-                        themeColors.chart5,
-                    ],
-                },
-            ],
-        }),
-        [stats, themeColors],
-    );
-
-    // Radar Chart
-    const radarData = useMemo(
-        () => ({
-            labels: ['Savings', 'Shares', 'Loans', 'Vendors', 'Users'],
-            datasets: [
-                {
-                    label: 'KPI Radar',
-                    data: [
-                        stats.savingsAccounts,
-                        stats.shares,
-                        stats.loans,
-                        stats.vendors,
-                        stats.users,
-                    ],
-                    backgroundColor: themeColors.chart1 + '33',
-                    borderColor: themeColors.chart1,
-                    borderWidth: 2,
-                },
-            ],
-        }),
-        [stats, themeColors],
-    );
-
-    // 🧮 Audit Log Chart
-    const groupedAuditLogs = auditLogs.reduce((acc: any, log: any) => {
-        acc[log.action] = (acc[log.action] || 0) + 1;
-        return acc;
-    }, {});
-
-    const auditChartData = {
-        labels: Object.keys(groupedAuditLogs),
-        datasets: [
-            {
-                label: 'Action Count',
-                data: Object.values(groupedAuditLogs),
-                backgroundColor: [
-                    themeColors.chart1,
-                    themeColors.chart2,
-                    themeColors.chart3,
-                    themeColors.chart4,
-                    themeColors.chart5,
-                ],
-                borderRadius: 6,
-            },
-        ],
-    };
+    const pendingWork = stats.pendingApplications + stats.pendingTransactions;
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Dashboard', href: '/dashboard' },
     ];
 
+    const metrics = [
+        {
+            label: 'Branches',
+            value: numberFormat.format(stats.branches),
+            detail: 'Organization locations',
+            icon: Building2,
+            tone: 'text-sky-700 bg-sky-100 dark:text-sky-300 dark:bg-sky-950/50',
+        },
+        {
+            label: 'Active members',
+            value: numberFormat.format(stats.members),
+            detail: 'Individual customers',
+            icon: Users,
+            tone: 'text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-950/50',
+        },
+        {
+            label: 'Active accounts',
+            value: numberFormat.format(stats.activeAccounts),
+            detail: 'Across all product types',
+            icon: WalletCards,
+            tone: 'text-indigo-700 bg-indigo-100 dark:text-indigo-300 dark:bg-indigo-950/50',
+        },
+        {
+            label: 'Loan portfolio',
+            value: formatMoney(stats.loanPortfolio),
+            detail: 'Active loan account balances',
+            icon: HandCoins,
+            tone: 'text-amber-800 bg-amber-100 dark:text-amber-300 dark:bg-amber-950/50',
+        },
+        {
+            label: 'Needs attention',
+            value: numberFormat.format(pendingWork),
+            detail: `${stats.pendingApplications} applications · ${stats.pendingTransactions} transactions`,
+            icon: FileClock,
+            tone: 'text-rose-700 bg-rose-100 dark:text-rose-300 dark:bg-rose-950/50',
+        },
+    ];
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
-            <div className="space-y-6 p-2 transition-colors duration-300 md:p-4">
+            <Head title="Organization Overview" />
+            <div className="space-y-6 text-foreground">
                 <ResourcePageHeader
-                    title="Dashboard"
-                    description="A live overview of activity across your organization."
+                    title="Organization overview"
+                    description="A live operating snapshot across branches, accounts, lending, and treasury."
+                    action={
+                        <div className="text-right">
+                            <div className="text-sm font-medium">
+                                {organization.active?.name ??
+                                    'Active organization'}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                {new Date(
+                                    `${today}T12:00:00`,
+                                ).toLocaleDateString('en-BD', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                })}
+                            </div>
+                        </div>
+                    }
                 />
 
-                {/* KPI Cards */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
-                    {kpiCards.map((card, idx) => (
-                        <div
-                            key={idx}
-                            onClick={() => router.visit(card.route)}
-                            className="group flex cursor-pointer items-center gap-3 rounded-2xl border bg-card/90 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-                            style={{
-                                backgroundColor: `${card.color}15`,
-                                borderColor: `${card.color}40`,
-                            }}
-                        >
-                            <i
-                                className={`fa-solid ${card.icon} rounded-xl p-3 text-xl transition-transform duration-200 group-hover:scale-110 sm:text-2xl`}
-                                style={{ color: card.color }}
-                            />
-                            <div>
-                                <div className="text-xl font-bold tracking-tight sm:text-2xl">
-                                    {card.value}
+                <section
+                    aria-label="Organization metrics"
+                    className="grid grid-cols-2 divide-x divide-y overflow-hidden border-y sm:grid-cols-3 sm:divide-y-0 xl:grid-cols-5"
+                >
+                    {metrics.map(
+                        ({ label, value, detail, icon: Icon, tone }) => (
+                            <div
+                                key={label}
+                                className="min-w-0 px-3 py-3 sm:px-4"
+                            >
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                    <span
+                                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${tone}`}
+                                    >
+                                        <Icon className="h-4 w-4" />
+                                    </span>
+                                    <span className="truncate text-xs">
+                                        {label}
+                                    </span>
                                 </div>
-                                <div className="text-xs font-medium text-muted-foreground">
-                                    {card.label}
+                                <div className="mt-2 truncate text-xl font-semibold tabular-nums">
+                                    {value}
+                                </div>
+                                <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                                    {detail}
+                                </div>
+                            </div>
+                        ),
+                    )}
+                </section>
+
+                {quickLinks.length > 0 && (
+                    <nav
+                        className="flex flex-wrap items-center gap-2"
+                        aria-label="Dashboard shortcuts"
+                    >
+                        <span className="mr-1 text-xs font-medium text-muted-foreground">
+                            Go to
+                        </span>
+                        {quickLinks.map((link) => (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs font-medium transition-colors hover:bg-muted"
+                            >
+                                {link.label}
+                                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                            </Link>
+                        ))}
+                    </nav>
+                )}
+
+                <div className="grid items-start gap-6 xl:grid-cols-[1.4fr_0.6fr]">
+                    <section className="min-w-0 border-y py-4">
+                        <div className="mb-4 flex items-start justify-between gap-4">
+                            <div>
+                                <h2 className="text-sm font-semibold">
+                                    Posted transaction volume
+                                </h2>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Daily total for the last seven days
+                                </p>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-sm font-semibold tabular-nums">
+                                    {formatMoney(stats.monthTransactionVolume)}
+                                </div>
+                                <div className="text-[10px] text-muted-foreground">
+                                    posted this month
                                 </div>
                             </div>
                         </div>
-                    ))}
-                </div>
 
-                {/* Charts */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Card className="bg-card/90">
-                        <CardHeader className="pb-0">
-                            <CardTitle className="text-base">
-                                Top Visited Routes
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Bar
-                                data={routeVisitedData}
-                                options={chartOptions}
-                            />
-                        </CardContent>
-                    </Card>
+                        <div className="flex h-44 items-end gap-2 border-b border-l px-2 pb-0 sm:gap-4">
+                            {dailyVolume.map((day) => {
+                                const height =
+                                    maxDailyVolume > 0
+                                        ? Math.max(
+                                              (day.amount / maxDailyVolume) *
+                                                  100,
+                                              day.amount > 0 ? 3 : 0,
+                                          )
+                                        : 0;
 
-                    <Card className="bg-card/90">
-                        <CardHeader className="pb-0">
-                            <CardTitle className="text-base">
-                                Monthly Visitors
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Line
-                                data={monthlyVisitorsData}
-                                options={chartOptions}
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/90">
-                        <CardHeader className="pb-0">
-                            <CardTitle className="text-base">
-                                Branches vs Customers
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Doughnut
-                                data={doughnutData}
-                                options={chartOptions}
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/90">
-                        <CardHeader className="pb-0">
-                            <CardTitle className="text-base">
-                                KPI Radar
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Radar data={radarData} options={chartOptions} />
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {/* 🧾 Audit Logs Section */}
-                    <Card className="bg-card/90">
-                        <CardHeader>
-                            <CardTitle className="text-base">
-                                Audit Log Activity
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Bar data={auditChartData} options={chartOptions} />
-                        </CardContent>
-                    </Card>
-
-                    {/* Audit Logs */}
-                    <Card className="bg-card/90">
-                        <CardHeader>
-                            <CardTitle className="text-base">
-                                Recent Audit Logs
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ul className="space-y-2 text-sm">
-                                {auditLogs.map((log: any) => (
-                                    <li
-                                        key={log.id}
-                                        className="flex flex-wrap justify-between border-b border-dashed border-muted-foreground/20 py-1"
+                                return (
+                                    <div
+                                        key={day.date}
+                                        className="flex h-full min-w-0 flex-1 flex-col justify-end"
                                     >
-                                        <span className="truncate">
-                                            {log.action}
+                                        <div className="mb-2 truncate text-center text-[10px] text-muted-foreground">
+                                            {day.amount > 0
+                                                ? compactNumberFormat.format(
+                                                      day.amount,
+                                                  )
+                                                : ''}
+                                        </div>
+                                        <div
+                                            className="w-full rounded-t-sm bg-primary/75 transition-[height]"
+                                            style={{ height: `${height}%` }}
+                                            title={`${day.label}: ${formatMoney(day.amount)}`}
+                                            role="img"
+                                            aria-label={`${day.label}: ${formatMoney(day.amount)}`}
+                                        />
+                                        <div className="mt-2 -mb-5 text-center text-[10px] text-muted-foreground">
+                                            {day.label}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </section>
+
+                    <section className="min-w-0 border-y py-4">
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                            <div>
+                                <h2 className="text-sm font-semibold">
+                                    Operations today
+                                </h2>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Live branch and session status
+                                </p>
+                            </div>
+                            <Activity className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="divide-y">
+                            {[
+                                {
+                                    label: 'Open branch days',
+                                    value: stats.openBranchDays,
+                                    icon: CalendarDays,
+                                },
+                                {
+                                    label: 'Teller sessions',
+                                    value: stats.openTellerSessions,
+                                    icon: Clock3,
+                                },
+                                {
+                                    label: 'Vault sessions',
+                                    value: stats.openVaultSessions,
+                                    icon: Landmark,
+                                },
+                            ].map(({ label, value, icon: Icon }) => (
+                                <div
+                                    key={label}
+                                    className="flex items-center justify-between gap-4 py-3"
+                                >
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                        <span className="truncate text-sm">
+                                            {label}
                                         </span>
-                                        <span className="ml-2 opacity-70">
-                                            {formatDateTime(log.created_at)}
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
+                                    </div>
+                                    <span className="text-sm font-semibold tabular-nums">
+                                        {numberFormat.format(value)}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
                 </div>
+
+                <div className="grid items-start gap-6 xl:grid-cols-2">
+                    <section className="min-w-0 space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <h2 className="text-sm font-semibold">
+                                    Recent transactions
+                                </h2>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Latest organization-wide financial activity
+                                </p>
+                            </div>
+                            <ReceiptText className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="overflow-x-auto border-y">
+                            {recentTransactions.length > 0 ? (
+                                <table className="w-full min-w-140 text-sm">
+                                    <thead className="text-left text-[10px] text-muted-foreground uppercase">
+                                        <tr>
+                                            <th className="py-2 pr-3 font-medium">
+                                                Transaction
+                                            </th>
+                                            <th className="py-2 pr-3 font-medium">
+                                                Branch
+                                            </th>
+                                            <th className="py-2 pr-3 font-medium">
+                                                Status
+                                            </th>
+                                            <th className="py-2 text-right font-medium">
+                                                Amount
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y">
+                                        {recentTransactions.map(
+                                            (transaction) => (
+                                                <tr key={transaction.id}>
+                                                    <td className="py-2 pr-3">
+                                                        <div className="font-medium">
+                                                            {transaction.number}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground">
+                                                            {formatType(
+                                                                transaction.type,
+                                                            )}{' '}
+                                                            ·{' '}
+                                                            {transaction.date
+                                                                ? formatDateTime(
+                                                                      transaction.date,
+                                                                  )
+                                                                : '—'}
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-2 pr-3 text-xs text-muted-foreground">
+                                                        {transaction.branch ??
+                                                            '—'}
+                                                    </td>
+                                                    <td className="py-2 pr-3">
+                                                        <StatusBadge
+                                                            tone={
+                                                                transaction.status ===
+                                                                'POSTED'
+                                                                    ? 'success'
+                                                                    : transaction.status ===
+                                                                        'PENDING'
+                                                                      ? 'warning'
+                                                                      : 'neutral'
+                                                            }
+                                                        >
+                                                            {transaction.status}
+                                                        </StatusBadge>
+                                                    </td>
+                                                    <td className="py-2 text-right font-medium tabular-nums">
+                                                        {formatMoney(
+                                                            transaction.amount,
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ),
+                                        )}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <div className="py-8 text-center text-sm text-muted-foreground">
+                                    No financial transactions recorded yet.
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    <section className="min-w-0 space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <h2 className="text-sm font-semibold">
+                                    Loan applications to review
+                                </h2>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {numberFormat.format(
+                                        stats.pendingApplications,
+                                    )}{' '}
+                                    awaiting a decision
+                                </p>
+                            </div>
+                            <HandCoins className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="divide-y border-y">
+                            {pendingApplicationsList.length > 0 ? (
+                                pendingApplicationsList.map((application) => (
+                                    <Link
+                                        key={application.id}
+                                        href={route(
+                                            'loan-applications.show',
+                                            application.id,
+                                        )}
+                                        className="flex items-center justify-between gap-3 py-3 transition-colors hover:bg-muted/40"
+                                    >
+                                        <div className="flex min-w-0 items-center gap-3">
+                                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
+                                                <ArrowDownRight className="h-4 w-4" />
+                                            </span>
+                                            <span className="min-w-0">
+                                                <span className="block truncate text-sm font-medium">
+                                                    {application.applicant}
+                                                </span>
+                                                <span className="block truncate text-xs text-muted-foreground">
+                                                    {application.number} ·{' '}
+                                                    {application.status.replaceAll(
+                                                        '_',
+                                                        ' ',
+                                                    )}
+                                                </span>
+                                            </span>
+                                        </div>
+                                        <span className="shrink-0 text-right text-sm font-medium tabular-nums">
+                                            {formatMoney(application.amount)}
+                                        </span>
+                                    </Link>
+                                ))
+                            ) : (
+                                <div className="py-8 text-center text-sm text-muted-foreground">
+                                    No loan applications are awaiting review.
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                </div>
+
+                <section className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                        <div>
+                            <h2 className="text-sm font-semibold">
+                                Financial account mix
+                            </h2>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Accounts and current balances by type
+                            </p>
+                        </div>
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div className="grid gap-x-8 border-y sm:grid-cols-2 lg:grid-cols-3">
+                        {accountMix.length > 0 ? (
+                            accountMix.map((account) => (
+                                <div
+                                    key={account.type}
+                                    className="min-w-0 py-3"
+                                >
+                                    <div className="flex items-baseline justify-between gap-3">
+                                        <span className="truncate text-sm font-medium">
+                                            {formatType(account.type)}
+                                        </span>
+                                        <span className="shrink-0 text-xs text-muted-foreground">
+                                            {numberFormat.format(account.count)}
+                                        </span>
+                                    </div>
+                                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                                        <div
+                                            className="h-full rounded-full bg-primary/75"
+                                            style={{
+                                                width: `${
+                                                    maxAccountCount
+                                                        ? (account.count /
+                                                              maxAccountCount) *
+                                                          100
+                                                        : 0
+                                                }%`,
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="mt-1 text-xs text-muted-foreground">
+                                        {formatMoney(account.balance)}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-6 text-sm text-muted-foreground">
+                                No financial accounts in this organization.
+                            </div>
+                        )}
+                    </div>
+                </section>
             </div>
         </CustomAuthLayout>
     );
