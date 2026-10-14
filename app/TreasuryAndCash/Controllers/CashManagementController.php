@@ -310,13 +310,6 @@ class CashManagementController extends Controller
                 ? $this->cashManagementDataService->tellerSessionOptions($organization->id, $user->branch_id)
                 : ['branch_day' => null, 'tellers' => []]),
             'filters' => $request->only(['search', 'per_page', 'page']),
-            'auth' => [
-                'user' => [
-                    'branch_id' => $user?->branch_id,
-                    'permissions' => $user?->permissions?->all() ?? [],
-                    'roles' => $user?->roles?->all() ?? [],
-                ],
-            ],
         ]);
     }
 
@@ -331,7 +324,6 @@ class CashManagementController extends Controller
                 'branch_days' => [],
                 'tellers' => [],
                 'user_branch_id' => null,
-                'organization' => $organization,
             ]);
         }
 
@@ -342,7 +334,6 @@ class CashManagementController extends Controller
             'branch_days' => $options['branch_days'],
             'tellers' => $options['tellers'],
             'user_branch_id' => $user->branch_id,
-            'organization' => $organization,
         ]);
     }
 
@@ -406,13 +397,6 @@ class CashManagementController extends Controller
                 ? $this->cashManagementDataService->vaultSessionOptions($organization->id, $user->branch_id)
                 : ['branch_day' => null, 'vaults' => []]),
             'filters' => $request->only(['search', 'per_page', 'page']),
-            'auth' => [
-                'user' => [
-                    'branch_id' => $user?->branch_id,
-                    'permissions' => $user?->permissions?->all() ?? [],
-                    'roles' => $user?->roles?->all() ?? [],
-                ],
-            ],
         ]);
     }
 
@@ -427,7 +411,6 @@ class CashManagementController extends Controller
                 'branch_days' => [],
                 'vaults' => [],
                 'user_branch_id' => null,
-                'organization' => $organization,
             ]);
         }
 
@@ -438,7 +421,6 @@ class CashManagementController extends Controller
             'branch_days' => $options['branch_days'],
             'vaults' => $options['vaults'],
             'user_branch_id' => $user->branch_id,
-            'organization' => $organization,
         ]);
     }
 

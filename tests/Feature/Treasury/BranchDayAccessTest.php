@@ -64,7 +64,11 @@ it('loads the branch day index page for users with branch-day access', function 
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('branch-days.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page->component('treasury-cash/branch-days/index'));
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/branch-days/index')
+            ->where('auth.user.branch_id', $branch->id)
+            ->where('auth.user.branch.name', $branch->name)
+            ->where('organization.activeId', $organization->id));
 });
 
 it('loads the dedicated branch day creation page for users with open access', function () {
@@ -81,7 +85,10 @@ it('loads the dedicated branch day creation page for users with open access', fu
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('branch-days.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page->component('treasury-cash/branch-days/create'));
+        ->assertInertia(fn($page) => $page
+            ->component('treasury-cash/branch-days/create')
+            ->where('organization.activeId', $organization->id)
+            ->where('auth.user.branch.name', $branch->name));
 });
 
 it('forbids users without branch-day access from the branch day index', function () {

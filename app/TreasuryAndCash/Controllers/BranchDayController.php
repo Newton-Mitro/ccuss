@@ -35,20 +35,12 @@ class BranchDayController extends Controller
         return Inertia::render('treasury-cash/branch-days/index', [
             'branch_days' => $branchDays,
             'filters' => $request->only(['search', 'per_page', 'page']),
-            'auth' => [
-                'user' => [
-                    'branch_id' => $request->user()?->branch_id,
-                ],
-            ],
         ]);
     }
 
     public function create(Request $request): Response
     {
-        $organization = $request->attributes->get('active_organization');
-
         return Inertia::render('treasury-cash/branch-days/create', [
-            'organization' => $organization,
             'user_branch_id' => $request->user()?->branch_id,
         ]);
     }

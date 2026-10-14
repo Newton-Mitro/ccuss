@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\SubledgerModule\Models\Subledger;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use App\GeneralAccounting\Models\LedgerAccount;
@@ -69,16 +68,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'bank_accounts',
             ]);
 
-            Subledger::create([
-                'code' => '1112',
-                'name' => 'Bank Accounts',
-                'short_name' => 'Bank Accounts',
-                'subledger_type' => 'cash_and_cash_equivalents',
-                'subledger_sub_type' => 'bank_accounts',
-                'is_active' => true,
-                'gl_account_id' => $bankAccounts->id,
-            ]);
-
             $pettyCashes = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '1113',
@@ -89,16 +78,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'cash_and_cash_equivalents',
                 'subledger_sub_type' => 'petty_cashes',
-            ]);
-
-            Subledger::create([
-                'code' => '1113',
-                'name' => 'Petty Cashes',
-                'short_name' => 'Petty Cashes',
-                'subledger_type' => 'cash_and_cash_equivalents',
-                'subledger_sub_type' => 'petty_cashes',
-                'is_active' => true,
-                'gl_account_id' => $pettyCashes->id,
             ]);
 
             $vaultCashes = LedgerAccount::create([
@@ -113,16 +92,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'vault_cashes',
             ]);
 
-            Subledger::create([
-                'code' => '1114',
-                'name' => 'Vault Cashes',
-                'short_name' => 'Vault Cashes',
-                'subledger_type' => 'cash_and_cash_equivalents',
-                'subledger_sub_type' => 'vault_cashes',
-                'is_active' => true,
-                'gl_account_id' => $vaultCashes->id,
-            ]);
-
             $tellerCashes = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '1115',
@@ -133,16 +102,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'cash_and_cash_equivalents',
                 'subledger_sub_type' => 'teller_cashes',
-            ]);
-
-            Subledger::create([
-                'code' => '1115',
-                'name' => 'Teller Cashes',
-                'short_name' => 'Teller Cashes',
-                'subledger_type' => 'cash_and_cash_equivalents',
-                'subledger_sub_type' => 'teller_cashes',
-                'is_active' => true,
-                'gl_account_id' => $tellerCashes->id,
             ]);
 
             // ----------------------------
@@ -169,16 +128,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'petty_cash_advances',
             ]);
 
-            Subledger::create([
-                'code' => '13001',
-                'name' => 'Petty Cash Advances',
-                'short_name' => 'Petty Cash Advances',
-                'subledger_type' => 'employee_advances',
-                'subledger_sub_type' => 'petty_cash_advances',
-                'is_active' => true,
-                'gl_account_id' => $pettyCashAdvances->id,
-            ]);
-
             $advanceSalaries = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '13002',
@@ -188,16 +137,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'employee_advances',
                 'subledger_sub_type' => 'advance_salaries',
-            ]);
-
-            Subledger::create([
-                'code' => '13002',
-                'name' => 'Advance Salaries',
-                'short_name' => 'Advance Salaries',
-                'subledger_type' => 'employee_advances',
-                'subledger_sub_type' => 'advance_salaries',
-                'is_active' => true,
-                'gl_account_id' => $advanceSalaries->id,
             ]);
 
             // RECEIVABLES
@@ -234,16 +173,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'interest_receivables',
             ]);
 
-            Subledger::create([
-                'code' => '11311',
-                'name' => 'Interest Receivables',
-                'short_name' => 'Interest Receivables',
-                'subledger_type' => 'loan_receivables',
-                'subledger_sub_type' => 'interest_receivables',
-                'is_active' => true,
-                'gl_account_id' => $interestReceivables->id,
-            ]);
-
             // Loan Portfolio
             $loansGroup = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
@@ -267,16 +196,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'general_loans',
             ], );
 
-            Subledger::create([
-                'code' => '1141',
-                'name' => 'General Loans',
-                'short_name' => 'General Loans',
-                'subledger_type' => 'loans',
-                'subledger_sub_type' => 'general_loans',
-                'is_active' => true,
-                'gl_account_id' => $generalLoans->id,
-            ]);
-
             $educationLoans = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '1142',
@@ -287,16 +206,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'loans',
                 'subledger_sub_type' => 'education_loans',
-            ]);
-
-            Subledger::create([
-                'code' => '1142',
-                'name' => 'Education Loans',
-                'short_name' => 'Education Loans',
-                'subledger_type' => 'loans',
-                'subledger_sub_type' => 'education_loans',
-                'is_active' => true,
-                'gl_account_id' => $educationLoans->id,
             ]);
 
             $housingLoans = LedgerAccount::create([
@@ -311,16 +220,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'housing_loans',
             ]);
 
-            Subledger::create([
-                'code' => '1143',
-                'name' => 'Housing Loans',
-                'short_name' => 'Housing Loans',
-                'subledger_type' => 'loans',
-                'subledger_sub_type' => 'housing_loans',
-                'is_active' => true,
-                'gl_account_id' => $housingLoans->id,
-            ]);
-
             $smeLoans = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '1144',
@@ -331,16 +230,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'loans',
                 'subledger_sub_type' => 'sme_loans',
-            ]);
-
-            Subledger::create([
-                'code' => '1144',
-                'name' => 'SME Loans',
-                'short_name' => 'SME Loans',
-                'subledger_type' => 'loans',
-                'subledger_sub_type' => 'sme_loans',
-                'is_active' => true,
-                'gl_account_id' => $smeLoans->id,
             ]);
 
             $vehicleLoans = LedgerAccount::create([
@@ -355,16 +244,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'vehicle_loans',
             ]);
 
-            Subledger::create([
-                'code' => '1145',
-                'name' => 'Vehicle Loans',
-                'short_name' => 'Vehicle Loans',
-                'subledger_type' => 'loans',
-                'subledger_sub_type' => 'vehicle_loans',
-                'is_active' => true,
-                'gl_account_id' => $vehicleLoans->id,
-            ]);
-
             $agriculturalLoans = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '1146',
@@ -375,16 +254,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'loans',
                 'subledger_sub_type' => 'agricultural_loans',
-            ]);
-
-            Subledger::create([
-                'code' => '1146',
-                'name' => 'Agricultural Loans',
-                'short_name' => 'Agricultural Loans',
-                'subledger_type' => 'loans',
-                'subledger_sub_type' => 'agricultural_loans',
-                'is_active' => true,
-                'gl_account_id' => $agriculturalLoans->id,
             ]);
 
             // Fixed Assets
@@ -465,16 +334,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'saving_deposits',
             ]);
 
-            Subledger::create([
-                'code' => '2011',
-                'name' => 'Savings Deposits',
-                'short_name' => 'Savings Deposits',
-                'subledger_type' => 'member_deposits',
-                'subledger_sub_type' => 'saving_deposits',
-                'is_active' => true,
-                'gl_account_id' => $savingDeposits->id,
-            ]);
-
             $termDeposits = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '2012',
@@ -485,16 +344,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'member_deposits',
                 'subledger_sub_type' => 'term_deposits',
-            ]);
-
-            Subledger::create([
-                'code' => '2012',
-                'name' => 'Term Deposits',
-                'short_name' => 'Term Deposits',
-                'subledger_type' => 'member_deposits',
-                'subledger_sub_type' => 'term_deposits',
-                'is_active' => true,
-                'gl_account_id' => $termDeposits->id,
             ]);
 
             $recurringDeposits = LedgerAccount::create([
@@ -509,16 +358,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'recurring_deposits',
             ]);
 
-            Subledger::create([
-                'code' => '2013',
-                'name' => 'Recurring Deposits',
-                'short_name' => 'Recurring Deposits',
-                'subledger_type' => 'member_deposits',
-                'subledger_sub_type' => 'recurring_deposits',
-                'is_active' => true,
-                'gl_account_id' => $recurringDeposits->id,
-            ]);
-
             $interestPayables = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '2014',
@@ -529,16 +368,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'member_deposits',
                 'subledger_sub_type' => 'interest_payables',
-            ]);
-
-            Subledger::create([
-                'code' => '2014',
-                'name' => 'Interest Payables',
-                'short_name' => 'Interest Payables',
-                'subledger_type' => 'member_deposits',
-                'subledger_sub_type' => 'interest_payables',
-                'is_active' => true,
-                'gl_account_id' => $interestPayables->id,
             ]);
 
             $interestProbations = LedgerAccount::create([
@@ -553,16 +382,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'interest_probations',
             ]);
 
-            Subledger::create([
-                'code' => '2015',
-                'name' => 'Interest in Probations / Suspense',
-                'short_name' => 'Interest in Probations / Suspense',
-                'subledger_type' => 'member_deposits',
-                'subledger_sub_type' => 'interest_probations',
-                'is_active' => true,
-                'gl_account_id' => $interestProbations->id,
-            ]);
-
             $interestProbationsExpired = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '2016',
@@ -573,16 +392,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'member_deposits',
                 'subledger_sub_type' => 'interest_forfeited',
-            ]);
-
-            Subledger::create([
-                'code' => '2016',
-                'name' => 'Interest Probation Expired / Forfeited',
-                'short_name' => 'Interest Probation Expired / Forfeited',
-                'subledger_type' => 'member_deposits',
-                'subledger_sub_type' => 'interest_forfeited',
-                'is_active' => true,
-                'gl_account_id' => $interestProbationsExpired->id,
             ]);
 
             // ----------------------------
@@ -610,16 +419,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'vendor_payables',
             ]);
 
-            Subledger::create([
-                'code' => '2111',
-                'name' => 'Vendor Payables',
-                'short_name' => 'Vendor Payables',
-                'subledger_type' => 'payables',
-                'subledger_sub_type' => 'vendor_payables',
-                'is_active' => true,
-                'gl_account_id' => $vendorPayables->id,
-            ]);
-
             $salariesPayables = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '2112',
@@ -630,16 +429,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'payables',
                 'subledger_sub_type' => 'salaries_benefits_payables',
-            ]);
-
-            Subledger::create([
-                'code' => '2112',
-                'name' => 'Salaries & Benefits Payable',
-                'short_name' => 'Salaries & Benefits Payable',
-                'subledger_type' => 'payables',
-                'subledger_sub_type' => 'salaries_benefits_payables',
-                'is_active' => true,
-                'gl_account_id' => $salariesPayables->id,
             ]);
 
             $taxPayables = LedgerAccount::create([
@@ -654,16 +443,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'tax_payables',
             ]);
 
-            Subledger::create([
-                'code' => '2113',
-                'name' => 'Tax Payable',
-                'short_name' => 'Tax Payable',
-                'subledger_type' => 'payables',
-                'subledger_sub_type' => 'tax_payables',
-                'is_active' => true,
-                'gl_account_id' => $taxPayables->id,
-            ]);
-
             $accruedExpensesOtherPayables = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '2114',
@@ -674,16 +453,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'payables',
                 'subledger_sub_type' => 'accrued_expenses_other_payables',
-            ]);
-
-            Subledger::create([
-                'code' => '2114',
-                'name' => 'Accrued Expenses / Other Payables',
-                'short_name' => 'Accrued Expenses / Other Payables',
-                'subledger_type' => 'payables',
-                'subledger_sub_type' => 'accrued_expenses_other_payables',
-                'is_active' => true,
-                'gl_account_id' => $accruedExpensesOtherPayables->id,
             ]);
 
             // ----------------------------
@@ -730,16 +499,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'equity',
                 'subledger_sub_type' => 'share_capitals',
-            ]);
-
-            Subledger::create([
-                'code' => '3010',
-                'name' => 'Share Capitals',
-                'short_name' => 'Share Capitals',
-                'subledger_type' => 'equity',
-                'subledger_sub_type' => 'share_capitals',
-                'is_active' => true,
-                'gl_account_id' => $shareCapitals->id,
             ]);
 
             LedgerAccount::create([
@@ -790,16 +549,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'loan_interest_incomes',
             ]);
 
-            Subledger::create([
-                'code' => '4101',
-                'name' => 'Loan Interest Incomes',
-                'short_name' => 'Loan Interest Incomes',
-                'subledger_type' => 'loan_incomes',
-                'subledger_sub_type' => 'loan_interest_incomes',
-                'is_active' => true,
-                'gl_account_id' => $loanInterestIncomes->id,
-            ]);
-
             $latePaymentFines = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '4102',
@@ -810,16 +559,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'loan_incomes',
                 'subledger_sub_type' => 'late_payment_fines',
-            ]);
-
-            Subledger::create([
-                'code' => '4102',
-                'name' => 'Late Payment Fines',
-                'short_name' => 'Late Payment Fines',
-                'subledger_type' => 'loan_incomes',
-                'subledger_sub_type' => 'late_payment_fines',
-                'is_active' => true,
-                'gl_account_id' => $latePaymentFines->id,
             ]);
 
             $loanInsuranceFees = LedgerAccount::create([
@@ -834,16 +573,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'subledger_sub_type' => 'loan_insurance_fees',
             ]);
 
-            Subledger::create([
-                'code' => '4103',
-                'name' => 'Loan Insurance Fees',
-                'short_name' => 'Loan Insurance Fees',
-                'subledger_type' => 'loan_incomes',
-                'subledger_sub_type' => 'loan_insurance_fees',
-                'is_active' => true,
-                'gl_account_id' => $loanInsuranceFees->id,
-            ]);
-
             $insuranceRenewalFees = LedgerAccount::create([
                 'organization_id' => $organizationGroup->id,
                 'code' => '4104',
@@ -854,16 +583,6 @@ class ChartOfAccountsSeeder extends Seeder
                 'is_control_account' => true,
                 'subledger_type' => 'loan_incomes',
                 'subledger_sub_type' => 'insurance_renewal_fees',
-            ]);
-
-            Subledger::create([
-                'code' => '4104',
-                'name' => 'Insurance Renewal Fees',
-                'short_name' => 'Insurance Renewal Fees',
-                'subledger_type' => 'loan_incomes',
-                'subledger_sub_type' => 'insurance_renewal_fees',
-                'is_active' => true,
-                'gl_account_id' => $insuranceRenewalFees->id,
             ]);
 
             /*

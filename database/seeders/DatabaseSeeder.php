@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
-use Database\Seeders\FinancialServicesSeeder;
 use Database\Seeders\FinancialProductAccountMappingSeeder;
 use Database\Seeders\FinancialProductCatalogSeeder;
 use Database\Seeders\FinancialProductPolicySeeder;
@@ -58,7 +57,6 @@ class DatabaseSeeder extends Seeder
                 FinancialProductAccountMappingSeeder::class,
                 PartySeeder::class,
                 CustomerSeeder::class,
-                FinancialServicesSeeder::class,
                 AccountDefaultRulesSeeder::class,
                 TreasuryAndCashSeeder::class,
             ]);

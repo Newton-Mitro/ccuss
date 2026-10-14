@@ -121,6 +121,8 @@ it('loads teller sessions for authorized organization users', function () {
             ->component('treasury-cash/teller-sessions/index')
             ->has('teller_sessions.data', 1)
             ->has('tellers', 1)
+            ->where('organization.activeId', $fixture['organization']->id)
+            ->where('auth.user.branch.name', $fixture['branch']->name)
             ->where('branch_day.id', $fixture['branchDay']->id)
             ->where('teller_sessions.data.0.id', $fixture['session']->id)
             ->where('teller_sessions.data.0.teller.code', $fixture['teller']->code));
@@ -136,6 +138,8 @@ it('loads the dedicated teller session creation page for users with open access'
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('treasury-cash/teller-sessions/create')
+            ->where('organization.activeId', $fixture['organization']->id)
+            ->where('auth.user.branch.name', $fixture['branch']->name)
             ->has('branch_days', 1)
             ->where('branch_days.0.branch_name', $fixture['branch']->name));
 });

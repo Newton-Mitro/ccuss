@@ -93,7 +93,9 @@ it('loads the vault session list for authorized users', function () {
         ->get(route('vault-sessions.index'))
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
-            ->component('treasury-cash/vault-sessions/index'));
+            ->component('treasury-cash/vault-sessions/index')
+            ->where('organization.activeId', $fixture['organization']->id)
+            ->where('auth.user.branch.name', $fixture['branch']->name));
 });
 
 it('does not expose vault sessions without permission', function () {
@@ -115,6 +117,8 @@ it('exposes open branch days on the vault session creation page', function () {
         ->assertSuccessful()
         ->assertInertia(fn($page) => $page
             ->component('treasury-cash/vault-sessions/create')
+            ->where('organization.activeId', $fixture['organization']->id)
+            ->where('auth.user.branch.name', $fixture['branch']->name)
             ->has('branch_days', 1)
             ->where('branch_days.0.branch_name', $fixture['branch']->name));
 });

@@ -7,6 +7,18 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        Schema::create('loan_protection_products', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
+            $table->string('code', 60);
+            $table->string('name', 180);
+            $table->text('description')->nullable();
+            $table->decimal('monthly_rate_percent', 8, 2);
+            $table->boolean('status')->default(true);
+            $table->timestamps();
+            $table->unique(['organization_id', 'code']);
+        });
+
         /*
         |--------------------------------------------------------------------------
         | Loan Applications
@@ -50,6 +62,10 @@ return new class extends Migration {
             $table->foreignId('loan_product_id')
                 ->constrained('loan_products')
                 ->restrictOnDelete();
+
+            $table->foreignId('loan_protection_product_id')->nullable();
+            $table->foreign('loan_protection_product_id', 'la_application_protection_fk')
+                ->references('id')->on('loan_protection_products')->nullOnDelete();
 
             /*
             |--------------------------------------------------------------------------
@@ -129,6 +145,85 @@ return new class extends Migration {
                 'loan_product_id',
                 'status',
             ]);
+        });
+
+
+        Schema::create('loan_application_income_details', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('loan_application_id');
+            $table->foreign('loan_application_id', 'la_income_app_fk')
+                ->references('id')->on('loan_applications')->cascadeOnDelete();
+            $table->string('source', 120);
+            $table->decimal('monthly_amount', 20, 2);
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('loan_application_expense_details', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('loan_application_id');
+            $table->foreign('loan_application_id', 'la_expense_app_fk')
+                ->references('id')->on('loan_applications')->cascadeOnDelete();
+            $table->string('category', 120);
+            $table->decimal('monthly_amount', 20, 2);
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('loan_application_job_histories', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('loan_application_id');
+            $table->foreign('loan_application_id', 'la_jobs_app_fk')
+                ->references('id')->on('loan_applications')->cascadeOnDelete();
+            $table->string('employer_name', 180);
+            $table->string('job_title', 120)->nullable();
+            $table->string('employment_type', 60)->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->decimal('monthly_income', 20, 2)->nullable();
+            $table->boolean('is_current')->default(false);
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('loan_application_asset_details', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('loan_application_id');
+            $table->foreign('loan_application_id', 'la_assets_app_fk')
+                ->references('id')->on('loan_applications')->cascadeOnDelete();
+            $table->string('asset_type', 100);
+            $table->string('description', 255);
+            $table->decimal('estimated_value', 20, 2)->nullable();
+            $table->string('ownership_status', 80)->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('loan_application_educations', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('loan_application_id');
+            $table->foreign('loan_application_id', 'la_educations_app_fk')
+                ->references('id')->on('loan_applications')->cascadeOnDelete();
+            $table->string('institution_name', 180);
+            $table->string('qualification', 120)->nullable();
+            $table->string('field_of_study', 120)->nullable();
+            $table->unsignedSmallInteger('start_year')->nullable();
+            $table->unsignedSmallInteger('end_year')->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('loan_application_supporting_documents', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('loan_application_id');
+            $table->foreign('loan_application_id', 'la_documents_app_fk')
+                ->references('id')->on('loan_applications')->cascadeOnDelete();
+            $table->string('document_type', 100);
+            $table->string('file_name', 255);
+            $table->string('file_path', 500);
+            $table->string('mime_type', 120)->nullable();
+            $table->unsignedBigInteger('file_size')->default(0);
+            $table->timestamps();
         });
 
 
@@ -777,6 +872,11 @@ return new class extends Migration {
                 ->constrained('loan_accounts')
                 ->cascadeOnDelete();
 
+            $table->foreignId('loan_protection_product_id')->nullable();
+            $table->foreign('loan_protection_product_id', 'la_policy_protection_product_fk')
+                ->references('id')->on('loan_protection_products')->nullOnDelete();
+            $table->decimal('monthly_rate_percent', 8, 2)->nullable();
+
             $table->boolean('required')
                 ->default(false);
 
@@ -813,10 +913,41 @@ return new class extends Migration {
                 'status',
             ]);
         });
+
+        Schema::create('loan_protection_claims', function (Blueprint $table): void {
+            $table->id();
+            $table->foreignId('loan_account_id')->constrained()->cascadeOnDelete();
+            $table->string('claim_no', 100)->unique();
+            $table->date('death_date');
+            $table->string('death_certificate_path', 500);
+            $table->string('death_certificate_name', 255);
+            $table->enum('status', ['SUBMITTED', 'APPROVED', 'REJECTED', 'SETTLED'])->default('SUBMITTED');
+            $table->decimal('payout_amount', 20, 2)->nullable();
+            $table->foreignId('payout_account_id')->nullable();
+            $table->foreign('payout_account_id', 'la_claim_payout_account_fk')
+                ->references('id')->on('financial_accounts')->nullOnDelete();
+            $table->foreignId('financial_transaction_id')->nullable();
+            $table->foreign('financial_transaction_id', 'la_claim_transaction_fk')
+                ->references('id')->on('financial_transactions')->nullOnDelete();
+            $table->foreignId('submitted_by')->constrained('users')->restrictOnDelete();
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('reviewed_at')->nullable();
+            $table->text('decision_note')->nullable();
+            $table->timestamps();
+            $table->unique('financial_transaction_id', 'la_claim_transaction_unique');
+            $table->index(['loan_account_id', 'status']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('loan_protection_claims');
+        Schema::dropIfExists('loan_application_supporting_documents');
+        Schema::dropIfExists('loan_application_educations');
+        Schema::dropIfExists('loan_application_asset_details');
+        Schema::dropIfExists('loan_application_job_histories');
+        Schema::dropIfExists('loan_application_expense_details');
+        Schema::dropIfExists('loan_application_income_details');
         Schema::dropIfExists('loan_protection_policies');
         Schema::dropIfExists('loan_repayments');
         Schema::dropIfExists('loan_repayment_schedules');
@@ -826,5 +957,6 @@ return new class extends Migration {
         Schema::dropIfExists('loan_approval_steps');
         Schema::dropIfExists('loan_accounts');
         Schema::dropIfExists('loan_applications');
+        Schema::dropIfExists('loan_protection_products');
     }
 };

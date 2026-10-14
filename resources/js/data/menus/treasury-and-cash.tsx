@@ -37,13 +37,6 @@ export const treasuryAndCash: SidebarItem[] = [
                         permission: ['vault_sessions.view'],
                     },
                     {
-                        name: 'Cash Position',
-                        icon: <i className="fa-solid fa-money-bill-transfer" />,
-                        path: '/vault-cash-position',
-                        match_path: 'vault-cash-position',
-                        permission: ['cash_transactions.view'],
-                    },
-                    {
                         name: 'Cash Transfers',
                         icon: <i className="fa-solid fa-right-left" />,
                         children_expanded: false,
@@ -100,13 +93,6 @@ export const treasuryAndCash: SidebarItem[] = [
                         ],
                     },
                     {
-                        name: 'Cash Counts',
-                        icon: <i className="fa-solid fa-money-check-dollar" />,
-                        path: '/vault-counts',
-                        match_path: 'vault-counts',
-                        permission: ['cash_transactions.view'],
-                    },
-                    {
                         name: 'Cash Adjustments',
                         icon: <i className="fa-solid fa-sliders" />,
                         children_expanded: false,
@@ -129,30 +115,6 @@ export const treasuryAndCash: SidebarItem[] = [
                                 permission: ['cash_transactions.create'],
                             },
                         ],
-                    },
-                ],
-            },
-
-            // Cash Control
-            {
-                name: 'Cash Control',
-                icon: <i className="fa-solid fa-shield-halved" />,
-                children_expanded: false,
-                permission: ['cash_transactions.view'],
-                children: [
-                    {
-                        name: 'Cash Counts',
-                        icon: <i className="fa-solid fa-money-check-dollar" />,
-                        path: '/cash-counts',
-                        match_path: 'cash-counts',
-                        permission: ['cash_transactions.view'],
-                    },
-                    {
-                        name: 'Branch Cash Summary',
-                        icon: <i className="fa-solid fa-chart-column" />,
-                        path: '/branch-cash-summaries',
-                        match_path: 'branch-cash-summaries',
-                        permission: ['cash_transactions.view'],
                     },
                 ],
             },
@@ -201,20 +163,6 @@ export const treasuryAndCash: SidebarItem[] = [
                         path: '/bank-accounts',
                         match_path: 'bank-accounts',
                         permission: ['bank_accounts.view'],
-                    },
-                    {
-                        name: 'Bank Transactions',
-                        icon: <i className="fa-solid fa-receipt" />,
-                        path: '/bank-transactions',
-                        match_path: 'bank-transactions',
-                        permission: ['bank_transactions.view'],
-                    },
-                    {
-                        name: 'Bank Reconciliations',
-                        icon: <i className="fa-solid fa-scale-balanced" />,
-                        path: '/bank-reconciliations',
-                        match_path: 'bank-reconciliations',
-                        permission: ['bank_transactions.view'],
                     },
                 ],
             },
@@ -280,6 +228,37 @@ export const treasuryAndCash: SidebarItem[] = [
                         path: '/financial-transactions/transfer/create',
                         match_path: 'financial-transactions/transfer',
                         permission: ['financial.transactions.create'],
+                    },
+                ],
+            },
+
+            // Reports
+            {
+                name: 'Reports',
+                icon: <i className="fa-solid fa-file-lines" />,
+                children_expanded: false,
+                permission: ['cash_transactions.view'],
+                children: [
+                    {
+                        name: 'Cash Counts',
+                        icon: <i className="fa-solid fa-money-check-dollar" />,
+                        path: '/cash-counts',
+                        match_path: 'cash-counts',
+                        permission: ['cash_transactions.view'],
+                    },
+                    {
+                        name: 'Bank Transactions',
+                        icon: <i className="fa-solid fa-receipt" />,
+                        path: '/bank-transactions',
+                        match_path: 'bank-transactions',
+                        permission: ['bank_transactions.view'],
+                    },
+                    {
+                        name: 'Bank Reconciliations',
+                        icon: <i className="fa-solid fa-scale-balanced" />,
+                        path: '/bank-reconciliations',
+                        match_path: 'bank-reconciliations',
+                        permission: ['bank_transactions.view'],
                     },
                 ],
             },
