@@ -17,19 +17,11 @@ export const branchOperations: SidebarItem[] = [
 
             // Branch Day
             {
-                name: 'Branch Day',
-                icon: <i className="fa-solid fa-calendar-day" />,
-                children_expanded: false,
+                name: 'Branch Days',
+                icon: <i className="fa-solid fa-calendar-check" />,
+                path: '/branch-days',
+                match_path: 'branch-days',
                 permission: ['branch_days.view'],
-                children: [
-                    {
-                        name: 'Open & Close Branch Day',
-                        icon: <i className="fa-solid fa-calendar-check" />,
-                        path: '/branch-days',
-                        match_path: 'branch-days',
-                        permission: ['branch_days.view'],
-                    },
-                ],
             },
 
             // Teller Management

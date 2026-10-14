@@ -118,8 +118,11 @@ class TreasuryFinancialAccountsSeeder extends Seeder
 
             foreach ([
                 ['CASH-VAULT-001', 'Main Vault Cash Account', 'CASH', 'Main Vault', 1000000, '1110'],
+                ['CASH-VAULT-002', 'Secondary Vault Cash Account', 'CASH', 'Secondary Vault', 250000, '1110'],
                 ['CASH-TELLER-001', 'Main Teller Cash Account', 'CASH', 'Main Teller', 100000, '1120'],
+                ['CASH-TELLER-002', 'Secondary Teller Cash Account', 'CASH', 'Secondary Teller', 50000, '1120'],
                 ['CASH-PETTY-001', 'Operations Petty Cash Account', 'CASH', 'Operations Petty Cash', 10000, '1130'],
+                ['CASH-PETTY-002', 'Administration Petty Cash Account', 'CASH', 'Administration Petty Cash', 5000, '1130'],
             ] as [$accountNo, $name, $accountType, $cashLocation, $amount, $ledgerCode]) {
                 $account = FinancialAccount::query()->updateOrCreate(
                     [
