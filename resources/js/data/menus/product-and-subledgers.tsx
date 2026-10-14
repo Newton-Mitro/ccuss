@@ -32,7 +32,10 @@ export const financialServices: SidebarItem[] = [
             {
                 name: 'Products & Configuration',
                 icon: <i className="fa-solid fa-layer-group" />,
-                permission: ['financial.products.view'],
+                permission: [
+                    'financial.products.view',
+                    'financial.loan-protection-products.view',
+                ],
                 children_expanded: false,
 
                 children: [
@@ -104,6 +107,13 @@ export const financialServices: SidebarItem[] = [
                                 ],
                             },
                         ],
+                    },
+                    {
+                        name: 'Credit-life Products',
+                        icon: <i className="fa-solid fa-shield-halved" />,
+                        path: '/loan-protection-products',
+                        match_path: 'loan-protection-products',
+                        permission: ['financial.loan-protection-products.view'],
                     },
                 ],
             },

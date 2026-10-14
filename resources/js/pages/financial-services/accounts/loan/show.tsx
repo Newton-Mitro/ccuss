@@ -1,4 +1,3 @@
-import FinancialAccountPeopleManagement from '@/components/financial-account-people-management';
 import {
     ResourcePageHeader,
     ResourceTableCard,
@@ -36,11 +35,7 @@ interface Props extends SharedData {
     };
 }
 export default function LoanAccountShow() {
-    const { account, customers } = usePage<
-        Props & {
-            customers: Array<{ id: number; customer_no: string; name: string }>;
-        }
-    >().props;
+    const { account } = usePage<Props>().props;
     const loan = account.loan_account;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
@@ -143,11 +138,6 @@ export default function LoanAccountShow() {
                         </tbody>
                     </table>
                 </ResourceTableCard>
-                <FinancialAccountPeopleManagement
-                    account={account}
-                    customers={customers}
-                    nomineesEnabled={false}
-                />
             </div>
         </CustomAuthLayout>
     );

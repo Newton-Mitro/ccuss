@@ -15,11 +15,25 @@ class StoreLoanApplicationRequest extends FormRequest
     public function rules(): array
     {
         $organizationId = (int) $this->attributes->get('active_organization')?->id;
+        $application = $this->route('loan_application');
+        $existingProtectionProductId = $application?->loan_protection_product_id;
 
         return [
             'branch_id' => ['nullable', 'integer', Rule::exists('branches', 'id')->where(fn($query) => $query->where('organization_id', $organizationId))],
             'customer_id' => ['required', 'integer', Rule::exists('customers', 'id')->where(fn($query) => $query->where('organization_id', $organizationId))],
             'financial_product_id' => ['required', 'integer', Rule::exists('loan_products', 'id')->where(fn($query) => $query->where('organization_id', $organizationId)->where('status', true))],
+            'loan_protection_product_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('loan_protection_products', 'id')->where(fn($query) => $query
+                    ->where('organization_id', $organizationId)
+                    ->where(function ($query) use ($existingProtectionProductId): void {
+                        $query->where('status', true);
+                        if ($existingProtectionProductId) {
+                            $query->orWhere('id', $existingProtectionProductId);
+                        }
+                    })),
+            ],
             'requested_amount' => ['required', 'numeric', 'gt:0'],
             'requested_term_months' => ['required', 'integer', 'min:1', 'max:600'],
             'purpose' => ['nullable', 'string', 'max:5000'],

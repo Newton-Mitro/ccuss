@@ -75,6 +75,7 @@ export default function LoanApplicationsIndex() {
         applications,
         filters,
         can_update: canUpdate,
+        can_manage_protection_products: canManageProtectionProducts,
     } = usePage<LoanApplicationIndexPageProps>().props;
     const { data, setData } = useForm({
         search: filters.search ?? '',
@@ -123,12 +124,25 @@ export default function LoanApplicationsIndex() {
                     title="Loan applications"
                     description="Originate, review, and decide customer loan requests."
                     action={
-                        <Button asChild size="sm">
-                            <Link href={route('loan-applications.create')}>
-                                <Plus className="mr-1 h-4 w-4" /> New
-                                application
-                            </Link>
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            {canManageProtectionProducts && (
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'loan-protection-products.index',
+                                        )}
+                                    >
+                                        Manage credit-life products
+                                    </Link>
+                                </Button>
+                            )}
+                            <Button asChild size="sm">
+                                <Link href={route('loan-applications.create')}>
+                                    <Plus className="mr-1 h-4 w-4" /> New
+                                    application
+                                </Link>
+                            </Button>
+                        </div>
                     }
                 />
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

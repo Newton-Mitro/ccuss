@@ -2,16 +2,22 @@
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\DefaultFineService;
+use App\FinancialServices\Application\FinancialTransactionService;
 use App\FinancialServices\Application\LoanApplicationService;
+use App\FinancialServices\Application\LoanProtectionClaimService;
 use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Models\AccountDefaultRule;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
+use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\LoanProtectionPolicy;
+use App\FinancialServices\Models\LoanProtectionProduct;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 function loanApplicationFixture(): array
 {
@@ -248,6 +254,117 @@ it('configures and activates required loan protection', function () {
     ]);
     expect($policy)->toBeInstanceOf(LoanProtectionPolicy::class)
         ->and($service->setProtectionStatus($application->fresh(), 'ACTIVE')->status)->toBe('ACTIVE');
+});
+
+it('enrolls an optional credit-life product and calculates monthly premiums on remaining principal', function () {
+    $fixture = loanApplicationFixture();
+    $protectionProduct = LoanProtectionProduct::query()->create([
+        'organization_id' => $fixture['organization']->id,
+        'code' => 'CL-1PCT',
+        'name' => 'Credit life 1 percent',
+        'monthly_rate_percent' => 1,
+        'status' => true,
+    ]);
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'loan_protection_product_id' => $protectionProduct->id,
+        'requested_amount' => 1200,
+        'requested_term_months' => 3,
+    ], $fixture['organization']->id);
+    $service->submit($application);
+    $service->approve($application, [], $fixture['user']->id);
+    $loan = $service->createLoanAccount($application->fresh());
+    $policy = $loan->protectionPolicy()->firstOrFail();
+
+    $schedules = app(LoanScheduleService::class)->generate($loan, [
+        'frequency' => 'MONTHLY',
+        'start_date' => '2026-01-31',
+    ]);
+
+    expect($application->fresh()->loan_protection_product_id)->toBe($protectionProduct->id)
+        ->and($policy->loan_protection_product_id)->toBe($protectionProduct->id)
+        ->and((float) $policy->monthly_rate_percent)->toBe(1.0)
+        ->and((float) $schedules[0]->scheduled_protection_fee)->toBe(8.0)
+        ->and((float) $schedules[1]->scheduled_protection_fee)->toBe(4.0)
+        ->and((float) $schedules[2]->scheduled_protection_fee)->toBe(0.0);
+
+    $arrears = app(LoanScheduleService::class)->assessArrears($loan, '2026-03-01');
+    expect($arrears)->toHaveCount(1)
+        ->and((float) $arrears[0]->fee_overdue)->toBe(8.0)
+        ->and($policy->fresh()->status)->toBe('ACTIVE');
+});
+
+it('settles a credit-life death claim through the ledger and restores coverage if the payout is reversed', function () {
+    $fixture = loanApplicationFixture();
+    Storage::fake('local');
+    $protectionProduct = LoanProtectionProduct::query()->create([
+        'organization_id' => $fixture['organization']->id,
+        'code' => 'CL-CLAIM',
+        'name' => 'Credit life claim test',
+        'monthly_rate_percent' => 0.5,
+        'status' => true,
+    ]);
+    $applicationService = app(LoanApplicationService::class);
+    $application = $applicationService->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'loan_protection_product_id' => $protectionProduct->id,
+        'requested_amount' => 1200,
+        'requested_term_months' => 3,
+    ], $fixture['organization']->id);
+    $applicationService->submit($application);
+    $applicationService->approve($application, [], $fixture['user']->id);
+    $loan = $applicationService->createLoanAccount($application->fresh());
+    $loan->update(['disbursed_amount' => 1200, 'status' => 'ACTIVE']);
+    $loan->financialAccount()->update(['balance' => 1200, 'available_balance' => 1200]);
+    app(LoanScheduleService::class)->generate($loan, [
+        'frequency' => 'MONTHLY',
+        'start_date' => '2026-01-31',
+    ]);
+    $payoutAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'balance' => 0,
+        'available_balance' => 0,
+    ]);
+
+    $claimService = app(LoanProtectionClaimService::class);
+    $claim = $claimService->submit($application, [
+        'death_date' => '2026-02-15',
+        'death_certificate' => UploadedFile::fake()->create('death-certificate.pdf', 100, 'application/pdf'),
+    ], $fixture['user']->id);
+    $claim = $claimService->approve($application, $claim, [
+        'payout_account_id' => $payoutAccount->id,
+        'decision_note' => 'Claim verified',
+    ], $fixture['organization']->id, $fixture['user']->id);
+    $transaction = FinancialTransaction::query()->findOrFail($claim->financial_transaction_id);
+
+    expect($claim->status)->toBe('APPROVED')
+        ->and((float) $claim->payout_amount)->toBe(1200.0)
+        ->and($transaction->status)->toBe('PENDING');
+
+    $transactionService = app(FinancialTransactionService::class);
+    $transactionService->post($transaction, $fixture['organization']->id, $fixture['user']->id);
+
+    expect($claim->fresh()->status)->toBe('SETTLED')
+        ->and($loan->fresh()->status)->toBe('CLOSED')
+        ->and($loan->financialAccount->fresh()->status)->toBe('CLOSED')
+        ->and($loan->protectionPolicy()->first()->status)->toBe('CANCELLED');
+    expect(fn() => app(LoanScheduleService::class)->generate($loan->fresh()))
+        ->toThrow(RuntimeException::class, 'Closed loans cannot generate repayment schedules');
+    expect(fn() => app(LoanScheduleService::class)->assessArrears($loan->fresh()))
+        ->toThrow(RuntimeException::class, 'Closed loans cannot accrue arrears');
+
+    $transactionService->reverse($transaction->fresh(), $fixture['organization']->id);
+
+    expect($claim->fresh()->status)->toBe('SUBMITTED')
+        ->and($loan->fresh()->status)->toBe('ACTIVE')
+        ->and($loan->financialAccount->fresh()->status)->toBe('ACTIVE')
+        ->and($loan->protectionPolicy()->first()->status)->toBe('ACTIVE');
 });
 
 it('generates a reproducible reducing-balance schedule across month boundaries', function () {

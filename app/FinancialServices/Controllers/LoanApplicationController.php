@@ -5,13 +5,19 @@ namespace App\FinancialServices\Controllers;
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\LoanApplicationService;
 use App\FinancialServices\Application\LoanScheduleService;
+use App\FinancialServices\Application\LoanProtectionClaimService;
+use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Models\LoanApplication;
+use App\FinancialServices\Models\LoanProtectionClaim;
 use App\FinancialServices\Models\LoanCollateral;
 use App\FinancialServices\Models\LoanGuarantor;
 use App\FinancialServices\Models\LoanArrear;
 use App\FinancialServices\Models\LoanApplicationSupportingDocument;
+use App\FinancialServices\Models\LoanProtectionProduct;
 use App\FinancialServices\Requests\DecideLoanApplicationRequest;
+use App\FinancialServices\Requests\ApproveLoanProtectionClaimRequest;
+use App\FinancialServices\Requests\StoreLoanProtectionClaimRequest;
 use App\FinancialServices\Requests\StoreLoanApplicationRequest;
 use App\FinancialServices\Requests\StoreLoanCollateralRequest;
 use App\FinancialServices\Requests\StoreLoanGuarantorRequest;
@@ -24,13 +30,16 @@ use Inertia\Response;
 
 class LoanApplicationController extends Controller
 {
-    public function __construct(private readonly LoanApplicationService $service, private readonly LoanScheduleService $scheduleService)
-    {
+    public function __construct(
+        private readonly LoanApplicationService $service,
+        private readonly LoanScheduleService $scheduleService,
+        private readonly LoanProtectionClaimService $claimService,
+    ) {
         $this->middleware('permission:financial.loan-applications.view')->only(['index', 'show']);
-        $this->middleware('permission:financial.loan-applications.documents.view')->only(['downloadSupportingDocument']);
-        $this->middleware('permission:financial.loan-applications.create')->only(['create', 'store', 'submit']);
+        $this->middleware('permission:financial.loan-applications.documents.view')->only(['downloadSupportingDocument', 'downloadProtectionClaimDocument']);
+        $this->middleware('permission:financial.loan-applications.create')->only(['create', 'store', 'submit', 'submitProtectionClaim']);
         $this->middleware('permission:financial.loan-applications.update')->only(['edit', 'update']);
-        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount', 'generateSchedule', 'assessArrears', 'resolveArrear', 'storeCollateral', 'verifyCollateral', 'releaseCollateral', 'storeGuarantor', 'decideGuarantor', 'storeProtection', 'activateProtection', 'cancelProtection']);
+        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount', 'generateSchedule', 'assessArrears', 'resolveArrear', 'storeCollateral', 'verifyCollateral', 'releaseCollateral', 'storeGuarantor', 'decideGuarantor', 'storeProtection', 'activateProtection', 'cancelProtection', 'approveProtectionClaim', 'rejectProtectionClaim']);
     }
 
     public function index(Request $request): Response
@@ -59,6 +68,7 @@ class LoanApplicationController extends Controller
             'applications' => $applications,
             'filters' => $request->only(['search', 'status', 'per_page', 'page']),
             'can_update' => $request->user()->hasPermission('financial.loan-applications.update'),
+            'can_manage_protection_products' => $request->user()->hasPermission('financial.loan-protection-products.manage'),
         ]);
     }
 
@@ -69,6 +79,7 @@ class LoanApplicationController extends Controller
         return Inertia::render('financial-services/loan-applications/form', [
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name']),
             'products' => LoanProduct::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
+            'protectionProducts' => LoanProtectionProduct::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('code')->get(['id', 'code', 'name', 'description', 'monthly_rate_percent', 'status']),
             'application' => null,
             'can_view_supporting_documents' => $request->user()->hasPermission('financial.loan-applications.documents.view'),
         ]);
@@ -80,7 +91,15 @@ class LoanApplicationController extends Controller
         abort_unless($loanApplication->status === 'DRAFT', 404);
         $organizationId = $this->organizationId($request);
         $canViewSupportingDocuments = $request->user()->hasPermission('financial.loan-applications.documents.view');
-        $application = $loanApplication->load(['incomeDetails', 'expenseDetails', 'jobHistories', 'assetDetails', 'educations']);
+        $application = $loanApplication->load(['incomeDetails', 'expenseDetails', 'jobHistories', 'assetDetails', 'educations', 'loanProtectionProduct']);
+        $protectionProducts = LoanProtectionProduct::query()
+            ->where('organization_id', $organizationId)
+            ->where(function ($query) use ($loanApplication): void {
+                $query->where('status', true)
+                    ->orWhere('id', $loanApplication->loan_protection_product_id);
+            })
+            ->orderBy('code')
+            ->get(['id', 'code', 'name', 'description', 'monthly_rate_percent', 'status']);
         if ($canViewSupportingDocuments) {
             $application->load('supportingDocuments');
         }
@@ -88,6 +107,7 @@ class LoanApplicationController extends Controller
         return Inertia::render('financial-services/loan-applications/form', [
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name']),
             'products' => LoanProduct::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('code')->get(['id', 'code', 'name']),
+            'protectionProducts' => $protectionProducts,
             'application' => $application,
             'can_view_supporting_documents' => $canViewSupportingDocuments,
         ]);
@@ -112,7 +132,7 @@ class LoanApplicationController extends Controller
     {
         $this->authorizeOrganization($request, $loanApplication);
         $canViewSupportingDocuments = $request->user()->hasPermission('financial.loan-applications.documents.view');
-        $application = $loanApplication->load(['customer', 'product', 'loanAccount.protectionPolicy', 'loanAccount.disbursements.financialTransaction', 'loanAccount.repayments.financialTransaction', 'loanAccount.repayments.allocations.component', 'loanAccount.schedules.components', 'loanAccount.arrears', 'collaterals', 'guarantors.customer', 'incomeDetails', 'expenseDetails', 'jobHistories', 'assetDetails', 'educations']);
+        $application = $loanApplication->load(['customer', 'product', 'loanAccount.protectionPolicy.product', 'loanAccount.protectionClaims.payoutAccount', 'loanAccount.disbursements.financialTransaction', 'loanAccount.repayments.financialTransaction', 'loanAccount.repayments.allocations.component', 'loanAccount.schedules.components', 'loanAccount.arrears', 'collaterals', 'guarantors.customer', 'incomeDetails', 'expenseDetails', 'jobHistories', 'assetDetails', 'educations']);
         if ($canViewSupportingDocuments) {
             $application->load('supportingDocuments');
         }
@@ -120,6 +140,16 @@ class LoanApplicationController extends Controller
         return Inertia::render('financial-services/loan-applications/show', [
             'application' => $application,
             'can_view_supporting_documents' => $canViewSupportingDocuments,
+            'can_submit_protection_claim' => $request->user()->hasPermission('financial.loan-applications.create'),
+            'can_manage_protection_claims' => $request->user()->hasPermission('financial.loan-applications.manage'),
+            'payout_accounts' => $request->user()->hasPermission('financial.loan-applications.manage')
+                ? FinancialAccount::query()
+                    ->where('organization_id', $this->organizationId($request))
+                    ->whereIn('account_type', ['CASH', 'BANK'])
+                    ->whereIn('status', ['PENDING', 'ACTIVE'])
+                    ->orderBy('account_no')
+                    ->get(['id', 'account_no', 'name', 'account_type'])
+                : [],
             'guarantorCustomers' => Customer::query()
                 ->where('organization_id', $this->organizationId($request))
                 ->where('id', '!=', $loanApplication->customer_id)
@@ -148,6 +178,45 @@ class LoanApplicationController extends Controller
             fpassthru($stream);
             fclose($stream);
         }, $document->file_name, ['Content-Type' => $document->mime_type ?? 'application/octet-stream']);
+    }
+
+    public function submitProtectionClaim(StoreLoanProtectionClaimRequest $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->claimService->submit($loanApplication, $request->validated(), $request->user()->id);
+
+        return back()->with('success', 'Credit-life claim submitted for review.');
+    }
+
+    public function approveProtectionClaim(ApproveLoanProtectionClaimRequest $request, LoanApplication $loanApplication, LoanProtectionClaim $claim)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $this->claimService->approve($loanApplication, $claim, $request->validated(), $this->organizationId($request), $request->user()->id);
+
+        return back()->with('success', 'Claim approved and a pending loan settlement transaction was created.');
+    }
+
+    public function rejectProtectionClaim(Request $request, LoanApplication $loanApplication, LoanProtectionClaim $claim)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        $validated = $request->validate(['decision_note' => ['required', 'string', 'max:2000']]);
+        $this->claimService->reject($loanApplication, $claim, $validated['decision_note'], $request->user()->id);
+
+        return back()->with('success', 'Credit-life claim rejected.');
+    }
+
+    public function downloadProtectionClaimDocument(Request $request, LoanApplication $loanApplication, LoanProtectionClaim $claim)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        abort_unless($claim->loanAccount?->loan_application_id === $loanApplication->id, 404);
+        abort_unless(Storage::disk('local')->exists($claim->death_certificate_path), 404);
+        $stream = Storage::disk('local')->readStream($claim->death_certificate_path);
+        abort_unless(is_resource($stream), 404);
+
+        return response()->streamDownload(static function () use ($stream): void {
+            fpassthru($stream);
+            fclose($stream);
+        }, $claim->death_certificate_name, ['Content-Type' => 'application/octet-stream']);
     }
 
     public function review(Request $request, LoanApplication $loanApplication)

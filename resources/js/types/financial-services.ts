@@ -118,6 +118,7 @@ export interface LoanApplication {
     customer_id?: number;
     loan_product_id?: number;
     financial_product_id?: number;
+    loan_protection_product_id?: number | null;
     application_no: string;
     requested_amount: string | number;
     approved_amount?: string | number | null;
@@ -136,11 +137,14 @@ export interface LoanApplication {
     supporting_documents?: LoanApplicationSupportingDocument[];
     customer?: { name?: string; customer_no?: string };
     product?: { code?: string; name?: string };
+    loan_protection_product?: LoanProtectionProduct | null;
     loan_account?: {
         id: number;
         loan_no: string;
+        principal_amount?: string | number;
         status: string;
         protection_policy?: LoanProtectionPolicy | null;
+        protection_claims?: LoanProtectionClaim[];
         disbursements?: LoanDisbursement[];
         schedules?: LoanSchedule[];
         arrears?: LoanArrear[];
@@ -148,6 +152,31 @@ export interface LoanApplication {
     } | null;
     collaterals?: LoanCollateral[];
     guarantors?: LoanGuarantor[];
+}
+
+export interface LoanProtectionProduct {
+    id: number;
+    code: string;
+    name: string;
+    description?: string | null;
+    monthly_rate_percent: string | number;
+    status: boolean;
+}
+
+export interface LoanProtectionClaim {
+    id: number;
+    claim_no: string;
+    death_date: string;
+    death_certificate_name: string;
+    status: 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'SETTLED';
+    payout_amount?: string | number | null;
+    payout_account?: {
+        account_no: string;
+        name?: string | null;
+        account_type: string;
+    } | null;
+    financial_transaction_id?: number | null;
+    decision_note?: string | null;
 }
 
 export interface LoanApplicationIncomeDetail {
@@ -230,6 +259,9 @@ export interface LoanGuarantor {
 
 export interface LoanProtectionPolicy {
     id: number;
+    loan_protection_product_id?: number | null;
+    monthly_rate_percent?: string | number | null;
+    product?: LoanProtectionProduct | null;
     required: boolean;
     coverage_amount?: string | number | null;
     initial_fee?: string | number | null;
@@ -315,11 +347,13 @@ export interface LoanApplicationIndexPageProps extends SharedData {
         per_page?: number;
     };
     can_update: boolean;
+    can_manage_protection_products: boolean;
 }
 
 export interface LoanApplicationFormPageProps extends SharedData {
     customers: { id: number; customer_no: string; name: string }[];
     products: { id: number; code: string; name: string }[];
+    protectionProducts: LoanProtectionProduct[];
     application?: LoanApplication | null;
     can_view_supporting_documents: boolean;
 }
@@ -328,6 +362,14 @@ export interface LoanApplicationShowPageProps extends SharedData {
     application: LoanApplication;
     guarantorCustomers: { id: number; customer_no: string; name: string }[];
     can_view_supporting_documents: boolean;
+    can_submit_protection_claim: boolean;
+    can_manage_protection_claims: boolean;
+    payout_accounts: {
+        id: number;
+        account_no: string;
+        name: string;
+        account_type: string;
+    }[];
 }
 
 export interface FinancialProductFormPageProps extends SharedData {

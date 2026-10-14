@@ -32,6 +32,8 @@ final class FinancialServicesPermissions
             new PermissionDefinition('Loan Applications', 'Create Loan Applications', 'financial.loan-applications.create', 'create', 'Create loan applications'),
             new PermissionDefinition('Loan Applications', 'Update Draft Loan Applications', 'financial.loan-applications.update', 'update', 'Edit draft loan applications'),
             new PermissionDefinition('Loan Applications', 'Manage Loan Applications', 'financial.loan-applications.manage', 'manage', 'Review and decide loan applications'),
+            new PermissionDefinition('Loan Protection Products', 'View Loan Protection Products', 'financial.loan-protection-products.view', 'view', 'View credit-life insurance products'),
+            new PermissionDefinition('Loan Protection Products', 'Manage Loan Protection Products', 'financial.loan-protection-products.manage', 'manage', 'Create and update credit-life insurance products'),
             new PermissionDefinition('Financial Transactions', 'View Financial Transactions', 'financial.transactions.view', 'view', 'View financial transactions'),
             new PermissionDefinition('Financial Transactions', 'Create Financial Transactions', 'financial.transactions.create', 'create', 'Create financial transactions'),
             new PermissionDefinition('Financial Transactions', 'Post Financial Transactions', 'financial.transactions.post', 'post', 'Post financial transactions'),

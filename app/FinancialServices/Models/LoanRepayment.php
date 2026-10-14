@@ -16,16 +16,32 @@ class LoanRepayment extends Model
         'loan_account_id',
         'financial_transaction_id',
         'amount',
-        'repayment_date',
+        'repayment_at',
+        'principal_amount',
+        'interest_amount',
+        'fine_amount',
+        'extra_principal_amount',
         'status',
-        'reference',
+        'note',
         'created_by',
     ];
 
     protected $casts = [
         'amount' => 'decimal:4',
-        'repayment_date' => 'date',
+        'repayment_at' => 'datetime',
     ];
+
+    protected $appends = ['repayment_date', 'reference'];
+
+    public function getRepaymentDateAttribute(): ?string
+    {
+        return $this->repayment_at?->toDateString();
+    }
+
+    public function getReferenceAttribute(): ?string
+    {
+        return $this->note;
+    }
 
     public function loanAccount(): BelongsTo
     {

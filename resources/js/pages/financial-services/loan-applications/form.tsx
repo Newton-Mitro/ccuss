@@ -21,6 +21,7 @@ export default function LoanApplicationForm() {
     const {
         customers,
         products,
+        protectionProducts,
         application,
         can_view_supporting_documents: canViewSupportingDocuments,
     } = usePage<LoanApplicationFormPageProps>().props;
@@ -35,6 +36,9 @@ export default function LoanApplicationForm() {
                           application.financial_product_id ??
                           '',
                   )
+                : '',
+            loan_protection_product_id: application?.loan_protection_product_id
+                ? String(application.loan_protection_product_id)
                 : '',
             requested_amount: application
                 ? String(application.requested_amount)
@@ -200,8 +204,12 @@ export default function LoanApplicationForm() {
                             <LoanBasicDetails
                                 customers={customers}
                                 products={products}
+                                protectionProducts={protectionProducts}
                                 customerId={data.customer_id}
                                 productId={data.financial_product_id}
+                                protectionProductId={
+                                    data.loan_protection_product_id
+                                }
                                 amount={data.requested_amount}
                                 term={data.requested_term_months}
                                 purpose={data.purpose}
@@ -211,6 +219,9 @@ export default function LoanApplicationForm() {
                                 }
                                 onProductChange={(value) =>
                                     setData('financial_product_id', value)
+                                }
+                                onProtectionProductChange={(value) =>
+                                    setData('loan_protection_product_id', value)
                                 }
                                 onAmountChange={(value) =>
                                     setData('requested_amount', value)

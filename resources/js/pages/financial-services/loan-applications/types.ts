@@ -47,6 +47,7 @@ export type LoanApplicationFormData = {
     _method: 'put' | 'post';
     customer_id: string;
     financial_product_id: string;
+    loan_protection_product_id: string;
     requested_amount: string;
     requested_term_months: string;
     purpose: string;

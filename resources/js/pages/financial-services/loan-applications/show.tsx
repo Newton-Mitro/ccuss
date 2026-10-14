@@ -1,8 +1,5 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
-import AppDatePicker from '@/components/ui/app_date_picker';
+import InputError from '@/components/input-error';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,19 +18,20 @@ import {
     ArrowDownToLine,
     ArrowLeft,
     ArrowUpRight,
-    BadgeCheck,
     Banknote,
+    BriefcaseBusiness,
     CalendarDays,
     Check,
     ChevronRight,
     CircleAlert,
     ClipboardCheck,
-    FileCheck2,
     FileText,
+    GraduationCap,
     HandCoins,
     Landmark,
-    LockKeyhole,
+    Pencil,
     Plus,
+    ReceiptText,
     RefreshCw,
     ShieldCheck,
     UserCheck,
@@ -48,6 +46,9 @@ export default function LoanApplicationShow() {
     const {
         application,
         can_view_supporting_documents: canViewSupportingDocuments,
+        can_submit_protection_claim: canSubmitProtectionClaim,
+        can_manage_protection_claims: canManageProtectionClaims,
+        payout_accounts,
     } = usePage<LoanApplicationShowPageProps>().props;
 
     const [arrearNote, setArrearNote] = useState('');
@@ -97,17 +98,26 @@ export default function LoanApplicationShow() {
     });
 
     const {
-        data: protectionData,
-        setData: setProtectionData,
-        post: postProtection,
-        processing: protectionProcessing,
+        data: claimData,
+        setData: setClaimData,
+        post: postProtectionClaim,
+        processing: claimProcessing,
+        errors: claimErrors,
     } = useForm({
-        required: false,
-        coverage_amount: '',
-        initial_fee: '0',
-        renewal_fee: '0',
-        renewal_frequency: 'NONE',
-        next_renewal_at: '',
+        death_date: '',
+        death_certificate: null as File | null,
+        notes: '',
+    });
+
+    const {
+        data: claimDecisionData,
+        setData: setClaimDecisionData,
+        post: postClaimDecision,
+        processing: claimDecisionProcessing,
+        errors: claimDecisionErrors,
+    } = useForm({
+        payout_account_id: '',
+        decision_note: '',
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -361,46 +371,51 @@ export default function LoanApplicationShow() {
             });
     };
 
-    const activateProtection = () => {
-        appSwal
-            .fire({
-                title: 'Activate protection?',
-                text: `Activate the loan protection for ${application.application_no}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Activate protection',
-                cancelButtonText: 'Cancel',
-            })
-            .then((result) => {
-                if (!result.isConfirmed) return;
-
-                router.post(
-                    route(
-                        'loan-applications.protection.activate',
-                        application.id,
-                    ),
-                );
-            });
+    const submitProtectionClaim = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        postProtectionClaim(
+            route('loan-applications.protection-claims.store', application.id),
+            { forceFormData: true, preserveScroll: true },
+        );
     };
 
-    const cancelProtection = () => {
+    const approveProtectionClaim = (
+        event: React.FormEvent<HTMLFormElement>,
+        claimId: number,
+    ) => {
+        event.preventDefault();
+        postClaimDecision(
+            route('loan-applications.protection-claims.approve', [
+                application.id,
+                claimId,
+            ]),
+            { preserveScroll: true },
+        );
+    };
+
+    const rejectProtectionClaim = (claimId: number) => {
         appSwal
             .fire({
-                title: 'Cancel protection?',
-                text: `Cancel the loan protection for ${application.application_no}?`,
+                title: 'Reject credit-life claim?',
+                text: `Reject claim ${application.loan_account?.protection_claims?.find((claim) => claim.id === claimId)?.claim_no ?? ''}?`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Cancel protection',
+                confirmButtonText: 'Reject claim',
                 cancelButtonText: 'Cancel',
+                input: 'textarea',
+                inputLabel: 'Reason for rejection',
+                inputValidator: (value) =>
+                    value ? undefined : 'A rejection reason is required.',
             })
             .then((result) => {
                 if (!result.isConfirmed) return;
-
                 router.post(
-                    route(
-                        'loan-applications.protection.cancel',
+                    route('loan-applications.protection-claims.reject', [
                         application.id,
-                    ),
+                        claimId,
+                    ]),
+                    { decision_note: result.value },
+                    { preserveScroll: true },
                 );
             });
     };
@@ -410,7 +425,11 @@ export default function LoanApplicationShow() {
             ? 'success'
             : application.status === 'REJECTED'
               ? 'danger'
-              : 'neutral';
+              : application.status === 'UNDER_REVIEW'
+                ? 'warning'
+                : application.status === 'SUBMITTED'
+                  ? 'info'
+                  : 'neutral';
 
     const schedules = application.loan_account?.schedules ?? [];
     const arrears = application.loan_account?.arrears ?? [];
@@ -426,203 +445,233 @@ export default function LoanApplicationShow() {
         (collateral: LoanCollateral) => collateral.type !== 'DEPOSIT_LIEN',
     );
     const guarantors = application.guarantors ?? [];
+    const protectionPolicy = application.loan_account?.protection_policy;
+    const protectionClaims = application.loan_account?.protection_claims ?? [];
+    const hasOpenProtectionClaim = protectionClaims.some((claim) =>
+        ['SUBMITTED', 'APPROVED'].includes(claim.status),
+    );
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={application.application_no} />
 
             <div className="space-y-5 pb-6">
-                {/* Header */}
-                <ResourcePageHeader
-                    title={application.application_no}
-                    description={`${application.customer?.name ?? 'Unknown customer'} · ${application.product?.name ?? 'Loan'}`}
-                    action={
-                        <div className="flex flex-wrap items-center justify-end gap-2">
-                            <StatusBadge tone={statusTone}>
-                                {application.status}
-                            </StatusBadge>
-
+                <section className="grid overflow-hidden rounded-lg border bg-card shadow-sm lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                    <div className="relative flex min-h-64 flex-col justify-between gap-8 overflow-hidden bg-muted p-5 text-foreground sm:p-7">
+                        <div
+                            aria-hidden="true"
+                            className="absolute inset-y-0 left-0 w-1 bg-accent"
+                        />
+                        <div className="relative">
+                            <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                                Loan application
+                            </p>
+                            <h1 className="mt-3 text-2xl font-semibold break-words sm:text-3xl">
+                                {application.application_no}
+                            </h1>
+                            <p className="mt-2 text-sm text-foreground">
+                                {application.customer?.name ??
+                                    'Unknown customer'}
+                                <span className="mx-2 text-muted-foreground">
+                                    /
+                                </span>
+                                {application.product?.name ?? 'Loan product'}
+                            </p>
+                        </div>
+                        <div className="relative flex flex-wrap items-end justify-between gap-4 border-t border-border pt-4">
+                            <div>
+                                <p className="text-[10px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+                                    Requested amount
+                                </p>
+                                <p className="mt-1 text-3xl font-semibold tabular-nums sm:text-4xl">
+                                    <span className="mr-1 text-lg text-muted-foreground">
+                                        ৳
+                                    </span>
+                                    {application.requested_amount}
+                                </p>
+                            </div>
                             {application.status === 'DRAFT' && (
-                                <Button asChild size="sm" variant="outline">
+                                <Button
+                                    asChild
+                                    size="sm"
+                                    variant="outline"
+                                    className="border-border bg-background/80 text-foreground hover:bg-background hover:text-foreground"
+                                >
                                     <Link
                                         href={route(
                                             'loan-applications.edit',
                                             application.id,
                                         )}
                                     >
+                                        <Pencil className="mr-1.5 size-4" />
                                         Edit draft
                                     </Link>
                                 </Button>
                             )}
                         </div>
-                    }
-                />
-
-                {/* Application summary */}
-                <div className="overflow-hidden rounded-xl border bg-background shadow-sm">
-                    <div className="grid divide-y bg-muted/5 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
-                        <SummaryItem
-                            icon={Banknote}
-                            label="Requested amount"
-                            value={application.requested_amount}
-                            emphasis
-                        />
-
-                        <SummaryItem
-                            icon={CalendarDays}
-                            label="Requested term"
-                            value={
-                                application.requested_term_months
-                                    ? `${application.requested_term_months} months`
-                                    : '-'
-                            }
-                        />
-
-                        <SummaryItem
-                            icon={FileText}
-                            label="Purpose"
-                            value={application.purpose ?? '-'}
-                        />
-
-                        <SummaryItem
-                            icon={UserCheck}
-                            label="Applicant"
-                            value={
-                                application.customer?.customer_no ??
-                                application.customer?.name ??
-                                '-'
-                            }
-                        />
                     </div>
-                </div>
 
-                <section className="space-y-5 rounded-lg border bg-background p-4">
-                    <h2 className="font-semibold">Applicant details</h2>
-                    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-medium">Income</h3>
-                            {(application.income_details ?? []).length ? (
-                                application.income_details?.map((income) => (
-                                    <p key={income.id} className="text-sm">
-                                        {income.source}: {income.monthly_amount}{' '}
-                                        / month
-                                        {income.notes
-                                            ? ` · ${income.notes}`
-                                            : ''}
-                                    </p>
-                                ))
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    No income details provided.
+                    <div className="flex flex-col">
+                        <div className="flex items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
+                            <div>
+                                <p className="text-[10px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+                                    Current status
                                 </p>
-                            )}
+                                <div className="mt-1">
+                                    <StatusBadge tone={statusTone}>
+                                        {application.status.replaceAll(
+                                            '_',
+                                            ' ',
+                                        )}
+                                    </StatusBadge>
+                                </div>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                                {application.applied_at
+                                    ? `Applied ${formatDate(application.applied_at)}`
+                                    : 'Not yet submitted'}
+                            </span>
                         </div>
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-medium">Expenses</h3>
-                            {(application.expense_details ?? []).length ? (
-                                application.expense_details?.map((expense) => (
-                                    <p key={expense.id} className="text-sm">
-                                        {expense.category}:{' '}
-                                        {expense.monthly_amount} / month
-                                        {expense.notes
-                                            ? ` · ${expense.notes}`
-                                            : ''}
-                                    </p>
-                                ))
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    No expense details provided.
-                                </p>
-                            )}
+                        <div className="grid flex-1 sm:grid-cols-2">
+                            <OverviewFact
+                                icon={UserCheck}
+                                label="Applicant"
+                                value={
+                                    application.customer?.name ??
+                                    application.customer?.customer_no ??
+                                    '—'
+                                }
+                                detail={application.customer?.customer_no}
+                            />
+                            <OverviewFact
+                                icon={Landmark}
+                                label="Loan product"
+                                value={
+                                    application.product?.name ??
+                                    application.product?.code ??
+                                    '—'
+                                }
+                                detail={application.product?.code}
+                            />
+                            <OverviewFact
+                                icon={CalendarDays}
+                                label="Requested term"
+                                value={
+                                    application.requested_term_months
+                                        ? `${application.requested_term_months} months`
+                                        : '—'
+                                }
+                            />
+                            <OverviewFact
+                                icon={FileText}
+                                label="Purpose"
+                                value={application.purpose || 'Not specified'}
+                            />
                         </div>
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-medium">
-                                Employment history
-                            </h3>
-                            {(application.job_histories ?? []).length ? (
-                                application.job_histories?.map((job) => (
-                                    <p key={job.id} className="text-sm">
-                                        {job.employer_name}
-                                        {job.job_title
-                                            ? ` · ${job.job_title}`
-                                            : ''}
-                                        {job.is_current ? ' · Current' : ''}
-                                    </p>
-                                ))
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    No job history provided.
-                                </p>
-                            )}
+                    </div>
+                </section>
+
+                <section className="overflow-hidden rounded-lg border bg-card">
+                    <div className="flex items-center gap-3 border-b px-4 py-3.5 sm:px-5">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-accent/15 text-accent-foreground">
+                            <Users className="size-4" />
                         </div>
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-medium">Assets</h3>
-                            {(application.asset_details ?? []).length ? (
-                                application.asset_details?.map((asset) => (
-                                    <p key={asset.id} className="text-sm">
-                                        {asset.asset_type}: {asset.description}
-                                        {asset.estimated_value
-                                            ? ` · ${asset.estimated_value}`
-                                            : ''}
-                                    </p>
-                                ))
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    No assets provided.
-                                </p>
-                            )}
+                        <div>
+                            <h2 className="text-sm font-semibold">
+                                Applicant profile
+                            </h2>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                Financial, employment, and document details
+                            </p>
                         </div>
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-medium">Education</h3>
-                            {(application.educations ?? []).length ? (
-                                application.educations?.map((education) => (
-                                    <p key={education.id} className="text-sm">
-                                        {education.institution_name}
-                                        {education.qualification
-                                            ? ` · ${education.qualification}`
-                                            : ''}
-                                        {education.field_of_study
-                                            ? ` · ${education.field_of_study}`
-                                            : ''}
+                    </div>
+                    <div className="grid gap-px bg-border/70 sm:grid-cols-2 xl:grid-cols-3">
+                        <ApplicantDetailGroup
+                            icon={Banknote}
+                            title="Income"
+                            empty="No income details provided."
+                            items={(application.income_details ?? []).map(
+                                (income) =>
+                                    `${income.source}: ${income.monthly_amount} / month${income.notes ? ` · ${income.notes}` : ''}`,
+                            )}
+                        />
+                        <ApplicantDetailGroup
+                            icon={ReceiptText}
+                            title="Expenses"
+                            empty="No expense details provided."
+                            items={(application.expense_details ?? []).map(
+                                (expense) =>
+                                    `${expense.category}: ${expense.monthly_amount} / month${expense.notes ? ` · ${expense.notes}` : ''}`,
+                            )}
+                        />
+                        <ApplicantDetailGroup
+                            icon={BriefcaseBusiness}
+                            title="Employment history"
+                            empty="No job history provided."
+                            items={(application.job_histories ?? []).map(
+                                (job) =>
+                                    `${job.employer_name}${job.job_title ? ` · ${job.job_title}` : ''}${job.is_current ? ' · Current' : ''}`,
+                            )}
+                        />
+                        <ApplicantDetailGroup
+                            icon={Landmark}
+                            title="Assets"
+                            empty="No assets provided."
+                            items={(application.asset_details ?? []).map(
+                                (asset) =>
+                                    `${asset.asset_type}: ${asset.description}${asset.estimated_value ? ` · ${asset.estimated_value}` : ''}`,
+                            )}
+                        />
+                        <ApplicantDetailGroup
+                            icon={GraduationCap}
+                            title="Education"
+                            empty="No education details provided."
+                            items={(application.educations ?? []).map(
+                                (education) =>
+                                    `${education.institution_name}${education.qualification ? ` · ${education.qualification}` : ''}${education.field_of_study ? ` · ${education.field_of_study}` : ''}`,
+                            )}
+                        />
+                        <div className="min-w-0 bg-background p-4 sm:p-5">
+                            <div className="flex items-center gap-2">
+                                <FileText className="size-4 text-primary" />
+                                <h3 className="text-xs font-semibold tracking-wide uppercase">
+                                    Supporting documents
+                                </h3>
+                            </div>
+                            <div className="mt-3 space-y-2">
+                                {!canViewSupportingDocuments ? (
+                                    <p className="text-sm text-muted-foreground">
+                                        You do not have permission to view these
+                                        documents.
                                     </p>
-                                ))
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    No education details provided.
-                                </p>
-                            )}
-                        </div>
-                        <div className="space-y-2">
-                            <h3 className="text-sm font-medium">
-                                Supporting documents
-                            </h3>
-                            {!canViewSupportingDocuments ? (
-                                <p className="text-sm text-muted-foreground">
-                                    You do not have permission to view these
-                                    documents.
-                                </p>
-                            ) : (application.supporting_documents ?? [])
-                                  .length ? (
-                                application.supporting_documents?.map(
-                                    (document) => (
-                                        <a
-                                            key={document.id}
-                                            className="flex items-center gap-2 text-sm underline"
-                                            href={route(
-                                                'loan-applications.documents.download',
-                                                [application.id, document.id],
-                                            )}
-                                        >
-                                            <FileText className="size-4" />
-                                            {document.file_name}
-                                        </a>
-                                    ),
-                                )
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    No supporting documents uploaded.
-                                </p>
-                            )}
+                                ) : (application.supporting_documents ?? [])
+                                      .length ? (
+                                    application.supporting_documents?.map(
+                                        (document) => (
+                                            <a
+                                                key={document.id}
+                                                className="flex min-w-0 items-center gap-2 text-sm text-primary hover:underline"
+                                                href={route(
+                                                    'loan-applications.documents.download',
+                                                    [
+                                                        application.id,
+                                                        document.id,
+                                                    ],
+                                                )}
+                                            >
+                                                <FileText className="size-4 shrink-0" />
+                                                <span className="truncate">
+                                                    {document.file_name}
+                                                </span>
+                                            </a>
+                                        ),
+                                    )
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        No supporting documents uploaded.
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -800,25 +849,29 @@ export default function LoanApplicationShow() {
                                 icon={RefreshCw}
                                 title="Repayment schedule"
                                 actions={
-                                    <>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={generateSchedule}
-                                        >
-                                            <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-                                            Generate schedule
-                                        </Button>
+                                    ['CLOSED', 'WRITTEN_OFF'].includes(
+                                        application.loan_account.status,
+                                    ) ? undefined : (
+                                        <>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={generateSchedule}
+                                            >
+                                                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                                                Generate schedule
+                                            </Button>
 
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={assessArrears}
-                                        >
-                                            <CircleAlert className="mr-1.5 h-3.5 w-3.5" />
-                                            Assess arrears
-                                        </Button>
-                                    </>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={assessArrears}
+                                            >
+                                                <CircleAlert className="mr-1.5 h-3.5 w-3.5" />
+                                                Assess arrears
+                                            </Button>
+                                        </>
+                                    )
                                 }
                             />
 
@@ -849,6 +902,9 @@ export default function LoanApplicationShow() {
                                                 </TableHead>
                                                 <TableHead align="right">
                                                     Interest
+                                                </TableHead>
+                                                <TableHead align="right">
+                                                    Insurance
                                                 </TableHead>
                                                 <TableHead align="right">
                                                     Total
@@ -882,6 +938,11 @@ export default function LoanApplicationShow() {
                                                     <TableCell align="right">
                                                         {
                                                             schedule.scheduled_interest
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        {
+                                                            schedule.scheduled_protection_fee
                                                         }
                                                     </TableCell>
                                                     <TableCell
@@ -1504,178 +1565,292 @@ export default function LoanApplicationShow() {
                     </form>
                 </section>
 
-                {/* Loan protection */}
+                {/* Credit-life insurance */}
                 {application.loan_account && (
                     <section className="overflow-hidden rounded-xl border bg-background shadow-sm">
                         <SectionHeader
-                            icon={LockKeyhole}
-                            title="Loan protection"
-                            description="Configure and activate protection for this loan account."
+                            icon={ShieldCheck}
+                            title="Credit-life insurance"
+                            description="Optional insurance pays the outstanding loan principal after an approved death claim."
+                            badge={protectionPolicy?.status ?? 'NOT ENROLLED'}
                         />
-
-                        <div className="border-b px-4 py-3">
-                            <div className="flex flex-wrap items-center gap-2.5">
-                                <span className="text-xs text-muted-foreground">
-                                    Current status
-                                </span>
-
-                                <StatusBadge tone="neutral">
-                                    {application.loan_account.protection_policy
-                                        ?.status ?? 'NOT CONFIGURED'}
-                                </StatusBadge>
+                        {protectionPolicy?.product ? (
+                            <div className="grid gap-3 border-b p-4 sm:grid-cols-3 sm:p-5">
+                                <MetricItem
+                                    label="Insurance product"
+                                    value={protectionPolicy.product.name}
+                                />
+                                <MetricItem
+                                    label="Monthly rate"
+                                    value={`${protectionPolicy.monthly_rate_percent ?? protectionPolicy.product.monthly_rate_percent}% of closing principal`}
+                                />
+                                <MetricItem
+                                    label="Covered principal"
+                                    value={String(
+                                        protectionPolicy.coverage_amount ??
+                                            application.loan_account
+                                                .principal_amount ??
+                                            0,
+                                    )}
+                                />
                             </div>
-                        </div>
+                        ) : (
+                            <p className="border-b px-4 py-4 text-sm text-muted-foreground">
+                                No credit-life insurance was selected for this
+                                loan.
+                            </p>
+                        )}
 
-                        <form
-                            className="p-4 sm:p-5"
-                            onSubmit={(event) => {
-                                event.preventDefault();
-
-                                postProtection(
-                                    route(
-                                        'loan-applications.protection.store',
-                                        application.id,
-                                    ),
-                                );
-                            }}
-                        >
-                            <div className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                <label className="flex h-9 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm">
-                                    <input
-                                        type="checkbox"
-                                        className="h-4 w-4 accent-primary"
-                                        checked={protectionData.required}
-                                        onChange={(event) =>
-                                            setProtectionData(
-                                                'required',
-                                                event.target.checked,
-                                            )
-                                        }
-                                    />
-
-                                    <span>Protection required</span>
-                                </label>
-
-                                <FormField label="Coverage amount">
-                                    <Input
-                                        className="h-9"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={protectionData.coverage_amount}
-                                        onChange={(event) =>
-                                            setProtectionData(
-                                                'coverage_amount',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-
-                                <FormField label="Initial fee">
-                                    <Input
-                                        className="h-9"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={protectionData.initial_fee}
-                                        onChange={(event) =>
-                                            setProtectionData(
-                                                'initial_fee',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-
-                                <FormField label="Renewal fee">
-                                    <Input
-                                        className="h-9"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={protectionData.renewal_fee}
-                                        onChange={(event) =>
-                                            setProtectionData(
-                                                'renewal_fee',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-
-                                <FormField label="Renewal frequency">
-                                    <Select
-                                        className="h-9"
-                                        value={protectionData.renewal_frequency}
-                                        onChange={(value) =>
-                                            setProtectionData(
-                                                'renewal_frequency',
-                                                value,
-                                            )
-                                        }
-                                        options={[
-                                            'NONE',
-                                            'MONTHLY',
-                                            'QUARTERLY',
-                                            'HALF_YEARLY',
-                                            'YEARLY',
-                                        ].map((value) => ({
-                                            value,
-                                            label: value,
-                                        }))}
-                                    />
-                                </FormField>
-
-                                <FormField label="Next renewal">
-                                    <AppDatePicker
-                                        value={protectionData.next_renewal_at}
-                                        onChange={(value) =>
-                                            setProtectionData(
-                                                'next_renewal_at',
-                                                value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-                            </div>
-
-                            <div className="mt-4 flex flex-wrap justify-end gap-2 border-t pt-4">
-                                <Button
-                                    type="submit"
-                                    size="sm"
-                                    disabled={protectionProcessing}
+                        {protectionPolicy?.status === 'ACTIVE' &&
+                            canSubmitProtectionClaim &&
+                            !hasOpenProtectionClaim && (
+                                <form
+                                    onSubmit={submitProtectionClaim}
+                                    className="grid gap-3 border-b bg-muted/20 p-4 sm:grid-cols-2 sm:p-5"
                                 >
-                                    <FileCheck2 className="mr-1.5 h-4 w-4" />
-                                    Save protection
-                                </Button>
+                                    <div>
+                                        <Label htmlFor="claim-death-date">
+                                            Date of death
+                                        </Label>
+                                        <Input
+                                            id="claim-death-date"
+                                            type="date"
+                                            value={claimData.death_date}
+                                            onChange={(event) =>
+                                                setClaimData(
+                                                    'death_date',
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                        <InputError
+                                            message={claimErrors.death_date}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="claim-death-certificate">
+                                            Death certificate
+                                        </Label>
+                                        <Input
+                                            id="claim-death-certificate"
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            onChange={(event) =>
+                                                setClaimData(
+                                                    'death_certificate',
+                                                    event.target.files?.[0] ??
+                                                        null,
+                                                )
+                                            }
+                                        />
+                                        <InputError
+                                            message={
+                                                claimErrors.death_certificate
+                                            }
+                                        />
+                                    </div>
+                                    <div className="sm:col-span-2">
+                                        <Label htmlFor="claim-notes">
+                                            Claim notes
+                                        </Label>
+                                        <Input
+                                            id="claim-notes"
+                                            value={claimData.notes}
+                                            onChange={(event) =>
+                                                setClaimData(
+                                                    'notes',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Optional notes"
+                                        />
+                                    </div>
+                                    <div className="flex justify-end sm:col-span-2">
+                                        <Button
+                                            type="submit"
+                                            disabled={claimProcessing}
+                                        >
+                                            <FileText className="size-4" />{' '}
+                                            Submit death claim
+                                        </Button>
+                                    </div>
+                                </form>
+                            )}
 
-                                {application.loan_account.protection_policy
-                                    ?.status === 'PENDING' && (
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={activateProtection}
+                        {protectionClaims.length > 0 && (
+                            <div className="divide-y divide-border/70">
+                                {protectionClaims.map((claim) => (
+                                    <div
+                                        key={claim.id}
+                                        className="space-y-3 p-4 sm:p-5"
                                     >
-                                        <BadgeCheck className="mr-1.5 h-4 w-4" />
-                                        Activate
-                                    </Button>
-                                )}
-
-                                {application.loan_account.protection_policy
-                                    ?.status === 'ACTIVE' && (
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={cancelProtection}
-                                    >
-                                        Cancel protection
-                                    </Button>
-                                )}
+                                        <div className="flex flex-wrap items-start justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm font-semibold">
+                                                    {claim.claim_no}
+                                                </p>
+                                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                                    Date of death:{' '}
+                                                    {formatDate(
+                                                        claim.death_date,
+                                                    )}
+                                                </p>
+                                            </div>
+                                            <StatusBadge
+                                                tone={
+                                                    claim.status === 'REJECTED'
+                                                        ? 'danger'
+                                                        : claim.status ===
+                                                            'SETTLED'
+                                                          ? 'success'
+                                                          : 'warning'
+                                                }
+                                            >
+                                                {claim.status}
+                                            </StatusBadge>
+                                        </div>
+                                        {canViewSupportingDocuments ? (
+                                            <a
+                                                className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+                                                href={route(
+                                                    'loan-applications.protection-claims.certificate',
+                                                    [application.id, claim.id],
+                                                )}
+                                            >
+                                                <FileText className="size-4" />{' '}
+                                                {claim.death_certificate_name}
+                                            </a>
+                                        ) : (
+                                            <p className="text-xs text-muted-foreground">
+                                                Death certificate access is
+                                                restricted.
+                                            </p>
+                                        )}
+                                        {claim.decision_note && (
+                                            <p className="text-sm text-muted-foreground">
+                                                {claim.decision_note}
+                                            </p>
+                                        )}
+                                        {claim.status === 'APPROVED' && (
+                                            <p className="text-sm text-muted-foreground">
+                                                Payout {claim.payout_amount} is
+                                                awaiting transaction posting.
+                                                {claim.financial_transaction_id && (
+                                                    <>
+                                                        {' '}
+                                                        <Link
+                                                            className="text-primary underline"
+                                                            href={route(
+                                                                'financial-transactions.show',
+                                                                claim.financial_transaction_id,
+                                                            )}
+                                                        >
+                                                            View transaction
+                                                        </Link>
+                                                    </>
+                                                )}
+                                            </p>
+                                        )}
+                                        {claim.status === 'SETTLED' && (
+                                            <p className="text-sm font-medium text-success">
+                                                Loan principal settled by
+                                                insurance.
+                                            </p>
+                                        )}
+                                        {canManageProtectionClaims &&
+                                            claim.status === 'SUBMITTED' && (
+                                                <form
+                                                    onSubmit={(event) =>
+                                                        approveProtectionClaim(
+                                                            event,
+                                                            claim.id,
+                                                        )
+                                                    }
+                                                    className="grid items-end gap-3 border-t pt-3 sm:grid-cols-[1fr_1fr_auto_auto]"
+                                                >
+                                                    <div>
+                                                        <Label>
+                                                            Payout account
+                                                        </Label>
+                                                        <Select
+                                                            value={
+                                                                claimDecisionData.payout_account_id
+                                                            }
+                                                            onChange={(value) =>
+                                                                setClaimDecisionData(
+                                                                    'payout_account_id',
+                                                                    value,
+                                                                )
+                                                            }
+                                                            options={[
+                                                                {
+                                                                    value: '',
+                                                                    label: 'Select insurer settlement account',
+                                                                },
+                                                                ...payout_accounts.map(
+                                                                    (
+                                                                        account,
+                                                                    ) => ({
+                                                                        value: String(
+                                                                            account.id,
+                                                                        ),
+                                                                        label: `${account.account_no} - ${account.name}`,
+                                                                    }),
+                                                                ),
+                                                            ]}
+                                                        />
+                                                        <InputError
+                                                            message={
+                                                                claimDecisionErrors.payout_account_id
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label>
+                                                            Decision note
+                                                        </Label>
+                                                        <Input
+                                                            value={
+                                                                claimDecisionData.decision_note
+                                                            }
+                                                            onChange={(event) =>
+                                                                setClaimDecisionData(
+                                                                    'decision_note',
+                                                                    event.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <Button
+                                                        type="submit"
+                                                        disabled={
+                                                            claimDecisionProcessing ||
+                                                            payout_accounts.length ===
+                                                                0
+                                                        }
+                                                    >
+                                                        <Check className="size-4" />{' '}
+                                                        Approve claim
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            rejectProtectionClaim(
+                                                                claim.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        <X className="size-4" />{' '}
+                                                        Reject
+                                                    </Button>
+                                                </form>
+                                            )}
+                                    </div>
+                                ))}
                             </div>
-                        </form>
+                        )}
                     </section>
                 )}
 
@@ -1697,36 +1872,72 @@ export default function LoanApplicationShow() {
 /* UI helpers                                                                  */
 /* -------------------------------------------------------------------------- */
 
-function SummaryItem({
+function OverviewFact({
     icon: Icon,
     label,
     value,
-    emphasis = false,
+    detail,
 }: {
     icon: React.ElementType;
     label: string;
     value: string | number;
-    emphasis?: boolean;
+    detail?: string | null;
 }) {
     return (
-        <div className="flex items-center gap-3 px-4 py-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted/70 ring-1 ring-border/50">
-                <Icon className="h-4 w-4 text-muted-foreground" />
+        <div className="flex min-w-0 gap-3 border-b border-border/70 p-4 odd:border-r sm:p-5 sm:[&:nth-child(n+3)]:border-b-0">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent/15 text-accent-foreground">
+                <Icon className="size-4" />
             </div>
-
-            <div className="min-w-0">
-                <p className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+            <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
                     {label}
                 </p>
-
-                <p
-                    className={`truncate text-sm ${
-                        emphasis ? 'font-semibold' : 'font-medium'
-                    }`}
-                >
+                <p className="mt-1 text-sm leading-snug font-semibold break-words">
                     {value}
                 </p>
+                {detail && detail !== value && (
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {detail}
+                    </p>
+                )}
             </div>
+        </div>
+    );
+}
+
+function ApplicantDetailGroup({
+    icon: Icon,
+    title,
+    items,
+    empty,
+}: {
+    icon: React.ElementType;
+    title: string;
+    items: string[];
+    empty: string;
+}) {
+    return (
+        <div className="min-w-0 bg-background p-4 even:bg-muted/15 sm:p-5">
+            <div className="flex items-center gap-2">
+                <Icon className="size-4 text-primary" />
+                <h3 className="text-xs font-semibold tracking-wide uppercase">
+                    {title}
+                </h3>
+            </div>
+            {items.length ? (
+                <ul className="mt-3 space-y-2">
+                    {items.map((item, index) => (
+                        <li
+                            key={`${title}-${index}`}
+                            className="border-l-2 border-accent/60 pl-2.5 text-sm leading-relaxed break-words"
+                        >
+                            {item}
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p className="mt-3 text-sm text-muted-foreground">{empty}</p>
+            )}
         </div>
     );
 }

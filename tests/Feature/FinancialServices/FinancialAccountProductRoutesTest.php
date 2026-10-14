@@ -1,6 +1,10 @@
 <?php
 
 use App\CustomerModule\Models\Customer;
+use App\FinancialServices\Application\FinancialTransactionService;
+use App\FinancialServices\Application\LoanApplicationService;
+use App\FinancialServices\Application\LoanProtectionClaimService;
+use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
@@ -330,6 +334,28 @@ it('does not expose generic financial-account creation endpoints', function () {
     expect(FinancialAccount::query()->where('account_no', 'LOAN-DIRECT-001')->exists())->toBeFalse();
 });
 
+it('does not allow additional holders or authorized persons on loan accounts', function () {
+    $fixture = createFinancialAccountProductFixture('LOAN');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.accounts.holders.manage',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('financial-accounts.holders.store', $fixture['account']), [
+            'customer_id' => $fixture['customer']->id,
+            'role' => 'JOINT',
+            'ownership_percent' => 50,
+        ])
+        ->assertUnprocessable();
+
+    $this->post(route('financial-accounts.authorized-persons.store', $fixture['account']), [
+        'customer_id' => $fixture['customer']->id,
+        'authorization_type' => 'SIGNATORY',
+        'is_active' => true,
+    ])->assertUnprocessable();
+});
+
 it('returns a requested amount validation error above the loan product ceiling', function () {
     $fixture = createFinancialAccountProductFixture('LOAN');
     grantFinancialAccountProductPermissions($fixture['user'], [
@@ -353,6 +379,136 @@ it('returns a requested amount validation error above the loan product ceiling',
             'requested_term_months' => 12,
         ])
         ->assertSessionHasErrors('requested_amount');
+});
+
+it('creates a credit-life product and allows it to be selected for a loan application', function () {
+    $fixture = createFinancialAccountProductFixture('LOAN');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.loan-protection-products.view',
+        'financial.loan-protection-products.manage',
+        'financial.loan-applications.view',
+        'financial.loan-applications.create',
+        'financial.loan-applications.update',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('loan-protection-products.index'))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/loan-protection-products/index')
+            ->where('can_manage', true));
+
+    $this->post(route('loan-protection-products.store'), [
+        'code' => 'CL-1PCT',
+        'name' => 'Credit life 1 percent',
+        'description' => 'Monthly cover against outstanding loan principal.',
+        'monthly_rate_percent' => 1,
+        'status' => true,
+    ])->assertRedirect();
+
+    $protectionProduct = \App\FinancialServices\Models\LoanProtectionProduct::query()->firstOrFail();
+    $this->post(route('loan-applications.store'), [
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'loan_protection_product_id' => $protectionProduct->id,
+        'requested_amount' => 500,
+        'requested_term_months' => 12,
+    ])->assertRedirect();
+
+    $application = \App\FinancialServices\Models\LoanApplication::query()->latest('id')->firstOrFail();
+    expect($application->loan_protection_product_id)->toBe($protectionProduct->id);
+
+    $this->get(route('loan-applications.edit', $application))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/loan-applications/form')
+            ->where('application.loan_protection_product_id', $protectionProduct->id)
+            ->where('protectionProducts.0.id', $protectionProduct->id));
+
+    $protectionProduct->update(['status' => false]);
+    $this->put(route('loan-applications.update', $application), [
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'loan_protection_product_id' => $protectionProduct->id,
+        'requested_amount' => 500,
+        'requested_term_months' => 12,
+    ])->assertRedirect();
+});
+
+it('submits and approves a death claim then settles the loan through a posted ledger transaction', function () {
+    $fixture = createFinancialAccountProductFixture('LOAN');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.loan-applications.view',
+        'financial.loan-applications.create',
+        'financial.loan-applications.manage',
+        'financial.loan-applications.documents.view',
+    ]);
+    Storage::fake('local');
+    $protectionProduct = \App\FinancialServices\Models\LoanProtectionProduct::query()->create([
+        'organization_id' => $fixture['organization']->id,
+        'code' => 'CL-CLAIM',
+        'name' => 'Credit life claim test',
+        'monthly_rate_percent' => 0.5,
+        'status' => true,
+    ]);
+    $applicationService = app(LoanApplicationService::class);
+    $application = $applicationService->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'loan_protection_product_id' => $protectionProduct->id,
+        'requested_amount' => 500,
+        'requested_term_months' => 12,
+    ], $fixture['organization']->id);
+    $applicationService->submit($application);
+    $applicationService->approve($application, [], $fixture['user']->id);
+    $loan = $applicationService->createLoanAccount($application->fresh());
+    $loan->update(['disbursed_amount' => 500, 'status' => 'ACTIVE']);
+    $loan->financialAccount()->update(['balance' => 500, 'available_balance' => 500]);
+    app(LoanScheduleService::class)->generate($loan, [
+        'frequency' => 'MONTHLY',
+        'start_date' => now()->toDateString(),
+    ]);
+    $payoutAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'balance' => 0,
+        'available_balance' => 0,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('loan-applications.protection-claims.store', $application), [
+            'death_date' => now()->subMonth()->toDateString(),
+            'death_certificate' => UploadedFile::fake()->create('death.pdf', 50, 'application/pdf'),
+            'notes' => 'Claim documentation received',
+        ])
+        ->assertRedirect();
+
+    $claim = \App\FinancialServices\Models\LoanProtectionClaim::query()->firstOrFail();
+    $this->get(route('loan-applications.protection-claims.certificate', [$application, $claim]))
+        ->assertSuccessful()
+        ->assertDownload('death.pdf');
+
+    $this->post(route('loan-applications.protection-claims.approve', [$application, $claim]), [
+        'payout_account_id' => $payoutAccount->id,
+        'decision_note' => 'Death certificate verified',
+    ])->assertRedirect();
+
+    $claim->refresh();
+    $transaction = \App\FinancialServices\Models\FinancialTransaction::query()->findOrFail($claim->financial_transaction_id);
+    expect($claim->status)->toBe('APPROVED')
+        ->and((float) $claim->payout_amount)->toBe(500.0)
+        ->and($transaction->status)->toBe('PENDING');
+
+    app(FinancialTransactionService::class)->post($transaction, $fixture['organization']->id, $fixture['user']->id);
+
+    expect($claim->fresh()->status)->toBe('SETTLED')
+        ->and($loan->fresh()->status)->toBe('CLOSED')
+        ->and($loan->financialAccount->fresh()->status)->toBe('CLOSED')
+        ->and($loan->protectionPolicy()->first()->status)->toBe('CANCELLED');
 });
 
 it('searches loan applications and exposes draft edit access to permitted users', function () {

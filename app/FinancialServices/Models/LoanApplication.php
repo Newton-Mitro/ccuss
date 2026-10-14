@@ -27,6 +27,7 @@ class LoanApplication extends Model
         'customer_id',
         'loan_product_id',
         'financial_product_id',
+        'loan_protection_product_id',
         'application_no',
         'requested_amount',
         'approved_amount',
@@ -54,6 +55,11 @@ class LoanApplication extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(LoanProduct::class, 'loan_product_id');
+    }
+
+    public function loanProtectionProduct(): BelongsTo
+    {
+        return $this->belongsTo(LoanProtectionProduct::class);
     }
 
     public function setFinancialProductIdAttribute($value): void

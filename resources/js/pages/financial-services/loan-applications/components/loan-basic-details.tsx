@@ -8,14 +8,17 @@ import { FormErrors } from '../types';
 type Props = {
     customers: LoanApplicationFormPageProps['customers'];
     products: LoanApplicationFormPageProps['products'];
+    protectionProducts: LoanApplicationFormPageProps['protectionProducts'];
     customerId: string;
     productId: string;
+    protectionProductId: string;
     amount: string;
     term: string;
     purpose: string;
     errors: FormErrors;
     onCustomerChange: (value: string) => void;
     onProductChange: (value: string) => void;
+    onProtectionProductChange: (value: string) => void;
     onAmountChange: (value: string) => void;
     onTermChange: (value: string) => void;
     onPurposeChange: (value: string) => void;
@@ -25,14 +28,17 @@ export default function LoanBasicDetails(props: Props) {
     const {
         customers,
         products,
+        protectionProducts,
         customerId,
         productId,
+        protectionProductId,
         amount,
         term,
         purpose,
         errors,
         onCustomerChange,
         onProductChange,
+        onProtectionProductChange,
         onAmountChange,
         onTermChange,
         onPurposeChange,
@@ -86,6 +92,26 @@ export default function LoanBasicDetails(props: Props) {
                         ]}
                     />
                     <InputError message={errors.financial_product_id} />
+                </div>
+                <div className="min-w-0 space-y-1.5 sm:col-span-2">
+                    <Label>Credit-life insurance (optional)</Label>
+                    <Select
+                        value={protectionProductId}
+                        onChange={onProtectionProductChange}
+                        options={[
+                            { value: '', label: 'No insurance selected' },
+                            ...protectionProducts.map((product) => ({
+                                value: String(product.id),
+                                label: `${product.code} - ${product.name} (${product.monthly_rate_percent}% monthly)`,
+                            })),
+                        ]}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                        Pays the outstanding loan principal after an approved
+                        death claim. Monthly premiums use the principal
+                        remaining after each scheduled repayment.
+                    </p>
+                    <InputError message={errors.loan_protection_product_id} />
                 </div>
                 <div className="min-w-0 space-y-1.5">
                     <Label>

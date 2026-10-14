@@ -12,7 +12,11 @@ class LoanScheduleService
 {
     public function generate(LoanAccount $loan, array $data = []): array
     {
-        $loan->loadMissing(['financialAccount.product', 'schedules.components', 'repayments']);
+        if (in_array($loan->status, ['CLOSED', 'WRITTEN_OFF'], true)) {
+            throw new RuntimeException('Closed loans cannot generate repayment schedules.');
+        }
+
+        $loan->loadMissing(['financialAccount.product', 'protectionPolicy', 'schedules.components', 'repayments']);
         if ($loan->repayments->contains(fn($repayment) => $repayment->status === 'POSTED')) {
             throw new RuntimeException('A schedule with posted repayments cannot be regenerated.');
         }
@@ -33,7 +37,18 @@ class LoanScheduleService
         $startDate = CarbonImmutable::parse($data['start_date'] ?? $loan->disbursed_at ?? $loan->approved_at ?? now());
         $version = ((int) $loan->schedules->max('schedule_version')) + 1;
         $fee = (float) ($data['scheduled_fee'] ?? $settings['loan_fee_per_installment'] ?? 0);
-        $protectionFee = (float) ($data['scheduled_protection_fee'] ?? $settings['protection_fee_per_installment'] ?? 0);
+        $protectionRate = $loan->protectionPolicy?->status === 'ACTIVE'
+            ? $loan->protectionPolicy->monthly_rate_percent
+            : null;
+        $fixedProtectionFee = (float) ($data['scheduled_protection_fee'] ?? $settings['protection_fee_per_installment'] ?? 0);
+        $periodsPerYear = match ($frequency) {
+            'WEEKLY' => 52,
+            'QUARTERLY' => 4,
+            default => 12,
+        };
+        $protectionPeriodRate = $protectionRate === null
+            ? null
+            : (float) $protectionRate * 12 / $periodsPerYear;
         $inputs = [
             'frequency' => $frequency,
             'term_value' => $termMonths,
@@ -43,10 +58,11 @@ class LoanScheduleService
             'annual_rate' => round($annualRate, 6),
             'interest_calculation' => $calculation,
             'scheduled_fee' => round($fee, 4),
-            'scheduled_protection_fee' => round($protectionFee, 4),
+            'scheduled_protection_fee' => round($fixedProtectionFee, 4),
+            'monthly_protection_rate_percent' => $protectionRate === null ? null : round((float) $protectionRate, 4),
         ];
 
-        return DB::transaction(function () use ($loan, $frequency, $periods, $principal, $annualRate, $calculation, $startDate, $version, $fee, $protectionFee, $inputs): array {
+        return DB::transaction(function () use ($loan, $frequency, $periods, $principal, $annualRate, $calculation, $startDate, $version, $fee, $fixedProtectionFee, $protectionPeriodRate, $inputs): array {
             $loan->schedules()->delete();
             $openingPrincipal = $principal;
 
@@ -66,6 +82,10 @@ class LoanScheduleService
                     default => 0.0,
                 };
                 $dueDate = $this->dueDate($startDate, $frequency, $index);
+                $closingPrincipal = max(0, round($openingPrincipal - $scheduledPrincipal, 4));
+                $protectionFee = $protectionPeriodRate === null
+                    ? $fixedProtectionFee
+                    : round($closingPrincipal * $protectionPeriodRate / 100, 2);
                 $totalDue = round($scheduledPrincipal + $scheduledInterest + $fee + $protectionFee, 4);
                 $schedule = $loan->schedules()->create([
                     'schedule_version' => $version,
@@ -89,7 +109,7 @@ class LoanScheduleService
                 ] as $type => $amount) {
                     $schedule->components()->create(['type' => $type, 'amount_due' => $amount, 'amount_paid' => 0, 'status' => $amount > 0 ? 'PENDING' : 'PAID']);
                 }
-                $openingPrincipal = max(0, round($openingPrincipal - $scheduledPrincipal, 4));
+                $openingPrincipal = $closingPrincipal;
             }
 
             return $loan->schedules()->with('components')->orderBy('installment_no')->get()->all();
@@ -98,6 +118,10 @@ class LoanScheduleService
 
     public function assessArrears(LoanAccount $loan, ?string $asOfDate = null): array
     {
+        if (in_array($loan->status, ['CLOSED', 'WRITTEN_OFF'], true)) {
+            throw new RuntimeException('Closed loans cannot accrue arrears.');
+        }
+
         $asOf = CarbonImmutable::parse($asOfDate ?? now()->toDateString());
         $loan->load('schedules.components');
 

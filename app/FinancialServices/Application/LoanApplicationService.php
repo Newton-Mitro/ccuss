@@ -9,6 +9,7 @@ use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanCollateral;
 use App\FinancialServices\Models\LoanGuarantor;
 use App\FinancialServices\Models\LoanProtectionPolicy;
+use App\FinancialServices\Models\LoanProtectionProduct;
 use App\CustomerModule\Models\Customer;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,8 +34,19 @@ class LoanApplicationService
             ->where('status', true)
             ->findOrFail($data['financial_product_id']);
         $this->policyService->validateLoanAmount($product, (float) $data['requested_amount']);
+        $protectionProductId = !empty($data['loan_protection_product_id'])
+            ? LoanProtectionProduct::query()
+                ->where('organization_id', $organizationId)
+                ->where('status', true)
+                ->whereKey($data['loan_protection_product_id'])
+                ->value('id')
+            : null;
+        if (!empty($data['loan_protection_product_id']) && !$protectionProductId) {
+            throw new RuntimeException('The selected credit-life product is unavailable.');
+        }
 
         $data['loan_product_id'] = $product->id;
+        $data['loan_protection_product_id'] = $protectionProductId;
         unset($data['financial_product_id']);
         $data['organization_id'] = $organizationId;
         $data['application_no'] = $this->nextNumber($organizationId);
@@ -67,15 +79,33 @@ class LoanApplicationService
             ->where('status', true)
             ->findOrFail($data['financial_product_id']);
         $this->policyService->validateLoanAmount($product, (float) $data['requested_amount']);
+        $protectionProductId = null;
+        if (!empty($data['loan_protection_product_id'])) {
+            $protectionProductQuery = LoanProtectionProduct::query()
+                ->where('organization_id', $application->organization_id)
+                ->where(function ($query) use ($application): void {
+                    $query->where('status', true);
+                    if ($application->loan_protection_product_id) {
+                        $query->orWhere('id', $application->loan_protection_product_id);
+                    }
+                });
+            $protectionProductId = $protectionProductQuery
+                ->whereKey($data['loan_protection_product_id'])
+                ->value('id');
+            if (!$protectionProductId) {
+                throw new RuntimeException('The selected credit-life product is unavailable.');
+            }
+        }
 
         $uploadedPaths = [];
 
         try {
-            return DB::transaction(function () use ($application, $data, $details, $product, &$uploadedPaths): LoanApplication {
+            return DB::transaction(function () use ($application, $data, $details, $product, $protectionProductId, &$uploadedPaths): LoanApplication {
                 $application->update([
                     'branch_id' => $data['branch_id'] ?? null,
                     'customer_id' => $data['customer_id'],
                     'loan_product_id' => $product->id,
+                    'loan_protection_product_id' => $protectionProductId,
                     'requested_amount' => $data['requested_amount'],
                     'requested_term_months' => $data['requested_term_months'],
                     'purpose' => $data['purpose'] ?? null,
@@ -155,7 +185,7 @@ class LoanApplicationService
             throw new RuntimeException('This loan application already has a loan account.');
         }
 
-        $application->loadMissing(['product', 'customer']);
+        $application->loadMissing(['product', 'customer', 'loanProtectionProduct']);
         $product = $application->product;
         $interestCalculation = in_array($product->interest_calculation, ['SIMPLE', 'FLAT', 'REDUCING_BALANCE'], true)
             ? $product->interest_calculation
@@ -178,7 +208,7 @@ class LoanApplicationService
                 'opened_at' => CarbonImmutable::today()->toDateString(),
             ]);
 
-            return $application->loanAccount()->create([
+            $loanAccount = $application->loanAccount()->create([
                 'financial_account_id' => $financialAccount->id,
                 'loan_no' => 'LN-' . str_pad((string) $application->id, 8, '0', STR_PAD_LEFT),
                 'principal_amount' => $application->approved_amount,
@@ -193,6 +223,22 @@ class LoanApplicationService
                 'maturity_date' => CarbonImmutable::parse($application->approved_at ?? now())->addMonthsNoOverflow((int) $application->requested_term_months)->toDateString(),
                 'status' => 'APPROVED',
             ]);
+
+            if ($application->loanProtectionProduct) {
+                $loanAccount->protectionPolicy()->create([
+                    'loan_protection_product_id' => $application->loanProtectionProduct->id,
+                    'monthly_rate_percent' => $application->loanProtectionProduct->monthly_rate_percent,
+                    'required' => false,
+                    'coverage_amount' => $loanAccount->principal_amount,
+                    'initial_fee' => 0,
+                    'renewal_fee' => 0,
+                    'renewal_frequency' => 'MONTHLY',
+                    'next_renewal_at' => CarbonImmutable::today()->addMonthNoOverflow()->toDateString(),
+                    'status' => 'ACTIVE',
+                ]);
+            }
+
+            return $loanAccount;
         });
     }
 

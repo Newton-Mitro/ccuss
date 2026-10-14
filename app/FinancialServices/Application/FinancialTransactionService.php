@@ -10,6 +10,7 @@ use App\FinancialServices\Models\InterestProvision;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanDisbursement;
 use App\FinancialServices\Models\LoanRepayment;
+use App\FinancialServices\Models\LoanProtectionClaim;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareDividendAllocation;
 use App\GeneralAccounting\Application\FinancialTransactionAccountingService;
@@ -353,15 +354,98 @@ class FinancialTransactionService
                 'loan_account_id' => $loan->id,
                 'financial_transaction_id' => $transaction->id,
                 'amount' => $amount,
-                'repayment_date' => $data['repayment_date'],
+                'repayment_at' => $data['repayment_date'],
                 'status' => 'PENDING',
-                'reference' => $data['reference'] ?? null,
+                'note' => $data['reference'] ?? null,
                 'created_by' => $userId,
             ]);
             foreach ($allocations as $allocation) {
                 $repayment->allocations()->create($allocation);
             }
             $transaction->update(['source_type' => LoanRepayment::class, 'source_id' => $repayment->id]);
+
+            return $transaction->fresh(['entries.financialAccount', 'source.allocations']);
+        });
+    }
+
+    public function createLoanProtectionClaimPayout(
+        LoanProtectionClaim $claim,
+        int $payoutAccountId,
+        int $organizationId,
+        int $userId,
+        ?string $decisionNote,
+    ): FinancialTransaction {
+        return DB::transaction(function () use ($claim, $payoutAccountId, $organizationId, $userId, $decisionNote): FinancialTransaction {
+            $claim = LoanProtectionClaim::query()->lockForUpdate()->findOrFail($claim->id);
+            if ($claim->status !== 'SUBMITTED') {
+                throw new RuntimeException('Only submitted credit-life claims can be approved.');
+            }
+
+            $loan = LoanAccount::query()
+                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+                ->with(['financialAccount', 'schedules.components', 'protectionPolicy'])
+                ->lockForUpdate()
+                ->findOrFail($claim->loan_account_id);
+            if (!$loan->protectionPolicy || $loan->protectionPolicy->status !== 'ACTIVE') {
+                throw new RuntimeException('The loan does not have active credit-life coverage.');
+            }
+
+            $payoutAccount = FinancialAccount::query()
+                ->where('organization_id', $organizationId)
+                ->whereIn('account_type', ['CASH', 'BANK'])
+                ->whereIn('status', ['PENDING', 'ACTIVE'])
+                ->findOrFail($payoutAccountId);
+            $amount = round($loan->schedules->sum(fn($schedule) => $schedule->components
+                ->where('type', 'PRINCIPAL')
+                ->sum(fn($component) => max(0, (float) $component->amount_due - (float) $component->amount_paid))), 2);
+            if ($amount <= 0) {
+                throw new RuntimeException('There is no outstanding loan principal to settle.');
+            }
+
+            $allocations = $this->repaymentAllocations($loan, $amount, now()->toDateString(), true, true);
+            if (round(collect($allocations)->sum('amount'), 2) !== $amount) {
+                throw new RuntimeException('The schedule does not match the outstanding loan principal.');
+            }
+
+            $transaction = $this->createMultiLine(
+                [
+                    'transaction_type' => 'LOAN_REPAYMENT',
+                    'transaction_date' => now()->toDateString(),
+                    'reference' => $claim->claim_no,
+                    'description' => 'Credit-life claim settlement',
+                    'idempotency_key' => 'credit-life-claim-' . $claim->id,
+                ],
+                [
+                    ['financial_account_id' => $payoutAccount->id, 'direction' => $this->directionForIncrease($payoutAccount), 'amount' => $amount, 'description' => 'Credit-life insurance payout'],
+                    ['financial_account_id' => $loan->financial_account_id, 'direction' => $this->directionForDecrease($loan->financialAccount), 'amount' => $amount, 'description' => 'Credit-life loan principal settlement'],
+                ],
+                $organizationId,
+                $userId,
+                $loan->financialAccount->branch_id,
+            );
+
+            $repayment = LoanRepayment::create([
+                'loan_account_id' => $loan->id,
+                'financial_transaction_id' => $transaction->id,
+                'amount' => $amount,
+                'repayment_at' => now()->toDateString(),
+                'status' => 'PENDING',
+                'note' => $claim->claim_no,
+                'created_by' => $userId,
+            ]);
+            foreach ($allocations as $allocation) {
+                $repayment->allocations()->create($allocation);
+            }
+            $transaction->update(['source_type' => LoanRepayment::class, 'source_id' => $repayment->id]);
+            $claim->update([
+                'status' => 'APPROVED',
+                'payout_amount' => $amount,
+                'payout_account_id' => $payoutAccount->id,
+                'financial_transaction_id' => $transaction->id,
+                'reviewed_by' => $userId,
+                'reviewed_at' => now(),
+                'decision_note' => $decisionNote,
+            ]);
 
             return $transaction->fresh(['entries.financialAccount', 'source.allocations']);
         });
@@ -426,6 +510,7 @@ class FinancialTransactionService
 
             if ($transaction->source instanceof LoanRepayment) {
                 $this->postLoanRepayment($transaction->source);
+                $this->settleProtectionClaim($transaction);
             }
 
             if ($transaction->source instanceof AccountFine) {
@@ -535,6 +620,7 @@ class FinancialTransactionService
 
             if ($transaction->source instanceof LoanRepayment) {
                 $this->reverseLoanRepayment($transaction->source);
+                $this->reopenProtectionClaim($transaction);
             }
 
             if ($transaction->source instanceof AccountFine) {
@@ -566,7 +652,7 @@ class FinancialTransactionService
         return FinancialTransaction::query()->where('organization_id', $organizationId);
     }
 
-    private function repaymentAllocations(LoanAccount $loan, float $amount, string $repaymentDate, bool $allowAdvance): array
+    private function repaymentAllocations(LoanAccount $loan, float $amount, string $repaymentDate, bool $allowAdvance, bool $principalOnly = false): array
     {
         $remaining = $amount;
         $allocations = [];
@@ -576,7 +662,7 @@ class FinancialTransactionService
             ->sortBy('due_date');
 
         foreach ($schedules as $schedule) {
-            foreach (['FEE', 'PROTECTION_FEE', 'INTEREST', 'PRINCIPAL'] as $type) {
+            foreach ($principalOnly ? ['PRINCIPAL'] : ['FEE', 'PROTECTION_FEE', 'INTEREST', 'PRINCIPAL'] as $type) {
                 $component = $schedule->components->firstWhere('type', $type);
                 if (!$component) {
                     continue;
@@ -613,6 +699,57 @@ class FinancialTransactionService
             $schedule->update(['total_paid' => $totalPaid, 'status' => $fullyPaid ? 'PAID' : 'PARTIAL', 'paid_at' => $fullyPaid ? now() : null]);
         }
         $repayment->update(['status' => 'POSTED']);
+    }
+
+    private function settleProtectionClaim(FinancialTransaction $transaction): void
+    {
+        $claim = LoanProtectionClaim::query()
+            ->where('financial_transaction_id', $transaction->id)
+            ->where('status', 'APPROVED')
+            ->first();
+        if (!$claim) {
+            return;
+        }
+
+        $loan = LoanAccount::query()->with(['financialAccount', 'protectionPolicy'])->lockForUpdate()->findOrFail($claim->loan_account_id);
+        $closedAt = now()->toDateString();
+        $loan->update([
+            'status' => 'CLOSED',
+            'closed_at' => $closedAt,
+            'closure_reason' => 'Settled by credit-life claim ' . $claim->claim_no,
+        ]);
+        $loan->financialAccount->update([
+            'status' => 'CLOSED',
+            'closed_at' => $closedAt,
+            'closure_reason' => 'Settled by credit-life claim ' . $claim->claim_no,
+        ]);
+        $loan->protectionPolicy?->update(['status' => 'CANCELLED']);
+        $claim->update(['status' => 'SETTLED']);
+    }
+
+    private function reopenProtectionClaim(FinancialTransaction $transaction): void
+    {
+        $claim = LoanProtectionClaim::query()
+            ->where('financial_transaction_id', $transaction->id)
+            ->where('status', 'SETTLED')
+            ->first();
+        if (!$claim) {
+            return;
+        }
+
+        $loan = LoanAccount::query()->with(['financialAccount', 'protectionPolicy'])->lockForUpdate()->findOrFail($claim->loan_account_id);
+        $loan->update(['status' => 'ACTIVE', 'closed_at' => null, 'closure_reason' => null]);
+        $loan->financialAccount->update(['status' => 'ACTIVE', 'closed_at' => null, 'closure_reason' => null]);
+        $loan->protectionPolicy?->update(['status' => 'ACTIVE']);
+        $claim->update([
+            'status' => 'SUBMITTED',
+            'payout_amount' => null,
+            'payout_account_id' => null,
+            'financial_transaction_id' => null,
+            'reviewed_by' => null,
+            'reviewed_at' => null,
+            'decision_note' => 'Previously settled payout was reversed.',
+        ]);
     }
 
     private function reverseLoanRepayment(LoanRepayment $repayment): void

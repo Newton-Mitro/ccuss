@@ -222,8 +222,6 @@ class FinancialAccountController extends Controller
         $relations = [
             'product',
             'holder',
-            'nominees',
-            'authorizedPersons.customer',
             'shareAccount',
             'fixedDeposit',
             'recurringDeposit.installments',
@@ -231,8 +229,12 @@ class FinancialAccountController extends Controller
             'loanAccount.arrears',
             'transactions',
         ];
-        if (Schema::hasTable('financial_account_holders')) {
-            $relations[] = 'holders';
+        if (in_array($financialAccount->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true)) {
+            $relations[] = 'nominees';
+            $relations[] = 'authorizedPersons.customer';
+            if (Schema::hasTable('financial_account_holders')) {
+                $relations[] = 'holders';
+            }
         }
         if (Schema::hasTable('saving_accounts')) {
             $relations[] = 'savingAccount';
@@ -591,6 +593,7 @@ class FinancialAccountController extends Controller
     private function authorizeAuthorizedPersonAccount(Request $request, FinancialAccount $account): void
     {
         $this->authorizeOrganization($request, $account);
+        abort_unless(in_array($account->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'], true), 422, 'This account does not support authorized persons.');
         abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change authorized persons.');
     }
 

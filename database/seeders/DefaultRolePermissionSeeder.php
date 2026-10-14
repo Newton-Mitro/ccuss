@@ -179,6 +179,7 @@ class DefaultRolePermissionSeeder extends Seeder
                 'financial.loan-applications.documents.view',
                 'financial.loan-applications.create',
                 'financial.loan-applications.update',
+                'financial.loan-protection-products.view',
             ],
             'credit_loan_manager' => [
                 'customer.view',
@@ -189,6 +190,8 @@ class DefaultRolePermissionSeeder extends Seeder
                 'financial.loan-applications.view',
                 'financial.loan-applications.documents.view',
                 'financial.loan-applications.manage',
+                'financial.loan-protection-products.view',
+                'financial.loan-protection-products.manage',
                 'financial.transactions.view',
                 'financial.reports.view',
             ],

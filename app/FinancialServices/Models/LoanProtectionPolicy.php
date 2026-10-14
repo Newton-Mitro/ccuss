@@ -12,6 +12,8 @@ class LoanProtectionPolicy extends Model
 
     protected $fillable = [
         'loan_account_id',
+        'loan_protection_product_id',
+        'monthly_rate_percent',
         'required',
         'coverage_amount',
         'initial_fee',
@@ -26,11 +28,17 @@ class LoanProtectionPolicy extends Model
         'coverage_amount' => 'decimal:4',
         'initial_fee' => 'decimal:4',
         'renewal_fee' => 'decimal:4',
+        'monthly_rate_percent' => 'decimal:4',
         'next_renewal_at' => 'date',
     ];
 
     public function loanAccount(): BelongsTo
     {
         return $this->belongsTo(LoanAccount::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(LoanProtectionProduct::class, 'loan_protection_product_id');
     }
 }

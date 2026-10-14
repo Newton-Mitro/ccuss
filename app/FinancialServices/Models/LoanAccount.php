@@ -8,6 +8,7 @@ use App\FinancialServices\Models\LoanGuarantor;
 use App\FinancialServices\Models\LoanArrear;
 use App\FinancialServices\Models\LoanSchedule;
 use App\FinancialServices\Models\LoanRepayment;
+use App\FinancialServices\Models\LoanProtectionClaim;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -67,6 +68,11 @@ class LoanAccount extends Model
     public function protectionPolicy(): HasOne
     {
         return $this->hasOne(LoanProtectionPolicy::class);
+    }
+
+    public function protectionClaims(): HasMany
+    {
+        return $this->hasMany(LoanProtectionClaim::class);
     }
 
     public function collaterals(): HasMany
