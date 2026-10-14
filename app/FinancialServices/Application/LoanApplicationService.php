@@ -12,8 +12,11 @@ use App\FinancialServices\Models\LoanProtectionPolicy;
 use App\CustomerModule\Models\Customer;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
+use Throwable;
 
 class LoanApplicationService
 {
@@ -23,6 +26,8 @@ class LoanApplicationService
 
     public function create(array $data, int $organizationId): LoanApplication
     {
+        $details = $this->extractDraftDetails($data);
+        $this->removeDraftDetails($data);
         $product = LoanProduct::query()
             ->where('organization_id', $organizationId)
             ->where('status', true)
@@ -35,7 +40,19 @@ class LoanApplicationService
         $data['application_no'] = $this->nextNumber($organizationId);
         $data['status'] = 'DRAFT';
 
-        return LoanApplication::create($data);
+        $uploadedPaths = [];
+
+        try {
+            return DB::transaction(function () use ($data, $details, &$uploadedPaths): LoanApplication {
+                $application = LoanApplication::create($data);
+                $this->saveDraftDetails($application, $details, $uploadedPaths);
+
+                return $application;
+            });
+        } catch (Throwable $exception) {
+            Storage::disk('local')->delete($uploadedPaths);
+            throw $exception;
+        }
     }
 
     public function updateDraft(LoanApplication $application, array $data): LoanApplication
@@ -44,22 +61,33 @@ class LoanApplicationService
             throw new RuntimeException('Only draft loan applications can be updated.');
         }
 
+        $details = $this->extractDraftDetails($data);
         $product = LoanProduct::query()
             ->where('organization_id', $application->organization_id)
             ->where('status', true)
             ->findOrFail($data['financial_product_id']);
         $this->policyService->validateLoanAmount($product, (float) $data['requested_amount']);
 
-        $application->update([
-            'branch_id' => $data['branch_id'] ?? null,
-            'customer_id' => $data['customer_id'],
-            'loan_product_id' => $product->id,
-            'requested_amount' => $data['requested_amount'],
-            'requested_term_months' => $data['requested_term_months'],
-            'purpose' => $data['purpose'] ?? null,
-        ]);
+        $uploadedPaths = [];
 
-        return $application->refresh();
+        try {
+            return DB::transaction(function () use ($application, $data, $details, $product, &$uploadedPaths): LoanApplication {
+                $application->update([
+                    'branch_id' => $data['branch_id'] ?? null,
+                    'customer_id' => $data['customer_id'],
+                    'loan_product_id' => $product->id,
+                    'requested_amount' => $data['requested_amount'],
+                    'requested_term_months' => $data['requested_term_months'],
+                    'purpose' => $data['purpose'] ?? null,
+                ]);
+                $this->saveDraftDetails($application, $details, $uploadedPaths);
+
+                return $application->refresh();
+            });
+        } catch (Throwable $exception) {
+            Storage::disk('local')->delete($uploadedPaths);
+            throw $exception;
+        }
     }
 
     public function submit(LoanApplication $application): LoanApplication
@@ -279,6 +307,59 @@ class LoanApplicationService
     {
         if ($applicationId !== $application->id) {
             throw new RuntimeException("The {$child} does not belong to this application.");
+        }
+    }
+
+    private function extractDraftDetails(array $data): array
+    {
+        return [
+            'income_details' => $data['income_details'] ?? [],
+            'expense_details' => $data['expense_details'] ?? [],
+            'job_histories' => $data['job_histories'] ?? [],
+            'asset_details' => $data['asset_details'] ?? [],
+            'educations' => $data['educations'] ?? [],
+            'supporting_documents' => $data['supporting_documents'] ?? [],
+        ];
+    }
+
+    private function removeDraftDetails(array &$data): void
+    {
+        foreach (['income_details', 'expense_details', 'job_histories', 'asset_details', 'educations', 'supporting_documents'] as $key) {
+            unset($data[$key]);
+        }
+    }
+
+    private function saveDraftDetails(LoanApplication $application, array $details, array &$uploadedPaths): void
+    {
+        foreach ([
+            'income_details' => 'incomeDetails',
+            'expense_details' => 'expenseDetails',
+            'job_histories' => 'jobHistories',
+            'asset_details' => 'assetDetails',
+            'educations' => 'educations',
+        ] as $key => $relationship) {
+            $relation = $application->{$relationship}();
+            $relation->delete();
+            if ($details[$key]) {
+                $relation->createMany($details[$key]);
+            }
+        }
+
+        foreach ($details['supporting_documents'] as $documentData) {
+            $file = $documentData['file'] ?? null;
+            if (!$file instanceof UploadedFile) {
+                continue;
+            }
+
+            $path = $file->store("loan-applications/{$application->id}/supporting-documents", 'local');
+            $uploadedPaths[] = $path;
+            $application->supportingDocuments()->create([
+                'document_type' => $documentData['document_type'],
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'mime_type' => $file->getClientMimeType(),
+                'file_size' => $file->getSize(),
+            ]);
         }
     }
 

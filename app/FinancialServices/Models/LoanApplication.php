@@ -4,6 +4,12 @@ namespace App\FinancialServices\Models;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\LoanAccount;
+use App\FinancialServices\Models\LoanApplicationAssetDetail;
+use App\FinancialServices\Models\LoanApplicationEducation;
+use App\FinancialServices\Models\LoanApplicationExpenseDetail;
+use App\FinancialServices\Models\LoanApplicationIncomeDetail;
+use App\FinancialServices\Models\LoanApplicationJobHistory;
+use App\FinancialServices\Models\LoanApplicationSupportingDocument;
 use App\FinancialServices\Models\LoanGuarantor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -73,5 +79,35 @@ class LoanApplication extends Model
     public function guarantors(): HasMany
     {
         return $this->hasMany(LoanGuarantor::class);
+    }
+
+    public function incomeDetails(): HasMany
+    {
+        return $this->hasMany(LoanApplicationIncomeDetail::class);
+    }
+
+    public function expenseDetails(): HasMany
+    {
+        return $this->hasMany(LoanApplicationExpenseDetail::class);
+    }
+
+    public function jobHistories(): HasMany
+    {
+        return $this->hasMany(LoanApplicationJobHistory::class);
+    }
+
+    public function assetDetails(): HasMany
+    {
+        return $this->hasMany(LoanApplicationAssetDetail::class);
+    }
+
+    public function educations(): HasMany
+    {
+        return $this->hasMany(LoanApplicationEducation::class);
+    }
+
+    public function supportingDocuments(): HasMany
+    {
+        return $this->hasMany(LoanApplicationSupportingDocument::class);
     }
 }

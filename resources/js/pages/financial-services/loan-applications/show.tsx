@@ -45,7 +45,10 @@ import { route } from 'ziggy-js';
 import { CustomerSearchInput } from '../../customer-kyc/customers/components/customer-search-input';
 
 export default function LoanApplicationShow() {
-    const { application } = usePage<LoanApplicationShowPageProps>().props;
+    const {
+        application,
+        can_view_supporting_documents: canViewSupportingDocuments,
+    } = usePage<LoanApplicationShowPageProps>().props;
 
     const [arrearNote, setArrearNote] = useState('');
 
@@ -492,6 +495,137 @@ export default function LoanApplicationShow() {
                         />
                     </div>
                 </div>
+
+                <section className="space-y-5 rounded-lg border bg-background p-4">
+                    <h2 className="font-semibold">Applicant details</h2>
+                    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-medium">Income</h3>
+                            {(application.income_details ?? []).length ? (
+                                application.income_details?.map((income) => (
+                                    <p key={income.id} className="text-sm">
+                                        {income.source}: {income.monthly_amount}{' '}
+                                        / month
+                                        {income.notes
+                                            ? ` · ${income.notes}`
+                                            : ''}
+                                    </p>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    No income details provided.
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-medium">Expenses</h3>
+                            {(application.expense_details ?? []).length ? (
+                                application.expense_details?.map((expense) => (
+                                    <p key={expense.id} className="text-sm">
+                                        {expense.category}:{' '}
+                                        {expense.monthly_amount} / month
+                                        {expense.notes
+                                            ? ` · ${expense.notes}`
+                                            : ''}
+                                    </p>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    No expense details provided.
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-medium">
+                                Employment history
+                            </h3>
+                            {(application.job_histories ?? []).length ? (
+                                application.job_histories?.map((job) => (
+                                    <p key={job.id} className="text-sm">
+                                        {job.employer_name}
+                                        {job.job_title
+                                            ? ` · ${job.job_title}`
+                                            : ''}
+                                        {job.is_current ? ' · Current' : ''}
+                                    </p>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    No job history provided.
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-medium">Assets</h3>
+                            {(application.asset_details ?? []).length ? (
+                                application.asset_details?.map((asset) => (
+                                    <p key={asset.id} className="text-sm">
+                                        {asset.asset_type}: {asset.description}
+                                        {asset.estimated_value
+                                            ? ` · ${asset.estimated_value}`
+                                            : ''}
+                                    </p>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    No assets provided.
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-medium">Education</h3>
+                            {(application.educations ?? []).length ? (
+                                application.educations?.map((education) => (
+                                    <p key={education.id} className="text-sm">
+                                        {education.institution_name}
+                                        {education.qualification
+                                            ? ` · ${education.qualification}`
+                                            : ''}
+                                        {education.field_of_study
+                                            ? ` · ${education.field_of_study}`
+                                            : ''}
+                                    </p>
+                                ))
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    No education details provided.
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-medium">
+                                Supporting documents
+                            </h3>
+                            {!canViewSupportingDocuments ? (
+                                <p className="text-sm text-muted-foreground">
+                                    You do not have permission to view these
+                                    documents.
+                                </p>
+                            ) : (application.supporting_documents ?? [])
+                                  .length ? (
+                                application.supporting_documents?.map(
+                                    (document) => (
+                                        <a
+                                            key={document.id}
+                                            className="flex items-center gap-2 text-sm underline"
+                                            href={route(
+                                                'loan-applications.documents.download',
+                                                [application.id, document.id],
+                                            )}
+                                        >
+                                            <FileText className="size-4" />
+                                            {document.file_name}
+                                        </a>
+                                    ),
+                                )
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    No supporting documents uploaded.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </section>
 
                 {/* Workflow */}
                 <section className="rounded-xl border bg-background">

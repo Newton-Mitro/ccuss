@@ -28,6 +28,7 @@ final class FinancialServicesPermissions
             new PermissionDefinition('Financial Accounts', 'Manage Fixed Deposits', 'financial.accounts.fixed-deposits.manage', 'manage', 'Manage fixed-deposit contracts'),
             new PermissionDefinition('Financial Accounts', 'Manage Recurring Deposits', 'financial.accounts.recurring-deposits.manage', 'manage', 'Manage recurring-deposit contracts'),
             new PermissionDefinition('Loan Applications', 'View Loan Applications', 'financial.loan-applications.view', 'view', 'View loan applications'),
+            new PermissionDefinition('Loan Applications', 'View Loan Application Documents', 'financial.loan-applications.documents.view', 'view', 'Download supporting documents for loan applications', true),
             new PermissionDefinition('Loan Applications', 'Create Loan Applications', 'financial.loan-applications.create', 'create', 'Create loan applications'),
             new PermissionDefinition('Loan Applications', 'Update Draft Loan Applications', 'financial.loan-applications.update', 'update', 'Edit draft loan applications'),
             new PermissionDefinition('Loan Applications', 'Manage Loan Applications', 'financial.loan-applications.manage', 'manage', 'Review and decide loan applications'),

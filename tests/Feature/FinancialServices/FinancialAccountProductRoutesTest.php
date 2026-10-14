@@ -10,6 +10,8 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 function grantFinancialAccountProductPermissions(User $user, array $slugs): void
 {
@@ -351,6 +353,138 @@ it('returns a requested amount validation error above the loan product ceiling',
             'requested_term_months' => 12,
         ])
         ->assertSessionHasErrors('requested_amount');
+});
+
+it('searches loan applications and exposes draft edit access to permitted users', function () {
+    $fixture = createFinancialAccountProductFixture('LOAN');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.loan-applications.view',
+        'financial.loan-applications.create',
+        'financial.loan-applications.update',
+    ]);
+    $payload = [
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 500,
+        'requested_term_months' => 12,
+    ];
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('loan-applications.store'), $payload)
+        ->assertRedirect();
+    $this->post(route('loan-applications.store'), $payload)->assertRedirect();
+
+    $this->get(route('loan-applications.index', [
+        'search' => 'LA-000001',
+        'status' => 'DRAFT',
+        'per_page' => 1,
+    ]))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/loan-applications/index')
+            ->where('can_update', true)
+            ->where('filters.search', 'LA-000001')
+            ->has('applications.data', 1)
+            ->where('applications.data.0.application_no', 'LA-000001'));
+});
+
+it('saves loan application details and private supporting documents with the draft', function () {
+    $fixture = createFinancialAccountProductFixture('LOAN');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.loan-applications.create',
+        'financial.loan-applications.update',
+        'financial.loan-applications.view',
+        'financial.loan-applications.documents.view',
+    ]);
+    Storage::fake('local');
+
+    $payload = [
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 500,
+        'requested_term_months' => 12,
+        'income_details' => [['source' => 'Salary', 'monthly_amount' => 3200]],
+        'expense_details' => [['category' => 'Housing', 'monthly_amount' => 900]],
+        'job_histories' => [['employer_name' => 'Northwind', 'job_title' => 'Clerk', 'is_current' => true]],
+        'asset_details' => [['asset_type' => 'Vehicle', 'description' => '2019 sedan', 'estimated_value' => 8000]],
+        'educations' => [['institution_name' => 'Central College', 'qualification' => 'Diploma']],
+        'supporting_documents' => [
+            [
+                'document_type' => 'INCOME',
+                'file' => UploadedFile::fake()->create('income.pdf', 30, 'application/pdf'),
+            ]
+        ],
+    ];
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('loan-applications.store'), $payload)
+        ->assertRedirect();
+
+    $application = \App\FinancialServices\Models\LoanApplication::query()->latest('id')->firstOrFail();
+    $document = \App\FinancialServices\Models\LoanApplicationSupportingDocument::query()->firstOrFail();
+
+    expect($application->incomeDetails()->count())->toBe(1)
+        ->and($application->expenseDetails()->count())->toBe(1)
+        ->and($application->jobHistories()->count())->toBe(1)
+        ->and($application->assetDetails()->count())->toBe(1)
+        ->and($application->educations()->count())->toBe(1)
+        ->and($document->loan_application_id)->toBe($application->id);
+    Storage::disk('local')->assertExists($document->file_path);
+
+    $this->get(route('loan-applications.show', $application))
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/loan-applications/show')
+            ->where('application.income_details.0.source', 'Salary')
+            ->where('application.supporting_documents.0.file_name', 'income.pdf'));
+
+    $this->get(route('loan-applications.documents.download', [$application, $document]))
+        ->assertSuccessful()
+        ->assertDownload('income.pdf');
+
+    $documentPermission = Permission::query()
+        ->where('slug', 'financial.loan-applications.documents.view')
+        ->firstOrFail();
+    $viewPermission = Permission::query()
+        ->where('slug', 'financial.loan-applications.view')
+        ->firstOrFail();
+    $viewerRole = Role::firstOrCreate(
+        ['slug' => 'loan_application_view_only_test'],
+        ['name' => 'Loan Application View Only Test'],
+    );
+    $viewerRole->permissions()->sync([$viewPermission->id]);
+    $viewer = User::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $viewer->roles()->attach($viewerRole->id);
+
+    $this->actingAs($viewer)
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('loan-applications.documents.download', [$application, $document]))
+        ->assertForbidden();
+    $this->get(route('loan-applications.show', $application))
+        ->assertInertia(fn($page) => $page
+            ->where('can_view_supporting_documents', false)
+            ->missing('application.supporting_documents'));
+
+    $this->actingAs($fixture['user']);
+    unset($payload['supporting_documents']);
+    $payload['income_details'] = [['source' => 'Consulting', 'monthly_amount' => 700]];
+    $payload['supporting_documents'] = [
+        [
+            'document_type' => 'BANK_STATEMENT',
+            'file' => UploadedFile::fake()->create('bank.pdf', 20, 'application/pdf'),
+        ]
+    ];
+    $payload['_method'] = 'put';
+    $this->post(route('loan-applications.update', $application), $payload)->assertRedirect();
+
+    expect($application->refresh()->incomeDetails()->count())->toBe(1)
+        ->and($application->incomeDetails()->first()->source)->toBe('Consulting')
+        ->and($application->supportingDocuments()->count())->toBe(2);
 });
 
 it('requires an adult guardian when opening an account for a minor', function () {

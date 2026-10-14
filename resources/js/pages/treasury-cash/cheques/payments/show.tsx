@@ -588,7 +588,7 @@ export default function ChequePaymentReview() {
                         </div>
 
                         <div className="p-4">
-                            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+                            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_460px]">
                                 {/* Left */}
 
                                 <div className="space-y-4">
@@ -785,10 +785,6 @@ export default function ChequePaymentReview() {
                                             <p className="text-sm font-medium">
                                                 Signature specimen
                                             </p>
-
-                                            <p className="text-xs text-muted-foreground">
-                                                Verified specimen for comparison
-                                            </p>
                                         </div>
 
                                         {selectedSignatory?.signature
@@ -800,7 +796,7 @@ export default function ChequePaymentReview() {
                                         )}
                                     </div>
 
-                                    <div className="relative h-64 overflow-hidden rounded-lg border bg-background shadow-inner sm:h-72">
+                                    <div className="relative h-80 overflow-hidden rounded-lg border bg-background shadow-inner">
                                         {selectedSignatory?.signature?.url ? (
                                             <ReactPanZoom
                                                 image={

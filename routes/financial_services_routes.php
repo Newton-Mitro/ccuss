@@ -158,6 +158,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/loan-applications/{loan_application}/edit', [LoanApplicationController::class, 'edit'])->name('loan-applications.edit');
     Route::put('/loan-applications/{loan_application}', [LoanApplicationController::class, 'update'])->name('loan-applications.update');
     Route::get('/loan-applications/{loan_application}', [LoanApplicationController::class, 'show'])->name('loan-applications.show');
+    Route::get('/loan-applications/{loan_application}/documents/{document}', [LoanApplicationController::class, 'downloadSupportingDocument'])->name('loan-applications.documents.download');
     Route::post('/loan-applications/{loan_application}/submit', [LoanApplicationController::class, 'submit'])->name('loan-applications.submit');
     Route::post('/loan-applications/{loan_application}/review', [LoanApplicationController::class, 'review'])->name('loan-applications.review');
     Route::post('/loan-applications/{loan_application}/approve', [LoanApplicationController::class, 'approve'])->name('loan-applications.approve');

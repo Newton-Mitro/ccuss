@@ -3,9 +3,7 @@
 namespace Database\Seeders;
 
 use App\FinancialServices\Models\DepositProduct;
-use App\FinancialServices\Models\DepositPolicy;
 use App\FinancialServices\Models\LoanProduct;
-use App\FinancialServices\Models\LoanPolicy;
 use App\SystemAdministration\Models\Organization;
 use Illuminate\Database\Seeder;
 
@@ -18,7 +16,7 @@ class FinancialProductPolicySeeder extends Seeder
             ->firstOrFail();
 
         foreach (DepositProduct::query()->where('organization_id', $organization->id)->where('is_system', true)->get() as $product) {
-            $minimumOpeningAmount = (float) ($product->settings['minimum_opening_amount'] ?? 0);
+            $minimumOpeningAmount = (float) ($product->settings['minimum_opening_amount'] ?? 50000);
             $product->policy()->updateOrCreate([], [
                 'minimum_opening_amount' => $minimumOpeningAmount,
                 'minimum_deposit_amount' => $minimumOpeningAmount,
@@ -31,7 +29,7 @@ class FinancialProductPolicySeeder extends Seeder
 
         foreach (LoanProduct::query()->where('organization_id', $organization->id)->where('is_system', true)->get() as $product) {
             $product->policy()->updateOrCreate([], [
-                'maximum_loan_amount' => 0,
+                'maximum_loan_amount' => 100000000,
                 'loan_to_value_percent' => 0,
                 'eligibility_rules' => ['kyc_level' => 'FULL', 'organization_customers_allowed' => true],
                 'repayment_rules' => ['frequency' => 'MONTHLY', 'allocation' => ['FEE', 'INTEREST', 'PRINCIPAL']],

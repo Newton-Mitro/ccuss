@@ -128,6 +128,12 @@ export interface LoanApplication {
     applied_at?: string | null;
     approved_at?: string | null;
     decision_note?: string | null;
+    income_details?: LoanApplicationIncomeDetail[];
+    expense_details?: LoanApplicationExpenseDetail[];
+    job_histories?: LoanApplicationJobHistory[];
+    asset_details?: LoanApplicationAssetDetail[];
+    educations?: LoanApplicationEducation[];
+    supporting_documents?: LoanApplicationSupportingDocument[];
     customer?: { name?: string; customer_no?: string };
     product?: { code?: string; name?: string };
     loan_account?: {
@@ -142,6 +148,59 @@ export interface LoanApplication {
     } | null;
     collaterals?: LoanCollateral[];
     guarantors?: LoanGuarantor[];
+}
+
+export interface LoanApplicationIncomeDetail {
+    id?: number;
+    source: string;
+    monthly_amount: string | number;
+    notes?: string | null;
+}
+
+export interface LoanApplicationExpenseDetail {
+    id?: number;
+    category: string;
+    monthly_amount: string | number;
+    notes?: string | null;
+}
+
+export interface LoanApplicationJobHistory {
+    id?: number;
+    employer_name: string;
+    job_title?: string | null;
+    employment_type?: string | null;
+    start_date?: string | null;
+    end_date?: string | null;
+    monthly_income?: string | number | null;
+    is_current: boolean;
+    notes?: string | null;
+}
+
+export interface LoanApplicationAssetDetail {
+    id?: number;
+    asset_type: string;
+    description: string;
+    estimated_value?: string | number | null;
+    ownership_status?: string | null;
+    notes?: string | null;
+}
+
+export interface LoanApplicationEducation {
+    id?: number;
+    institution_name: string;
+    qualification?: string | null;
+    field_of_study?: string | null;
+    start_year?: number | null;
+    end_year?: number | null;
+    notes?: string | null;
+}
+
+export interface LoanApplicationSupportingDocument {
+    id: number;
+    document_type: string;
+    file_name: string;
+    file_size: number;
+    mime_type?: string | null;
 }
 
 export interface LoanCollateral {
@@ -247,19 +306,28 @@ export interface LoanApplicationIndexPageProps extends SharedData {
     applications: {
         data: LoanApplication[];
         links: { url: string | null; label: string; active: boolean }[];
+        per_page: number;
     };
-    filters: { status?: string; page?: number; per_page?: number };
+    filters: {
+        search?: string;
+        status?: string;
+        page?: number;
+        per_page?: number;
+    };
+    can_update: boolean;
 }
 
 export interface LoanApplicationFormPageProps extends SharedData {
     customers: { id: number; customer_no: string; name: string }[];
     products: { id: number; code: string; name: string }[];
     application?: LoanApplication | null;
+    can_view_supporting_documents: boolean;
 }
 
 export interface LoanApplicationShowPageProps extends SharedData {
     application: LoanApplication;
     guarantorCustomers: { id: number; customer_no: string; name: string }[];
+    can_view_supporting_documents: boolean;
 }
 
 export interface FinancialProductFormPageProps extends SharedData {

@@ -191,33 +191,6 @@ export const financialServices: SidebarItem[] = [
             },
 
             // ─────────────────────────────────────────────
-            // Transaction Desk
-            // ─────────────────────────────────────────────
-            {
-                name: 'Transaction Desk',
-                icon: <i className="fa-solid fa-money-bill-transfer" />,
-                permission: ['financial.transactions.view'],
-                children_expanded: false,
-
-                children: [
-                    {
-                        name: 'Posting Queue',
-                        icon: <i className="fa-solid fa-list" />,
-                        path: '/financial-transactions',
-                        match_path: 'financial-transactions',
-                        permission: ['financial.transactions.view'],
-                    },
-                    {
-                        name: 'Transfers',
-                        icon: <i className="fa-solid fa-right-left" />,
-                        path: '/financial-transactions/transfer/create',
-                        match_path: 'financial-transactions/transfer',
-                        permission: ['financial.transactions.create'],
-                    },
-                ],
-            },
-
-            // ─────────────────────────────────────────────
             // Controls & Returns
             // ─────────────────────────────────────────────
             {
