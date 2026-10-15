@@ -2,7 +2,6 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Activity,
     ArrowDownRight,
-    ArrowRight,
     Banknote,
     Building2,
     CalendarDays,
@@ -15,6 +14,10 @@ import {
     WalletCards,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import {
+    DashboardMetricGrid,
+    DashboardQuickLinks,
+} from '../components/dashboard-summary';
 import {
     ResourcePageHeader,
     StatusBadge,
@@ -46,6 +49,7 @@ interface DashboardProps extends SharedData {
         amount: number;
         status: string;
         branch: string | null;
+        accounts: string[];
     }[];
     pendingApplicationsList: {
         id: number;
@@ -102,42 +106,37 @@ export default function DashboardPage() {
             value: numberFormat.format(stats.branches),
             detail: 'Organization locations',
             icon: Building2,
-            tone: 'text-sky-700 bg-sky-100 dark:text-sky-300 dark:bg-sky-950/50',
         },
         {
             label: 'Active members',
             value: numberFormat.format(stats.members),
             detail: 'Individual customers',
             icon: Users,
-            tone: 'text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-950/50',
         },
         {
             label: 'Active accounts',
             value: numberFormat.format(stats.activeAccounts),
             detail: 'Across all product types',
             icon: WalletCards,
-            tone: 'text-indigo-700 bg-indigo-100 dark:text-indigo-300 dark:bg-indigo-950/50',
         },
         {
             label: 'Loan portfolio',
             value: formatMoney(stats.loanPortfolio),
             detail: 'Active loan account balances',
             icon: HandCoins,
-            tone: 'text-amber-800 bg-amber-100 dark:text-amber-300 dark:bg-amber-950/50',
         },
         {
             label: 'Needs attention',
             value: numberFormat.format(pendingWork),
             detail: `${stats.pendingApplications} applications · ${stats.pendingTransactions} transactions`,
             icon: FileClock,
-            tone: 'text-rose-700 bg-rose-100 dark:text-rose-300 dark:bg-rose-950/50',
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Organization Overview" />
-            <div className="space-y-6 text-foreground">
+            <div className="space-y-5 text-foreground">
                 <ResourcePageHeader
                     title="Organization overview"
                     description="A live operating snapshot across branches, accounts, lending, and treasury."
@@ -161,57 +160,12 @@ export default function DashboardPage() {
                     }
                 />
 
-                <section
-                    aria-label="Organization metrics"
-                    className="grid grid-cols-2 divide-x divide-y overflow-hidden border-y sm:grid-cols-3 sm:divide-y-0 xl:grid-cols-5"
-                >
-                    {metrics.map(
-                        ({ label, value, detail, icon: Icon, tone }) => (
-                            <div
-                                key={label}
-                                className="min-w-0 px-3 py-3 sm:px-4"
-                            >
-                                <div className="flex items-center gap-2 text-muted-foreground">
-                                    <span
-                                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${tone}`}
-                                    >
-                                        <Icon className="h-4 w-4" />
-                                    </span>
-                                    <span className="truncate text-xs">
-                                        {label}
-                                    </span>
-                                </div>
-                                <div className="mt-2 truncate text-xl font-semibold tabular-nums">
-                                    {value}
-                                </div>
-                                <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
-                                    {detail}
-                                </div>
-                            </div>
-                        ),
-                    )}
-                </section>
+                <DashboardMetricGrid
+                    className="xl:grid-cols-5"
+                    metrics={metrics}
+                />
 
-                {quickLinks.length > 0 && (
-                    <nav
-                        className="flex flex-wrap items-center gap-2"
-                        aria-label="Dashboard shortcuts"
-                    >
-                        <span className="mr-1 text-xs font-medium text-muted-foreground">
-                            Go to
-                        </span>
-                        {quickLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs font-medium transition-colors hover:bg-muted"
-                            >
-                                {link.label}
-                                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
-                            </Link>
-                        ))}
-                    </nav>
-                )}
+                <DashboardQuickLinks links={quickLinks} />
 
                 <div className="grid items-start gap-6 xl:grid-cols-[1.4fr_0.6fr]">
                     <section className="min-w-0 border-y py-4">
@@ -335,7 +289,7 @@ export default function DashboardPage() {
                             </div>
                             <ReceiptText className="h-4 w-4 text-muted-foreground" />
                         </div>
-                        <div className="overflow-x-auto border-y">
+                        <div className="overflow-x-auto rounded-md border bg-card p-3">
                             {recentTransactions.length > 0 ? (
                                 <table className="w-full min-w-140 text-sm">
                                     <thead className="text-left text-[10px] text-muted-foreground uppercase">
@@ -373,6 +327,14 @@ export default function DashboardPage() {
                                                                   )
                                                                 : '—'}
                                                         </div>
+                                                        {transaction.accounts
+                                                            .length > 0 && (
+                                                            <div className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground">
+                                                                {transaction.accounts.join(
+                                                                    ', ',
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </td>
                                                     <td className="py-2 pr-3 text-xs text-muted-foreground">
                                                         {transaction.branch ??

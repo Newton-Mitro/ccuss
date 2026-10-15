@@ -10,6 +10,10 @@ use RuntimeException;
 
 class CashLocationFinancialAccountService
 {
+    public function __construct(
+        private readonly FinancialAccountNumberService $financialAccountNumberService,
+    ) {}
+
     public function ensureLinked(CashLocation $cashLocation, float|int|string|null $openingBalance = null): FinancialAccount
     {
         return DB::transaction(function () use ($cashLocation, $openingBalance): FinancialAccount {
@@ -32,7 +36,7 @@ class CashLocationFinancialAccountService
 
                 $financialAccount = $this->initializeManagedBalance($financialAccount, $openingBalance);
 
-                return $this->ensureNumericAccountNumber($financialAccount);
+                return $this->financialAccountNumberService->ensurePrefixedNumber($financialAccount);
             }
 
             $balance = (float) ($openingBalance ?? 0);
@@ -60,37 +64,8 @@ class CashLocationFinancialAccountService
 
             $cashLocation->update(['financial_account_id' => $financialAccount->id]);
 
-            return $this->ensureNumericAccountNumber($financialAccount);
+            return $this->financialAccountNumberService->ensurePrefixedNumber($financialAccount);
         });
-    }
-
-    private function ensureNumericAccountNumber(FinancialAccount $financialAccount): FinancialAccount
-    {
-        if (
-            data_get($financialAccount->metadata, 'managed_by') !== 'cash_location'
-            && ! str_starts_with((string) $financialAccount->account_no, 'CASH-LOCATION-')
-        ) {
-            return $financialAccount;
-        }
-
-        if (ctype_digit((string) $financialAccount->account_no)) {
-            return $financialAccount;
-        }
-
-        $accountNumber = (string) $financialAccount->id;
-        while (
-            FinancialAccount::query()
-                ->where('organization_id', $financialAccount->organization_id)
-                ->where('account_no', $accountNumber)
-                ->where('id', '!=', $financialAccount->id)
-                ->exists()
-        ) {
-            $accountNumber = (string) ((int) $accountNumber + 1);
-        }
-
-        $financialAccount->update(['account_no' => $accountNumber]);
-
-        return $financialAccount->fresh();
     }
 
     private function initializeManagedBalance(FinancialAccount $financialAccount, float|int|string|null $openingBalance): FinancialAccount

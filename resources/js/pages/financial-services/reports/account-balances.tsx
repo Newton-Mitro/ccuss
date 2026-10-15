@@ -1,6 +1,6 @@
 import {
+    ResourceEmptyState,
     ResourcePageHeader,
-    ResourceTableCard,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
@@ -17,21 +17,17 @@ export default function AccountBalancesReport() {
         { title: 'Financial Services', href: '' },
         { title: 'Account Balances', href: '' },
     ];
+    const isEmpty = accounts.data.length === 0;
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Balances" />
             <div className="space-y-4">
-                <ReportExportActions
-                    report="account-balances"
-                    query={{
-                        product_id: filters.product_id || undefined,
-                    }}
-                />
                 <ResourcePageHeader
                     title="Account balances"
                     description="Current and available balances across financial accounts."
                 />
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Select
                         className="w-full bg-card sm:w-72"
                         value={String(filters.product_id ?? '')}
@@ -54,66 +50,100 @@ export default function AccountBalancesReport() {
                             })),
                         ]}
                     />
+                    <ReportExportActions
+                        report="account-balances"
+                        query={{
+                            product_id: filters.product_id || undefined,
+                        }}
+                    />
                 </div>
-                <ResourceTableCard>
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/70 text-left text-xs text-muted-foreground">
-                            <tr>
-                                <th className="px-3 py-2">Account</th>
-                                <th className="px-3 py-2">Product</th>
-                                <th className="px-3 py-2">Status</th>
-                                <th className="px-3 py-2 text-right">
-                                    Balance
-                                </th>
-                                <th className="px-3 py-2 text-right">
-                                    Available
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {accounts.data.map((account) => (
-                                <tr
-                                    key={account.id}
-                                    className="border-b last:border-0"
-                                >
-                                    <td className="px-3 py-2 font-mono text-xs">
-                                        {account.account_no}
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        {account.product?.name ??
-                                            account.account_type}
-                                    </td>
-                                    <td className="px-3 py-2">
-                                        {account.status}
-                                    </td>
-                                    <td className="px-3 py-2 text-right tabular-nums">
-                                        {Number(account.balance).toFixed(4)}
-                                    </td>
-                                    <td className="px-3 py-2 text-right tabular-nums">
-                                        {Number(
-                                            account.available_balance,
-                                        ).toFixed(4)}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </ResourceTableCard>
-                <DataTablePagination
-                    perPage={accounts.per_page}
-                    links={accounts.links}
-                    onPerPageChange={(perPage) =>
-                        router.get(
-                            route('financial-reports.account-balances'),
-                            {
-                                product_id: filters.product_id || undefined,
-                                per_page: perPage,
-                                page: 1,
-                            },
-                            { preserveState: true, preserveScroll: true },
-                        )
-                    }
-                />
+                {isEmpty ? (
+                    <ResourceEmptyState
+                        title="No account balances found"
+                        description="No financial accounts match the selected product."
+                    />
+                ) : (
+                    <>
+                        <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                            <table className="w-full min-w-[720px] border-collapse">
+                                <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                                    <tr>
+                                        {[
+                                            'Account',
+                                            'Product',
+                                            'Status',
+                                            'Balance',
+                                            'Available',
+                                        ].map((header) => (
+                                            <th
+                                                key={header}
+                                                className={`border-b p-2 text-left text-sm font-medium ${header === 'Balance' || header === 'Available' ? 'text-right' : ''}`}
+                                            >
+                                                {header}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {accounts.data.map((account) => (
+                                        <tr
+                                            key={account.id}
+                                            className="border-b even:bg-muted hover:bg-accent/20"
+                                        >
+                                            <td className="px-2 py-1">
+                                                <div className="font-medium">
+                                                    {account.name ||
+                                                        account.account_no}
+                                                </div>
+                                                {account.name && (
+                                                    <div className="font-mono text-xs text-muted-foreground">
+                                                        {account.account_no}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {account.product?.name ??
+                                                    account.account_type}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {account.status}
+                                            </td>
+                                            <td className="px-2 py-1 text-right tabular-nums">
+                                                {Number(
+                                                    account.balance,
+                                                ).toFixed(4)}
+                                            </td>
+                                            <td className="px-2 py-1 text-right tabular-nums">
+                                                {Number(
+                                                    account.available_balance,
+                                                ).toFixed(4)}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <DataTablePagination
+                            perPage={accounts.per_page}
+                            links={accounts.links}
+                            onPerPageChange={(perPage) =>
+                                router.get(
+                                    route('financial-reports.account-balances'),
+                                    {
+                                        product_id:
+                                            filters.product_id || undefined,
+                                        per_page: perPage,
+                                        page: 1,
+                                    },
+                                    {
+                                        preserveState: true,
+                                        preserveScroll: true,
+                                    },
+                                )
+                            }
+                        />
+                    </>
+                )}
             </div>
         </CustomAuthLayout>
     );

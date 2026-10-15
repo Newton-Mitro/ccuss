@@ -120,7 +120,7 @@ class ReportExportController extends Controller
             ],
             'account-balances' => [
                 'Account Balances',
-                ['Account', 'Product', 'Type', 'Status', 'Balance', 'Available Balance'],
+                ['Account Name', 'Account Number', 'Product', 'Type', 'Status', 'Balance', 'Available Balance'],
                 FinancialAccount::where('organization_id', $organizationId)
                     ->when($request->filled('product_id'), function ($query) use ($request): void {
                             [$family, $id] = array_pad(explode(':', $request->string('product_id')->toString(), 2), 2, null);
@@ -130,7 +130,7 @@ class ReportExportController extends Controller
                             }
                         })
                     ->with('product')->orderByDesc('balance')->get()
-                    ->map(fn($row) => [$row->account_no, $row->product?->name ?? $row->account_type, $row->account_type, $row->status, $row->balance, $row->available_balance])->all(),
+                        ->map(fn($row) => [$row->name ?? '-', $row->account_no, $row->product?->name ?? $row->account_type, $row->account_type, $row->status, $row->balance, $row->available_balance])->all(),
             ],
             'transactions' => [
                 'Financial Transactions',
@@ -194,7 +194,7 @@ class ReportExportController extends Controller
                 ['label' => 'Ending Equity', 'value' => number_format($sum(5), 2)],
             ],
             'product-summary' => [['label' => 'Products', 'value' => count($rows)], ['label' => 'Accounts', 'value' => number_format($sum(3), 0)], ['label' => 'Balance', 'value' => number_format($sum(4), 2)]],
-            'account-balances' => [['label' => 'Accounts', 'value' => count($rows)], ['label' => 'Balance', 'value' => number_format($sum(4), 2)], ['label' => 'Available', 'value' => number_format($sum(5), 2)]],
+            'account-balances' => [['label' => 'Accounts', 'value' => count($rows)], ['label' => 'Balance', 'value' => number_format($sum(5), 2)], ['label' => 'Available', 'value' => number_format($sum(6), 2)]],
             'transactions' => [['label' => 'Transactions', 'value' => count($rows)], ['label' => 'Total Amount', 'value' => number_format($sum(4), 2)]],
             'account-statement' => [['label' => 'Transactions', 'value' => count($rows)], ['label' => 'Debit', 'value' => number_format($sum(3), 2)], ['label' => 'Credit', 'value' => number_format($sum(4), 2)]],
             default => [],

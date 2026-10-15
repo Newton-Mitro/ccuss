@@ -1,3 +1,7 @@
+import {
+    DashboardMetricGrid,
+    DashboardQuickLinks,
+} from '@/components/dashboard-summary';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
@@ -95,8 +99,8 @@ export default function Dashboard() {
                 />
 
                 {/* Summary metrics */}
-                <section className="grid grid-cols-2 divide-x divide-y overflow-hidden border-y sm:grid-cols-4 sm:divide-y-0">
-                    {[
+                <DashboardMetricGrid
+                    metrics={[
                         {
                             label: 'Total customers',
                             value: stats.customers,
@@ -121,43 +125,20 @@ export default function Dashboard() {
                             detail: 'Documents awaiting review',
                             icon: FileCheck2,
                         },
-                    ].map(({ label, value, detail, icon: Icon }) => (
-                        <div key={label} className="min-w-0 px-3 py-3 sm:px-4">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <Icon className="h-4 w-4 shrink-0" />
-
-                                <span className="truncate text-xs">
-                                    {label}
-                                </span>
-                            </div>
-
-                            <div className="mt-2 truncate text-xl font-semibold tabular-nums">
-                                {value.toLocaleString()}
-                            </div>
-
-                            <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
-                                {detail}
-                            </div>
-                        </div>
-                    ))}
-                </section>
+                    ].map((metric) => ({
+                        ...metric,
+                        value: metric.value.toLocaleString(),
+                    }))}
+                />
 
                 {/* Quick navigation */}
-                <nav
-                    className="flex flex-wrap gap-2"
-                    aria-label="Customer and KYC"
-                >
-                    {links.map(({ label, href, icon: Icon }) => (
-                        <Link
-                            key={href}
-                            href={route(href)}
-                            className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs font-medium transition hover:bg-muted"
-                        >
-                            <Icon className="h-4 w-4 text-primary" />
-                            {label}
-                        </Link>
-                    ))}
-                </nav>
+                <DashboardQuickLinks
+                    label="Customer and KYC"
+                    links={links.map((link) => ({
+                        ...link,
+                        href: route(link.href),
+                    }))}
+                />
 
                 {/* Metrics chart */}
                 <DashboardMetricCharts

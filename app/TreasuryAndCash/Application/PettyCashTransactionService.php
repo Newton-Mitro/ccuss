@@ -12,8 +12,8 @@ class PettyCashTransactionService
 {
     public function __construct(
         private readonly TreasurySummaryPostingService $summaryPostingService,
-    ) {
-    }
+        private readonly CashLocationFinancialAccountService $cashLocationFinancialAccountService,
+    ) {}
 
     public function create(int $organizationId, int $branchId, int $userId, string $type, array $data): PettyCashTransaction
     {
@@ -38,7 +38,7 @@ class PettyCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$branchDay || !$fund) {
+            if (! $branchDay || ! $fund) {
                 throw new \RuntimeException('An open branch day and active petty cash fund in the active branch are required.');
             }
 
@@ -51,7 +51,7 @@ class PettyCashTransactionService
             return PettyCashTransaction::create([
                 'branch_day_id' => $branchDay->id,
                 'petty_cash_fund_id' => $fund->id,
-                'transaction_no' => 'PETTY-' . now()->format('Ymd') . '-' . str_pad((string) $nextNumber, 5, '0', STR_PAD_LEFT),
+                'transaction_no' => 'PETTY-'.now()->format('Ymd').'-'.str_pad((string) $nextNumber, 5, '0', STR_PAD_LEFT),
                 'type' => $type,
                 'amount' => $data['amount'],
                 'payee' => $data['payee'] ?? null,
@@ -78,7 +78,7 @@ class PettyCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$transaction) {
+            if (! $transaction) {
                 throw new \RuntimeException('A pending petty cash transaction for the active branch is required.');
             }
 
@@ -88,7 +88,7 @@ class PettyCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$fund) {
+            if (! $fund) {
                 throw new \RuntimeException('An active petty cash fund is required to post this transaction.');
             }
 
@@ -111,6 +111,12 @@ class PettyCashTransactionService
                     ? $balance + $amount
                     : $balance - $amount,
             ]);
+            $cashAccount = $this->cashLocationFinancialAccountService->ensureLinked($fund->cashLocation);
+            $cashBalance = (float) $fund->fresh()->current_balance;
+            $cashAccount->update([
+                'balance' => $cashBalance,
+                'available_balance' => $cashBalance,
+            ]);
 
             $branchDay = BranchDay::query()->findOrFail($transaction->branch_day_id);
             $this->summaryPostingService->post(
@@ -118,12 +124,12 @@ class PettyCashTransactionService
                 sourceType: 'PETTY_CASH_TRANSACTION',
                 sourceCode: 'DEFAULT',
                 transactionType: $transaction->type,
-                voucherNo: 'PETTY-GL-' . $transaction->id,
+                voucherNo: 'PETTY-GL-'.$transaction->id,
                 voucherDate: (string) $branchDay->business_date,
                 branchId: $branchId,
                 userId: $userId,
                 amount: $amount,
-                description: $transaction->description ?? 'Petty cash ' . strtolower($transaction->type),
+                description: $transaction->description ?? 'Petty cash '.strtolower($transaction->type),
                 reference: $transaction->transaction_no,
                 debitAccountOverride: $transaction->type === 'EXPENSE' && $transaction->expense_account_id
                 ? (int) $transaction->expense_account_id

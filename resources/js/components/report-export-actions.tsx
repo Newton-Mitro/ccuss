@@ -19,24 +19,24 @@ function exportUrl(report: string, format: string, query: Props['query']) {
 
 export default function ReportExportActions({ report, query }: Props) {
     return (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-nowrap items-center gap-2">
             <a
                 href={exportUrl(report, 'pdf', query)}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-8 items-center gap-1 rounded-md border bg-card px-3 text-xs font-medium hover:bg-muted"
+                className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border bg-card px-3 text-xs font-medium whitespace-nowrap hover:bg-muted"
             >
                 <Printer className="h-4 w-4" /> PDF
             </a>
             <a
                 href={exportUrl(report, 'xlsx', query)}
-                className="inline-flex h-8 items-center gap-1 rounded-md border bg-card px-3 text-xs font-medium hover:bg-muted"
+                className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border bg-card px-3 text-xs font-medium whitespace-nowrap hover:bg-muted"
             >
                 <FileSpreadsheet className="h-4 w-4" /> Excel
             </a>
             <a
                 href={exportUrl(report, 'csv', query)}
-                className="inline-flex h-8 items-center gap-1 rounded-md border bg-card px-3 text-xs font-medium hover:bg-muted"
+                className="inline-flex h-8 shrink-0 items-center gap-1 rounded-md border bg-card px-3 text-xs font-medium whitespace-nowrap hover:bg-muted"
             >
                 <FileDown className="h-4 w-4" /> CSV
             </a>

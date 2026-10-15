@@ -1,8 +1,14 @@
 import {
+    DashboardMetricGrid,
+    DashboardQuickLinks,
+} from '@/components/dashboard-summary';
+import {
     ResourceEmptyState,
     ResourcePageHeader,
+    ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import TreasuryDashboardCharts from '@/components/treasury-dashboard-charts';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -16,6 +22,24 @@ interface TreasuryCashDashboardProps extends SharedData {
         openBranchDays: number;
         openTellerSessions: number;
     };
+    cashAccounts: {
+        id: number;
+        type: string;
+        code: string;
+        name: string;
+        account_no: string | null;
+    }[];
+    dailyActivity: {
+        date: string;
+        label: string;
+        teller_cash: number;
+        bank: number;
+    }[];
+    cashLocationBalances: {
+        type: string;
+        locations: number;
+        balance: number;
+    }[];
 }
 
 const links = [
@@ -42,7 +66,8 @@ const links = [
 ] as const;
 
 export default function TreasuryCashDashboard() {
-    const { stats } = usePage<TreasuryCashDashboardProps>().props;
+    const { stats, cashAccounts, dailyActivity, cashLocationBalances } =
+        usePage<TreasuryCashDashboardProps>().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -104,43 +129,21 @@ export default function TreasuryCashDashboard() {
                 />
 
                 {/* Summary Metrics */}
-                <section className="grid grid-cols-2 divide-x divide-y overflow-hidden border-y sm:grid-cols-4 sm:divide-y-0">
-                    {metrics.map(({ label, value, detail, icon: Icon }) => (
-                        <div key={label} className="min-w-0 px-3 py-3 sm:px-4">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <Icon className="h-4 w-4 shrink-0" />
-                                <span className="truncate text-xs">
-                                    {label}
-                                </span>
-                            </div>
-
-                            <div className="mt-2 truncate text-xl font-semibold tabular-nums">
-                                {value}
-                            </div>
-
-                            <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
-                                {detail}
-                            </div>
-                        </div>
-                    ))}
-                </section>
+                <DashboardMetricGrid metrics={metrics} />
 
                 {/* Quick Navigation */}
-                <nav
-                    className="flex flex-wrap gap-2"
-                    aria-label="Treasury and cash"
-                >
-                    {links.map(({ label, href, icon: Icon }) => (
-                        <Link
-                            key={href}
-                            href={route(href)}
-                            className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs font-medium transition hover:bg-muted"
-                        >
-                            <Icon className="h-4 w-4 text-primary" />
-                            {label}
-                        </Link>
-                    ))}
-                </nav>
+                <DashboardQuickLinks
+                    label="Treasury and cash"
+                    links={links.map((link) => ({
+                        ...link,
+                        href: route(link.href),
+                    }))}
+                />
+
+                <TreasuryDashboardCharts
+                    dailyActivity={dailyActivity}
+                    cashLocationBalances={cashLocationBalances}
+                />
 
                 {/* Operational Overview */}
                 <div className="grid items-start gap-5 xl:grid-cols-2">
@@ -300,6 +303,74 @@ export default function TreasuryCashDashboard() {
                         </div>
                     </section>
                 </div>
+
+                <section className="space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                        <div>
+                            <h2 className="text-sm font-semibold">
+                                Internal cash account numbers
+                            </h2>
+                            <p className="text-xs text-muted-foreground">
+                                Linked financial accounts for treasury cash
+                                locations
+                            </p>
+                        </div>
+                        <StatusBadge tone="info">
+                            {cashAccounts.length} locations
+                        </StatusBadge>
+                    </div>
+
+                    <ResourceTableCard className="max-h-[360px]">
+                        {cashAccounts.length ? (
+                            <table className="w-full min-w-[560px] text-sm">
+                                <thead className="sticky top-0 z-10 bg-muted text-left text-xs text-muted-foreground">
+                                    <tr>
+                                        <th className="px-3 py-2 font-medium">
+                                            Cash location
+                                        </th>
+                                        <th className="px-3 py-2 font-medium">
+                                            Type
+                                        </th>
+                                        <th className="px-3 py-2 font-medium">
+                                            Financial account
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                    {cashAccounts.map((account) => (
+                                        <tr
+                                            key={account.id}
+                                            className="even:bg-muted/40 hover:bg-accent/20"
+                                        >
+                                            <td className="px-3 py-2.5">
+                                                <div className="font-medium">
+                                                    {account.name}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {account.code}
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-2.5 text-xs capitalize">
+                                                {account.type
+                                                    .replaceAll('_', ' ')
+                                                    .toLowerCase()}
+                                            </td>
+                                            <td className="px-3 py-2.5 font-mono text-xs">
+                                                {account.account_no ??
+                                                    'Not linked'}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                                No teller, vault, or petty-cash financial
+                                accounts are linked yet.
+                            </div>
+                        )}
+                    </ResourceTableCard>
+                </section>
 
                 {/* Empty / Informational State */}
                 {!stats.vaults &&

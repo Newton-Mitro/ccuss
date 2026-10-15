@@ -1,5 +1,7 @@
 <?php
 
+use App\GeneralAccounting\Models\AccountGroup;
+use App\GeneralAccounting\Models\LedgerAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
@@ -7,8 +9,8 @@ use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BankTransaction;
-use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\BranchDay;
+use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\PettyCashFund;
 use App\TreasuryAndCash\Models\PettyCashTransaction;
 
@@ -88,6 +90,11 @@ it('creates a bank account from the UI flow', function () {
         'opened_by' => $user->id,
     ]);
     grantBankAccountCreatePermission($user);
+    $group = AccountGroup::factory()->create(['organization_id' => $organization->id]);
+    $counterpartAccount = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+    ]);
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
@@ -95,6 +102,7 @@ it('creates a bank account from the UI flow', function () {
             'branch_id' => $branch->id,
             'account_name' => 'New Operating Account',
             'account_number' => 'BANK-ACCOUNT-5001',
+            'opening_counterpart_account_id' => $counterpartAccount->id,
             'account_type' => 'CURRENT',
             'opening_balance' => 5000,
             'is_reconcilable' => true,
@@ -108,7 +116,9 @@ it('creates a bank account from the UI flow', function () {
 
     expect($financialAccount)->not->toBeNull()
         ->and($financialAccount->account_type)->toBe('BANK')
+        ->and($financialAccount->account_no)->toMatch('/^BANK-\d{5}$/')
         ->and($financialAccount->name)->toBe('New Operating Account')
+        ->and($account->account_number)->toBe('BANK-ACCOUNT-5001')
         ->and($account->opening_balance)->toBe('0.0000')
         ->and($openingDeposit->type)->toBe('DEPOSIT')
         ->and($openingDeposit->amount)->toBe('5000.0000')
@@ -129,7 +139,7 @@ it('loads the bank account create page without institution or account selectors'
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('bank-accounts.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/banking/accounts/create')
             ->has('branches', 1)
             ->missing('banks')
@@ -156,11 +166,11 @@ it('loads the petty cash create form for authorized users', function () {
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('petty-cash-accounts.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/petty-cash/accounts/create')
             ->has('branches', 2)
             ->has('users', 2)
-            ->where('users', fn($users) => collect($users)->contains('id', $memberUser->id))
+            ->where('users', fn ($users) => collect($users)->contains('id', $memberUser->id))
             ->where('default_custodian_id', $user->id)
             ->where('default_branch_id', $branch->id));
 });
@@ -206,8 +216,13 @@ it('creates a petty cash fund from the UI flow', function () {
     $cashLocation = CashLocation::query()->where('code', 'PC-NEW-100')->firstOrFail();
     $fund = PettyCashFund::query()->where('code', 'PC-NEW-100')->firstOrFail();
     $openingFunding = PettyCashTransaction::query()->where('petty_cash_fund_id', $fund->id)->firstOrFail();
+    $cashAccount = $cashLocation->financialAccount;
 
     expect($fund->cash_location_id)->toBe($cashLocation->id)
+        ->and($cashAccount)->not->toBeNull()
+        ->and($cashAccount->account_type)->toBe('CASH')
+        ->and($cashAccount->account_no)->toMatch('/^PETTY-CASH-\d{5}$/')
+        ->and($cashAccount->balance)->toBe('0.0000')
         ->and($fund->custodian_id)->toBe($custodian->id)
         ->and($cashLocation->branch_id)->toBe($selectedBranch->id)
         ->and($cashLocation->type)->toBe('PETTY_CASH')
@@ -275,7 +290,7 @@ it('edits a petty cash fund and moves its location when it has no history', func
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('petty-cash-accounts.edit', $fund))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/petty-cash/accounts/create')
             ->has('branches', 2)
             ->where('branch_locked', false));
@@ -347,7 +362,7 @@ it('prevents moving a petty cash fund after it has transaction history', functio
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('petty-cash-accounts.edit', $fund))
-        ->assertInertia(fn($page) => $page->where('branch_locked', true));
+        ->assertInertia(fn ($page) => $page->where('branch_locked', true));
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])

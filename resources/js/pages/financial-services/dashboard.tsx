@@ -16,6 +16,10 @@ import {
 import { route } from 'ziggy-js';
 
 import DashboardMetricCharts from '../../components/dashboard-metric-charts';
+import {
+    DashboardMetricGrid,
+    DashboardQuickLinks,
+} from '../../components/dashboard-summary';
 
 interface FinancialServicesDashboardProps extends SharedData {
     metrics: {
@@ -109,8 +113,9 @@ export default function FinancialServicesDashboard() {
                 />
 
                 {/* Summary metrics */}
-                <section className="grid grid-cols-2 divide-x divide-y overflow-hidden border-y sm:grid-cols-3 sm:divide-y-0 xl:grid-cols-5">
-                    {[
+                <DashboardMetricGrid
+                    className="xl:grid-cols-5"
+                    metrics={[
                         {
                             label: 'Deposit products',
                             value: metrics.depositProducts,
@@ -141,43 +146,20 @@ export default function FinancialServicesDashboard() {
                             detail: 'Recorded transactions',
                             icon: ArrowDownToLine,
                         },
-                    ].map(({ label, value, detail, icon: Icon }) => (
-                        <div key={label} className="min-w-0 px-3 py-3 sm:px-4">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <Icon className="h-4 w-4 shrink-0" />
-
-                                <span className="truncate text-xs">
-                                    {label}
-                                </span>
-                            </div>
-
-                            <div className="mt-2 truncate text-xl font-semibold tabular-nums">
-                                {value.toLocaleString()}
-                            </div>
-
-                            <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
-                                {detail}
-                            </div>
-                        </div>
-                    ))}
-                </section>
+                    ].map((metric) => ({
+                        ...metric,
+                        value: metric.value.toLocaleString(),
+                    }))}
+                />
 
                 {/* Quick navigation */}
-                <nav
-                    className="flex flex-wrap gap-2"
-                    aria-label="Financial services"
-                >
-                    {links.map(({ label, href, icon: Icon }) => (
-                        <Link
-                            key={`${label}-${href}`}
-                            href={route(href)}
-                            className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs font-medium transition hover:bg-muted"
-                        >
-                            <Icon className="h-4 w-4 text-primary" />
-                            {label}
-                        </Link>
-                    ))}
-                </nav>
+                <DashboardQuickLinks
+                    label="Financial services"
+                    links={links.map((link) => ({
+                        ...link,
+                        href: route(link.href),
+                    }))}
+                />
 
                 {/* Metrics chart */}
                 <DashboardMetricCharts

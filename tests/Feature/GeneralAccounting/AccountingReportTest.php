@@ -1,7 +1,7 @@
 <?php
 
-use App\GeneralAccounting\Application\AccountingReportService;
 use App\GeneralAccounting\Application\AccountGroupService;
+use App\GeneralAccounting\Application\AccountingReportService;
 use App\GeneralAccounting\Application\FiscalPeriodService;
 use App\GeneralAccounting\Application\FiscalYearService;
 use App\GeneralAccounting\Application\LedgerAccountService;
@@ -83,7 +83,7 @@ it('loads the general ledger report through its HTTP route', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('financial-reports.general-ledger'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page->component('general-accounting/reports/general-ledger-page'));
+        ->assertInertia(fn ($page) => $page->component('general-accounting/reports/general-ledger-page'));
 });
 
 it('redirects unauthenticated users from the general ledger report to login', function () {
@@ -119,7 +119,7 @@ it('loads the general ledger report when the organization has no active accounts
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('financial-reports.general-ledger'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page->component('general-accounting/reports/general-ledger-page'));
+        ->assertInertia(fn ($page) => $page->component('general-accounting/reports/general-ledger-page'));
 });
 
 it('loads every financial report route for an authorized organization user', function () {
@@ -145,6 +145,23 @@ it('loads every financial report route for an authorized organization user', fun
             ->get(route($routeName, $query))
             ->assertSuccessful();
     }
+});
+
+it('uses one fiscal period selector for trial balance and defaults to an open period', function () {
+    $fixture = reportFixture();
+    grantReportPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-reports.trial-balance'))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('general-accounting/reports/trial-balance-page')
+            ->has('fiscalPeriods', 1)
+            ->where('fiscalPeriods.0.fiscal_year_name', $fixture['fiscalYear']->name)
+            ->where('selectedFiscalPeriod', $fixture['period']->id)
+            ->missing('fiscalYears')
+            ->missing('selectedFiscalYear'));
 });
 
 it('builds trial balance from posted vouchers and excludes drafts', function () {
@@ -213,7 +230,7 @@ it('builds profit and loss and balance sheet statements from posted entries', fu
         $group = app(AccountGroupService::class)->create([
             'organization_id' => $fixture['organization']->id,
             'code' => $code,
-            'name' => $name . ' Group',
+            'name' => $name.' Group',
             'type' => $type,
             'normal_balance' => $normalBalance,
         ]);
@@ -221,7 +238,7 @@ it('builds profit and loss and balance sheet statements from posted entries', fu
         return app(LedgerAccountService::class)->create([
             'organization_id' => $fixture['organization']->id,
             'account_group_id' => $group->id,
-            'code' => $code . '1',
+            'code' => $code.'1',
             'name' => $name,
             'type' => $type,
             'normal_balance' => $normalBalance,

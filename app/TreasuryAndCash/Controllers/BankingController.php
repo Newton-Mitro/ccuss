@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\SystemAdministration\Models\Branch;
 use App\TreasuryAndCash\Application\BankingDataService;
 use App\TreasuryAndCash\Application\BankTransactionService;
+use App\TreasuryAndCash\Application\FinancialAccountNumberService;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Requests\StoreBankAccountRequest;
 use App\TreasuryAndCash\Requests\StoreBankTransactionRequest;
@@ -24,6 +25,7 @@ class BankingController extends Controller
     public function __construct(
         private readonly BankingDataService $bankingDataService,
         private readonly BankTransactionService $bankTransactionService,
+        private readonly FinancialAccountNumberService $financialAccountNumberService,
     ) {
         $this->middleware('permission:bank_accounts.view')->only(['accounts']);
         $this->middleware('permission:bank_accounts.create')->only(['createAccount', 'storeAccount']);
@@ -95,6 +97,7 @@ class BankingController extends Controller
                     'opened_at' => now()->toDateString(),
                     'metadata' => ['managed_by' => 'bank_account'],
                 ]);
+                $this->financialAccountNumberService->ensurePrefixedNumber($financialAccount);
 
                 $bankAccountData = $data;
                 unset($bankAccountData['opening_counterpart_account_id']);

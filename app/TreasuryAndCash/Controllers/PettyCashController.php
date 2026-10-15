@@ -5,6 +5,7 @@ namespace App\TreasuryAndCash\Controllers;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Application\CashBranchAccessService;
+use App\TreasuryAndCash\Application\CashLocationFinancialAccountService;
 use App\TreasuryAndCash\Application\CashLocationHistoryService;
 use App\TreasuryAndCash\Application\PettyCashDataService;
 use App\TreasuryAndCash\Application\PettyCashTransactionService;
@@ -22,6 +23,7 @@ class PettyCashController extends Controller
 {
     public function __construct(
         private readonly CashBranchAccessService $cashBranchAccessService,
+        private readonly CashLocationFinancialAccountService $cashLocationFinancialAccountService,
         private readonly CashLocationHistoryService $cashLocationHistoryService,
         private readonly PettyCashDataService $pettyCashDataService,
         private readonly PettyCashTransactionService $pettyCashTransactionService,
@@ -107,13 +109,13 @@ class PettyCashController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        if (!$this->cashBranchAccessService->canManage($organization->id, (int) $data['branch_id'])) {
+        if (! $this->cashBranchAccessService->canManage($organization->id, (int) $data['branch_id'])) {
             throw ValidationException::withMessages([
                 'branch_id' => 'Select a branch in the active organization.',
             ]);
         }
 
-        if (!User::query()->forOrganization($organization->id)->whereKey($data['custodian_id'])->exists()) {
+        if (! User::query()->forOrganization($organization->id)->whereKey($data['custodian_id'])->exists()) {
             throw ValidationException::withMessages([
                 'custodian_id' => 'Select a custodian belonging to the active organization.',
             ]);
@@ -142,6 +144,7 @@ class PettyCashController extends Controller
                     'type' => 'PETTY_CASH',
                     'is_active' => ($data['status'] ?? 'ACTIVE') === 'ACTIVE',
                 ]);
+                $this->cashLocationFinancialAccountService->ensureLinked($location);
 
                 $fund = PettyCashFund::create([
                     'cash_location_id' => $location->id,
@@ -163,7 +166,7 @@ class PettyCashController extends Controller
                         [
                             'petty_cash_fund_id' => $fund->id,
                             'amount' => $openingAmount,
-                            'description' => 'Opening funding for petty cash fund ' . $fund->code,
+                            'description' => 'Opening funding for petty cash fund '.$fund->code,
                         ],
                     );
                 }
@@ -205,7 +208,7 @@ class PettyCashController extends Controller
         abort_unless($cashLocation?->organization_id === $organization->id, 404);
 
         $data = $request->validated();
-        if (!User::query()->forOrganization($organization->id)->whereKey($data['custodian_id'])->exists()) {
+        if (! User::query()->forOrganization($organization->id)->whereKey($data['custodian_id'])->exists()) {
             throw ValidationException::withMessages([
                 'custodian_id' => 'Select a custodian belonging to the active organization.',
             ]);
@@ -296,7 +299,7 @@ class PettyCashController extends Controller
         }
 
         return redirect()
-            ->route('petty-cash-transactions.' . $routeType)
+            ->route('petty-cash-transactions.'.$routeType)
             ->with('success', "Petty cash transaction {$transaction->transaction_no} created successfully.");
     }
 }

@@ -1,15 +1,15 @@
 <?php
 
-use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\Organization;
-use App\SystemAdministration\Models\Permission;
-use App\SystemAdministration\Models\Role;
-use App\SystemAdministration\Models\User;
 use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\TreasuryGlMapping;
+use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Models\Role;
+use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\PettyCashFund;
@@ -141,9 +141,9 @@ it('loads petty cash funding and expense forms with scoped funds', function () {
     foreach (['funding', 'expense'] as $type) {
         $this->actingAs($fixture['user'])
             ->withSession(['active_organization_id' => $fixture['organization']->id])
-            ->get(route('petty-cash-transactions.' . $type))
+            ->get(route('petty-cash-transactions.'.$type))
             ->assertSuccessful()
-            ->assertInertia(fn($page) => $page
+            ->assertInertia(fn ($page) => $page
                 ->component('treasury-cash/petty-cash/transactions/form')
                 ->where('transaction_type', strtoupper($type))
                 ->has('funds', 1));
@@ -158,7 +158,7 @@ it('loads the petty cash transaction queue for users with view permission', func
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('petty-cash-transactions.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/petty-cash/transactions/index')
             ->has('transactions.data', 0));
 });
@@ -227,6 +227,12 @@ it('posts a petty cash expense and reduces the fund balance', function () {
 
     expect($transaction->fresh()->status)->toBe('POSTED')
         ->and($fixture['fund']->fresh()->current_balance)->toBe('3375.0000');
+
+    $cashFinancialAccount = $fixture['location']->fresh()->financialAccount;
+    expect($cashFinancialAccount)->not->toBeNull()
+        ->and($cashFinancialAccount->account_no)->toMatch('/^PETTY-CASH-\d{5}$/')
+        ->and($cashFinancialAccount->balance)->toBe('3375.0000')
+        ->and($cashFinancialAccount->available_balance)->toBe('3375.0000');
 });
 
 it('posts petty cash opening funding and creates a voucher', function () {
@@ -269,7 +275,7 @@ it('posts petty cash opening funding and creates a voucher', function () {
 
     expect($transaction->fresh()->status)->toBe('POSTED')
         ->and($fixture['fund']->fresh()->current_balance)->toBe('4500.0000')
-        ->and(\App\GeneralAccounting\Models\Voucher::query()->where('voucher_no', 'PETTY-GL-' . $transaction->id)->exists())->toBeTrue();
+        ->and(\App\GeneralAccounting\Models\Voucher::query()->where('voucher_no', 'PETTY-GL-'.$transaction->id)->exists())->toBeTrue();
 });
 
 it('keeps a petty cash transaction pending when its GL mapping is missing', function () {
@@ -291,7 +297,7 @@ it('keeps a petty cash transaction pending when its GL mapping is missing', func
         ->from(route('petty-cash-transactions.index'))
         ->post(route('petty-cash-transactions.post', $transaction))
         ->assertRedirect(route('petty-cash-transactions.index'))
-        ->assertSessionHas('error', fn(string $message) => str_contains($message, 'No active General Ledger mapping'));
+        ->assertSessionHas('error', fn (string $message) => str_contains($message, 'No active General Ledger mapping'));
 
     expect($transaction->fresh()->status)->toBe('PENDING')
         ->and($fixture['fund']->fresh()->current_balance)->toBe('3500.0000')

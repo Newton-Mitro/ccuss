@@ -227,8 +227,8 @@ it('creates a vault and teller for a selected authorized branch', function () {
         ->and(CashLocation::query()->where('code', 'T-002')->value('branch_id'))->toBe($selectedBranch->id)
         ->and(CashLocation::query()->where('code', 'VAULT-002')->firstOrFail()->financialAccount->account_type)->toBe('CASH')
         ->and(CashLocation::query()->where('code', 'T-002')->firstOrFail()->financialAccount->account_type)->toBe('CASH')
-        ->and(ctype_digit(CashLocation::query()->where('code', 'VAULT-002')->firstOrFail()->financialAccount->account_no))->toBeTrue()
-        ->and(ctype_digit(CashLocation::query()->where('code', 'T-002')->firstOrFail()->financialAccount->account_no))->toBeTrue();
+        ->and(CashLocation::query()->where('code', 'VAULT-002')->firstOrFail()->financialAccount->account_no)->toMatch('/^VAULT-\d{5}$/')
+        ->and(CashLocation::query()->where('code', 'T-002')->firstOrFail()->financialAccount->account_no)->toMatch('/^TELLER-\d{5}$/');
 
     $vault = Vault::query()->where('code', 'VAULT-002')->firstOrFail();
     $teller = Teller::query()->where('code', 'T-002')->firstOrFail();
@@ -273,7 +273,7 @@ it('creates a vault and teller for a selected authorized branch', function () {
         ->assertRedirect(route('tellers.index'));
 });
 
-it('converts existing managed cash account numbers to numeric values', function () {
+it('converts existing managed cash account numbers to prefixed values', function () {
     $fixture = cashManagementFixture();
     $financialAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $fixture['organization']->id,
@@ -295,8 +295,7 @@ it('converts existing managed cash account numbers to numeric values', function 
     $linkedAccount = app(\App\TreasuryAndCash\Application\CashLocationFinancialAccountService::class)
         ->ensureLinked($cashLocation);
 
-    expect(ctype_digit($linkedAccount->account_no))->toBeTrue()
-        ->and($linkedAccount->account_no)->toBe((string) $financialAccount->id);
+    expect($linkedAccount->account_no)->toMatch('/^TELLER-\d{5}$/');
 });
 
 it('rejects cash locations for branches outside the active organization', function () {

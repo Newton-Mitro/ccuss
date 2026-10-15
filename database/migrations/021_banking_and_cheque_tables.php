@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -128,10 +129,14 @@ return new class extends Migration
             $table->timestamps();
             $table->unique(['branch_day_id', 'clearing_no']);
         });
+
+        $this->prefixManagedFinancialAccountNumbers();
     }
 
     public function down(): void
     {
+        $this->restoreManagedFinancialAccountNumbers();
+
         Schema::table('cash_transfers', function (Blueprint $table): void {
             $table->dropForeign(['bank_account_id']);
             $table->dropForeign(['bank_transaction_id']);
@@ -143,5 +148,80 @@ return new class extends Migration
         Schema::dropIfExists('bank_reconciliations');
         Schema::dropIfExists('bank_transactions');
         Schema::dropIfExists('bank_accounts');
+    }
+
+    private function prefixManagedFinancialAccountNumbers(): void
+    {
+        $cashLocationTypes = DB::table('cash_locations')
+            ->whereNotNull('financial_account_id')
+            ->pluck('type', 'financial_account_id');
+
+        DB::table('financial_accounts')
+            ->whereIn('account_type', ['BANK', 'CASH'])
+            ->orderBy('id')
+            ->get(['id', 'organization_id', 'account_type', 'metadata'])
+            ->each(function (object $account) use ($cashLocationTypes): void {
+                $metadata = json_decode((string) $account->metadata, true) ?: [];
+                $managedBy = $metadata['managed_by'] ?? null;
+
+                if ($managedBy === 'bank_account') {
+                    $prefix = 'BANK';
+                } elseif (in_array($managedBy, ['cash_location', 'petty_cash'], true)) {
+                    $prefix = match ($cashLocationTypes[$account->id] ?? null) {
+                        'TELLER' => 'TELLER',
+                        'VAULT' => 'VAULT',
+                        'PETTY_CASH' => 'PETTY-CASH',
+                        default => 'CASH',
+                    };
+                } else {
+                    return;
+                }
+
+                $sequence = (int) $account->id;
+                $accountNumber = $prefix.'-'.str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+                while (
+                    DB::table('financial_accounts')
+                        ->where('organization_id', $account->organization_id)
+                        ->where('account_no', $accountNumber)
+                        ->where('id', '!=', $account->id)
+                        ->exists()
+                ) {
+                    $sequence++;
+                    $accountNumber = $prefix.'-'.str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+                }
+
+                DB::table('financial_accounts')
+                    ->where('id', $account->id)
+                    ->update(['account_no' => $accountNumber]);
+            });
+    }
+
+    private function restoreManagedFinancialAccountNumbers(): void
+    {
+        DB::table('financial_accounts')
+            ->whereIn('account_type', ['BANK', 'CASH'])
+            ->orderBy('id')
+            ->get(['id', 'organization_id', 'metadata'])
+            ->each(function (object $account): void {
+                $metadata = json_decode((string) $account->metadata, true) ?: [];
+                if (! in_array($metadata['managed_by'] ?? null, ['bank_account', 'cash_location', 'petty_cash'], true)) {
+                    return;
+                }
+
+                $accountNumber = (string) $account->id;
+                while (
+                    DB::table('financial_accounts')
+                        ->where('organization_id', $account->organization_id)
+                        ->where('account_no', $accountNumber)
+                        ->where('id', '!=', $account->id)
+                        ->exists()
+                ) {
+                    $accountNumber = (string) ((int) $accountNumber + 1);
+                }
+
+                DB::table('financial_accounts')
+                    ->where('id', $account->id)
+                    ->update(['account_no' => $accountNumber]);
+            });
     }
 };

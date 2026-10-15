@@ -245,6 +245,22 @@ function tellerCashTransactionFixture(): array
 it('loads the branch operations dashboard scoped to the assigned branch', function () {
     $fixture = tellerCashTransactionFixture();
     grantBranchOperationsDashboardPermission($fixture['user']);
+    $fixture['branchDay']->update(['business_date' => today()->toDateString()]);
+    $cashAccount = app(\App\TreasuryAndCash\Application\CashLocationFinancialAccountService::class)
+        ->ensureLinked($fixture['location']);
+    TellerCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'cash_location_id' => $fixture['location']->id,
+        'teller_session_id' => $fixture['session']->id,
+        'transaction_no' => 'TELLER-DASH-CHART-001',
+        'type' => 'DEPOSIT',
+        'amount' => 300,
+        'status' => 'POSTED',
+        'requested_by' => $fixture['user']->id,
+        'posted_by' => $fixture['user']->id,
+        'requested_at' => now(),
+        'posted_at' => now(),
+    ]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -256,7 +272,23 @@ it('loads the branch operations dashboard scoped to the assigned branch', functi
             ->where('branch_day.id', $fixture['branchDay']->id)
             ->where('metrics.assigned_tellers', 1)
             ->where('metrics.open_sessions', 1)
-            ->where('metrics.pending_transactions', 0));
+            ->where('open_sessions.0.teller_account_no', $cashAccount->account_no)
+            ->where('metrics.pending_transactions', 0)
+            ->where('daily_posted_amounts', fn ($days) => (float) collect($days)->firstWhere('date', today()->toDateString())['amount'] === 300.0)
+            ->where('transaction_types.0.type', 'DEPOSIT')
+            ->where('transaction_types.0.count', 1));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('treasury-cash.dashboard'))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/dashboard')
+            ->where('cashAccounts.0.account_no', $cashAccount->account_no)
+            ->has('dailyActivity', 7)
+            ->where('cashLocationBalances.0.type', 'TELLER')
+            ->where('cashLocationBalances.0.locations', 1)
+            ->where('cashLocationBalances.0.balance', 0));
 });
 
 function configureTellerSummaryMapping(array $fixture, string $transactionType): void

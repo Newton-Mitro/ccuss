@@ -22,7 +22,13 @@ class AccountingReportController extends Controller
     public function trialBalance(Request $request): Response
     {
         $organizationId = $request->attributes->get('active_organization')->id;
+        $fiscalPeriods = $this->fiscalPeriods($request);
         $periodId = $request->integer('fiscal_period_id') ?: null;
+        if ($periodId === null) {
+            $periodId = $fiscalPeriods->firstWhere('status', 'OPEN')['id']
+                ?? $fiscalPeriods->first()['id']
+                ?? null;
+        }
 
         return Inertia::render('general-accounting/reports/trial-balance-page', [
             'trialBalance' => $this->reportService->trialBalance(
@@ -30,18 +36,16 @@ class AccountingReportController extends Controller
                 $periodId,
                 $request->input('from'),
                 $request->input('to'),
-            )->map(fn($row) => [
-                    'ledger_account_id' => $row->id,
-                    'account_code' => $row->code,
-                    'account_name' => $row->name,
-                    'account_type' => $row->type,
-                    'total_debit' => $row->debit,
-                    'total_credit' => $row->credit,
-                    'balance' => $row->balance,
-                ]),
-            'fiscalYears' => $this->fiscalYears($request),
-            'fiscalPeriods' => $this->fiscalPeriods($request),
-            'selectedFiscalYear' => $request->integer('fiscal_year_id') ?: null,
+            )->map(fn ($row) => [
+                'ledger_account_id' => $row->id,
+                'account_code' => $row->code,
+                'account_name' => $row->name,
+                'account_type' => $row->type,
+                'total_debit' => $row->debit,
+                'total_credit' => $row->credit,
+                'balance' => $row->balance,
+            ]),
+            'fiscalPeriods' => $fiscalPeriods,
             'selectedFiscalPeriod' => $periodId,
         ]);
     }
@@ -53,7 +57,7 @@ class AccountingReportController extends Controller
         $account = LedgerAccount::query()
             ->where('organization_id', $organizationId)
             ->where('status', true)
-            ->when($accountId > 0, fn($query) => $query->whereKey($accountId))
+            ->when($accountId > 0, fn ($query) => $query->whereKey($accountId))
             ->orderBy('code')
             ->first();
 
@@ -91,17 +95,17 @@ class AccountingReportController extends Controller
         );
 
         return Inertia::render('general-accounting/reports/profit-and-loss-page', [
-            'profitAndLoss' => $profitAndLoss['income']->map(fn($row) => [
+            'profitAndLoss' => $profitAndLoss['income']->map(fn ($row) => [
                 'ledger_account_id' => $row->id,
                 'category' => 'income',
                 'account_name' => $row->name,
                 'amount' => $row->balance,
-            ])->concat($profitAndLoss['expenses']->map(fn($row) => [
-                            'ledger_account_id' => $row->id,
-                            'category' => 'expense',
-                            'account_name' => $row->name,
-                            'amount' => $row->balance,
-                        ])),
+            ])->concat($profitAndLoss['expenses']->map(fn ($row) => [
+                'ledger_account_id' => $row->id,
+                'category' => 'expense',
+                'account_name' => $row->name,
+                'amount' => $row->balance,
+            ])),
             'fiscalYears' => $this->fiscalYears($request),
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'selectedFiscalYear' => $request->integer('fiscal_year_id') ?: null,
@@ -119,12 +123,12 @@ class AccountingReportController extends Controller
                 $request->integer('fiscal_period_id') ?: null,
                 $request->input('from'),
                 $request->input('to'),
-            ))->only(['assets', 'liabilities', 'equity'])->flatMap(fn($rows, $category) => collect($rows)->map(fn($row) => [
-                    'ledger_account_id' => $row->id,
-                    'category' => ucfirst($category),
-                    'account_name' => $row->name,
-                    'balance' => $row->balance,
-                ]))->values(),
+            ))->only(['assets', 'liabilities', 'equity'])->flatMap(fn ($rows, $category) => collect($rows)->map(fn ($row) => [
+                'ledger_account_id' => $row->id,
+                'category' => ucfirst($category),
+                'account_name' => $row->name,
+                'balance' => $row->balance,
+            ]))->values(),
             'fiscalYears' => $this->fiscalYears($request),
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'selectedFiscalYear' => $request->integer('fiscal_year_id') ?: null,
@@ -141,7 +145,7 @@ class AccountingReportController extends Controller
                 $request->integer('fiscal_period_id') ?: null,
                 $request->input('from'),
                 $request->input('to'),
-            )->map(fn($row) => (array) $row),
+            )->map(fn ($row) => (array) $row),
             'fiscalYears' => $this->fiscalYears($request),
             'fiscalPeriods' => $this->fiscalPeriods($request),
             'selectedFiscalYear' => $request->integer('fiscal_year_id') ?: null,
@@ -169,15 +173,17 @@ class AccountingReportController extends Controller
     private function fiscalPeriods(Request $request)
     {
         return FiscalPeriod::query()
-            ->whereHas('fiscalYear', fn($query) => $query->where(
+            ->whereHas('fiscalYear', fn ($query) => $query->where(
                 'organization_id',
                 $request->attributes->get('active_organization')->id,
             ))
+            ->with('fiscalYear:id,name')
             ->orderByDesc('start_date')
             ->get()
-            ->map(fn($period) => [
+            ->map(fn ($period) => [
                 'id' => $period->id,
                 'fiscal_year_id' => $period->fiscal_year_id,
+                'fiscal_year_name' => $period->fiscalYear->name,
                 'name' => $period->name,
                 'period_name' => $period->name,
                 'start_date' => $period->start_date,
@@ -192,7 +198,7 @@ class AccountingReportController extends Controller
             ->where('organization_id', $request->attributes->get('active_organization')->id)
             ->orderByDesc('start_date')
             ->get(['id', 'name', 'start_date', 'end_date', 'status'])
-            ->map(fn($year) => [
+            ->map(fn ($year) => [
                 'id' => $year->id,
                 'name' => $year->name,
                 'code' => $year->name,

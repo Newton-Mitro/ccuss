@@ -47,7 +47,7 @@ class DashboardController extends Controller
             ->groupBy('account_type')
             ->orderBy('account_type')
             ->get()
-            ->map(fn(FinancialAccount $account): array => [
+            ->map(fn (FinancialAccount $account): array => [
                 'type' => $account->account_type,
                 'count' => (int) $account->total_accounts,
                 'balance' => (float) $account->total_balance,
@@ -56,11 +56,11 @@ class DashboardController extends Controller
 
         $recentTransactions = FinancialTransaction::query()
             ->where('organization_id', $organizationId)
-            ->with('branch:id,name')
+            ->with(['branch:id,name', 'entries.financialAccount:id,account_no'])
             ->latest('transaction_date')
             ->limit(6)
             ->get(['id', 'branch_id', 'transaction_no', 'transaction_type', 'transaction_date', 'amount', 'status'])
-            ->map(fn(FinancialTransaction $transaction): array => [
+            ->map(fn (FinancialTransaction $transaction): array => [
                 'id' => $transaction->id,
                 'number' => $transaction->transaction_no,
                 'type' => $transaction->transaction_type,
@@ -68,6 +68,12 @@ class DashboardController extends Controller
                 'amount' => (float) $transaction->amount,
                 'status' => $transaction->status,
                 'branch' => $transaction->branch?->name,
+                'accounts' => $transaction->entries
+                    ->pluck('financialAccount.account_no')
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all(),
             ])
             ->values();
 
@@ -78,7 +84,7 @@ class DashboardController extends Controller
             ->latest('created_at')
             ->limit(5)
             ->get(['id', 'customer_id', 'application_no', 'requested_amount', 'status', 'created_at'])
-            ->map(fn(LoanApplication $application): array => [
+            ->map(fn (LoanApplication $application): array => [
                 'id' => $application->id,
                 'number' => $application->application_no,
                 'applicant' => $application->customer?->name ?? 'Unknown customer',
@@ -93,8 +99,8 @@ class DashboardController extends Controller
             ['permission' => 'financial.accounts.view', 'label' => 'Financial accounts', 'href' => route('financial-accounts.index', [], false)],
             ['permission' => 'financial.transactions.view', 'label' => 'Transactions', 'href' => route('financial-transactions.index', [], false)],
             ['permission' => 'branch_days.view', 'label' => 'Branch days', 'href' => route('branch-days.index', [], false)],
-        ])->filter(fn(array $link): bool => $user?->hasPermission($link['permission']) ?? false)
-            ->map(fn(array $link): array => ['label' => $link['label'], 'href' => $link['href']])
+        ])->filter(fn (array $link): bool => $user?->hasPermission($link['permission']) ?? false)
+            ->map(fn (array $link): array => ['label' => $link['label'], 'href' => $link['href']])
             ->values();
 
         return Inertia::render('dashboard', [
@@ -133,11 +139,11 @@ class DashboardController extends Controller
                     ->count(),
                 'openTellerSessions' => TellerSession::query()
                     ->where('status', 'OPEN')
-                    ->whereHas('branchDay', fn($query) => $query->where('organization_id', $organizationId))
+                    ->whereHas('branchDay', fn ($query) => $query->where('organization_id', $organizationId))
                     ->count(),
                 'openVaultSessions' => VaultSession::query()
                     ->where('status', 'OPEN')
-                    ->whereHas('branchDay', fn($query) => $query->where('organization_id', $organizationId))
+                    ->whereHas('branchDay', fn ($query) => $query->where('organization_id', $organizationId))
                     ->count(),
             ],
             'dailyVolume' => $dailyVolume,

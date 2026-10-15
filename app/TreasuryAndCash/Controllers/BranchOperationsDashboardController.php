@@ -35,19 +35,59 @@ class BranchOperationsDashboardController
         $openSessions = $branch
             ? TellerSession::query()
                 ->where('status', 'OPEN')
-                ->whereHas('branchDay', fn($query) => $query
+                ->whereHas('branchDay', fn ($query) => $query
                     ->where('organization_id', $organizationId)
                     ->where('branch_id', $branch->id)
                     ->where('status', BranchDay::STATUS_OPEN))
-                ->with(['teller', 'branchDay'])
+                ->with(['teller.cashLocation.financialAccount', 'branchDay'])
                 ->latest('opened_at')
                 ->get()
             : collect();
 
-        $branchTransactionQuery = fn() => TellerCashTransaction::query()
-            ->whereHas('branchDay', fn($query) => $query
+        $branchTransactionQuery = fn () => TellerCashTransaction::query()
+            ->whereHas('branchDay', fn ($query) => $query
                 ->where('organization_id', $organizationId)
                 ->where('branch_id', $branch->id));
+
+        $dailyPostedAmounts = $branch
+            ? TellerCashTransaction::query()
+                ->join('branch_days', 'branch_days.id', '=', 'teller_cash_transactions.branch_day_id')
+                ->where('branch_days.organization_id', $organizationId)
+                ->where('branch_days.branch_id', $branch->id)
+                ->whereBetween('branch_days.business_date', [
+                    today()->subDays(6)->toDateString(),
+                    today()->toDateString(),
+                ])
+                ->where('teller_cash_transactions.status', 'POSTED')
+                ->selectRaw('branch_days.business_date as business_date, SUM(teller_cash_transactions.amount) as total_amount')
+                ->groupBy('branch_days.business_date')
+                ->pluck('total_amount', 'business_date')
+            : collect();
+
+        $dailyActivity = collect(range(6, 0))->map(function (int $daysAgo) use ($dailyPostedAmounts): array {
+            $date = today()->subDays($daysAgo);
+            $key = $date->toDateString();
+
+            return [
+                'date' => $key,
+                'label' => $date->format('D'),
+                'amount' => (float) ($dailyPostedAmounts->get($key) ?? 0),
+            ];
+        })->values();
+
+        $transactionTypes = $openBranchDay
+            ? TellerCashTransaction::query()
+                ->where('branch_day_id', $openBranchDay->id)
+                ->selectRaw('type, COUNT(*) as total')
+                ->groupBy('type')
+                ->orderBy('type')
+                ->get()
+                ->map(fn (TellerCashTransaction $transaction): array => [
+                    'type' => $transaction->type,
+                    'count' => (int) $transaction->total,
+                ])
+                ->values()
+            : collect();
 
         $recentActivity = $branch
             ? $branchTransactionQuery()
@@ -55,7 +95,7 @@ class BranchOperationsDashboardController
                 ->latest('id')
                 ->limit(8)
                 ->get()
-                ->map(fn(TellerCashTransaction $transaction) => [
+                ->map(fn (TellerCashTransaction $transaction) => [
                     'id' => $transaction->id,
                     'transaction_no' => $transaction->transaction_no,
                     'type' => $transaction->type,
@@ -84,7 +124,7 @@ class BranchOperationsDashboardController
                 'assigned_tellers' => $branch
                     ? Teller::query()
                         ->where('status', 'ACTIVE')
-                        ->whereHas('cashLocation', fn($query) => $query
+                        ->whereHas('cashLocation', fn ($query) => $query
                             ->where('organization_id', $organizationId)
                             ->where('branch_id', $branch->id)
                             ->where('is_active', true))
@@ -101,15 +141,18 @@ class BranchOperationsDashboardController
                         ->sum('amount')
                     : 0,
             ],
-            'open_sessions' => $openSessions->map(fn(TellerSession $session) => [
+            'open_sessions' => $openSessions->map(fn (TellerSession $session) => [
                 'id' => $session->id,
                 'teller_name' => $session->teller?->name ?? 'Teller',
                 'teller_code' => $session->teller?->code,
+                'teller_account_no' => $session->teller?->cashLocation?->financialAccount?->account_no,
                 'business_date' => $session->branchDay?->business_date,
                 'opened_at' => $session->opened_at?->toDateTimeString(),
                 'expected_cash' => (float) ($session->expected_cash ?? $session->opening_cash ?? 0),
             ])->values()->all(),
             'recent_activity' => $recentActivity->all(),
+            'daily_posted_amounts' => $dailyActivity,
+            'transaction_types' => $transactionTypes,
         ]);
     }
 }

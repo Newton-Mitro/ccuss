@@ -1,3 +1,8 @@
+import BranchOperationsCharts from '@/components/branch-operations-charts';
+import {
+    DashboardMetricGrid,
+    DashboardQuickLinks,
+} from '@/components/dashboard-summary';
 import {
     ResourceEmptyState,
     ResourcePageHeader,
@@ -35,6 +40,7 @@ interface BranchOperationsDashboardProps extends SharedData {
         id: number;
         teller_name: string;
         teller_code: string | null;
+        teller_account_no: string | null;
         business_date: string | null;
         opened_at: string | null;
         expected_cash: number;
@@ -49,6 +55,8 @@ interface BranchOperationsDashboardProps extends SharedData {
         cash_location: string | null;
         teller: string | null;
     }[];
+    daily_posted_amounts: { date: string; label: string; amount: number }[];
+    transaction_types: { type: string; count: number }[];
 }
 
 const links = [
@@ -73,8 +81,15 @@ const money = (amount: number) =>
     })}`;
 
 export default function BranchOperationsDashboard() {
-    const { branch, branch_day, metrics, open_sessions, recent_activity } =
-        usePage<BranchOperationsDashboardProps>().props;
+    const {
+        branch,
+        branch_day,
+        metrics,
+        open_sessions,
+        recent_activity,
+        daily_posted_amounts,
+        transaction_types,
+    } = usePage<BranchOperationsDashboardProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Branch Operations',
@@ -130,8 +145,8 @@ export default function BranchOperationsDashboard() {
                             </Link>
                         </section>
 
-                        <section className="grid grid-cols-2 divide-x divide-y overflow-hidden border-y sm:grid-cols-4 sm:divide-y-0">
-                            {[
+                        <DashboardMetricGrid
+                            metrics={[
                                 {
                                     label: 'Active tellers',
                                     value: metrics.assigned_tellers,
@@ -156,42 +171,21 @@ export default function BranchOperationsDashboard() {
                                     detail: 'Current open business day',
                                     icon: WalletCards,
                                 },
-                            ].map(({ label, value, detail, icon: Icon }) => (
-                                <div
-                                    key={label}
-                                    className="min-w-0 px-3 py-3 sm:px-4"
-                                >
-                                    <div className="flex items-center gap-2 text-muted-foreground">
-                                        <Icon className="h-4 w-4 shrink-0" />
-                                        <span className="truncate text-xs">
-                                            {label}
-                                        </span>
-                                    </div>
-                                    <div className="mt-2 truncate text-xl font-semibold tabular-nums">
-                                        {value}
-                                    </div>
-                                    <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
-                                        {detail}
-                                    </div>
-                                </div>
-                            ))}
-                        </section>
+                            ]}
+                        />
 
-                        <nav
-                            className="flex flex-wrap gap-2"
-                            aria-label="Branch operations"
-                        >
-                            {links.map(({ label, href, icon: Icon }) => (
-                                <Link
-                                    key={href}
-                                    href={route(href)}
-                                    className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs font-medium transition hover:bg-muted"
-                                >
-                                    <Icon className="h-4 w-4 text-primary" />
-                                    {label}
-                                </Link>
-                            ))}
-                        </nav>
+                        <DashboardQuickLinks
+                            label="Branch operations"
+                            links={links.map((link) => ({
+                                ...link,
+                                href: route(link.href),
+                            }))}
+                        />
+
+                        <BranchOperationsCharts
+                            dailyPostedAmounts={daily_posted_amounts}
+                            transactionTypes={transaction_types}
+                        />
 
                         <div className="grid items-start gap-5 xl:grid-cols-2">
                             <section className="min-w-0 space-y-3">
@@ -228,6 +222,9 @@ export default function BranchOperationsDashboard() {
                                                         <div className="text-xs text-muted-foreground">
                                                             {session.teller_code ??
                                                                 'No teller code'}
+                                                            {' · '}
+                                                            {session.teller_account_no ??
+                                                                'No financial account'}
                                                             {' · '}
                                                             {session.business_date ??
                                                                 '-'}

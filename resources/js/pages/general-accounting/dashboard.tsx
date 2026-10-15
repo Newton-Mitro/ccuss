@@ -1,4 +1,9 @@
 import {
+    DashboardMetricGrid,
+    DashboardQuickLinks,
+} from '@/components/dashboard-summary';
+import GeneralAccountingDashboardCharts from '@/components/general-accounting-dashboard-charts';
+import {
     ResourceEmptyState,
     ResourcePageHeader,
     StatusBadge,
@@ -28,6 +33,15 @@ interface GeneralAccountingDashboardProps extends SharedData {
         postedVouchers: number;
         activeBudgets: number;
     };
+    dailyVoucherActivity: {
+        date: string;
+        label: string;
+        posted: number;
+    }[];
+    voucherStatusBreakdown: {
+        status: string;
+        count: number;
+    }[];
 }
 
 const links = [
@@ -54,7 +68,8 @@ const links = [
 ] as const;
 
 export default function GeneralAccountingDashboard() {
-    const { stats } = usePage<GeneralAccountingDashboardProps>().props;
+    const { stats, dailyVoucherActivity, voucherStatusBreakdown } =
+        usePage<GeneralAccountingDashboardProps>().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -119,44 +134,21 @@ export default function GeneralAccountingDashboard() {
                 />
 
                 {/* Accounting Metrics */}
-                <section className="grid grid-cols-2 divide-x divide-y overflow-hidden border-y sm:grid-cols-4 sm:divide-y-0">
-                    {metrics.map(({ label, value, detail, icon: Icon }) => (
-                        <div key={label} className="min-w-0 px-3 py-3 sm:px-4">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <Icon className="h-4 w-4 shrink-0" />
-
-                                <span className="truncate text-xs">
-                                    {label}
-                                </span>
-                            </div>
-
-                            <div className="mt-2 truncate text-xl font-semibold tabular-nums">
-                                {value}
-                            </div>
-
-                            <div className="mt-0.5 truncate text-[10px] text-muted-foreground">
-                                {detail}
-                            </div>
-                        </div>
-                    ))}
-                </section>
+                <DashboardMetricGrid metrics={metrics} />
 
                 {/* Quick Navigation */}
-                <nav
-                    className="flex flex-wrap gap-2"
-                    aria-label="General accounting"
-                >
-                    {links.map(({ label, href, icon: Icon }) => (
-                        <Link
-                            key={href}
-                            href={route(href)}
-                            className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-xs font-medium transition hover:bg-muted"
-                        >
-                            <Icon className="h-4 w-4 text-primary" />
-                            {label}
-                        </Link>
-                    ))}
-                </nav>
+                <DashboardQuickLinks
+                    label="General accounting"
+                    links={links.map((link) => ({
+                        ...link,
+                        href: route(link.href),
+                    }))}
+                />
+
+                <GeneralAccountingDashboardCharts
+                    dailyVoucherActivity={dailyVoucherActivity}
+                    voucherStatusBreakdown={voucherStatusBreakdown}
+                />
 
                 {/* Accounting Operations */}
                 <div className="grid items-start gap-5 xl:grid-cols-2">

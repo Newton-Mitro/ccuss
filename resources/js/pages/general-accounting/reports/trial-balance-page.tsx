@@ -6,10 +6,7 @@ import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem, SharedData } from '../../../types';
-import {
-    FiscalPeriod,
-    FiscalYear,
-} from '../../../types/finance_and_accounting';
+import { FiscalPeriod } from '../../../types/finance_and_accounting';
 
 /* ---------------- Types ---------------- */
 
@@ -29,47 +26,26 @@ interface TrialBalanceRow {
 
 interface Props extends SharedData {
     trialBalance: TrialBalanceRow[];
-    fiscalYears: FiscalYear[];
-    fiscalPeriods: FiscalPeriod[];
-    selectedFiscalYear?: number;
+    fiscalPeriods: (FiscalPeriod & { fiscal_year_name: string })[];
     selectedFiscalPeriod?: number;
 }
 
 /* ---------------- Page ---------------- */
 
 export default function TrialBalancePage() {
-    const {
-        trialBalance,
-        fiscalYears,
-        fiscalPeriods,
-        selectedFiscalYear,
-        selectedFiscalPeriod,
-    } = usePage<Props>().props;
+    const { trialBalance, fiscalPeriods, selectedFiscalPeriod } =
+        usePage<Props>().props;
 
-    const [fiscalYear, setFiscalYear] = useState<number>(
-        selectedFiscalYear || 0,
-    );
     const [fiscalPeriod, setFiscalPeriod] = useState<number>(
         selectedFiscalPeriod || 0,
     );
-
-    /* ---------------- Filter Handlers ---------------- */
-    const handleFiscalYearChange = (value) => {
-        const year = Number(value);
-        setFiscalYear(year);
-        router.get(
-            '/trial-balance',
-            { fiscal_year_id: year, fiscal_period_id: fiscalPeriod },
-            { preserveState: true },
-        );
-    };
 
     const handleFiscalPeriodChange = (value) => {
         const period = Number(value);
         setFiscalPeriod(period);
         router.get(
             '/trial-balance',
-            { fiscal_year_id: fiscalYear, fiscal_period_id: period },
+            { fiscal_period_id: period || undefined },
             { preserveState: true },
         );
     };
@@ -118,8 +94,7 @@ export default function TrialBalancePage() {
                 <ReportExportActions
                     report="trial-balance"
                     query={{
-                        fiscal_year_id: fiscalYear,
-                        fiscal_period_id: fiscalPeriod,
+                        fiscal_period_id: fiscalPeriod || undefined,
                     }}
                 />
                 {/* Header */}
@@ -129,30 +104,16 @@ export default function TrialBalancePage() {
                         description="Debit, Credit & Balance Summary"
                     />
 
-                    <div className="flex items-center gap-2">
-                        <div className="w-60">
-                            <Select
-                                className="bg-card"
-                                value={fiscalYear.toString()}
-                                onChange={handleFiscalYearChange}
-                                options={fiscalYears.map((fy) => ({
-                                    value: fy.id.toString(),
-                                    label: fy.code,
-                                }))}
-                            />
-                        </div>
-
-                        <div className="w-60">
-                            <Select
-                                className="bg-card"
-                                value={fiscalPeriod.toString()}
-                                onChange={handleFiscalPeriodChange}
-                                options={fiscalPeriods.map((fp) => ({
-                                    value: fp.id.toString(),
-                                    label: fp.period_name,
-                                }))}
-                            />
-                        </div>
+                    <div className="w-full sm:w-72">
+                        <Select
+                            className="bg-card"
+                            value={fiscalPeriod.toString()}
+                            onChange={handleFiscalPeriodChange}
+                            options={fiscalPeriods.map((period) => ({
+                                value: period.id.toString(),
+                                label: `${period.period_name} · ${period.fiscal_year_name}`,
+                            }))}
+                        />
                     </div>
                 </div>
 
