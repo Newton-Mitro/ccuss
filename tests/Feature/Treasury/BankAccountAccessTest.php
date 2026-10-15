@@ -2,10 +2,10 @@
 
 use App\FinancialServices\Models\FinancialAccount;
 use App\GeneralAccounting\Models\AccountGroup;
-use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
-use App\GeneralAccounting\Models\TreasuryGlMapping;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\Voucher;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
@@ -44,14 +44,14 @@ function grantBankTransactionPermissions(User $user): void
     $permissions = collect([
         ['slug' => 'bank_transactions.view', 'name' => 'View Bank Transactions', 'action' => 'view'],
         ['slug' => 'bank_transactions.create', 'name' => 'Create Bank Transactions', 'action' => 'create'],
-    ])->map(fn(array $permission) => Permission::firstOrCreate(
-            ['slug' => $permission['slug']],
-            [
-                'module' => 'bank_transactions',
-                'name' => $permission['name'],
-                'action' => $permission['action'],
-            ],
-        ));
+    ])->map(fn (array $permission) => Permission::firstOrCreate(
+        ['slug' => $permission['slug']],
+        [
+            'module' => 'bank_transactions',
+            'name' => $permission['name'],
+            'action' => $permission['action'],
+        ],
+    ));
 
     $role->permissions()->syncWithoutDetaching($permissions->pluck('id'));
     $user->roles()->syncWithoutDetaching([$role->id]);
@@ -106,10 +106,11 @@ it('loads bank accounts for authorized organization users', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('bank-accounts.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/banking/accounts/index')
             ->has('accounts.data', 1)
-            ->where('accounts.data.0.account_number', $fixture['account']->account_number));
+            ->where('accounts.data.0.account_number', $fixture['account']->account_number)
+            ->where('accounts.data.0.balance', fn ($balance) => (float) $balance === 25000.0));
 });
 
 it('does not expose bank accounts without banking permission', function () {
@@ -132,11 +133,26 @@ it('creates and posts a bank transaction for an open branch day', function () {
         'opened_by' => $fixture['user']->id,
     ]);
     grantBankTransactionPermissions($fixture['user']);
+    grantBankingViewPermission($fixture['user']);
+    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    $bankControl = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+        'code' => '1200',
+        'is_cash_account' => true,
+        'is_control_account' => true,
+    ]);
+    $counterpart = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+        'code' => '1100',
+    ]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->post(route('bank-transactions.store'), [
             'bank_account_id' => $fixture['account']->id,
+            'counterpart_account_id' => $counterpart->id,
             'type' => 'DEPOSIT',
             'amount' => 500,
             'transaction_date' => '2026-09-21',
@@ -147,33 +163,55 @@ it('creates and posts a bank transaction for an open branch day', function () {
     $transaction = BankTransaction::query()->firstOrFail();
 
     expect($transaction->status)->toBe('PENDING')
-        ->and($transaction->branch_day_id)->toBe($branchDay->id);
+        ->and($transaction->branch_day_id)->toBe($branchDay->id)
+        ->and($transaction->counterpart_account_id)->toBe($counterpart->id);
 
-    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
-    $debitAccount = LedgerAccount::factory()->create([
-        'organization_id' => $fixture['organization']->id,
-        'account_group_id' => $group->id,
-    ]);
-    $creditAccount = LedgerAccount::factory()->create([
-        'organization_id' => $fixture['organization']->id,
-        'account_group_id' => $group->id,
-    ]);
-    TreasuryGlMapping::query()->create([
-        'organization_id' => $fixture['organization']->id,
-        'source_type' => 'BANK_TRANSACTION',
-        'source_code' => 'DEFAULT',
-        'transaction_type' => 'DEPOSIT',
-        'debit_account_id' => $debitAccount->id,
-        'credit_account_id' => $creditAccount->id,
-        'status' => true,
-    ]);
+    $transaction->update(['counterpart_account_id' => null]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('bank-transactions.post', $transaction))
+        ->post(route('bank-transactions.post', $transaction), [
+            'counterpart_account_id' => $counterpart->id,
+        ])
         ->assertRedirect(route('bank-transactions.index'));
 
     expect($transaction->fresh()->status)->toBe('POSTED')
         ->and($transaction->fresh()->balance_after)->toBe('25500.0000')
-        ->and(\App\GeneralAccounting\Models\Voucher::query()->where('voucher_no', 'BANK-GL-' . $transaction->id)->exists())->toBeTrue();
+        ->and($transaction->fresh()->counterpart_account_id)->toBe($counterpart->id)
+        ->and(Voucher::query()->where('voucher_no', 'BANK-GL-'.$transaction->id)->exists())->toBeTrue()
+        ->and(Voucher::query()->where('voucher_no', 'BANK-GL-'.$transaction->id)->firstOrFail()->entries()->where('account_id', $bankControl->id)->where('debit', 500)->exists())->toBeTrue()
+        ->and(Voucher::query()->where('voucher_no', 'BANK-GL-'.$transaction->id)->firstOrFail()->entries()->where('account_id', $counterpart->id)->where('credit', 500)->exists())->toBeTrue();
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('bank-accounts.index'))
+        ->assertInertia(fn ($page) => $page
+            ->where('accounts.data.0.balance', fn ($balance) => (float) $balance === 25500.0));
+});
+
+it('rejects the bank control account as its own transaction counterpart', function () {
+    $fixture = bankAccountFixture();
+    grantBankTransactionPermissions($fixture['user']);
+
+    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    $bankControl = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+        'code' => '1200',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->from(route('bank-transactions.create'))
+        ->post(route('bank-transactions.store'), [
+            'bank_account_id' => $fixture['account']->id,
+            'counterpart_account_id' => $bankControl->id,
+            'type' => 'DEPOSIT',
+            'amount' => 10,
+            'transaction_date' => '2026-09-21',
+        ])
+        ->assertRedirect(route('bank-transactions.create'))
+        ->assertSessionHasErrors(['counterpart_account_id']);
+
+    expect(BankTransaction::query()->count())->toBe(0);
 });

@@ -2,11 +2,6 @@
 
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\KycDocument;
-use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\Organization;
-use App\SystemAdministration\Models\Permission;
-use App\SystemAdministration\Models\Role;
-use App\SystemAdministration\Models\User;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanProtectionPolicy;
@@ -19,12 +14,17 @@ use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\TreasuryGlMapping;
+use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Models\Role;
+use App\SystemAdministration\Models\User;
+use App\TreasuryAndCash\Application\ChequePaymentService;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\ChequeBook;
 use App\TreasuryAndCash\Models\ChequePayment;
-use App\TreasuryAndCash\Application\ChequePaymentService;
 use App\TreasuryAndCash\Models\Teller;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
 use App\TreasuryAndCash\Models\TellerSession;
@@ -250,7 +250,7 @@ it('loads the branch operations dashboard scoped to the assigned branch', functi
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('branch-operations.dashboard'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('branch-operations/dashboard')
             ->where('branch.id', $fixture['branch']->id)
             ->where('branch_day.id', $fixture['branchDay']->id)
@@ -262,6 +262,22 @@ it('loads the branch operations dashboard scoped to the assigned branch', functi
 function configureTellerSummaryMapping(array $fixture, string $transactionType): void
 {
     $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+        'code' => '2100',
+        'name' => 'Member Deposits',
+        'type' => 'LIABILITY',
+        'normal_balance' => 'CREDIT',
+    ]);
+    LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+        'code' => '3100',
+        'name' => 'Member Equity',
+        'type' => 'EQUITY',
+        'normal_balance' => 'CREDIT',
+    ]);
     $debitAccount = LedgerAccount::factory()->create([
         'organization_id' => $fixture['organization']->id,
         'account_group_id' => $group->id,
@@ -294,9 +310,9 @@ it('loads deposit and withdrawal forms with scoped teller sessions', function ()
     foreach (['deposit', 'withdrawal'] as $type) {
         $this->actingAs($fixture['user'])
             ->withSession(['active_organization_id' => $fixture['organization']->id])
-            ->get(route('teller-transactions.' . $type))
+            ->get(route('teller-transactions.'.$type))
             ->assertSuccessful()
-            ->assertInertia(fn($page) => $page
+            ->assertInertia(fn ($page) => $page
                 ->component('treasury-cash/teller-transactions/form')
                 ->where('transaction_type', strtoupper($type))
                 ->has('teller_sessions', 1));
@@ -311,7 +327,7 @@ it('loads the teller transaction queue for users with view permission', function
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('teller-transactions.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/teller-transactions/index')
             ->has('transactions.data', 0));
 });
@@ -324,7 +340,7 @@ it('loads the customer deposit page without a selected customer', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('teller-transactions.customer-deposit'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/teller-deposits/customer-deposit-page')
             ->where('customer', null)
             ->where('customerAccounts', []));
@@ -338,7 +354,7 @@ it('loads the customer deposit page with open teller sessions available', functi
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('teller-transactions.customer-deposit'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/teller-deposits/customer-deposit-page')
             ->has('teller_sessions', 1)
             ->where('teller_sessions.0.id', $fixture['session']->id));
@@ -439,7 +455,7 @@ it('restores the selected customer account on the customer deposit page', functi
             'account_id' => $account->id,
         ]))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->where('customer.id', $customer->id)
             ->where('selectedAccount.id', $account->id)
             ->where('obligations.0.account_name', $account->name)
@@ -559,14 +575,14 @@ it('lists real customer loan, protection, deposit, and fine obligations', functi
             'account_id' => $loanAccount->id,
         ]))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
-            ->where('obligations', fn($obligations) => collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan repayment' && $row['amount'] === 100)
-                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan interest' && $row['amount'] === 20)
-                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan fine' && $row['amount'] === 10)
-                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan protection fee' && $row['amount'] === 5)
-                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Loan protection renew fee' && $row['amount'] === 50)
-                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Deposit contribution' && $row['amount'] === 100)
-                && collect($obligations)->contains(fn($row) => $row['due_type'] === 'Deposit fine' && $row['amount'] === 25)));
+        ->assertInertia(fn ($page) => $page
+            ->where('obligations', fn ($obligations) => collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan repayment' && $row['amount'] === 100)
+                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan interest' && $row['amount'] === 20)
+                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan fine' && $row['amount'] === 10)
+                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan protection fee' && $row['amount'] === 5)
+                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan protection renew fee' && $row['amount'] === 50)
+                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Deposit contribution' && $row['amount'] === 100)
+                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Deposit fine' && $row['amount'] === 25)));
 });
 
 it('creates a pending teller cash deposit for an open session', function () {
@@ -625,7 +641,7 @@ it('allows a customer deposit without a verified signature', function () {
             'teller_session_id' => $fixture['session']->id,
             'customer_id' => $customer->id,
             'amount' => '10.00',
-            'selected' => ['deposit-' . $savingsAccount->id],
+            'selected' => ['deposit-'.$savingsAccount->id],
             'note' => 'Customer cash deposit',
         ])
         ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
@@ -670,7 +686,7 @@ it('receives a savings cheque into review without posting it', function () {
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cheque-payments.index'))
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/cheques/payments/index')
             ->where('available_cheques.0.id', $cheque->id)
             ->where('teller_sessions.0.id', $fixture['session']->id));
@@ -686,19 +702,19 @@ it('receives a savings cheque into review without posting it', function () {
     $payment = ChequePayment::query()->where('cheque_id', $cheque->id)->firstOrFail();
     expect($payment->status)->toBe('RECEIVED')
         ->and($cheque->fresh()->status)->toBe('ISSUED')
-        ->and(TellerCashTransaction::query()->where('reference', 'CHEQUE-' . $cheque->cheque_no)->exists())->toBeFalse();
+        ->and(TellerCashTransaction::query()->where('reference', 'CHEQUE-'.$cheque->cheque_no)->exists())->toBeFalse();
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cheque-payments.index'))
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/cheques/payments/index')
             ->where('payments.data.0.status', 'RECEIVED'));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cheque-payments.show', $payment))
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/cheques/payments/show')
             ->where('payment.status', 'RECEIVED')
             ->where('account_check.status', 'ACTIVE'));
@@ -735,7 +751,7 @@ it('requires a verified signatory and a separate approver before payment', funct
     ]);
     $book = ChequeBook::create([
         'financial_account_id' => $account->id,
-        'book_no' => 'PAYMENT-BOOK-' . $account->id,
+        'book_no' => 'PAYMENT-BOOK-'.$account->id,
         'start_number' => 1,
         'end_number' => 1,
         'current_number' => 1,
@@ -745,7 +761,7 @@ it('requires a verified signatory and a separate approver before payment', funct
     $cheque = Cheque::create([
         'cheque_book_id' => $book->id,
         'financial_account_id' => $account->id,
-        'cheque_no' => 'PAYMENT-' . $account->id,
+        'cheque_no' => 'PAYMENT-'.$account->id,
         'status' => 'ISSUED',
         'amount' => 100,
     ]);
@@ -767,7 +783,7 @@ it('requires a verified signatory and a separate approver before payment', funct
         'authorization_type' => 'VIEWER',
         'is_active' => true,
     ]);
-    expect(fn() => $service->verify($payment, $viewer->id, true, true, $fixture['organization']->id, $fixture['user']->id))
+    expect(fn () => $service->verify($payment, $viewer->id, true, true, $fixture['organization']->id, $fixture['user']->id))
         ->toThrow(ValidationException::class);
 
     $payment = $service->verify($payment, $customer->id, true, true, $fixture['organization']->id, $fixture['user']->id);
@@ -775,7 +791,7 @@ it('requires a verified signatory and a separate approver before payment', funct
         ->and($payment->checks['balance_sufficient'])->toBeTrue()
         ->and($payment->checks['stop_payment_clear'])->toBeTrue();
 
-    expect(fn() => $service->approve($payment, $fixture['organization']->id, $fixture['user']->id))
+    expect(fn () => $service->approve($payment, $fixture['organization']->id, $fixture['user']->id))
         ->toThrow(ValidationException::class);
 
     $approver = User::factory()->create([
@@ -785,7 +801,7 @@ it('requires a verified signatory and a separate approver before payment', funct
     $payment = $service->approve($payment, $fixture['organization']->id, $approver->id);
     expect($payment->status)->toBe('APPROVED');
 
-    expect(fn() => $service->pay($payment, $fixture['organization']->id, $fixture['branch']->id, $approver->id))
+    expect(fn () => $service->pay($payment, $fixture['organization']->id, $fixture['branch']->id, $approver->id))
         ->toThrow(ValidationException::class);
     expect($payment->fresh()->status)->toBe('APPROVED')
         ->and($cheque->fresh()->status)->toBe('ISSUED');
@@ -824,7 +840,7 @@ it('creates a pending customer deposit from selected obligations', function () {
             'teller_session_id' => $fixture['session']->id,
             'customer_id' => $customer->id,
             'amount' => '5.00',
-            'selected' => ['deposit-' . $savingsAccount->id],
+            'selected' => ['deposit-'.$savingsAccount->id],
             'note' => 'Customer cash deposit',
         ])
         ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
@@ -972,13 +988,6 @@ it('creates and posts a multi-line financial deposit with the teller cash leg', 
     grantTellerCashTransactionPostPermission($fixture['user']);
     grantTellerCashTransactionReversePermission($fixture['user']);
 
-    $cashAccount = FinancialAccount::factory()->active()->create([
-        'organization_id' => $fixture['organization']->id,
-        'branch_id' => $fixture['branch']->id,
-        'financial_product_id' => null,
-        'account_type' => 'CASH',
-        'account_no' => 'CASH-TELLER-001',
-    ]);
     $savingsAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
@@ -993,7 +1002,6 @@ it('creates and posts a multi-line financial deposit with the teller cash leg', 
         'account_type' => 'SHARE',
         'account_no' => 'SHARE-001',
     ]);
-    $fixture['location']->update(['financial_account_id' => $cashAccount->id]);
     configureTellerSummaryMapping($fixture, 'DEPOSIT');
 
     $this->actingAs($fixture['user'])
@@ -1009,8 +1017,11 @@ it('creates and posts a multi-line financial deposit with the teller cash leg', 
         ->assertRedirect(route('teller-transactions.deposit'));
 
     $transaction = TellerCashTransaction::query()->with('financialTransaction.entries')->firstOrFail();
+    $cashAccount = $fixture['location']->fresh()->financialAccount;
 
     expect($transaction->financial_transaction_id)->not->toBeNull()
+        ->and($cashAccount)->not->toBeNull()
+        ->and($cashAccount->account_type)->toBe('CASH')
         ->and($transaction->financialTransaction->entries)->toHaveCount(3)
         ->and($transaction->financialTransaction->status)->toBe('PENDING');
 
@@ -1019,11 +1030,16 @@ it('creates and posts a multi-line financial deposit with the teller cash leg', 
         ->post(route('teller-transactions.post', $transaction))
         ->assertRedirect(route('teller-transactions.index'));
 
-    expect($cashAccount->fresh()->balance)->toBe('300.0000')
+    expect($cashAccount->fresh()->balance)->toBe('5300.0000')
         ->and($savingsAccount->fresh()->balance)->toBe('200.0000')
         ->and($shareAccount->fresh()->balance)->toBe('100.0000')
         ->and($transaction->fresh()->status)->toBe('POSTED')
         ->and($fixture['session']->fresh()->expected_cash)->toBe('5300.0000');
+
+    $voucherEntries = $transaction->fresh()->financialTransaction->voucher()->with('entries.account')->firstOrFail()->entries;
+    expect($voucherEntries)->toHaveCount(3)
+        ->and($voucherEntries->contains(fn ($entry) => $entry->account->code === '2100' && $entry->credit === '200.0000'))->toBeTrue()
+        ->and($voucherEntries->contains(fn ($entry) => $entry->account->code === '3100' && $entry->credit === '100.0000'))->toBeTrue();
 
     $fixture['session']->update([
         'status' => 'CLOSED',
@@ -1043,7 +1059,7 @@ it('creates and posts a multi-line financial deposit with the teller cash leg', 
         ->and($transaction->fresh()->reversed_by)->toBe($fixture['user']->id)
         ->and($transaction->fresh()->reversed_at)->not->toBeNull()
         ->and($transaction->fresh()->financialTransaction->status)->toBe('REVERSED')
-        ->and($cashAccount->fresh()->balance)->toBe('0.0000')
+        ->and($cashAccount->fresh()->balance)->toBe('5000.0000')
         ->and($savingsAccount->fresh()->balance)->toBe('0.0000')
         ->and($shareAccount->fresh()->balance)->toBe('0.0000')
         ->and($fixture['session']->fresh()->expected_cash)->toBe('5000.0000')
@@ -1055,15 +1071,6 @@ it('creates and posts a multi-line financial withdrawal with the teller cash leg
     grantTellerCashTransactionPermission($fixture['user']);
     grantTellerCashTransactionPostPermission($fixture['user']);
 
-    $cashAccount = FinancialAccount::factory()->active()->create([
-        'organization_id' => $fixture['organization']->id,
-        'branch_id' => $fixture['branch']->id,
-        'financial_product_id' => null,
-        'account_type' => 'CASH',
-        'account_no' => 'CASH-TELLER-002',
-        'balance' => 1000,
-        'available_balance' => 1000,
-    ]);
     $savingsAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
@@ -1073,7 +1080,6 @@ it('creates and posts a multi-line financial withdrawal with the teller cash leg
         'balance' => 500,
         'available_balance' => 500,
     ]);
-    $fixture['location']->update(['financial_account_id' => $cashAccount->id]);
     configureTellerSummaryMapping($fixture, 'WITHDRAWAL');
 
     $this->actingAs($fixture['user'])
@@ -1088,8 +1094,11 @@ it('creates and posts a multi-line financial withdrawal with the teller cash leg
         ->assertRedirect(route('teller-transactions.withdrawal'));
 
     $transaction = TellerCashTransaction::query()->with('financialTransaction.entries')->latest()->firstOrFail();
+    $cashAccount = $fixture['location']->fresh()->financialAccount;
 
     expect($transaction->financial_transaction_id)->not->toBeNull()
+        ->and($cashAccount)->not->toBeNull()
+        ->and($cashAccount->balance)->toBe('5000.0000')
         ->and($transaction->financialTransaction->entries)->toHaveCount(2)
         ->and($transaction->financialTransaction->status)->toBe('PENDING');
 
@@ -1098,8 +1107,12 @@ it('creates and posts a multi-line financial withdrawal with the teller cash leg
         ->post(route('teller-transactions.post', $transaction))
         ->assertRedirect(route('teller-transactions.index'));
 
-    expect($cashAccount->fresh()->balance)->toBe('700.0000')
+    expect($cashAccount->fresh()->balance)->toBe('4700.0000')
         ->and($savingsAccount->fresh()->balance)->toBe('200.0000')
         ->and($transaction->fresh()->status)->toBe('POSTED')
         ->and($fixture['session']->fresh()->expected_cash)->toBe('4700.0000');
+
+    $voucherEntries = $transaction->fresh()->financialTransaction->voucher()->with('entries.account')->firstOrFail()->entries;
+    expect($voucherEntries)->toHaveCount(2)
+        ->and($voucherEntries->contains(fn ($entry) => $entry->account->code === '2100' && $entry->debit === '300.0000'))->toBeTrue();
 });

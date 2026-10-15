@@ -28,7 +28,9 @@ export default function FinancialTransactionShow() {
                     description={`${transaction.transaction_type} · ${
                         transaction.entries
                             ?.map(
-                                (entry) => entry.financial_account?.account_no,
+                                (entry) =>
+                                    entry.financial_account?.name ||
+                                    entry.financial_account?.account_no,
                             )
                             .filter(Boolean)
                             .join(', ') || '-'
@@ -184,7 +186,10 @@ export default function FinancialTransactionShow() {
                                 className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
                             >
                                 <span>
-                                    {entry.financial_account?.account_no ?? '-'}
+                                    {entry.financial_account?.name
+                                        ? `${entry.financial_account.name} (${entry.financial_account.account_no ?? '-'})`
+                                        : (entry.financial_account
+                                              ?.account_no ?? '-')}
                                 </span>
                                 <span className="tabular-nums">
                                     {entry.direction}{' '}

@@ -2,8 +2,9 @@
 
 namespace App\TreasuryAndCash\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\FinancialServices\Models\FinancialAccount;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\Http\Controllers\Controller;
 use App\SystemAdministration\Models\Branch;
 use App\TreasuryAndCash\Application\BankingDataService;
 use App\TreasuryAndCash\Application\BankTransactionService;
@@ -13,9 +14,10 @@ use App\TreasuryAndCash\Requests\StoreBankTransactionRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Str;
 
 class BankingController extends Controller
 {
@@ -49,6 +51,7 @@ class BankingController extends Controller
 
         return Inertia::render('treasury-cash/banking/accounts/create', [
             'branches' => Branch::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'code', 'name']),
+            'ledger_accounts' => $this->counterpartLedgerAccounts($organizationId),
         ]);
     }
 
@@ -60,7 +63,7 @@ class BankingController extends Controller
         $openingAmount = (float) $data['opening_balance'];
 
         abort_unless(
-            !$data['branch_id'] || Branch::query()->whereKey($data['branch_id'])->where('organization_id', $organizationId)->exists(),
+            ! $data['branch_id'] || Branch::query()->whereKey($data['branch_id'])->where('organization_id', $organizationId)->exists(),
             404,
         );
 
@@ -82,7 +85,7 @@ class BankingController extends Controller
                     'product_id' => null,
                     'holder_type' => null,
                     'holder_id' => null,
-                    'account_no' => 'BANK-' . Str::uuid(),
+                    'account_no' => 'BANK-'.Str::uuid(),
                     'name' => $data['account_name'],
                     'account_type' => 'BANK',
                     'status' => 'ACTIVE',
@@ -93,8 +96,11 @@ class BankingController extends Controller
                     'metadata' => ['managed_by' => 'bank_account'],
                 ]);
 
+                $bankAccountData = $data;
+                unset($bankAccountData['opening_counterpart_account_id']);
+
                 $account = BankAccount::create([
-                    ...$data,
+                    ...$bankAccountData,
                     'organization_id' => $organizationId,
                     'financial_account_id' => $financialAccount->id,
                     'opening_balance' => 0,
@@ -106,8 +112,9 @@ class BankingController extends Controller
                         'bank_account_id' => $account->id,
                         'type' => 'DEPOSIT',
                         'amount' => $openingAmount,
-                        'reference' => 'OPENING-' . $account->account_number,
-                        'description' => 'Opening balance deposit for ' . $account->account_name,
+                        'counterpart_account_id' => $data['opening_counterpart_account_id'],
+                        'reference' => 'OPENING-'.$account->account_number,
+                        'description' => 'Opening balance deposit for '.$account->account_name,
                     ]);
                 }
             });
@@ -125,12 +132,15 @@ class BankingController extends Controller
 
     public function transactions(Request $request): Response
     {
+        $organizationId = $request->attributes->get('active_organization')->id;
+
         return Inertia::render('treasury-cash/banking/transactions/index', [
             'transactions' => $this->bankingDataService->listTransactions(
-                $request->attributes->get('active_organization')->id,
+                $organizationId,
                 $request->input('search'),
                 $request->input('per_page', 18),
             ),
+            'ledger_accounts' => $this->counterpartLedgerAccounts($organizationId),
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
@@ -145,6 +155,7 @@ class BankingController extends Controller
                 ->where('status', 'ACTIVE')
                 ->orderBy('account_name')
                 ->get(['id', 'account_name', 'account_number']),
+            'ledger_accounts' => $this->counterpartLedgerAccounts($organizationId),
         ]);
     }
 
@@ -170,18 +181,42 @@ class BankingController extends Controller
     {
         $user = $request->user();
         abort_unless($user?->branch_id, 422, 'A branch assignment is required for bank transactions.');
+        $organizationId = $request->attributes->get('active_organization')->id;
+        $data = $request->validate([
+            'counterpart_account_id' => [
+                Rule::requiredIf(! $transaction->counterpart_account_id),
+                'nullable',
+                'integer',
+                Rule::exists('accounts', 'id')->where(fn ($query) => $query
+                    ->where('organization_id', $organizationId)
+                    ->where('status', true)
+                    ->where('code', '!=', '1200')),
+            ],
+        ]);
 
         try {
             $this->bankTransactionService->post(
-                $request->attributes->get('active_organization')->id,
+                $organizationId,
                 $user->branch_id,
                 $transaction->id,
                 $user->id,
+                isset($data['counterpart_account_id']) ? (int) $data['counterpart_account_id'] : null,
             );
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         }
 
         return redirect()->route('bank-transactions.index')->with('success', 'Bank transaction posted successfully.');
+    }
+
+    private function counterpartLedgerAccounts(int $organizationId): array
+    {
+        return LedgerAccount::query()
+            ->where('organization_id', $organizationId)
+            ->where('status', true)
+            ->where('code', '!=', '1200')
+            ->orderBy('code')
+            ->get(['id', 'code', 'name'])
+            ->all();
     }
 }

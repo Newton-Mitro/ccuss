@@ -50,13 +50,13 @@ it('lists and upserts organization-scoped Treasury GL mappings', function () {
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('treasury-gl-mappings.index'))
         ->assertOk()
-        ->assertInertia(fn(Assert $page) => $page
+        ->assertInertia(fn (Assert $page) => $page
             ->component('general-accounting/treasury-gl-mappings/index')
             ->has('mappings', 0)
             ->has('accounts', 3));
 
     $payload = [
-        'source_type' => 'BANK_TRANSACTION',
+        'source_type' => 'BANK_ACCOUNT',
         'source_code' => ' default ',
         'transaction_type' => 'deposit',
         'debit_account_id' => $debit->id,
@@ -94,7 +94,7 @@ it('rejects Treasury GL mappings to accounts in another organization', function 
         ->withSession(['active_organization_id' => $organization->id])
         ->from(route('treasury-gl-mappings.index'))
         ->post(route('treasury-gl-mappings.store'), [
-            'source_type' => 'BANK_TRANSACTION',
+            'source_type' => 'BANK_ACCOUNT',
             'source_code' => 'DEFAULT',
             'transaction_type' => 'DEPOSIT',
             'debit_account_id' => $otherAccount->id,

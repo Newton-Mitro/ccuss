@@ -23,7 +23,8 @@ import { type FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Create() {
-    const { branches } = usePage<BankAccountCreatePageProps>().props;
+    const { branches, ledger_accounts } =
+        usePage<BankAccountCreatePageProps>().props;
 
     const { data, setData, post, processing, errors } = useForm({
         branch_id: '',
@@ -32,6 +33,7 @@ export default function Create() {
         routing_number: '',
         account_type: 'CURRENT',
         opening_balance: '0',
+        opening_counterpart_account_id: '',
         is_reconcilable: true,
         status: 'ACTIVE',
     });
@@ -400,6 +402,56 @@ export default function Create() {
                                     Posting it updates the book balance and
                                     creates the voucher; the selected branch
                                     needs an open business day.
+                                </p>
+                            </div>
+
+                            <div className="max-w-xl space-y-1.5">
+                                <label
+                                    htmlFor="opening_counterpart_account_id"
+                                    className={labelClass}
+                                >
+                                    Opening balance counterpart
+                                    {Number(data.opening_balance) > 0 && (
+                                        <span className="ml-1 text-destructive">
+                                            *
+                                        </span>
+                                    )}
+                                </label>
+
+                                <Select
+                                    id="opening_counterpart_account_id"
+                                    className={fieldClass}
+                                    value={data.opening_counterpart_account_id}
+                                    disabled={Number(data.opening_balance) <= 0}
+                                    onChange={(value) =>
+                                        setData(
+                                            'opening_counterpart_account_id',
+                                            value,
+                                        )
+                                    }
+                                    placeholder="Select counterpart account"
+                                    options={[
+                                        {
+                                            value: '',
+                                            label: 'Select counterpart account',
+                                        },
+                                        ...ledger_accounts.map((account) => ({
+                                            value: String(account.id),
+                                            label: `${account.code} — ${account.name}`,
+                                        })),
+                                    ]}
+                                />
+
+                                <InputError
+                                    message={
+                                        errors.opening_counterpart_account_id
+                                    }
+                                />
+
+                                <p className="text-xs leading-5 text-muted-foreground">
+                                    Required for a positive opening balance. The
+                                    chosen ledger account will be credited when
+                                    the opening deposit is posted.
                                 </p>
                             </div>
 

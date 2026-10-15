@@ -3,6 +3,8 @@
 namespace App\TreasuryAndCash\Application;
 
 use App\GeneralAccounting\Application\TreasurySummaryPostingService;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
@@ -16,8 +18,7 @@ class CashTransferService
     public function __construct(
         private readonly BankTransactionService $bankTransactionService,
         private readonly TreasurySummaryPostingService $summaryPostingService,
-    ) {
-    }
+    ) {}
 
     public function create(
         int $organizationId,
@@ -35,7 +36,7 @@ class CashTransferService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$branchDay) {
+            if (! $branchDay) {
                 throw new \RuntimeException('An open branch day is required before creating a cash transfer.');
             }
 
@@ -77,12 +78,12 @@ class CashTransferService
                 $bankAccount = BankAccount::query()
                     ->whereKey($data['bank_account_id'] ?? null)
                     ->where('organization_id', $organizationId)
-                    ->where(fn($query) => $query->whereNull('branch_id')->orWhere('branch_id', $branchId))
+                    ->where(fn ($query) => $query->whereNull('branch_id')->orWhere('branch_id', $branchId))
                     ->where('status', 'ACTIVE')
                     ->lockForUpdate()
                     ->first();
 
-                if (!$bankAccount) {
+                if (! $bankAccount) {
                     throw new \RuntimeException('Select an active bank account in the active branch.');
                 }
 
@@ -97,7 +98,7 @@ class CashTransferService
                 'to_cash_location_id' => $data['to_cash_location_id'] ?? null,
                 'bank_account_id' => $bankAccountId,
                 'amount' => $data['amount'],
-                'transfer_no' => 'TRF-' . now()->format('Ymd') . '-' . str_pad((string) $nextNumber, 5, '0', STR_PAD_LEFT),
+                'transfer_no' => 'TRF-'.now()->format('Ymd').'-'.str_pad((string) $nextNumber, 5, '0', STR_PAD_LEFT),
                 'transfer_type' => $transferType,
                 'status' => 'PENDING',
                 'requested_by' => $userId,
@@ -120,7 +121,7 @@ class CashTransferService
             })
             ->first();
 
-        if (!$transfer) {
+        if (! $transfer) {
             throw new \RuntimeException('A pending transfer for the active branch and open branch day is required.');
         }
 
@@ -148,7 +149,7 @@ class CashTransferService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$transfer) {
+            if (! $transfer) {
                 throw new \RuntimeException('An approved transfer for the active branch and open branch day is required.');
             }
 
@@ -160,22 +161,18 @@ class CashTransferService
                     'bank_account_id' => $transfer->bank_account_id,
                     'type' => 'TRANSFER_OUT',
                     'amount' => $transfer->amount,
+                    'counterpart_account_id' => $this->cashLedgerAccountIdForLocation(
+                        $organizationId,
+                        $transfer->toCashLocation,
+                        'DEPOSIT',
+                    ),
                     'transaction_date' => now()->toDateString(),
                     'reference' => $transfer->transfer_no,
-                    'description' => $transfer->note ?: 'Bank funding to vault ' . $transfer->toCashLocation->name,
+                    'description' => $transfer->note ?: 'Bank funding to vault '.$transfer->toCashLocation->name,
                 ]);
                 $this->bankTransactionService->post($organizationId, $branchId, $bankTransaction->id, $userId);
                 $transfer->bank_transaction_id = $bankTransaction->id;
                 $destinationSession->update(['expected_cash' => $destinationExpected + $amount]);
-                $this->postCashLocationLeg(
-                    $organizationId,
-                    $branchId,
-                    $userId,
-                    $transfer,
-                    $transfer->toCashLocation,
-                    'DEPOSIT',
-                    'CASH-IN',
-                );
             } elseif ($transfer->transfer_type === 'VAULT_TO_BANK') {
                 $sourceSession = $this->openSessionForLocation($transfer->fromCashLocation, $transfer->branch_day_id);
                 $sourceExpected = (float) ($sourceSession->expected_cash ?? $sourceSession->opening_cash);
@@ -187,6 +184,11 @@ class CashTransferService
                     'bank_account_id' => $transfer->bank_account_id,
                     'type' => 'TRANSFER_IN',
                     'amount' => $transfer->amount,
+                    'counterpart_account_id' => $this->cashLedgerAccountIdForLocation(
+                        $organizationId,
+                        $transfer->fromCashLocation,
+                        'WITHDRAWAL',
+                    ),
                     'transaction_date' => now()->toDateString(),
                     'reference' => $transfer->transfer_no,
                     'description' => $transfer->note ?: 'Vault deposit to bank account',
@@ -194,15 +196,6 @@ class CashTransferService
                 $this->bankTransactionService->post($organizationId, $branchId, $bankTransaction->id, $userId);
                 $sourceSession->update(['expected_cash' => $sourceExpected - $amount]);
                 $transfer->bank_transaction_id = $bankTransaction->id;
-                $this->postCashLocationLeg(
-                    $organizationId,
-                    $branchId,
-                    $userId,
-                    $transfer,
-                    $transfer->fromCashLocation,
-                    'WITHDRAWAL',
-                    'CASH-OUT',
-                );
             } else {
                 $destinationSession = $this->openSessionForLocation($transfer->toCashLocation, $transfer->branch_day_id);
                 $destinationExpected = (float) ($destinationSession->expected_cash ?? $destinationSession->opening_cash);
@@ -215,24 +208,34 @@ class CashTransferService
 
                 $sourceSession->update(['expected_cash' => $sourceExpected - $amount]);
                 $destinationSession->update(['expected_cash' => $destinationExpected + $amount]);
-                $this->postCashLocationLeg(
+                $destinationCashAccountId = $this->cashLedgerAccountIdForLocation(
                     $organizationId,
-                    $branchId,
-                    $userId,
-                    $transfer,
-                    $transfer->fromCashLocation,
-                    'WITHDRAWAL',
-                    'CASH-OUT',
-                );
-                $this->postCashLocationLeg(
-                    $organizationId,
-                    $branchId,
-                    $userId,
-                    $transfer,
                     $transfer->toCashLocation,
                     'DEPOSIT',
-                    'CASH-IN',
                 );
+                $sourceCashAccountId = $this->cashLedgerAccountIdForLocation(
+                    $organizationId,
+                    $transfer->fromCashLocation,
+                    'WITHDRAWAL',
+                );
+
+                if ($destinationCashAccountId !== $sourceCashAccountId) {
+                    $this->summaryPostingService->post(
+                        organizationId: $organizationId,
+                        sourceType: 'CASH_TRANSFER',
+                        sourceCode: 'DIRECT',
+                        transactionType: 'TRANSFER',
+                        voucherNo: 'CASH-TRF-'.$transfer->id,
+                        voucherDate: now()->toDateString(),
+                        branchId: $branchId,
+                        userId: $userId,
+                        amount: $amount,
+                        description: 'Cash transfer '.$transfer->transfer_no,
+                        reference: $transfer->transfer_no,
+                        debitAccountOverride: $destinationCashAccountId,
+                        creditAccountOverride: $sourceCashAccountId,
+                    );
+                }
             }
 
             $transfer->update([
@@ -244,28 +247,40 @@ class CashTransferService
         });
     }
 
-    private function postCashLocationLeg(
+    private function cashLedgerAccountIdForLocation(
         int $organizationId,
-        int $branchId,
-        int $userId,
-        CashTransfer $transfer,
         CashLocation $location,
         string $transactionType,
-        string $suffix,
-    ): void {
-        $this->summaryPostingService->post(
-            organizationId: $organizationId,
-            sourceType: 'CASH_LOCATION',
-            sourceCode: $location->type,
-            transactionType: $transactionType,
-            voucherNo: 'CASH-TRF-' . $transfer->id . '-' . $suffix,
-            voucherDate: now()->toDateString(),
-            branchId: $branchId,
-            userId: $userId,
-            amount: (float) $transfer->amount,
-            description: 'Cash transfer ' . $transfer->transfer_no . ' ' . strtolower($transactionType),
-            reference: $transfer->transfer_no,
-        );
+    ): int {
+        $mapping = TreasuryGlMapping::query()
+            ->where('organization_id', $organizationId)
+            ->where('source_type', 'CASH_LOCATION')
+            ->where('source_code', $location->type)
+            ->where('transaction_type', $transactionType)
+            ->where('status', true)
+            ->first();
+
+        $accountId = $transactionType === 'DEPOSIT'
+            ? $mapping?->debit_account_id
+            : $mapping?->credit_account_id;
+
+        if (! $accountId) {
+            throw new \RuntimeException("No active cash ledger mapping exists for {$location->type}/{$transactionType}.");
+        }
+
+        $isCashControl = LedgerAccount::query()
+            ->where('organization_id', $organizationId)
+            ->where('status', true)
+            ->where('is_cash_account', true)
+            ->where('is_control_account', true)
+            ->whereKey($accountId)
+            ->exists();
+
+        if (! $isCashControl) {
+            throw new \RuntimeException("The {$location->type} mapping must use an active cash control account.");
+        }
+
+        return (int) $accountId;
     }
 
     private function openSessionForLocation(CashLocation $location, int $branchDayId): TellerSession|VaultSession
@@ -274,19 +289,19 @@ class CashTransferService
             'TELLER' => TellerSession::query()
                 ->where('branch_day_id', $branchDayId)
                 ->where('status', 'OPEN')
-                ->whereHas('teller', fn($teller) => $teller->where('cash_location_id', $location->id))
+                ->whereHas('teller', fn ($teller) => $teller->where('cash_location_id', $location->id))
                 ->lockForUpdate()
                 ->first(),
             'VAULT' => VaultSession::query()
                 ->where('branch_day_id', $branchDayId)
                 ->where('status', 'OPEN')
-                ->whereHas('vault', fn($vault) => $vault->where('cash_location_id', $location->id))
+                ->whereHas('vault', fn ($vault) => $vault->where('cash_location_id', $location->id))
                 ->lockForUpdate()
                 ->first(),
             default => null,
         };
 
-        if (!$session) {
+        if (! $session) {
             throw new \RuntimeException('Both source and destination must have open teller or vault sessions for this branch day.');
         }
 

@@ -245,8 +245,7 @@ class GeneralAccountingSeeder extends Seeder
 
                         'name' => $definition['name'],
                         'type' => $definition['type'],
-                        'normal_balance' =>
-                            $definition['normal_balance'],
+                        'normal_balance' => $definition['normal_balance'],
 
                         'level' => $parentCode ? 1 : 0,
 
@@ -307,16 +306,6 @@ class GeneralAccountingSeeder extends Seeder
                 'is_cash' => true,
                 'is_reconcilable' => true,
                 'is_control' => true,
-            ],
-            [
-                'code' => '1210',
-                'name' => 'Bank Clearing',
-                'group' => '1100',
-                'type' => 'ASSET',
-                'normal_balance' => 'DEBIT',
-                'is_cash' => false,
-                'is_reconcilable' => true,
-                'is_control' => false,
             ],
             [
                 'code' => '1300',
@@ -586,24 +575,19 @@ class GeneralAccountingSeeder extends Seeder
                         'code' => $definition['code'],
                     ],
                     [
-                        'account_group_id' =>
-                            $groups[$definition['group']]->id,
+                        'account_group_id' => $groups[$definition['group']]->id,
 
                         'name' => $definition['name'],
                         'type' => $definition['type'],
-                        'normal_balance' =>
-                            $definition['normal_balance'],
+                        'normal_balance' => $definition['normal_balance'],
 
                         'level' => 0,
 
-                        'is_control_account' =>
-                            $definition['is_control'],
+                        'is_control_account' => $definition['is_control'],
 
-                        'is_reconcilable' =>
-                            $definition['is_reconcilable'],
+                        'is_reconcilable' => $definition['is_reconcilable'],
 
-                        'is_cash_account' =>
-                            $definition['is_cash'],
+                        'is_cash_account' => $definition['is_cash'],
 
                         'is_system' => true,
                         'status' => true,
@@ -666,8 +650,7 @@ class GeneralAccountingSeeder extends Seeder
             $costCenters[$definition['code']] =
                 CostCenter::query()->firstOrCreate(
                     [
-                        'organization_id' =>
-                            $organization->id,
+                        'organization_id' => $organization->id,
 
                         'code' => $definition['code'],
                     ],
@@ -739,8 +722,7 @@ class GeneralAccountingSeeder extends Seeder
         $fiscalYear =
             FiscalYear::query()->updateOrCreate(
                 [
-                    'organization_id' =>
-                        $organization->id,
+                    'organization_id' => $organization->id,
 
                     'name' => '2025-2026',
                 ],
@@ -749,8 +731,7 @@ class GeneralAccountingSeeder extends Seeder
                     'end_date' => '2026-06-30',
 
                     'status' => 'OPEN',
-                    'is_current' =>
-                        $openingFiscalYearIsCurrent,
+                    'is_current' => $openingFiscalYearIsCurrent,
                 ],
             );
 
@@ -768,22 +749,18 @@ class GeneralAccountingSeeder extends Seeder
         $currentFiscalYear =
             FiscalYear::query()->updateOrCreate(
                 [
-                    'organization_id' =>
-                        $organization->id,
+                    'organization_id' => $organization->id,
 
-                    'name' =>
-                        $currentFiscalYearStart->year .
-                        '-' .
+                    'name' => $currentFiscalYearStart->year.
+                        '-'.
                         $currentFiscalYearEnd->year,
                 ],
                 [
-                    'start_date' =>
-                        $currentFiscalYearStart
-                            ->toDateString(),
+                    'start_date' => $currentFiscalYearStart
+                        ->toDateString(),
 
-                    'end_date' =>
-                        $currentFiscalYearEnd
-                            ->toDateString(),
+                    'end_date' => $currentFiscalYearEnd
+                        ->toDateString(),
 
                     'status' => 'OPEN',
                     'is_current' => true,
@@ -814,11 +791,9 @@ class GeneralAccountingSeeder extends Seeder
                     'name' => $start->format('F Y'),
                 ],
                 [
-                    'start_date' =>
-                        $start->toDateString(),
+                    'start_date' => $start->toDateString(),
 
-                    'end_date' =>
-                        $end->toDateString(),
+                    'end_date' => $end->toDateString(),
 
                     'status' => 'OPEN',
                 ],
@@ -853,14 +828,11 @@ class GeneralAccountingSeeder extends Seeder
 
         $budget = Budget::query()->firstOrCreate(
             [
-                'organization_id' =>
-                    $organization->id,
+                'organization_id' => $organization->id,
 
-                'fiscal_year_id' =>
-                    $openingFiscalYear->id,
+                'fiscal_year_id' => $openingFiscalYear->id,
 
-                'name' =>
-                    'Operating Budget 2025-2026',
+                'name' => 'Operating Budget 2025-2026',
             ],
             [
                 'status' => 'ACTIVE',
@@ -875,20 +847,16 @@ class GeneralAccountingSeeder extends Seeder
 
         $entries = [
             [
-                'account_id' =>
-                    $ledgerAccounts['5100']->id,
+                'account_id' => $ledgerAccounts['5100']->id,
 
-                'cost_center_id' =>
-                    $costCenters['operations']->id,
+                'cost_center_id' => $costCenters['operations']->id,
 
-                'fiscal_period_id' =>
-                    $period->id,
+                'fiscal_period_id' => $period->id,
 
                 'amount' => 0,
             ],
             [
-                'account_id' =>
-                    $ledgerAccounts['5100']->id,
+                'account_id' => $ledgerAccounts['5100']->id,
 
                 'cost_center_id' => null,
                 'fiscal_period_id' => null,
@@ -896,13 +864,11 @@ class GeneralAccountingSeeder extends Seeder
                 'amount' => 0,
             ],
             [
-                'account_id' =>
-                    $ledgerAccounts['4100']->id,
+                'account_id' => $ledgerAccounts['4100']->id,
 
                 'cost_center_id' => null,
 
-                'fiscal_period_id' =>
-                    $period->id,
+                'fiscal_period_id' => $period->id,
 
                 'amount' => 0,
             ],
@@ -911,19 +877,15 @@ class GeneralAccountingSeeder extends Seeder
         foreach ($entries as $entry) {
             BudgetEntry::query()->firstOrCreate(
                 [
-                    'organization_id' =>
-                        $organization->id,
+                    'organization_id' => $organization->id,
 
                     'budget_id' => $budget->id,
 
-                    'account_id' =>
-                        $entry['account_id'],
+                    'account_id' => $entry['account_id'],
 
-                    'cost_center_id' =>
-                        $entry['cost_center_id'],
+                    'cost_center_id' => $entry['cost_center_id'],
 
-                    'fiscal_period_id' =>
-                        $entry['fiscal_period_id'],
+                    'fiscal_period_id' => $entry['fiscal_period_id'],
                 ],
                 [
                     'amount' => $entry['amount'],

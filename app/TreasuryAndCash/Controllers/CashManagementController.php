@@ -3,26 +3,27 @@
 namespace App\TreasuryAndCash\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Application\CashBranchAccessService;
+use App\TreasuryAndCash\Application\CashLocationFinancialAccountService;
 use App\TreasuryAndCash\Application\CashLocationHistoryService;
 use App\TreasuryAndCash\Application\CashManagementDataService;
 use App\TreasuryAndCash\Application\TellerSessionService;
 use App\TreasuryAndCash\Application\VaultSessionService;
-use App\TreasuryAndCash\Models\TellerSession;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Teller;
+use App\TreasuryAndCash\Models\TellerSession;
 use App\TreasuryAndCash\Models\Vault;
 use App\TreasuryAndCash\Models\VaultSession;
 use App\TreasuryAndCash\Requests\CloseTellerSessionRequest;
 use App\TreasuryAndCash\Requests\CloseVaultSessionRequest;
-use App\TreasuryAndCash\Requests\StoreTellerSessionRequest;
 use App\TreasuryAndCash\Requests\StoreTellerRequest;
+use App\TreasuryAndCash\Requests\StoreTellerSessionRequest;
 use App\TreasuryAndCash\Requests\StoreVaultRequest;
 use App\TreasuryAndCash\Requests\StoreVaultSessionRequest;
-use App\SystemAdministration\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -32,6 +33,7 @@ class CashManagementController extends Controller
     public function __construct(
         private readonly CashManagementDataService $cashManagementDataService,
         private readonly CashBranchAccessService $cashBranchAccessService,
+        private readonly CashLocationFinancialAccountService $cashLocationFinancialAccountService,
         private readonly CashLocationHistoryService $cashLocationHistoryService,
         private readonly TellerSessionService $tellerSessionService,
         private readonly VaultSessionService $vaultSessionService,
@@ -93,7 +95,7 @@ class CashManagementController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        if (!$this->cashBranchAccessService->canManage($organization->id, (int) $data['branch_id'])) {
+        if (! $this->cashBranchAccessService->canManage($organization->id, (int) $data['branch_id'])) {
             throw ValidationException::withMessages([
                 'branch_id' => 'Select a branch in the active organization.',
             ]);
@@ -108,6 +110,7 @@ class CashManagementController extends Controller
                 'type' => 'VAULT',
                 'is_active' => $data['status'] === 'ACTIVE',
             ]);
+            $this->cashLocationFinancialAccountService->ensureLinked($location);
             Vault::create([
                 'cash_location_id' => $location->id,
                 'code' => $data['code'],
@@ -189,7 +192,7 @@ class CashManagementController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        if (!$this->cashBranchAccessService->canManage($organization->id, (int) $data['branch_id'])) {
+        if (! $this->cashBranchAccessService->canManage($organization->id, (int) $data['branch_id'])) {
             throw ValidationException::withMessages([
                 'branch_id' => 'Select a branch in the active organization.',
             ]);
@@ -212,6 +215,7 @@ class CashManagementController extends Controller
                 'type' => 'TELLER',
                 'is_active' => $data['status'] === 'ACTIVE',
             ]);
+            $this->cashLocationFinancialAccountService->ensureLinked($location);
             Teller::create([
                 'cash_location_id' => $location->id,
                 'user_id' => $data['user_id'],
@@ -318,7 +322,7 @@ class CashManagementController extends Controller
         $organization = $request->attributes->get('active_organization');
         $user = $request->user();
 
-        if (!$user?->branch_id) {
+        if (! $user?->branch_id) {
             return Inertia::render('treasury-cash/teller-sessions/create', [
                 'branch_day' => null,
                 'branch_days' => [],
@@ -405,7 +409,7 @@ class CashManagementController extends Controller
         $organization = $request->attributes->get('active_organization');
         $user = $request->user();
 
-        if (!$user?->branch_id) {
+        if (! $user?->branch_id) {
             return Inertia::render('treasury-cash/vault-sessions/create', [
                 'branch_day' => null,
                 'branch_days' => [],

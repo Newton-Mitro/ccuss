@@ -13,6 +13,7 @@ export interface BankAccountListItem {
     account_number: string;
     routing_number?: string | null;
     account_type: BankAccountType;
+    balance: string | number;
     opening_balance: string | number;
     is_reconcilable: boolean;
     status: BankAccountStatus;

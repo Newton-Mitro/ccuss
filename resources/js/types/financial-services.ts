@@ -403,7 +403,7 @@ export interface FinancialAccountOption {
 }
 
 export interface FinancialTransactionEntry {
-    financial_account?: { account_no?: string } | null;
+    financial_account?: { account_no?: string; name?: string | null } | null;
     direction?: 'DEBIT' | 'CREDIT';
     amount?: string | number;
     balance_after?: string | number | null;

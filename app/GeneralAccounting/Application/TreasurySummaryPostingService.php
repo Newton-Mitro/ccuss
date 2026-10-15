@@ -55,7 +55,7 @@ class TreasurySummaryPostingService
         $debitAccountId = $debitAccountOverride ?? $mapping?->debit_account_id;
         $creditAccountId = $creditAccountOverride ?? $mapping?->credit_account_id;
 
-        if (!$debitAccountId || !$creditAccountId) {
+        if (! $debitAccountId || ! $creditAccountId) {
             throw new RuntimeException(
                 "No active General Ledger mapping exists for {$sourceType}/{$sourceCode}/{$transactionType}.",
             );
@@ -78,7 +78,7 @@ class TreasurySummaryPostingService
 
         if ($sourceType === 'CASH_LOCATION' && in_array($transactionType, ['DEPOSIT', 'WITHDRAWAL'], true)) {
             $cashAccount = $accounts->get($transactionType === 'DEPOSIT' ? $debitAccountId : $creditAccountId);
-            if (!$cashAccount->is_cash_account || !$cashAccount->is_control_account) {
+            if (! $cashAccount->is_cash_account || ! $cashAccount->is_control_account) {
                 throw new RuntimeException(
                     'The cash side of a cash location mapping must be an active cash control account.',
                 );
@@ -86,14 +86,14 @@ class TreasurySummaryPostingService
         }
 
         $fiscalPeriod = FiscalPeriod::query()
-            ->whereHas('fiscalYear', fn($query) => $query->where('organization_id', $organizationId)->where('status', 'OPEN'))
+            ->whereHas('fiscalYear', fn ($query) => $query->where('organization_id', $organizationId)->where('status', 'OPEN'))
             ->where('status', 'OPEN')
             ->whereDate('start_date', '<=', $voucherDate)
             ->whereDate('end_date', '>=', $voucherDate)
             ->with('fiscalYear')
             ->first();
 
-        if (!$fiscalPeriod) {
+        if (! $fiscalPeriod) {
             throw new RuntimeException('No open fiscal period covers the Treasury transaction date.');
         }
 
@@ -131,6 +131,104 @@ class TreasurySummaryPostingService
                 'line_no' => 2,
             ],
         ]);
+
+        return $voucher->load('entries');
+    }
+
+    public function postJournal(
+        int $organizationId,
+        string $voucherNo,
+        string $voucherDate,
+        ?int $branchId,
+        int $userId,
+        string $description,
+        string $reference,
+        int $financialTransactionId,
+        array $lines,
+    ): Voucher {
+        $existing = Voucher::query()
+            ->where('organization_id', $organizationId)
+            ->where('financial_transaction_id', $financialTransactionId)
+            ->first();
+        if ($existing) {
+            return $existing->load('entries');
+        }
+
+        $existing = Voucher::query()
+            ->where('organization_id', $organizationId)
+            ->where('voucher_no', $voucherNo)
+            ->first();
+        if ($existing) {
+            return $existing->load('entries');
+        }
+
+        $debitTotal = collect($lines)
+            ->where('direction', 'DEBIT')
+            ->sum(fn (array $line): float => (float) $line['amount']);
+        $creditTotal = collect($lines)
+            ->where('direction', 'CREDIT')
+            ->sum(fn (array $line): float => (float) $line['amount']);
+
+        if (
+            $lines === []
+            || $debitTotal <= 0
+            || abs($debitTotal - $creditTotal) > 0.0001
+            || collect($lines)->contains(fn (array $line): bool => (float) $line['amount'] <= 0)
+        ) {
+            throw new RuntimeException('General Ledger journal lines must have positive amounts and equal debit and credit totals.');
+        }
+
+        $accountIds = collect($lines)->pluck('account_id')->unique();
+        $accounts = LedgerAccount::query()
+            ->where('organization_id', $organizationId)
+            ->where('status', true)
+            ->whereIn('id', $accountIds)
+            ->get()
+            ->keyBy('id');
+
+        if ($accounts->count() !== $accountIds->count()) {
+            throw new RuntimeException('Every General Ledger journal line must reference an active account in the active organization.');
+        }
+
+        $fiscalPeriod = FiscalPeriod::query()
+            ->whereHas('fiscalYear', fn ($query) => $query->where('organization_id', $organizationId)->where('status', 'OPEN'))
+            ->where('status', 'OPEN')
+            ->whereDate('start_date', '<=', $voucherDate)
+            ->whereDate('end_date', '>=', $voucherDate)
+            ->with('fiscalYear')
+            ->first();
+
+        if (! $fiscalPeriod) {
+            throw new RuntimeException('No open fiscal period covers the Treasury transaction date.');
+        }
+
+        $voucher = Voucher::query()->create([
+            'organization_id' => $organizationId,
+            'branch_id' => $branchId,
+            'fiscal_year_id' => $fiscalPeriod->fiscal_year_id,
+            'fiscal_period_id' => $fiscalPeriod->id,
+            'financial_transaction_id' => $financialTransactionId,
+            'voucher_no' => $voucherNo,
+            'voucher_type' => 'SYSTEM',
+            'voucher_date' => $voucherDate,
+            'description' => $description,
+            'status' => 'POSTED',
+            'created_by' => $userId,
+            'posted_by' => $userId,
+            'posted_at' => now(),
+        ]);
+
+        $voucher->entries()->createMany(collect($lines)->values()->map(
+            fn (array $line, int $index): array => [
+                'account_id' => $line['account_id'],
+                'branch_id' => $branchId,
+                'debit' => $line['direction'] === 'DEBIT' ? $line['amount'] : 0,
+                'credit' => $line['direction'] === 'CREDIT' ? $line['amount'] : 0,
+                'reference' => $reference,
+                'description' => $line['description'] ?? $description,
+                'line_no' => $index + 1,
+            ],
+        )->all());
 
         return $voucher->load('entries');
     }

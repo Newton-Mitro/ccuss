@@ -90,6 +90,7 @@ export default function Index() {
                                         'Account',
                                         'Branch',
                                         'Type',
+                                        'Balance',
                                         'Opening Balance',
                                         'Reconciliation',
                                         'Status',
@@ -134,6 +135,9 @@ export default function Index() {
                                         </td>
                                         <td className="px-2 py-2">
                                             {account.account_type}
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            {`BDT ${Number(account.balance).toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                         </td>
                                         <td className="px-2 py-2">
                                             {account.opening_balance}

@@ -38,15 +38,6 @@ interface Props extends SharedData {
 }
 
 const transactionTypes: Record<string, string[]> = {
-    BANK_TRANSACTION: [
-        'DEPOSIT',
-        'WITHDRAWAL',
-        'TRANSFER_IN',
-        'TRANSFER_OUT',
-        'CHARGE',
-        'INTEREST',
-        'ADJUSTMENT',
-    ],
     PETTY_CASH_TRANSACTION: [
         'FUNDING',
         'EXPENSE',
@@ -60,7 +51,7 @@ const transactionTypes: Record<string, string[]> = {
 export default function TreasuryGlMappingsPage() {
     const { mappings, accounts, sourceTypes } = usePage<Props>().props;
     const { data, setData, post, processing, errors, reset } = useForm({
-        source_type: 'BANK_TRANSACTION',
+        source_type: sourceTypes[0] ?? 'BANK_ACCOUNT',
         source_code: 'DEFAULT',
         transaction_type: 'DEPOSIT',
         debit_account_id: '',

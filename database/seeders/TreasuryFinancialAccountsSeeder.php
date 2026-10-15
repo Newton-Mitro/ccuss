@@ -24,7 +24,7 @@ class TreasuryFinancialAccountsSeeder extends Seeder
         $branchId = $organization->branches()->oldest('id')->value('id');
         $ledgerAccounts = LedgerAccount::query()
             ->where('organization_id', $organization->id)
-            ->whereIn('code', ['1100', '1130', '1200', '1210'])
+            ->whereIn('code', ['1100', '1130', '1200', '3100'])
             ->get()
             ->keyBy('code');
 
@@ -91,7 +91,7 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                     'DEPOSIT',
                     'DEBIT',
                     $ledgerAccounts->get('1200'),
-                    $ledgerAccounts->get('1210'),
+                    $ledgerAccounts->get('3100'),
                     $bankDefinition['financial_account_no'],
                 );
             }
@@ -131,7 +131,7 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                     'DEPOSIT',
                     'DEBIT',
                     $ledgerAccounts->get($ledgerCode),
-                    $ledgerAccounts->get('1210'),
+                    $ledgerAccounts->get('3100'),
                     $accountNo,
                 );
             }
@@ -152,15 +152,15 @@ class TreasuryFinancialAccountsSeeder extends Seeder
         string $accountNo,
         ?FinancialAccount $creditFinancialAccount = null,
     ): void {
-        if (!$debitLedgerAccount || !$creditLedgerAccount) {
+        if (! $debitLedgerAccount || ! $creditLedgerAccount) {
             throw new \RuntimeException("Missing seeded ledger account for {$accountNo}.");
         }
 
         $idempotencyKey = Uuid::uuid5(
             Uuid::NAMESPACE_DNS,
-            $organization->id . ':' . $financialAccount->id . ':' . $financialAccount->account_type,
+            $organization->id.':'.$financialAccount->id.':'.$financialAccount->account_type,
         )->toString();
-        $transactionNo = 'FT-OPEN-' . str_pad($financialAccount->id, 8, '0', STR_PAD_LEFT);
+        $transactionNo = 'FT-OPEN-'.str_pad($financialAccount->id, 8, '0', STR_PAD_LEFT);
         $transaction = FinancialTransaction::query()->updateOrCreate(
             [
                 'organization_id' => $organization->id,
@@ -231,7 +231,7 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                 'branch_id' => $branchId,
                 'fiscal_year_id' => $fiscalYear->id,
                 'fiscal_period_id' => $fiscalPeriod->id,
-                'voucher_no' => 'VOU-OPEN-' . str_pad($financialAccount->id, 8, '0', STR_PAD_LEFT),
+                'voucher_no' => 'VOU-OPEN-'.str_pad($financialAccount->id, 8, '0', STR_PAD_LEFT),
                 'voucher_type' => 'OPENING',
                 'voucher_date' => self::OPENING_DATE,
                 'description' => "Opening {$transactionType} for {$financialAccount->name}",

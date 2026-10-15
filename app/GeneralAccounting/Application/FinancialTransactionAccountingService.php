@@ -4,19 +4,17 @@ namespace App\GeneralAccounting\Application;
 
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\LoanProduct;
-use App\GeneralAccounting\Application\TreasurySummaryPostingService;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\GeneralAccounting\Models\Voucher;
-use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\BankAccount;
+use App\TreasuryAndCash\Models\CashLocation;
 
 class FinancialTransactionAccountingService
 {
     public function __construct(
         private readonly TreasurySummaryPostingService $postingService,
-    ) {
-    }
+    ) {}
 
     public function post(FinancialTransaction $transaction, int $userId): ?Voucher
     {
@@ -30,12 +28,12 @@ class FinancialTransactionAccountingService
         }
 
         $productMappings = $entries
-            ->map(fn($entry) => $entry->financialAccount?->product?->accountMappings()
+            ->map(fn ($entry) => $entry->financialAccount?->product?->accountMappings()
                 ->where('transaction_type', $transaction->transaction_type)
                 ->where('status', true)
                 ->first())
             ->filter()
-            ->unique(fn($mapping) => $mapping->debit_account_id . ':' . $mapping->credit_account_id)
+            ->unique(fn ($mapping) => $mapping->debit_account_id.':'.$mapping->credit_account_id)
             ->values();
 
         $debitTotal = (float) $entries->where('direction', 'DEBIT')->sum('amount');
@@ -46,58 +44,98 @@ class FinancialTransactionAccountingService
         }
 
         $source = $this->resolveSource($transaction, $entries);
+        if (
+            $source
+            && in_array($source['type'], ['CASH_LOCATION', 'BANK_ACCOUNT'], true)
+            && in_array($transaction->transaction_type, ['DEPOSIT', 'WITHDRAWAL'], true)
+        ) {
+            return $this->postDirectAccountTransaction($transaction, $userId, $entries, $source);
+        }
+
         $mapping = $productMappings->count() === 1 ? $productMappings->first() : null;
         $mappingProduct = $mapping?->product;
         $productSourceType = $mappingProduct instanceof LoanProduct ? 'LOAN_PRODUCT' : 'DEPOSIT_PRODUCT';
         $debitAccountOverride = $mapping?->debit_account_id;
         $creditAccountOverride = $mapping?->credit_account_id;
 
+        if ($mapping && $source && in_array($source['type'], ['CASH_LOCATION', 'BANK_ACCOUNT'], true)) {
+            $treasuryMapping = TreasuryGlMapping::query()
+                ->where('organization_id', $transaction->organization_id)
+                ->where('source_type', $source['type'])
+                ->where('source_code', $source['code'])
+                ->where('transaction_type', $transaction->transaction_type)
+                ->where('status', true)
+                ->with(['debitAccount', 'creditAccount'])
+                ->first();
+
+            if (
+                ! $treasuryMapping
+                && $source['type'] === 'CASH_LOCATION'
+                && in_array($transaction->transaction_type, ['DEPOSIT', 'WITHDRAWAL'], true)
+            ) {
+                throw new \RuntimeException(
+                    "An active cash control mapping is required for {$source['code']} {$transaction->transaction_type} postings.",
+                );
+            }
+
+            $cashControlSide = match ($source['type'].'/'.$transaction->transaction_type) {
+                'CASH_LOCATION/DEPOSIT',
+                'CASH_LOCATION/LOAN_REPAYMENT',
+                'CASH_LOCATION/FINE_PAYMENT',
+                'BANK_ACCOUNT/DEPOSIT',
+                'BANK_ACCOUNT/TRANSFER_IN',
+                'BANK_ACCOUNT/INTEREST',
+                'BANK_ACCOUNT/LOAN_REPAYMENT',
+                'BANK_ACCOUNT/FINE_PAYMENT' => 'debit',
+                'CASH_LOCATION/WITHDRAWAL',
+                'CASH_LOCATION/LOAN_DISBURSEMENT',
+                'BANK_ACCOUNT/WITHDRAWAL',
+                'BANK_ACCOUNT/TRANSFER_OUT',
+                'BANK_ACCOUNT/CHARGE',
+                'BANK_ACCOUNT/ADJUSTMENT',
+                'BANK_ACCOUNT/LOAN_DISBURSEMENT' => 'credit',
+                default => null,
+            };
+            $cashControlAccount = $treasuryMapping
+                ? ($cashControlSide === 'debit'
+                    ? $treasuryMapping->debitAccount
+                    : ($cashControlSide === 'credit' ? $treasuryMapping->creditAccount : null))
+                : null;
+
+            if (
+                $treasuryMapping
+                && (! $cashControlAccount
+                    || ! $cashControlAccount->status
+                    || ! $cashControlAccount->is_cash_account
+                    || ! $cashControlAccount->is_control_account)
+            ) {
+                throw new \RuntimeException(
+                    'Treasury mappings must identify an active cash control account.',
+                );
+            }
+
+            if ($cashControlAccount) {
+                if ($cashControlSide === 'debit') {
+                    $debitAccountOverride = $cashControlAccount->id;
+                } else {
+                    $creditAccountOverride = $cashControlAccount->id;
+                }
+            }
+        }
+
+        if (! $mapping && ! $source) {
+            return null;
+        }
+
         if (
-            $mapping
+            ! $mapping
             && $source
             && $source['type'] === 'CASH_LOCATION'
             && in_array($transaction->transaction_type, ['DEPOSIT', 'WITHDRAWAL'], true)
         ) {
-            $cashMapping = TreasuryGlMapping::query()
-                ->where('organization_id', $transaction->organization_id)
-                ->where('source_type', 'CASH_LOCATION')
-                ->where('source_code', $source['code'])
-                ->where('transaction_type', $transaction->transaction_type)
-                ->where('status', true)
-                ->first();
-
-            if (!$cashMapping) {
-                throw new \RuntimeException(
-                    'An active Cash On Hand control mapping is required for teller deposits and withdrawals.',
-                );
-            }
-
-            $cashControlAccountId = $transaction->transaction_type === 'DEPOSIT'
-                ? $cashMapping->debit_account_id
-                : $cashMapping->credit_account_id;
-            $isCashControlAccount = LedgerAccount::query()
-                ->where('organization_id', $transaction->organization_id)
-                ->where('status', true)
-                ->where('is_cash_account', true)
-                ->where('is_control_account', true)
-                ->whereKey($cashControlAccountId)
-                ->exists();
-
-            if (!$isCashControlAccount) {
-                throw new \RuntimeException(
-                    'The cash side of the teller mapping must be an active cash control account.',
-                );
-            }
-
-            if ($transaction->transaction_type === 'DEPOSIT') {
-                $debitAccountOverride = $cashControlAccountId;
-            } else {
-                $creditAccountOverride = $cashControlAccountId;
-            }
-        }
-
-        if (!$mapping && !$source) {
-            return null;
+            throw new \RuntimeException(
+                'A financial product account mapping is required to post a cash-location deposit or withdrawal without a clearing account.',
+            );
         }
 
         return $this->postingService->post(
@@ -105,7 +143,7 @@ class FinancialTransactionAccountingService
             sourceType: $mapping ? $productSourceType : $source['type'],
             sourceCode: $mapping ? (string) $mappingProduct->id : $source['code'],
             transactionType: $transaction->transaction_type,
-            voucherNo: 'FT-' . $transaction->transaction_no,
+            voucherNo: 'FT-'.$transaction->transaction_no,
             voucherDate: $transaction->transaction_date->toDateString(),
             branchId: $transaction->branch_id,
             userId: $userId,
@@ -121,31 +159,158 @@ class FinancialTransactionAccountingService
     private function resolveSource(FinancialTransaction $transaction, $entries): ?array
     {
         $accountIds = $entries->pluck('financial_account_id')->unique()->values();
-        $cashLocationTypes = CashLocation::query()
+        $cashLocations = CashLocation::query()
             ->where('organization_id', $transaction->organization_id)
             ->whereIn('financial_account_id', $accountIds)
             ->where('is_active', true)
-            ->distinct()
-            ->pluck('type');
+            ->get(['type', 'financial_account_id']);
+        $cashLocationTypes = $cashLocations->pluck('type')->unique()->values();
 
         if ($cashLocationTypes->count() === 1) {
-            return ['type' => 'CASH_LOCATION', 'code' => $cashLocationTypes->first()];
+            return [
+                'type' => 'CASH_LOCATION',
+                'code' => $cashLocationTypes->first(),
+                'financial_account_ids' => $cashLocations->pluck('financial_account_id')->unique()->all(),
+            ];
         }
 
         if ($cashLocationTypes->count() > 1) {
-            return ['type' => 'CASH_LOCATION', 'code' => 'MIXED'];
+            return [
+                'type' => 'CASH_LOCATION',
+                'code' => 'MIXED',
+                'financial_account_ids' => $cashLocations->pluck('financial_account_id')->unique()->all(),
+            ];
         }
 
         $bankAccounts = BankAccount::query()
             ->where('organization_id', $transaction->organization_id)
             ->whereIn('financial_account_id', $accountIds)
-            ->pluck('id');
+            ->get(['financial_account_id']);
 
         if ($bankAccounts->isNotEmpty()) {
-            return ['type' => 'BANK_ACCOUNT', 'code' => 'DEFAULT'];
+            return [
+                'type' => 'BANK_ACCOUNT',
+                'code' => 'DEFAULT',
+                'financial_account_ids' => $bankAccounts->pluck('financial_account_id')->unique()->all(),
+            ];
         }
 
         return null;
+    }
+
+    private function postDirectAccountTransaction(
+        FinancialTransaction $transaction,
+        int $userId,
+        $entries,
+        array $source,
+    ): Voucher {
+        $cashControlSide = $transaction->transaction_type === 'DEPOSIT' ? 'debit' : 'credit';
+        $treasuryMapping = TreasuryGlMapping::query()
+            ->where('organization_id', $transaction->organization_id)
+            ->where('source_type', $source['type'])
+            ->where('source_code', $source['code'])
+            ->where('transaction_type', $transaction->transaction_type)
+            ->where('status', true)
+            ->with(['debitAccount', 'creditAccount'])
+            ->first();
+
+        $cashControlAccount = $treasuryMapping
+            ? ($cashControlSide === 'debit'
+                ? $treasuryMapping->debitAccount
+                : $treasuryMapping->creditAccount)
+            : null;
+
+        if (
+            ! $cashControlAccount
+            || ! $cashControlAccount->status
+            || ! $cashControlAccount->is_cash_account
+            || ! $cashControlAccount->is_control_account
+        ) {
+            throw new \RuntimeException(
+                "An active cash control mapping is required for {$source['code']} {$transaction->transaction_type} postings.",
+            );
+        }
+
+        $counterpartDirection = $transaction->transaction_type === 'DEPOSIT' ? 'CREDIT' : 'DEBIT';
+        $sourceAccountIds = $source['financial_account_ids'];
+        $counterpartLines = [];
+        $amount = 0.0;
+
+        foreach ($entries as $entry) {
+            if (in_array($entry->financial_account_id, $sourceAccountIds, true)) {
+                continue;
+            }
+
+            $entryAmount = (float) $entry->amount;
+            if ($entryAmount <= 0) {
+                continue;
+            }
+
+            $productMapping = $entry->financialAccount?->product?->accountMappings()
+                ->where('transaction_type', $transaction->transaction_type)
+                ->where('status', true)
+                ->first();
+
+            if ($productMapping) {
+                $counterpartAccountId = $cashControlSide === 'debit'
+                    ? $productMapping->credit_account_id
+                    : $productMapping->debit_account_id;
+            } else {
+                $accountCode = match ($entry->financialAccount?->account_type) {
+                    'SAVINGS' => '2100',
+                    'FIXED_DEPOSIT' => '2200',
+                    'RECURRING_DEPOSIT' => '2300',
+                    'SHARE' => '3100',
+                    default => null,
+                };
+
+                if (! $accountCode) {
+                    throw new \RuntimeException(
+                        'A financial product account mapping is required for this account type to post without a clearing account.',
+                    );
+                }
+
+                $counterpartAccountId = LedgerAccount::query()
+                    ->where('organization_id', $transaction->organization_id)
+                    ->where('code', $accountCode)
+                    ->where('status', true)
+                    ->value('id');
+            }
+
+            if (! $counterpartAccountId) {
+                throw new \RuntimeException('The transaction counterpart ledger account could not be resolved.');
+            }
+
+            $counterpartLines[] = [
+                'account_id' => $counterpartAccountId,
+                'direction' => $counterpartDirection,
+                'amount' => $entryAmount,
+            ];
+            $amount += $entryAmount;
+        }
+
+        if ($amount <= 0) {
+            throw new \RuntimeException('The transaction has no financial account entries to post.');
+        }
+
+        return $this->postingService->postJournal(
+            organizationId: $transaction->organization_id,
+            voucherNo: 'FT-'.$transaction->transaction_no,
+            voucherDate: $transaction->transaction_date->toDateString(),
+            branchId: $transaction->branch_id,
+            userId: $userId,
+            description: $transaction->description ?? $transaction->transaction_type,
+            reference: $transaction->transaction_no,
+            financialTransactionId: $transaction->id,
+            lines: [
+                [
+                    'account_id' => $cashControlAccount->id,
+                    'direction' => $cashControlSide === 'debit' ? 'DEBIT' : 'CREDIT',
+                    'amount' => $amount,
+                ],
+                ...$counterpartLines,
+            ],
+        );
     }
 
     public function reverse(FinancialTransaction $transaction): void

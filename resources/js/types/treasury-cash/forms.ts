@@ -3,6 +3,7 @@ import type { Customer } from '@/types/customer_kyc_module';
 
 export interface BankAccountCreatePageProps extends SharedData {
     branches: { id: number; code: string; name: string }[];
+    ledger_accounts: { id: number; code: string; name: string }[];
 }
 
 export interface BankTransactionListItem {
@@ -21,6 +22,11 @@ export interface BankTransactionListItem {
     reference?: string | null;
     description?: string | null;
     balance_after?: string | number | null;
+    counterpart_account?: {
+        id: number;
+        code: string;
+        name: string;
+    } | null;
     status: 'PENDING' | 'POSTED' | 'RECONCILED' | 'CANCELLED';
     bank_account?: {
         account_name: string;
@@ -36,6 +42,7 @@ export interface BankTransactionIndexPageProps extends SharedData {
         last_page: number;
         total: number;
     };
+    ledger_accounts: { id: number; code: string; name: string }[];
     filters: { search?: string; page?: number; per_page?: number };
 }
 

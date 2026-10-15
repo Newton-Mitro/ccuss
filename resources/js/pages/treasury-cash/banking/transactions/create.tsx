@@ -17,12 +17,18 @@ interface Props extends SharedData {
         account_name: string;
         account_number: string;
     }[];
+    ledger_accounts: {
+        id: number;
+        code: string;
+        name: string;
+    }[];
 }
 
 export default function Create() {
-    const { bank_accounts } = usePage<Props>().props;
+    const { bank_accounts, ledger_accounts } = usePage<Props>().props;
     const { data, setData, post, processing, errors } = useForm({
         bank_account_id: '',
+        counterpart_account_id: '',
         type: 'DEPOSIT',
         amount: '',
         transaction_date: new Date().toISOString().slice(0, 10),
@@ -85,6 +91,42 @@ export default function Create() {
                         )}
                     </div>
                     <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="counterpart_account_id"
+                                className="text-sm font-medium"
+                            >
+                                Counterpart ledger account
+                            </label>
+                            <Select
+                                id="counterpart_account_id"
+                                className="h-9"
+                                value={data.counterpart_account_id}
+                                onChange={(value) =>
+                                    setData('counterpart_account_id', value)
+                                }
+                                placeholder="Select counterpart account"
+                                options={[
+                                    {
+                                        value: '',
+                                        label: 'Select counterpart account',
+                                    },
+                                    ...ledger_accounts.map((account) => ({
+                                        value: String(account.id),
+                                        label: `${account.code} — ${account.name}`,
+                                    })),
+                                ]}
+                            />
+                            {errors.counterpart_account_id && (
+                                <p className="text-sm text-destructive">
+                                    {errors.counterpart_account_id}
+                                </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                                Select the actual ledger account on the other
+                                side of this transaction.
+                            </p>
+                        </div>
                         <div className="space-y-2">
                             <label
                                 htmlFor="type"

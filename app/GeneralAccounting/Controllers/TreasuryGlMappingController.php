@@ -15,7 +15,6 @@ use Inertia\Response;
 class TreasuryGlMappingController extends Controller
 {
     private const SOURCE_TYPES = [
-        'BANK_TRANSACTION',
         'BANK_ACCOUNT',
         'CASH_LOCATION',
         'PETTY_CASH_TRANSACTION',
@@ -61,7 +60,7 @@ class TreasuryGlMappingController extends Controller
             'debit_account_id' => [
                 'required',
                 'integer',
-                Rule::exists('accounts', 'id')->where(fn($query) => $query
+                Rule::exists('accounts', 'id')->where(fn ($query) => $query
                     ->where('organization_id', $organizationId)
                     ->where('status', true)),
             ],
@@ -69,7 +68,7 @@ class TreasuryGlMappingController extends Controller
                 'required',
                 'integer',
                 'different:debit_account_id',
-                Rule::exists('accounts', 'id')->where(fn($query) => $query
+                Rule::exists('accounts', 'id')->where(fn ($query) => $query
                     ->where('organization_id', $organizationId)
                     ->where('status', true)),
             ],
@@ -79,7 +78,7 @@ class TreasuryGlMappingController extends Controller
         $data['transaction_type'] = strtoupper(trim($data['transaction_type']));
 
         if ($data['source_type'] === 'CASH_LOCATION') {
-            if (!in_array($data['transaction_type'], ['DEPOSIT', 'WITHDRAWAL'], true)) {
+            if (! in_array($data['transaction_type'], ['DEPOSIT', 'WITHDRAWAL'], true)) {
                 throw ValidationException::withMessages([
                     'transaction_type' => 'Cash location mappings support deposits and withdrawals.',
                 ]);
@@ -96,7 +95,7 @@ class TreasuryGlMappingController extends Controller
                 ->whereKey($cashAccountId)
                 ->exists();
 
-            if (!$isCashControlAccount) {
+            if (! $isCashControlAccount) {
                 $field = $data['transaction_type'] === 'DEPOSIT'
                     ? 'debit_account_id'
                     : 'credit_account_id';

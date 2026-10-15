@@ -15,13 +15,6 @@ class TreasuryGlMappingSeeder extends Seeder
         $organization = Organization::query()->where('code', 'ORG-001')->firstOrFail();
 
         $mappingRows = [
-            ['BANK_TRANSACTION', 'DEFAULT', 'DEPOSIT', '1200', '1210'],
-            ['BANK_TRANSACTION', 'DEFAULT', 'WITHDRAWAL', '1210', '1200'],
-            ['BANK_TRANSACTION', 'DEFAULT', 'TRANSFER_IN', '1200', '1210'],
-            ['BANK_TRANSACTION', 'DEFAULT', 'TRANSFER_OUT', '1210', '1200'],
-            ['BANK_TRANSACTION', 'DEFAULT', 'CHARGE', '5100', '1200'],
-            ['BANK_TRANSACTION', 'DEFAULT', 'INTEREST', '1200', '4110'],
-            ['BANK_TRANSACTION', 'DEFAULT', 'ADJUSTMENT', '1210', '1200'],
             ['PETTY_CASH_TRANSACTION', 'DEFAULT', 'FUNDING', '1130', '1200'],
             ['PETTY_CASH_TRANSACTION', 'DEFAULT', 'REPLENISHMENT', '1130', '1200'],
             ['PETTY_CASH_TRANSACTION', 'DEFAULT', 'EXPENSE', '5100', '1130'],
@@ -30,25 +23,26 @@ class TreasuryGlMappingSeeder extends Seeder
         ];
 
         foreach (['VAULT' => '1100', 'TELLER' => '1100', 'PETTY_CASH' => '1130'] as $sourceCode => $cashAccountCode) {
-            $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'DEPOSIT', $cashAccountCode, '1210'];
-            $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'WITHDRAWAL', '1210', $cashAccountCode];
+            $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'DEPOSIT', $cashAccountCode, '1200'];
+            $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'WITHDRAWAL', '1200', $cashAccountCode];
             $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'LOAN_DISBURSEMENT', '1300', $cashAccountCode];
             $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'LOAN_REPAYMENT', $cashAccountCode, '1300'];
             $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'FINE_PAYMENT', $cashAccountCode, '1400'];
         }
 
         foreach ([
-            ['DEPOSIT', '1200', '1210'],
-            ['WITHDRAWAL', '1210', '1200'],
+            ['DEPOSIT', '1200', '1100'],
+            ['WITHDRAWAL', '1100', '1200'],
             ['LOAN_DISBURSEMENT', '1300', '1200'],
             ['LOAN_REPAYMENT', '1200', '1300'],
             ['FINE_PAYMENT', '1200', '1400'],
+            ['ADJUSTMENT', '1100', '1200'],
         ] as [$transactionType, $debitCode, $creditCode]) {
             $mappingRows[] = ['BANK_ACCOUNT', 'DEFAULT', $transactionType, $debitCode, $creditCode];
         }
 
         $accountCodes = collect($mappingRows)
-            ->flatMap(fn(array $mapping): array => [$mapping[3], $mapping[4]])
+            ->flatMap(fn (array $mapping): array => [$mapping[3], $mapping[4]])
             ->unique()
             ->values();
 
@@ -59,11 +53,16 @@ class TreasuryGlMappingSeeder extends Seeder
             ->keyBy('code');
 
         DB::transaction(function () use ($organization, $ledgerAccounts, $mappingRows): void {
+            TreasuryGlMapping::query()
+                ->where('organization_id', $organization->id)
+                ->where('source_type', 'BANK_TRANSACTION')
+                ->delete();
+
             foreach ($mappingRows as [$sourceType, $sourceCode, $transactionType, $debitCode, $creditCode]) {
                 $debitAccount = $ledgerAccounts->get($debitCode);
                 $creditAccount = $ledgerAccounts->get($creditCode);
 
-                if (!$debitAccount || !$creditAccount) {
+                if (! $debitAccount || ! $creditAccount) {
                     throw new \RuntimeException("Missing seeded ledger account for treasury mapping {$sourceType}/{$sourceCode}/{$transactionType}.");
                 }
 

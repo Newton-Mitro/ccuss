@@ -1,8 +1,8 @@
 <?php
 
-use App\FinancialServices\Models\FinancialAccount;
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\KycDocument;
+use App\FinancialServices\Models\FinancialAccount;
 use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
@@ -13,8 +13,8 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
-use App\TreasuryAndCash\Application\ChequeService;
 use App\TreasuryAndCash\Application\ChequePaymentService;
+use App\TreasuryAndCash\Application\ChequeService;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
@@ -149,7 +149,7 @@ it('loads cheque books and cheques for authorized organization users', function 
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cheque-books.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/cheques/books/index')
             ->has('books.data', 1)
             ->where('books.data.0.book_no', $fixture['book']->book_no));
@@ -158,7 +158,7 @@ it('loads cheque books and cheques for authorized organization users', function 
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cheques.index', ['per_page' => 1]))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/cheques/index')
             ->has('cheques.data', 1)
             ->where('cheques.data.0.cheque_no', $fixture['cheque']->cheque_no)
@@ -214,7 +214,7 @@ it('creates cheque leaves and enforces the cheque lifecycle', function () {
     expect($cheque->fresh()->status)->toBe('CLEARED')
         ->and($cheque->transactions()->count())->toBe(3);
 
-    expect(fn() => $service->transition($cheque->fresh(), 'bounce', $fixture['user']->id))
+    expect(fn () => $service->transition($cheque->fresh(), 'bounce', $fixture['user']->id))
         ->toThrow(RuntimeException::class);
 });
 
@@ -346,6 +346,14 @@ it('posts a savings-account cheque withdrawal through the teller cash ledger', f
         'account_group_id' => $group->id,
         'is_control_account' => true,
         'is_cash_account' => true,
+    ]);
+    LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+        'code' => '2100',
+        'name' => 'Member Deposits',
+        'type' => 'LIABILITY',
+        'normal_balance' => 'CREDIT',
     ]);
     TreasuryGlMapping::query()->create([
         'organization_id' => $organization->id,

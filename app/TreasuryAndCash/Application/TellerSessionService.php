@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\DB;
 
 class TellerSessionService
 {
+    public function __construct(
+        private readonly CashLocationFinancialAccountService $cashLocationFinancialAccountService,
+    ) {}
+
     public function open(
         int $organizationId,
         int $branchId,
@@ -25,7 +29,7 @@ class TellerSessionService
             ->where('status', BranchDay::STATUS_OPEN)
             ->first();
 
-        if (!$branchDay) {
+        if (! $branchDay) {
             throw new \RuntimeException('The selected branch day is not open for this branch.');
         }
 
@@ -37,7 +41,7 @@ class TellerSessionService
             })
             ->first();
 
-        if (!$teller) {
+        if (! $teller) {
             throw new \RuntimeException('The selected teller does not belong to the active branch.');
         }
 
@@ -46,6 +50,11 @@ class TellerSessionService
         }
 
         return DB::transaction(function () use ($branchDay, $teller, $userId, $openingCash, $openingNote) {
+            $this->cashLocationFinancialAccountService->ensureLinked(
+                $teller->cashLocation,
+                $openingCash,
+            );
+
             return TellerSession::create([
                 'branch_day_id' => $branchDay->id,
                 'teller_id' => $teller->id,

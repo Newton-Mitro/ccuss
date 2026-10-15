@@ -12,8 +12,8 @@ class TellerCashTransactionService
 {
     public function __construct(
         private readonly FinancialTransactionService $financialTransactionService,
-    ) {
-    }
+        private readonly CashLocationFinancialAccountService $cashLocationFinancialAccountService,
+    ) {}
 
     public function create(int $organizationId, int $branchId, int $userId, string $type, array $data): TellerCashTransaction
     {
@@ -31,18 +31,18 @@ class TellerCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$session || !$session->teller?->cashLocation) {
+            if (! $session || ! $session->teller?->cashLocation) {
                 throw new \RuntimeException('An open teller session in the active branch is required.');
             }
 
             $nextNumber = TellerCashTransaction::query()->lockForUpdate()->count() + 1;
             $financialTransactionId = null;
 
-            if (!empty($data['lines'])) {
-                $cashAccount = $session->teller->cashLocation->financialAccount;
-                if (!$cashAccount) {
-                    throw new \RuntimeException('The teller cash location must be linked to a financial account before posting multi-line teller transactions.');
-                }
+            if (! empty($data['lines'])) {
+                $cashAccount = $this->cashLocationFinancialAccountService->ensureLinked(
+                    $session->teller->cashLocation,
+                    $session->expected_cash ?? $session->opening_cash,
+                );
 
                 $accountIds = collect($data['lines'])->pluck('financial_account_id')->all();
                 $accounts = FinancialAccount::query()
@@ -54,7 +54,7 @@ class TellerCashTransactionService
 
                 $entryLines = collect($data['lines'])->map(function (array $line) use ($accounts, $type): array {
                     $account = $accounts->get($line['financial_account_id']);
-                    if (!$account) {
+                    if (! $account) {
                         throw new \RuntimeException('Every teller transaction line must reference a valid account in the active organization.');
                     }
 
@@ -97,7 +97,7 @@ class TellerCashTransactionService
                 'cash_location_id' => $session->teller->cashLocation->id,
                 'teller_session_id' => $session->id,
                 'financial_transaction_id' => $financialTransactionId,
-                'transaction_no' => 'TELLER-' . now()->format('Ymd') . '-' . str_pad((string) $nextNumber, 5, '0', STR_PAD_LEFT),
+                'transaction_no' => 'TELLER-'.now()->format('Ymd').'-'.str_pad((string) $nextNumber, 5, '0', STR_PAD_LEFT),
                 'type' => $type,
                 'amount' => $data['amount'],
                 'status' => 'PENDING',
@@ -125,7 +125,7 @@ class TellerCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$transaction || !$transaction->tellerSession || $transaction->tellerSession->status !== 'OPEN') {
+            if (! $transaction || ! $transaction->tellerSession || $transaction->tellerSession->status !== 'OPEN') {
                 throw new \RuntimeException('A pending transaction for an open teller session is required.');
             }
 
@@ -184,7 +184,7 @@ class TellerCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$transaction || !$transaction->tellerSession || $transaction->tellerSession->status !== 'OPEN') {
+            if (! $transaction || ! $transaction->tellerSession || $transaction->tellerSession->status !== 'OPEN') {
                 throw new \RuntimeException('A pending transaction for an open teller session is required.');
             }
 
@@ -198,7 +198,7 @@ class TellerCashTransactionService
                     ->lockForUpdate()
                     ->first();
 
-                if (!$financialTransaction || $financialTransaction->status !== 'PENDING') {
+                if (! $financialTransaction || $financialTransaction->status !== 'PENDING') {
                     throw new \RuntimeException('Only a pending financial transaction can be edited.');
                 }
 
@@ -231,7 +231,7 @@ class TellerCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$transaction) {
+            if (! $transaction) {
                 throw new \RuntimeException('Only a pending transaction in the active branch can be cancelled.');
             }
 
@@ -240,7 +240,7 @@ class TellerCashTransactionService
                     ->lockForUpdate()
                     ->first();
 
-                if (!$financialTransaction || $financialTransaction->status !== 'PENDING') {
+                if (! $financialTransaction || $financialTransaction->status !== 'PENDING') {
                     throw new \RuntimeException('The linked financial transaction is no longer pending.');
                 }
 
@@ -277,7 +277,7 @@ class TellerCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$transaction) {
+            if (! $transaction) {
                 throw new \RuntimeException('Only a posted transaction in the active branch can be reversed.');
             }
 
@@ -286,7 +286,7 @@ class TellerCashTransactionService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$session) {
+            if (! $session) {
                 throw new \RuntimeException('The teller session for this transaction no longer exists.');
             }
 
@@ -295,7 +295,7 @@ class TellerCashTransactionService
                     ->lockForUpdate()
                     ->first();
 
-                if (!$financialTransaction || $financialTransaction->status !== 'POSTED') {
+                if (! $financialTransaction || $financialTransaction->status !== 'POSTED') {
                     throw new \RuntimeException('The linked financial transaction is not posted and cannot be reversed.');
                 }
 

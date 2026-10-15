@@ -1,13 +1,13 @@
 <?php
 
+use App\FinancialServices\Models\FinancialAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
-use App\FinancialServices\Models\FinancialAccount;
-use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\BranchDay;
+use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Teller;
 use App\TreasuryAndCash\Models\TellerSession;
 use App\TreasuryAndCash\Models\Vault;
@@ -140,7 +140,7 @@ it('loads vault and teller list pages for authorized organization users', functi
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vaults.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/vaults/index')
             ->has('vaults.data', 1)
             ->where('vaults.data.0.code', $fixture['vault']->code)
@@ -150,7 +150,7 @@ it('loads vault and teller list pages for authorized organization users', functi
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('tellers.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/tellers/index')
             ->has('tellers.data', 1)
             ->where('tellers.data.0.code', $fixture['teller']->code)
@@ -184,7 +184,7 @@ it('creates a vault and teller for a selected authorized branch', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vaults.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/vaults/create')
             ->has('branches', 2)
             ->where('default_branch_id', $fixture['branch']->id));
@@ -204,7 +204,7 @@ it('creates a vault and teller for a selected authorized branch', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('tellers.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/tellers/create')
             ->has('branches', 2)
             ->has('users', 2));
@@ -224,7 +224,11 @@ it('creates a vault and teller for a selected authorized branch', function () {
     expect(Vault::query()->where('code', 'VAULT-002')->exists())->toBeTrue()
         ->and(Teller::query()->where('code', 'T-002')->exists())->toBeTrue()
         ->and(CashLocation::query()->where('code', 'VAULT-002')->value('branch_id'))->toBe($selectedBranch->id)
-        ->and(CashLocation::query()->where('code', 'T-002')->value('branch_id'))->toBe($selectedBranch->id);
+        ->and(CashLocation::query()->where('code', 'T-002')->value('branch_id'))->toBe($selectedBranch->id)
+        ->and(CashLocation::query()->where('code', 'VAULT-002')->firstOrFail()->financialAccount->account_type)->toBe('CASH')
+        ->and(CashLocation::query()->where('code', 'T-002')->firstOrFail()->financialAccount->account_type)->toBe('CASH')
+        ->and(ctype_digit(CashLocation::query()->where('code', 'VAULT-002')->firstOrFail()->financialAccount->account_no))->toBeTrue()
+        ->and(ctype_digit(CashLocation::query()->where('code', 'T-002')->firstOrFail()->financialAccount->account_no))->toBeTrue();
 
     $vault = Vault::query()->where('code', 'VAULT-002')->firstOrFail();
     $teller = Teller::query()->where('code', 'T-002')->firstOrFail();
@@ -233,7 +237,7 @@ it('creates a vault and teller for a selected authorized branch', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vaults.edit', $vault))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/vaults/create')
             ->has('branches', 2)
             ->where('branch_locked', false));
@@ -252,7 +256,7 @@ it('creates a vault and teller for a selected authorized branch', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('tellers.edit', $teller))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/tellers/create')
             ->has('branches', 2)
             ->where('branch_locked', false));
@@ -267,6 +271,32 @@ it('creates a vault and teller for a selected authorized branch', function () {
             'status' => 'ACTIVE',
         ])
         ->assertRedirect(route('tellers.index'));
+});
+
+it('converts existing managed cash account numbers to numeric values', function () {
+    $fixture = cashManagementFixture();
+    $financialAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'account_type' => 'CASH',
+        'account_no' => 'CASH-LOCATION-5cbb37bc-172c-440a-998e-1a458dedc270',
+        'metadata' => ['managed_by' => 'cash_location'],
+    ]);
+    $cashLocation = CashLocation::create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_account_id' => $financialAccount->id,
+        'code' => 'TELLER-NUMERIC',
+        'name' => 'Numeric Teller',
+        'type' => 'TELLER',
+        'is_active' => true,
+    ]);
+
+    $linkedAccount = app(\App\TreasuryAndCash\Application\CashLocationFinancialAccountService::class)
+        ->ensureLinked($cashLocation);
+
+    expect(ctype_digit($linkedAccount->account_no))->toBeTrue()
+        ->and($linkedAccount->account_no)->toBe((string) $financialAccount->id);
 });
 
 it('rejects cash locations for branches outside the active organization', function () {
@@ -324,7 +354,7 @@ it('prevents moving teller and vault locations after sessions exist', function (
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('tellers.edit', $fixture['teller']))
-        ->assertInertia(fn($page) => $page->where('branch_locked', true));
+        ->assertInertia(fn ($page) => $page->where('branch_locked', true));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -340,7 +370,7 @@ it('prevents moving teller and vault locations after sessions exist', function (
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vaults.edit', $fixture['vault']))
-        ->assertInertia(fn($page) => $page->where('branch_locked', true));
+        ->assertInertia(fn ($page) => $page->where('branch_locked', true));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])

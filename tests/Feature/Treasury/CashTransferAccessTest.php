@@ -1,10 +1,5 @@
 <?php
 
-use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\Organization;
-use App\SystemAdministration\Models\Permission;
-use App\SystemAdministration\Models\Role;
-use App\SystemAdministration\Models\User;
 use App\FinancialServices\Models\FinancialAccount;
 use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\FiscalPeriod;
@@ -12,6 +7,11 @@ use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\GeneralAccounting\Models\Voucher;
+use App\SystemAdministration\Models\Branch;
+use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Models\Role;
+use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
@@ -51,14 +51,14 @@ function grantCashTransferLifecyclePermissions(User $user): void
     $permissions = collect([
         ['slug' => 'cash_transfers.approve', 'name' => 'Approve Cash Transfers', 'action' => 'approve'],
         ['slug' => 'cash_transfers.complete', 'name' => 'Complete Cash Transfers', 'action' => 'complete'],
-    ])->map(fn(array $permission) => Permission::firstOrCreate(
-            ['slug' => $permission['slug']],
-            [
-                'module' => 'cash_transfers',
-                'name' => $permission['name'],
-                'action' => $permission['action'],
-            ],
-        ));
+    ])->map(fn (array $permission) => Permission::firstOrCreate(
+        ['slug' => $permission['slug']],
+        [
+            'module' => 'cash_transfers',
+            'name' => $permission['name'],
+            'action' => $permission['action'],
+        ],
+    ));
 
     $role->permissions()->syncWithoutDetaching($permissions->pluck('id'));
     $user->roles()->syncWithoutDetaching([$role->id]);
@@ -173,10 +173,6 @@ function cashTransferFixture(): array
     ]);
 
     $accountGroup = AccountGroup::factory()->create(['organization_id' => $organization->id]);
-    $clearingAccount = LedgerAccount::factory()->create([
-        'organization_id' => $organization->id,
-        'account_group_id' => $accountGroup->id,
-    ]);
     $tellerLedgerAccount = LedgerAccount::factory()->create([
         'organization_id' => $organization->id,
         'account_group_id' => $accountGroup->id,
@@ -189,9 +185,16 @@ function cashTransferFixture(): array
         'is_control_account' => true,
         'is_cash_account' => true,
     ]);
+    $bankLedgerAccount = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $accountGroup->id,
+        'code' => '1200',
+        'is_control_account' => true,
+        'is_cash_account' => true,
+    ]);
     $fiscalYear = FiscalYear::factory()->create([
         'organization_id' => $organization->id,
-        'name' => 'Transfer Fiscal Year ' . $organization->id,
+        'name' => 'Transfer Fiscal Year '.$organization->id,
         'start_date' => '2026-01-01',
         'end_date' => '2026-12-31',
         'status' => 'OPEN',
@@ -204,10 +207,10 @@ function cashTransferFixture(): array
     ]);
 
     foreach ([
-        ['TELLER', 'DEPOSIT', $tellerLedgerAccount->id, $clearingAccount->id],
-        ['TELLER', 'WITHDRAWAL', $clearingAccount->id, $tellerLedgerAccount->id],
-        ['VAULT', 'DEPOSIT', $vaultLedgerAccount->id, $clearingAccount->id],
-        ['VAULT', 'WITHDRAWAL', $clearingAccount->id, $vaultLedgerAccount->id],
+        ['TELLER', 'DEPOSIT', $tellerLedgerAccount->id, $bankLedgerAccount->id],
+        ['TELLER', 'WITHDRAWAL', $bankLedgerAccount->id, $tellerLedgerAccount->id],
+        ['VAULT', 'DEPOSIT', $vaultLedgerAccount->id, $bankLedgerAccount->id],
+        ['VAULT', 'WITHDRAWAL', $bankLedgerAccount->id, $vaultLedgerAccount->id],
     ] as [$sourceCode, $transactionType, $debitAccountId, $creditAccountId]) {
         TreasuryGlMapping::query()->create([
             'organization_id' => $organization->id,
@@ -242,7 +245,7 @@ it('loads the teller-to-teller transfer form with scoped transfer data', functio
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cash-movements.teller-to-teller-transfer'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/cash-movements/teller-to-teller-transfer')
             ->has('branch_day')
             ->where('transfer_type', 'TELLER_TO_TELLER')
@@ -259,7 +262,7 @@ it('filters vault transfer options to the correct source and destination types',
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vault-transfers.root.vault-to-teller'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'VAULT_TO_TELLER')
             ->has('from_cash_locations', 1)
             ->where('from_cash_locations.0.type', 'VAULT')
@@ -270,7 +273,7 @@ it('filters vault transfer options to the correct source and destination types',
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vault-transfers.root.teller-to-vault'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'TELLER_TO_VAULT')
             ->has('from_cash_locations', 2)
             ->where('from_cash_locations.0.type', 'TELLER')
@@ -281,7 +284,7 @@ it('filters vault transfer options to the correct source and destination types',
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vault-transfers.root.vault-to-vault'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'VAULT_TO_VAULT')
             ->has('from_cash_locations', 1)
             ->where('from_cash_locations.0.type', 'VAULT')
@@ -314,7 +317,7 @@ it('loads active bank accounts as the source for bank-to-vault funding', functio
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vault-transfers.root.bank-to-vault'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'BANK_TO_VAULT')
             ->has('from_cash_locations', 0)
             ->has('to_cash_locations', 1)
@@ -339,7 +342,7 @@ it('loads the cash transfer queue for users with view permission', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('cash-movements.transfers.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/cash-movements/index')
             ->has('transfers.data', 0));
 });
@@ -427,15 +430,6 @@ it('funds an open vault from a bank and updates both balances on completion', fu
         'status' => 'ACTIVE',
     ]);
 
-    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
-    $debitAccount = LedgerAccount::factory()->create([
-        'organization_id' => $fixture['organization']->id,
-        'account_group_id' => $group->id,
-    ]);
-    $creditAccount = LedgerAccount::factory()->create([
-        'organization_id' => $fixture['organization']->id,
-        'account_group_id' => $group->id,
-    ]);
     $fiscalYear = FiscalYear::factory()->create([
         'organization_id' => $fixture['organization']->id,
         'start_date' => '2026-01-01',
@@ -448,16 +442,6 @@ it('funds an open vault from a bank and updates both balances on completion', fu
         'end_date' => '2026-12-31',
         'status' => 'OPEN',
     ]);
-    TreasuryGlMapping::query()->create([
-        'organization_id' => $fixture['organization']->id,
-        'source_type' => 'BANK_TRANSACTION',
-        'source_code' => 'DEFAULT',
-        'transaction_type' => 'TRANSFER_OUT',
-        'debit_account_id' => $debitAccount->id,
-        'credit_account_id' => $creditAccount->id,
-        'status' => true,
-    ]);
-
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->post(route('vault-transfers.root.bank-to-vault.store'), [
@@ -489,24 +473,14 @@ it('funds an open vault from a bank and updates both balances on completion', fu
         ->and($fixture['vaultSession']->fresh()->expected_cash)->toBe('1250.0000')
         ->and(Voucher::query()->where(
             'voucher_no',
-            'CASH-TRF-' . $transfer->id . '-CASH-IN',
+            'BANK-GL-'.$bankTransaction->id,
         )->exists())->toBeTrue();
-
-    TreasuryGlMapping::query()->create([
-        'organization_id' => $fixture['organization']->id,
-        'source_type' => 'BANK_TRANSACTION',
-        'source_code' => 'DEFAULT',
-        'transaction_type' => 'TRANSFER_IN',
-        'debit_account_id' => $debitAccount->id,
-        'credit_account_id' => $creditAccount->id,
-        'status' => true,
-    ]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('vault-transfers.root.vault-to-bank'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'VAULT_TO_BANK')
             ->has('from_cash_locations', 1)
             ->where('from_cash_locations.0.type', 'VAULT')
@@ -541,7 +515,7 @@ it('funds an open vault from a bank and updates both balances on completion', fu
         ->and($fixture['vaultSession']->fresh()->expected_cash)->toBe('1050.0000')
         ->and(Voucher::query()->where(
             'voucher_no',
-            'CASH-TRF-' . $vaultDeposit->id . '-CASH-OUT',
+            'BANK-GL-'.$depositBankTransaction->id,
         )->exists())->toBeTrue();
 });
 
@@ -629,8 +603,5 @@ it('approves and completes a pending cash transfer', function () {
         ->and($transfer->fresh()->completed_at)->not->toBeNull()
         ->and($fixture['sourceSession']->fresh()->expected_cash)->toBe('3749.5000')
         ->and($fixture['targetSession']->fresh()->expected_cash)->toBe('1350.5000')
-        ->and(Voucher::query()->whereIn('voucher_no', [
-            'CASH-TRF-' . $transfer->id . '-CASH-OUT',
-            'CASH-TRF-' . $transfer->id . '-CASH-IN',
-        ])->count())->toBe(2);
+        ->and(Voucher::query()->where('voucher_no', 'CASH-TRF-'.$transfer->id)->exists())->toBeFalse();
 });

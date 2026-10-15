@@ -6,6 +6,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
@@ -14,13 +15,16 @@ import { BreadcrumbItem } from '@/types';
 import type { BankTransactionIndexPageProps } from '@/types/treasury-cash/forms';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, Plus, ReceiptText } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
-    const { transactions, filters, auth } =
+    const { transactions, ledger_accounts, filters, auth } =
         usePage<BankTransactionIndexPageProps>().props;
     useFlashToastHandler();
+    const [counterpartSelections, setCounterpartSelections] = useState<
+        Record<number, string>
+    >({});
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -97,6 +101,7 @@ export default function Index() {
                                         'Account',
                                         'Date',
                                         'Type',
+                                        'Counterpart',
                                         'Amount',
                                         'Balance After',
                                         'Status',
@@ -159,6 +164,47 @@ export default function Index() {
                                             {transaction.type}
                                         </td>
                                         <td className="px-2 py-2">
+                                            {transaction.counterpart_account ? (
+                                                `${transaction.counterpart_account.code} — ${transaction.counterpart_account.name}`
+                                            ) : transaction.status ===
+                                              'PENDING' ? (
+                                                <Select
+                                                    className="h-9 min-w-56"
+                                                    value={
+                                                        counterpartSelections[
+                                                            transaction.id
+                                                        ] ?? ''
+                                                    }
+                                                    onChange={(value) =>
+                                                        setCounterpartSelections(
+                                                            (current) => ({
+                                                                ...current,
+                                                                [transaction.id]:
+                                                                    value,
+                                                            }),
+                                                        )
+                                                    }
+                                                    placeholder="Select counterpart"
+                                                    options={[
+                                                        {
+                                                            value: '',
+                                                            label: 'Select counterpart',
+                                                        },
+                                                        ...ledger_accounts.map(
+                                                            (account) => ({
+                                                                value: String(
+                                                                    account.id,
+                                                                ),
+                                                                label: `${account.code} — ${account.name}`,
+                                                            }),
+                                                        ),
+                                                    ]}
+                                                />
+                                            ) : (
+                                                '-'
+                                            )}
+                                        </td>
+                                        <td className="px-2 py-2">
                                             {transaction.amount}
                                         </td>
                                         <td className="px-2 py-2">
@@ -213,7 +259,18 @@ export default function Index() {
                                                                                 'bank-transactions.post',
                                                                                 transaction.id,
                                                                             ),
-                                                                            {},
+                                                                            counterpartSelections[
+                                                                                transaction
+                                                                                    .id
+                                                                            ]
+                                                                                ? {
+                                                                                      counterpart_account_id:
+                                                                                          counterpartSelections[
+                                                                                              transaction
+                                                                                                  .id
+                                                                                          ],
+                                                                                  }
+                                                                                : {},
                                                                             {
                                                                                 preserveScroll: true,
                                                                             },
@@ -222,6 +279,12 @@ export default function Index() {
                                                                 );
                                                         }}
                                                         aria-label={`Post ${transaction.transaction_no}`}
+                                                        disabled={
+                                                            !transaction.counterpart_account &&
+                                                            !counterpartSelections[
+                                                                transaction.id
+                                                            ]
+                                                        }
                                                     >
                                                         <CheckCircle2 className="h-4 w-4 text-success" />
                                                     </Button>

@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('bank_accounts', function (Blueprint $table): void {
@@ -28,6 +29,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('branch_day_id')->constrained()->cascadeOnDelete();
             $table->foreignId('bank_account_id')->constrained()->restrictOnDelete();
+            $table->foreignId('counterpart_account_id')->nullable()->constrained('accounts')->restrictOnDelete();
             $table->string('transaction_no', 100);
             $table->enum('type', ['DEPOSIT', 'WITHDRAWAL', 'TRANSFER_IN', 'TRANSFER_OUT', 'CHARGE', 'INTEREST', 'ADJUSTMENT']);
             $table->decimal('amount', 20, 2);
