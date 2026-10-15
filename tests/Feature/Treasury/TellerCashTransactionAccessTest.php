@@ -271,6 +271,11 @@ function configureTellerSummaryMapping(array $fixture, string $transactionType):
         'account_group_id' => $group->id,
     ]);
 
+    ($transactionType === 'DEPOSIT' ? $debitAccount : $creditAccount)->update([
+        'is_control_account' => true,
+        'is_cash_account' => true,
+    ]);
+
     TreasuryGlMapping::query()->create([
         'organization_id' => $fixture['organization']->id,
         'source_type' => 'CASH_LOCATION',

@@ -14,7 +14,7 @@ class CashManagementDataService
     {
         $query = Vault::query()
             ->whereHas('cashLocation', fn($location) => $location->where('organization_id', $organizationId))
-            ->with('cashLocation.branch')
+            ->with(['cashLocation.branch', 'cashLocation.financialAccount:id,balance'])
             ->latest();
 
         $this->applySearch($query, $search);
@@ -26,7 +26,7 @@ class CashManagementDataService
     {
         $query = Teller::query()
             ->whereHas('cashLocation', fn($location) => $location->where('organization_id', $organizationId))
-            ->with(['cashLocation.branch', 'user'])
+            ->with(['cashLocation.branch', 'cashLocation.financialAccount:id,balance', 'user'])
             ->latest();
 
         $this->applySearch($query, $search);
@@ -86,8 +86,16 @@ class CashManagementDataService
                         ->where('branch_id', $branchId)
                         ->where('is_active', true);
                 })
+                ->with('cashLocation.financialAccount:id,balance')
                 ->orderBy('name')
-                ->get(['id', 'code', 'name']),
+                ->get(['id', 'code', 'name', 'cash_location_id'])
+                ->map(fn(Teller $teller) => [
+                    'id' => $teller->id,
+                    'code' => $teller->code,
+                    'name' => $teller->name,
+                    'current_balance' => $teller->cashLocation?->financialAccount?->balance,
+                ])
+                ->all(),
         ];
     }
 
@@ -142,8 +150,16 @@ class CashManagementDataService
                         ->where('branch_id', $branchId)
                         ->where('is_active', true);
                 })
+                ->with('cashLocation.financialAccount:id,balance')
                 ->orderBy('name')
-                ->get(['id', 'code', 'name']),
+                ->get(['id', 'code', 'name', 'cash_location_id'])
+                ->map(fn(Vault $vault) => [
+                    'id' => $vault->id,
+                    'code' => $vault->code,
+                    'name' => $vault->name,
+                    'current_balance' => $vault->cashLocation?->financialAccount?->balance,
+                ])
+                ->all(),
         ];
     }
 

@@ -29,7 +29,7 @@ class TreasuryGlMappingSeeder extends Seeder
             ['PETTY_CASH_TRANSACTION', 'DEFAULT', 'ADJUSTMENT', '5100', '1130'],
         ];
 
-        foreach (['VAULT' => '1110', 'TELLER' => '1120', 'PETTY_CASH' => '1130'] as $sourceCode => $cashAccountCode) {
+        foreach (['VAULT' => '1100', 'TELLER' => '1100', 'PETTY_CASH' => '1130'] as $sourceCode => $cashAccountCode) {
             $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'DEPOSIT', $cashAccountCode, '1210'];
             $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'WITHDRAWAL', '1210', $cashAccountCode];
             $mappingRows[] = ['CASH_LOCATION', $sourceCode, 'LOAN_DISBURSEMENT', '1300', $cashAccountCode];

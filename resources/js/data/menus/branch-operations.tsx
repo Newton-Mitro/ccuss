@@ -48,32 +48,6 @@ export const branchOperations: SidebarItem[] = [
                 ],
             },
 
-            // Teller-to-Teller
-            {
-                name: 'Cash Transfers',
-                icon: <i className="fa-solid fa-right-left" />,
-                children_expanded: false,
-                permission: ['cash_transfers.view'],
-                children: [
-                    {
-                        name: 'Transfer Queue',
-                        icon: <i className="fa-solid fa-clipboard-check" />,
-                        path: '/cash-movements/transfers',
-                        match_path: 'cash-movements/transfers',
-                        permission: ['cash_transfers.view'],
-                    },
-                    {
-                        name: 'Teller to Teller Transfer',
-                        icon: (
-                            <i className="fa-solid fa-arrow-right-arrow-left" />
-                        ),
-                        path: '/cash-movements/teller-to-teller-transfer',
-                        match_path: 'cash-movements',
-                        permission: ['cash_transfers.create'],
-                    },
-                ],
-            },
-
             // Cash Transactions
             {
                 name: 'Cash Transactions',

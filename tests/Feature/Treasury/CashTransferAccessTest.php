@@ -181,10 +181,14 @@ function cashTransferFixture(): array
     $tellerLedgerAccount = LedgerAccount::factory()->create([
         'organization_id' => $organization->id,
         'account_group_id' => $accountGroup->id,
+        'is_control_account' => true,
+        'is_cash_account' => true,
     ]);
     $vaultLedgerAccount = LedgerAccount::factory()->create([
         'organization_id' => $organization->id,
         'account_group_id' => $accountGroup->id,
+        'is_control_account' => true,
+        'is_cash_account' => true,
     ]);
     $fiscalYear = FiscalYear::factory()->create([
         'organization_id' => $organization->id,

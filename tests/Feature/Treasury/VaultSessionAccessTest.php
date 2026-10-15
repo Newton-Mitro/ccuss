@@ -5,6 +5,7 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use App\FinancialServices\Models\FinancialAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Vault;
@@ -110,6 +111,15 @@ it('does not expose vault sessions without permission', function () {
 it('exposes open branch days on the vault session creation page', function () {
     $fixture = vaultSessionFixture();
     grantVaultSessionCreatePermission($fixture['user']);
+    $cashAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'balance' => 18750,
+    ]);
+    CashLocation::query()->whereKey($fixture['vault']->cash_location_id)
+        ->update(['financial_account_id' => $cashAccount->id]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -120,7 +130,8 @@ it('exposes open branch days on the vault session creation page', function () {
             ->where('organization.activeId', $fixture['organization']->id)
             ->where('auth.user.branch.name', $fixture['branch']->name)
             ->has('branch_days', 1)
-            ->where('branch_days.0.branch_name', $fixture['branch']->name));
+            ->where('branch_days.0.branch_name', $fixture['branch']->name)
+            ->where('vaults.0.current_balance', '18750.0000'));
 });
 
 it('opens a vault session for the selected open branch day', function () {

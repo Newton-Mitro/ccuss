@@ -62,6 +62,12 @@ it('summarizes a teller cash transaction using its balanced line total', functio
         'organization_id' => $organization->id,
         'account_group_id' => $group->id,
     ]);
+    $cashControlLedger = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+        'is_control_account' => true,
+        'is_cash_account' => true,
+    ]);
     $year = FiscalYear::factory()->create([
         'organization_id' => $organization->id,
         'start_date' => '2026-01-01',
@@ -80,10 +86,22 @@ it('summarizes a teller cash transaction using its balanced line total', functio
         'balance' => 0,
         'available_balance' => 0,
     ]);
+    $savingsProduct = FinancialProduct::factory()->create([
+        'organization_id' => $organization->id,
+        'category' => 'SAVINGS',
+        'balance_type' => 'LIABILITY',
+    ]);
+    DepositProductAccountMapping::create([
+        'deposit_product_id' => $savingsProduct->id,
+        'transaction_type' => 'DEPOSIT',
+        'debit_account_id' => $debitLedger->id,
+        'credit_account_id' => $creditLedger->id,
+        'status' => true,
+    ]);
     $savingsAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
-        'financial_product_id' => null,
+        'financial_product_id' => $savingsProduct->id,
         'account_type' => 'SAVINGS',
         'balance' => 0,
         'available_balance' => 0,
@@ -102,8 +120,8 @@ it('summarizes a teller cash transaction using its balanced line total', functio
         'source_type' => 'CASH_LOCATION',
         'source_code' => 'TELLER',
         'transaction_type' => 'DEPOSIT',
-        'debit_account_id' => $debitLedger->id,
-        'credit_account_id' => $creditLedger->id,
+        'debit_account_id' => $cashControlLedger->id,
+        'credit_account_id' => $debitLedger->id,
         'status' => true,
     ]);
 
@@ -129,5 +147,45 @@ it('summarizes a teller cash transaction using its balanced line total', functio
     expect($transaction->amount)->toBe('500.0000')
         ->and($voucher)->not->toBeNull()
         ->and((float) $voucher->entries->sum('debit'))->toBe(250.0)
-        ->and((float) $voucher->entries->sum('credit'))->toBe(250.0);
+        ->and((float) $voucher->entries->sum('credit'))->toBe(250.0)
+        ->and($voucher->entries->firstWhere('debit', '>', 0)->account_id)->toBe($cashControlLedger->id)
+        ->and($voucher->entries->firstWhere('credit', '>', 0)->account_id)->toBe($creditLedger->id);
+
+    DepositProductAccountMapping::create([
+        'deposit_product_id' => $savingsProduct->id,
+        'transaction_type' => 'WITHDRAWAL',
+        'debit_account_id' => $debitLedger->id,
+        'credit_account_id' => $creditLedger->id,
+        'status' => true,
+    ]);
+    TreasuryGlMapping::query()->create([
+        'organization_id' => $organization->id,
+        'source_type' => 'CASH_LOCATION',
+        'source_code' => 'TELLER',
+        'transaction_type' => 'WITHDRAWAL',
+        'debit_account_id' => $creditLedger->id,
+        'credit_account_id' => $cashControlLedger->id,
+        'status' => true,
+    ]);
+
+    $withdrawal = $service->createMultiLine(
+        [
+            'transaction_type' => 'WITHDRAWAL',
+            'transaction_date' => '2026-09-23',
+            'description' => 'Teller withdrawal summary',
+        ],
+        [
+            ['financial_account_id' => $cashAccount->id, 'direction' => 'CREDIT', 'amount' => 100],
+            ['financial_account_id' => $savingsAccount->id, 'direction' => 'DEBIT', 'amount' => 100],
+        ],
+        $organization->id,
+        $user->id,
+        $branch->id,
+    );
+    $service->post($withdrawal, $organization->id, $user->id);
+    $withdrawalVoucher = $withdrawal->fresh()->voucher;
+
+    expect($withdrawalVoucher)->not->toBeNull()
+        ->and($withdrawalVoucher->entries->firstWhere('debit', '>', 0)->account_id)->toBe($debitLedger->id)
+        ->and($withdrawalVoucher->entries->firstWhere('credit', '>', 0)->account_id)->toBe($cashControlLedger->id);
 });

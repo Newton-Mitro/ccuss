@@ -9,6 +9,9 @@ export type VaultStatus = 'ACTIVE' | 'INACTIVE' | 'CLOSED';
 export interface VaultCashLocation {
     code: string;
     name: string;
+    financial_account?: {
+        balance: string | number;
+    } | null;
     branch?: {
         name: string;
         code: string;

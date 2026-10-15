@@ -286,26 +286,6 @@ class GeneralAccountingSeeder extends Seeder
                 'normal_balance' => 'DEBIT',
                 'is_cash' => true,
                 'is_reconcilable' => true,
-                'is_control' => false,
-            ],
-            [
-                'code' => '1110',
-                'name' => 'Vault Cash',
-                'group' => '1100',
-                'type' => 'ASSET',
-                'normal_balance' => 'DEBIT',
-                'is_cash' => true,
-                'is_reconcilable' => true,
-                'is_control' => true,
-            ],
-            [
-                'code' => '1120',
-                'name' => 'Teller Cash',
-                'group' => '1100',
-                'type' => 'ASSET',
-                'normal_balance' => 'DEBIT',
-                'is_cash' => true,
-                'is_reconcilable' => true,
                 'is_control' => true,
             ],
             [
@@ -630,6 +610,14 @@ class GeneralAccountingSeeder extends Seeder
                     ],
                 );
         }
+
+        LedgerAccount::query()
+            ->where('organization_id', $organization->id)
+            ->whereIn('code', ['1110', '1120'])
+            ->update([
+                'is_control_account' => false,
+                'status' => false,
+            ]);
 
         return $accounts;
     }

@@ -38,29 +38,38 @@ export const treasuryAndCash: SidebarItem[] = [
                     },
                     {
                         name: 'Cash Transfers',
-                        icon: <i className="fa-solid fa-right-left" />,
+                        icon: <i className="fa-solid fa-money-bill-transfer" />,
                         children_expanded: false,
                         permission: ['cash_transfers.view'],
                         children: [
                             {
                                 name: 'Transfer Queue',
-                                icon: (
-                                    <i className="fa-solid fa-clipboard-check" />
-                                ),
-                                path: '/vault-transfers',
-                                match_path: 'vault-transfers',
+                                icon: <i className="fa-solid fa-list-check" />,
+                                path: '/cash-movements/transfers',
+                                match_path: 'cash-movements/transfers',
                                 permission: ['cash_transfers.view'],
                             },
                             {
+                                name: 'Teller to Teller',
+                                icon: (
+                                    <i className="fa-solid fa-people-arrows-left-right" />
+                                ),
+                                path: '/cash-movements/teller-to-teller-transfer',
+                                match_path: 'cash-movements',
+                                permission: ['cash_transfers.create'],
+                            },
+                            {
                                 name: 'Vault to Teller',
-                                icon: <i className="fa-solid fa-arrow-down" />,
+                                icon: <i className="fa-solid fa-vault" />,
                                 path: '/vault-transfers/vault-to-teller',
                                 match_path: 'vault-transfers/vault-to-teller',
                                 permission: ['cash_transfers.create'],
                             },
                             {
                                 name: 'Teller to Vault',
-                                icon: <i className="fa-solid fa-arrow-up" />,
+                                icon: (
+                                    <i className="fa-solid fa-building-columns" />
+                                ),
                                 path: '/vault-transfers/teller-to-vault',
                                 match_path: 'vault-transfers/teller-to-vault',
                                 permission: ['cash_transfers.create'],
@@ -84,7 +93,7 @@ export const treasuryAndCash: SidebarItem[] = [
                             {
                                 name: 'Vault to Bank',
                                 icon: (
-                                    <i className="fa-solid fa-building-columns" />
+                                    <i className="fa-solid fa-money-bill-transfer" />
                                 ),
                                 path: '/vault-transfers/vault-to-bank',
                                 match_path: 'vault-transfers/vault-to-bank',

@@ -17,6 +17,8 @@ interface LedgerAccount {
     id: number;
     code: string;
     name: string;
+    is_control_account: boolean;
+    is_cash_account: boolean;
 }
 
 interface Mapping {
@@ -52,6 +54,7 @@ const transactionTypes: Record<string, string[]> = {
         'RETURN',
         'ADJUSTMENT',
     ],
+    CASH_LOCATION: ['DEPOSIT', 'WITHDRAWAL'],
 };
 
 export default function TreasuryGlMappingsPage() {
@@ -97,9 +100,15 @@ export default function TreasuryGlMappingsPage() {
         { value: '', label: 'Select GL account' },
         ...accounts.map((account) => ({
             value: String(account.id),
-            label: `${account.code} - ${account.name}`,
+            label: `${account.code} - ${account.name}${account.is_control_account && account.is_cash_account ? ' · Cash control' : account.is_cash_account ? ' · Cash' : ''}`,
         })),
     ];
+    const cashControlSide =
+        data.source_type === 'CASH_LOCATION'
+            ? data.transaction_type === 'DEPOSIT'
+                ? 'debit'
+                : 'credit'
+            : null;
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -154,7 +163,7 @@ export default function TreasuryGlMappingsPage() {
                             onChange={(event) =>
                                 setData('source_code', event.target.value)
                             }
-                            placeholder="DEFAULT, VAULT, or product code"
+                            placeholder="DEFAULT, TELLER, or VAULT"
                             required
                         />
                         {errors.source_code && (
@@ -201,7 +210,11 @@ export default function TreasuryGlMappingsPage() {
                         )}
                     </div>
                     <div>
-                        <Label htmlFor="debit_account_id">Debit account</Label>
+                        <Label htmlFor="debit_account_id">
+                            {cashControlSide === 'debit'
+                                ? 'Debit account (Cash on Hand control)'
+                                : 'Debit account'}
+                        </Label>
                         <Select
                             value={data.debit_account_id}
                             onChange={(value) =>
@@ -217,7 +230,9 @@ export default function TreasuryGlMappingsPage() {
                     </div>
                     <div>
                         <Label htmlFor="credit_account_id">
-                            Credit account
+                            {cashControlSide === 'credit'
+                                ? 'Credit account (Cash on Hand control)'
+                                : 'Credit account'}
                         </Label>
                         <Select
                             value={data.credit_account_id}
@@ -232,6 +247,13 @@ export default function TreasuryGlMappingsPage() {
                             </p>
                         )}
                     </div>
+                    {cashControlSide && (
+                        <p className="text-xs text-muted-foreground md:col-span-6">
+                            The cash-side account must be marked as both a cash
+                            account and a control account in the chart of
+                            accounts.
+                        </p>
+                    )}
                     <Button
                         type="submit"
                         disabled={processing || accounts.length < 2}

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { TellerIndexProps } from '@/types/teller';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -89,6 +90,7 @@ export default function Index() {
                                         'Assigned User',
                                         'Branch',
                                         'Status',
+                                        'Account Balance',
                                         'Maximum Cash',
                                         'Actions',
                                     ].map((header) => (
@@ -143,6 +145,16 @@ export default function Index() {
                                             >
                                                 {teller.status}
                                             </StatusBadge>
+                                        </td>
+                                        <td className="px-2 py-2 tabular-nums">
+                                            {teller.cash_location
+                                                ?.financial_account
+                                                ? formatBDTCurrency(
+                                                      teller.cash_location
+                                                          .financial_account
+                                                          .balance,
+                                                  )
+                                                : '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             {teller.maximum_cash ?? '-'}

@@ -5,6 +5,7 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use App\FinancialServices\Models\FinancialAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\Teller;
@@ -131,6 +132,15 @@ it('loads teller sessions for authorized organization users', function () {
 it('loads the dedicated teller session creation page for users with open access', function () {
     $fixture = tellerSessionFixture();
     grantTellerSessionLifecyclePermissions($fixture['user']);
+    $cashAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'balance' => 4250,
+    ]);
+    CashLocation::query()->whereKey($fixture['teller']->cash_location_id)
+        ->update(['financial_account_id' => $cashAccount->id]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -141,7 +151,8 @@ it('loads the dedicated teller session creation page for users with open access'
             ->where('organization.activeId', $fixture['organization']->id)
             ->where('auth.user.branch.name', $fixture['branch']->name)
             ->has('branch_days', 1)
-            ->where('branch_days.0.branch_name', $fixture['branch']->name));
+            ->where('branch_days.0.branch_name', $fixture['branch']->name)
+            ->where('tellers.0.current_balance', '4250.0000'));
 });
 
 it('does not expose teller sessions without permission', function () {

@@ -76,6 +76,15 @@ class TreasurySummaryPostingService
             throw new RuntimeException('Treasury GL mappings must reference active ledger accounts in the active organization.');
         }
 
+        if ($sourceType === 'CASH_LOCATION' && in_array($transactionType, ['DEPOSIT', 'WITHDRAWAL'], true)) {
+            $cashAccount = $accounts->get($transactionType === 'DEPOSIT' ? $debitAccountId : $creditAccountId);
+            if (!$cashAccount->is_cash_account || !$cashAccount->is_control_account) {
+                throw new RuntimeException(
+                    'The cash side of a cash location mapping must be an active cash control account.',
+                );
+            }
+        }
+
         $fiscalPeriod = FiscalPeriod::query()
             ->whereHas('fiscalYear', fn($query) => $query->where('organization_id', $organizationId)->where('status', 'OPEN'))
             ->where('status', 'OPEN')

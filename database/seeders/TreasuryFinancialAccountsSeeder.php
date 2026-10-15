@@ -25,7 +25,7 @@ class TreasuryFinancialAccountsSeeder extends Seeder
         $branchId = $organization->branches()->oldest('id')->value('id');
         $ledgerAccounts = LedgerAccount::query()
             ->where('organization_id', $organization->id)
-            ->whereIn('code', ['1110', '1120', '1130', '1200', '1210'])
+            ->whereIn('code', ['1100', '1130', '1200', '1210'])
             ->get()
             ->keyBy('code');
 
@@ -117,10 +117,10 @@ class TreasuryFinancialAccountsSeeder extends Seeder
             }
 
             foreach ([
-                ['CASH-VAULT-001', 'Main Vault Cash Account', 'CASH', 'Main Vault', 1000000, '1110'],
-                ['CASH-VAULT-002', 'Secondary Vault Cash Account', 'CASH', 'Secondary Vault', 250000, '1110'],
-                ['CASH-TELLER-001', 'Main Teller Cash Account', 'CASH', 'Main Teller', 100000, '1120'],
-                ['CASH-TELLER-002', 'Secondary Teller Cash Account', 'CASH', 'Secondary Teller', 50000, '1120'],
+                ['CASH-VAULT-001', 'Main Vault Cash Account', 'CASH', 'Main Vault', 1000000, '1100'],
+                ['CASH-VAULT-002', 'Secondary Vault Cash Account', 'CASH', 'Secondary Vault', 250000, '1100'],
+                ['CASH-TELLER-001', 'Main Teller Cash Account', 'CASH', 'Main Teller', 100000, '1100'],
+                ['CASH-TELLER-002', 'Secondary Teller Cash Account', 'CASH', 'Secondary Teller', 50000, '1100'],
                 ['CASH-PETTY-001', 'Operations Petty Cash Account', 'CASH', 'Operations Petty Cash', 10000, '1130'],
                 ['CASH-PETTY-002', 'Administration Petty Cash Account', 'CASH', 'Administration Petty Cash', 5000, '1130'],
             ] as [$accountNo, $name, $accountType, $cashLocation, $amount, $ledgerCode]) {
@@ -263,10 +263,10 @@ class TreasuryFinancialAccountsSeeder extends Seeder
 
         $debitEntry = $voucher->entries()->firstOrCreate(
             [
-                'account_id' => $debitLedgerAccount->id,
                 'line_no' => 1,
             ],
             [
+                'account_id' => $debitLedgerAccount->id,
                 'branch_id' => $branchId,
                 'debit' => $amount,
                 'credit' => 0,
@@ -275,6 +275,7 @@ class TreasuryFinancialAccountsSeeder extends Seeder
             ],
         );
         $debitEntry->fill([
+            'account_id' => $debitLedgerAccount->id,
             'branch_id' => $branchId,
             'debit' => $amount,
             'credit' => 0,
@@ -284,10 +285,10 @@ class TreasuryFinancialAccountsSeeder extends Seeder
 
         $creditEntry = $voucher->entries()->firstOrCreate(
             [
-                'account_id' => $creditLedgerAccount->id,
                 'line_no' => 2,
             ],
             [
+                'account_id' => $creditLedgerAccount->id,
                 'branch_id' => $branchId,
                 'debit' => 0,
                 'credit' => $amount,
@@ -296,6 +297,7 @@ class TreasuryFinancialAccountsSeeder extends Seeder
             ],
         );
         $creditEntry->fill([
+            'account_id' => $creditLedgerAccount->id,
             'branch_id' => $branchId,
             'debit' => 0,
             'credit' => $amount,

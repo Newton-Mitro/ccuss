@@ -5,6 +5,7 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use App\FinancialServices\Models\FinancialAccount;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\Teller;
@@ -80,9 +81,17 @@ function cashManagementFixture(): array
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
     ]);
+    $vaultAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'balance' => 3400,
+    ]);
     $vaultLocation = CashLocation::create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
+        'financial_account_id' => $vaultAccount->id,
         'code' => 'VAULT-001',
         'name' => 'Main Vault Location',
         'type' => 'VAULT',
@@ -95,9 +104,17 @@ function cashManagementFixture(): array
         'status' => 'ACTIVE',
         'maximum_balance' => 100000,
     ]);
+    $tellerAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'financial_product_id' => null,
+        'account_type' => 'CASH',
+        'balance' => 1250,
+    ]);
     $tellerLocation = CashLocation::create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
+        'financial_account_id' => $tellerAccount->id,
         'code' => 'TELLER-001',
         'name' => 'Teller Location',
         'type' => 'TELLER',
@@ -126,7 +143,8 @@ it('loads vault and teller list pages for authorized organization users', functi
         ->assertInertia(fn($page) => $page
             ->component('treasury-cash/vaults/index')
             ->has('vaults.data', 1)
-            ->where('vaults.data.0.code', $fixture['vault']->code));
+            ->where('vaults.data.0.code', $fixture['vault']->code)
+            ->where('vaults.data.0.cash_location.financial_account.balance', '3400.0000'));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -135,7 +153,8 @@ it('loads vault and teller list pages for authorized organization users', functi
         ->assertInertia(fn($page) => $page
             ->component('treasury-cash/tellers/index')
             ->has('tellers.data', 1)
-            ->where('tellers.data.0.code', $fixture['teller']->code));
+            ->where('tellers.data.0.code', $fixture['teller']->code)
+            ->where('tellers.data.0.cash_location.financial_account.balance', '1250.0000'));
 });
 
 it('does not expose cash management pages without permission', function () {

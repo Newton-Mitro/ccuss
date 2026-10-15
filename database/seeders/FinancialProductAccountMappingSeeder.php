@@ -33,17 +33,17 @@ class FinancialProductAccountMappingSeeder extends Seeder
 
                 $mappingPairs = $isLoan
                     ? [
-                        ['DISBURSEMENT', '1300', '1120'],
-                        ['REPAYMENT', '1120', '1300'],
-                        ['INTEREST', '1120', '4100'],
-                        ['FEE', '1120', '4200'],
+                        ['DISBURSEMENT', '1300', '1100'],
+                        ['REPAYMENT', '1100', '1300'],
+                        ['INTEREST', '1100', '4100'],
+                        ['FEE', '1100', '4200'],
                     ]
                     : [
-                        ['DEPOSIT', '1120', $liabilityAccount],
-                        ['WITHDRAWAL', $liabilityAccount, '1120'],
+                        ['DEPOSIT', '1100', $liabilityAccount],
+                        ['WITHDRAWAL', $liabilityAccount, '1100'],
                         ['INTEREST', '5200', $liabilityAccount],
                         ['FEE', $liabilityAccount, '4200'],
-                        ['MIGRATION_OPENING_BALANCE', '1120', $liabilityAccount],
+                        ['MIGRATION_OPENING_BALANCE', '1100', $liabilityAccount],
                     ];
 
                 foreach ($mappingPairs as [$transactionType, $debitCode, $creditCode]) {

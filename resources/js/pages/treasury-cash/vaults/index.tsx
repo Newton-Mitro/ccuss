@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { VaultIndexProps } from '@/types/treasury-cash/vaults';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -88,6 +89,7 @@ export default function Index() {
                                         'Vault',
                                         'Branch',
                                         'Status',
+                                        'Account Balance',
                                         'Maximum Balance',
                                         'Actions',
                                     ].map((header) => (
@@ -139,6 +141,16 @@ export default function Index() {
                                             >
                                                 {vault.status}
                                             </StatusBadge>
+                                        </td>
+                                        <td className="px-2 py-2 tabular-nums">
+                                            {vault.cash_location
+                                                ?.financial_account
+                                                ? formatBDTCurrency(
+                                                      vault.cash_location
+                                                          .financial_account
+                                                          .balance,
+                                                  )
+                                                : '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             {vault.maximum_balance ?? '-'}

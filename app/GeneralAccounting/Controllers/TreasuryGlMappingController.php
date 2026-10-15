@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,8 +35,8 @@ class TreasuryGlMappingController extends Controller
                 ->where('organization_id', $organizationId)
                 ->whereIn('source_type', self::SOURCE_TYPES)
                 ->with([
-                    'debitAccount:id,code,name',
-                    'creditAccount:id,code,name',
+                    'debitAccount:id,code,name,is_control_account,is_cash_account',
+                    'creditAccount:id,code,name,is_control_account,is_cash_account',
                 ])
                 ->orderBy('source_type')
                 ->orderBy('source_code')
@@ -45,7 +46,7 @@ class TreasuryGlMappingController extends Controller
                 ->where('organization_id', $organizationId)
                 ->where('status', true)
                 ->orderBy('code')
-                ->get(['id', 'code', 'name']),
+                ->get(['id', 'code', 'name', 'is_control_account', 'is_cash_account']),
             'sourceTypes' => self::SOURCE_TYPES,
         ]);
     }
@@ -76,6 +77,35 @@ class TreasuryGlMappingController extends Controller
 
         $data['source_code'] = strtoupper(trim($data['source_code']));
         $data['transaction_type'] = strtoupper(trim($data['transaction_type']));
+
+        if ($data['source_type'] === 'CASH_LOCATION') {
+            if (!in_array($data['transaction_type'], ['DEPOSIT', 'WITHDRAWAL'], true)) {
+                throw ValidationException::withMessages([
+                    'transaction_type' => 'Cash location mappings support deposits and withdrawals.',
+                ]);
+            }
+
+            $cashAccountId = $data['transaction_type'] === 'DEPOSIT'
+                ? $data['debit_account_id']
+                : $data['credit_account_id'];
+            $isCashControlAccount = LedgerAccount::query()
+                ->where('organization_id', $organizationId)
+                ->where('status', true)
+                ->where('is_cash_account', true)
+                ->where('is_control_account', true)
+                ->whereKey($cashAccountId)
+                ->exists();
+
+            if (!$isCashControlAccount) {
+                $field = $data['transaction_type'] === 'DEPOSIT'
+                    ? 'debit_account_id'
+                    : 'credit_account_id';
+
+                throw ValidationException::withMessages([
+                    $field => 'The cash side must use an active ledger account marked as both a cash account and a control account.',
+                ]);
+            }
+        }
 
         TreasuryGlMapping::query()->updateOrCreate(
             [

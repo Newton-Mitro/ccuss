@@ -352,6 +352,8 @@ it('posts a savings-account cheque withdrawal through the teller cash ledger', f
     $creditLedger = LedgerAccount::factory()->create([
         'organization_id' => $organization->id,
         'account_group_id' => $group->id,
+        'is_control_account' => true,
+        'is_cash_account' => true,
     ]);
     TreasuryGlMapping::query()->create([
         'organization_id' => $organization->id,

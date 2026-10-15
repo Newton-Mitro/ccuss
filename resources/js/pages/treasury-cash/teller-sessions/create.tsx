@@ -1,3 +1,4 @@
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -31,6 +32,7 @@ type Teller = {
     id: number;
     name: string;
     code: string;
+    current_balance?: string | number | null;
 };
 
 export default function CreateTellerSessionPage() {
@@ -56,6 +58,9 @@ export default function CreateTellerSessionPage() {
         opening_cash: '',
         opening_note: '',
     });
+    const selectedTeller = tellers.find(
+        (teller) => String(teller.id) === data.teller_id,
+    );
 
     useFlashToastHandler();
 
@@ -393,6 +398,27 @@ export default function CreateTellerSessionPage() {
                                 </div>
 
                                 <div className="space-y-4 p-4 sm:p-5">
+                                    {selectedTeller && (
+                                        <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 px-3 py-2.5">
+                                            <div>
+                                                <p className="text-xs font-medium">
+                                                    Current ledger balance
+                                                </p>
+                                                <p className="text-[11px] text-muted-foreground">
+                                                    Reference only; count the
+                                                    physical cash below.
+                                                </p>
+                                            </div>
+                                            <p className="shrink-0 text-sm font-semibold tabular-nums">
+                                                {selectedTeller.current_balance ==
+                                                null
+                                                    ? '-'
+                                                    : formatBDTCurrency(
+                                                          selectedTeller.current_balance,
+                                                      )}
+                                            </p>
+                                        </div>
+                                    )}
                                     <div>
                                         <label
                                             htmlFor="opening_cash"

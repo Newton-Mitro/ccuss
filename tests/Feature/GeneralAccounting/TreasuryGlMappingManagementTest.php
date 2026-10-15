@@ -105,3 +105,67 @@ it('rejects Treasury GL mappings to accounts in another organization', function 
 
     expect(TreasuryGlMapping::query()->count())->toBe(0);
 });
+
+it('requires cash location mappings to use a cash control account on the cash side', function () {
+    $organization = Organization::factory()->create();
+    $user = User::factory()->create(['organization_id' => $organization->id]);
+    grantTreasuryGlMappingPermission($user);
+    $group = AccountGroup::factory()->create(['organization_id' => $organization->id]);
+    $cashControl = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+        'is_control_account' => true,
+        'is_cash_account' => true,
+    ]);
+    $counterAccount = LedgerAccount::factory()->create([
+        'organization_id' => $organization->id,
+        'account_group_id' => $group->id,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->from(route('treasury-gl-mappings.index'))
+        ->post(route('treasury-gl-mappings.store'), [
+            'source_type' => 'CASH_LOCATION',
+            'source_code' => 'TELLER',
+            'transaction_type' => 'DEPOSIT',
+            'debit_account_id' => $counterAccount->id,
+            'credit_account_id' => $cashControl->id,
+        ])
+        ->assertRedirect(route('treasury-gl-mappings.index'))
+        ->assertSessionHasErrors(['debit_account_id']);
+
+    expect(TreasuryGlMapping::query()->count())->toBe(0);
+
+    $this->post(route('treasury-gl-mappings.store'), [
+        'source_type' => 'CASH_LOCATION',
+        'source_code' => 'TELLER',
+        'transaction_type' => 'DEPOSIT',
+        'debit_account_id' => $cashControl->id,
+        'credit_account_id' => $counterAccount->id,
+    ])->assertRedirect(route('treasury-gl-mappings.index'));
+
+    expect(TreasuryGlMapping::query()->firstOrFail()->debit_account_id)->toBe($cashControl->id);
+
+    $this->from(route('treasury-gl-mappings.index'))
+        ->post(route('treasury-gl-mappings.store'), [
+            'source_type' => 'CASH_LOCATION',
+            'source_code' => 'TELLER',
+            'transaction_type' => 'WITHDRAWAL',
+            'debit_account_id' => $cashControl->id,
+            'credit_account_id' => $counterAccount->id,
+        ])
+        ->assertRedirect(route('treasury-gl-mappings.index'))
+        ->assertSessionHasErrors(['credit_account_id']);
+
+    $this->post(route('treasury-gl-mappings.store'), [
+        'source_type' => 'CASH_LOCATION',
+        'source_code' => 'TELLER',
+        'transaction_type' => 'WITHDRAWAL',
+        'debit_account_id' => $counterAccount->id,
+        'credit_account_id' => $cashControl->id,
+    ])->assertRedirect(route('treasury-gl-mappings.index'));
+
+    expect(TreasuryGlMapping::query()->count())->toBe(2)
+        ->and(TreasuryGlMapping::query()->where('transaction_type', 'WITHDRAWAL')->value('credit_account_id'))->toBe($cashControl->id);
+});

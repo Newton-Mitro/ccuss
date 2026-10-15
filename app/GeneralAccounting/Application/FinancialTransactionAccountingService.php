@@ -5,6 +5,8 @@ namespace App\GeneralAccounting\Application;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\LoanProduct;
 use App\GeneralAccounting\Application\TreasurySummaryPostingService;
+use App\GeneralAccounting\Models\LedgerAccount;
+use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\GeneralAccounting\Models\Voucher;
 use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\BankAccount;
@@ -47,6 +49,52 @@ class FinancialTransactionAccountingService
         $mapping = $productMappings->count() === 1 ? $productMappings->first() : null;
         $mappingProduct = $mapping?->product;
         $productSourceType = $mappingProduct instanceof LoanProduct ? 'LOAN_PRODUCT' : 'DEPOSIT_PRODUCT';
+        $debitAccountOverride = $mapping?->debit_account_id;
+        $creditAccountOverride = $mapping?->credit_account_id;
+
+        if (
+            $mapping
+            && $source
+            && $source['type'] === 'CASH_LOCATION'
+            && in_array($transaction->transaction_type, ['DEPOSIT', 'WITHDRAWAL'], true)
+        ) {
+            $cashMapping = TreasuryGlMapping::query()
+                ->where('organization_id', $transaction->organization_id)
+                ->where('source_type', 'CASH_LOCATION')
+                ->where('source_code', $source['code'])
+                ->where('transaction_type', $transaction->transaction_type)
+                ->where('status', true)
+                ->first();
+
+            if (!$cashMapping) {
+                throw new \RuntimeException(
+                    'An active Cash On Hand control mapping is required for teller deposits and withdrawals.',
+                );
+            }
+
+            $cashControlAccountId = $transaction->transaction_type === 'DEPOSIT'
+                ? $cashMapping->debit_account_id
+                : $cashMapping->credit_account_id;
+            $isCashControlAccount = LedgerAccount::query()
+                ->where('organization_id', $transaction->organization_id)
+                ->where('status', true)
+                ->where('is_cash_account', true)
+                ->where('is_control_account', true)
+                ->whereKey($cashControlAccountId)
+                ->exists();
+
+            if (!$isCashControlAccount) {
+                throw new \RuntimeException(
+                    'The cash side of the teller mapping must be an active cash control account.',
+                );
+            }
+
+            if ($transaction->transaction_type === 'DEPOSIT') {
+                $debitAccountOverride = $cashControlAccountId;
+            } else {
+                $creditAccountOverride = $cashControlAccountId;
+            }
+        }
 
         if (!$mapping && !$source) {
             return null;
@@ -65,8 +113,8 @@ class FinancialTransactionAccountingService
             description: $transaction->description ?? $transaction->transaction_type,
             reference: $transaction->transaction_no,
             financialTransactionId: $transaction->id,
-            debitAccountOverride: $mapping?->debit_account_id,
-            creditAccountOverride: $mapping?->credit_account_id,
+            debitAccountOverride: $debitAccountOverride,
+            creditAccountOverride: $creditAccountOverride,
         );
     }
 
