@@ -11,7 +11,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { PettyCashIndexProps } from '@/types/treasury-cash/petty-cash-accounts';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Pencil, WalletCards } from 'lucide-react';
+import { Eye, Pencil, WalletCards } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
@@ -161,7 +161,7 @@ export default function Index() {
                                             </StatusBadge>
                                         </td>
                                         <td className="px-2 py-2">
-                                            {canUpdate && (
+                                            <div className="flex items-center">
                                                 <Button
                                                     asChild
                                                     type="button"
@@ -170,16 +170,35 @@ export default function Index() {
                                                 >
                                                     <Link
                                                         href={route(
-                                                            'petty-cash-accounts.edit',
+                                                            'petty-cash-accounts.show',
                                                             fund.id,
                                                         )}
-                                                        aria-label={`Edit ${fund.name}`}
-                                                        title="Edit petty cash fund"
+                                                        aria-label={`View ${fund.name}`}
+                                                        title="View petty cash fund"
                                                     >
-                                                        <Pencil className="h-4 w-4" />
+                                                        <Eye className="h-4 w-4" />
                                                     </Link>
                                                 </Button>
-                                            )}
+                                                {canUpdate && (
+                                                    <Button
+                                                        asChild
+                                                        type="button"
+                                                        size="icon"
+                                                        variant="ghost"
+                                                    >
+                                                        <Link
+                                                            href={route(
+                                                                'petty-cash-accounts.edit',
+                                                                fund.id,
+                                                            )}
+                                                            aria-label={`Edit ${fund.name}`}
+                                                            title="Edit petty cash fund"
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Link>
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

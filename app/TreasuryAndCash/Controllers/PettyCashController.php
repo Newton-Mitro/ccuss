@@ -28,7 +28,7 @@ class PettyCashController extends Controller
         private readonly PettyCashDataService $pettyCashDataService,
         private readonly PettyCashTransactionService $pettyCashTransactionService,
     ) {
-        $this->middleware('permission:petty_cash.view')->only(['accounts']);
+        $this->middleware('permission:petty_cash.view')->only(['accounts', 'show']);
         $this->middleware('permission:petty_cash.create')->only(['create', 'store', 'funding', 'storeFunding']);
         $this->middleware('permission:petty_cash.update')->only(['edit', 'update']);
         $this->middleware('permission:petty_cash.expense')->only(['expense', 'storeExpense']);
@@ -48,6 +48,19 @@ class PettyCashController extends Controller
             'funds' => $funds,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
+    }
+
+    public function show(Request $request, PettyCashFund $fund): Response
+    {
+        $organization = $request->attributes->get('active_organization');
+        abort_unless($fund->cashLocation?->organization_id === $organization->id, 404);
+        $fund->load([
+            'cashLocation.branch',
+            'cashLocation.financialAccount:id,account_no,balance',
+            'custodian:id,name,email',
+        ]);
+
+        return Inertia::render('treasury-cash/petty-cash/accounts/show', ['fund' => $fund]);
     }
 
     public function transactions(Request $request): Response

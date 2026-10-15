@@ -1,0 +1,103 @@
+import {
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { BreadcrumbItem, SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { ArrowLeft, Pencil } from 'lucide-react';
+
+export interface TreasuryAccountDetail {
+    label: string;
+    value: string | number | null | undefined;
+    mono?: boolean;
+}
+
+export default function TreasuryAccountDetails({
+    title,
+    description,
+    breadcrumbs,
+    details,
+    status,
+    editHref,
+    editPermission,
+    indexHref,
+}: {
+    title: string;
+    description: string;
+    breadcrumbs: BreadcrumbItem[];
+    details: TreasuryAccountDetail[];
+    status: string;
+    editHref?: string;
+    editPermission?: string;
+    indexHref: string;
+}) {
+    const { auth } = usePage<SharedData>().props;
+    const permissions = new Set([
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ]);
+
+    return (
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
+            <Head title={title} />
+            <div className="space-y-5 text-foreground">
+                <ResourcePageHeader
+                    title={title}
+                    description={description}
+                    action={
+                        <StatusBadge
+                            tone={status === 'ACTIVE' ? 'success' : 'neutral'}
+                        >
+                            {status}
+                        </StatusBadge>
+                    }
+                />
+                <div className="flex flex-wrap gap-2">
+                    <Button asChild variant="outline">
+                        <Link href={indexHref}>
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Back to list
+                        </Link>
+                    </Button>
+                    {editHref &&
+                        (!editPermission ||
+                            permissions.has(editPermission)) && (
+                            <Button asChild>
+                                <Link href={editHref}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit
+                                </Link>
+                            </Button>
+                        )}
+                </div>
+                <section className="overflow-hidden rounded-md border bg-card">
+                    <dl className="grid divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+                        {details.map(({ label, value, mono }) => (
+                            <div
+                                key={label}
+                                className="min-w-0 border-b p-4 last:border-b-0 sm:odd:border-r"
+                            >
+                                <dt className="text-xs font-medium text-muted-foreground">
+                                    {label}
+                                </dt>
+                                <dd
+                                    className={`mt-1 text-sm font-medium break-words ${mono ? 'font-mono' : ''}`}
+                                >
+                                    {value === null ||
+                                    value === undefined ||
+                                    value === ''
+                                        ? '—'
+                                        : value}
+                                </dd>
+                            </div>
+                        ))}
+                    </dl>
+                </section>
+            </div>
+        </CustomAuthLayout>
+    );
+}

@@ -10,7 +10,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
 import type { BankAccountIndexProps } from '@/types/treasury-cash/bank-accounts';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Building2, Plus } from 'lucide-react';
+import { Building2, Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
@@ -45,6 +45,7 @@ export default function Index() {
             (role.permissions ?? []).map((permission) => permission.slug),
         ),
     ]);
+    const canUpdate = permissions.has('bank_accounts.update');
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -94,6 +95,7 @@ export default function Index() {
                                         'Opening Balance',
                                         'Reconciliation',
                                         'Status',
+                                        'Actions',
                                     ].map((header) => (
                                         <th
                                             key={header}
@@ -157,6 +159,34 @@ export default function Index() {
                                             >
                                                 {account.status}
                                             </StatusBadge>
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <div className="flex items-center">
+                                                <Link
+                                                    href={route(
+                                                        'bank-accounts.show',
+                                                        account.id,
+                                                    )}
+                                                    aria-label={`View ${account.account_name}`}
+                                                    className="inline-flex size-9 items-center justify-center rounded-md hover:bg-accent"
+                                                    title="View bank account"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Link>
+                                                {canUpdate && (
+                                                    <Link
+                                                        href={route(
+                                                            'bank-accounts.edit',
+                                                            account.id,
+                                                        )}
+                                                        aria-label={`Edit ${account.account_name}`}
+                                                        className="inline-flex size-9 items-center justify-center rounded-md hover:bg-accent"
+                                                        title="Edit bank account"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

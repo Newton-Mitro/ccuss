@@ -65,4 +65,25 @@ class BankingDataService
 
         return $query->paginate($perPage)->withQueryString();
     }
+
+    public function findAccount(int $organizationId, int $accountId): ?BankAccount
+    {
+        $postedTransactionNet = BankTransaction::query()
+            ->selectRaw(
+                'COALESCE(SUM(CASE WHEN type IN (?, ?, ?) THEN amount ELSE -amount END), 0)',
+                ['DEPOSIT', 'TRANSFER_IN', 'INTEREST'],
+            )
+            ->whereColumn('bank_account_id', 'bank_accounts.id')
+            ->where('status', 'POSTED');
+
+        return BankAccount::query()
+            ->select('bank_accounts.*')
+            ->selectRaw(
+                '(bank_accounts.opening_balance + ('.$postedTransactionNet->toSql().')) as balance',
+                $postedTransactionNet->getBindings(),
+            )
+            ->where('organization_id', $organizationId)
+            ->with(['branch', 'financialAccount:id,account_no,name'])
+            ->find($accountId);
+    }
 }

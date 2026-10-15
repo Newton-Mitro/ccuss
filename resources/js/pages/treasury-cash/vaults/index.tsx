@@ -12,19 +12,21 @@ import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { VaultIndexProps } from '@/types/treasury-cash/vaults';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Vault as VaultIcon } from 'lucide-react';
+import { Eye, Pencil, Plus, Vault as VaultIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
     const { vaults, filters, auth } = usePage<VaultIndexProps>().props;
     useFlashToastHandler();
-    const canCreate = [
+    const permissions = new Set([
         ...(auth.user.permissions ?? []).map((permission) => permission.slug),
         ...auth.user.roles.flatMap((role) =>
             (role.permissions ?? []).map((permission) => permission.slug),
         ),
-    ].includes('cash_management.create');
+    ]);
+    const canCreate = permissions.has('cash_management.create');
+    const canUpdate = permissions.has('cash_management.update');
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -156,21 +158,40 @@ export default function Index() {
                                             {vault.maximum_balance ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            <Button
-                                                asChild
-                                                variant="ghost"
-                                                size="icon"
-                                                title="Edit vault"
-                                            >
-                                                <a
-                                                    href={route(
-                                                        'vaults.edit',
-                                                        vault.id,
-                                                    )}
+                                            <div className="flex items-center">
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="View vault"
                                                 >
-                                                    <Pencil className="h-4 w-4" />
-                                                </a>
-                                            </Button>
+                                                    <Link
+                                                        href={route(
+                                                            'vaults.show',
+                                                            vault.id,
+                                                        )}
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                {canUpdate && (
+                                                    <Button
+                                                        asChild
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        title="Edit vault"
+                                                    >
+                                                        <Link
+                                                            href={route(
+                                                                'vaults.edit',
+                                                                vault.id,
+                                                            )}
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Link>
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

@@ -38,7 +38,7 @@ class CashManagementController extends Controller
         private readonly TellerSessionService $tellerSessionService,
         private readonly VaultSessionService $vaultSessionService,
     ) {
-        $this->middleware('permission:cash_management.view')->only(['vaults', 'tellers']);
+        $this->middleware('permission:cash_management.view')->only(['vaults', 'tellers', 'showVault', 'showTeller']);
         $this->middleware('permission:cash_management.create')->only(['createVault', 'storeVault', 'createTeller', 'storeTeller']);
         $this->middleware('permission:cash_management.update')->only(['editVault', 'updateVault', 'editTeller', 'updateTeller']);
         $this->middleware('permission:teller_sessions.view')->only(['tellerSessions']);
@@ -63,6 +63,17 @@ class CashManagementController extends Controller
         ]);
     }
 
+    public function showVault(Request $request, Vault $vault): Response
+    {
+        $this->authorizeCashLocation($request, $vault->cashLocation);
+        $vault->load([
+            'cashLocation.branch',
+            'cashLocation.financialAccount:id,account_no,balance',
+        ]);
+
+        return Inertia::render('treasury-cash/vaults/show', ['vault' => $vault]);
+    }
+
     public function tellers(Request $request): Response
     {
         $tellers = $this->cashManagementDataService->listTellers(
@@ -75,6 +86,18 @@ class CashManagementController extends Controller
             'tellers' => $tellers,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
+    }
+
+    public function showTeller(Request $request, Teller $teller): Response
+    {
+        $this->authorizeCashLocation($request, $teller->cashLocation);
+        $teller->load([
+            'user:id,name,email',
+            'cashLocation.branch',
+            'cashLocation.financialAccount:id,account_no,balance',
+        ]);
+
+        return Inertia::render('treasury-cash/tellers/show', ['teller' => $teller]);
     }
 
     public function createVault(Request $request): Response

@@ -148,6 +148,14 @@ it('loads vault and teller list pages for authorized organization users', functi
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('vaults.show', $fixture['vault']))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/vaults/show')
+            ->where('vault.cash_location.financial_account.balance', '3400.0000'));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('tellers.index'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
@@ -155,6 +163,14 @@ it('loads vault and teller list pages for authorized organization users', functi
             ->has('tellers.data', 1)
             ->where('tellers.data.0.code', $fixture['teller']->code)
             ->where('tellers.data.0.cash_location.financial_account.balance', '1250.0000'));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('tellers.show', $fixture['teller']))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/tellers/show')
+            ->where('teller.cash_location.financial_account.balance', '1250.0000'));
 });
 
 it('does not expose cash management pages without permission', function () {

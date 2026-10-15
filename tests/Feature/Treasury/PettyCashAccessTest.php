@@ -66,10 +66,18 @@ it('loads petty cash accounts for authorized organization users', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('petty-cash-accounts.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/petty-cash/accounts/index')
             ->has('funds.data', 1)
             ->where('funds.data.0.code', $fixture['fund']->code));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('petty-cash-accounts.show', $fixture['fund']))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/petty-cash/accounts/show')
+            ->where('fund.custodian.id', $fixture['user']->id));
 });
 
 it('does not expose petty cash accounts without permission', function () {

@@ -23,19 +23,20 @@ import { type FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Create() {
-    const { branches, ledger_accounts } =
+    const { branches, ledger_accounts, account } =
         usePage<BankAccountCreatePageProps>().props;
+    const editing = Boolean(account);
 
-    const { data, setData, post, processing, errors } = useForm({
-        branch_id: '',
-        account_name: '',
-        account_number: '',
-        routing_number: '',
-        account_type: 'CURRENT',
-        opening_balance: '0',
+    const { data, setData, post, put, processing, errors } = useForm({
+        branch_id: String(account?.branch_id ?? ''),
+        account_name: account?.account_name ?? '',
+        account_number: account?.account_number ?? '',
+        routing_number: account?.routing_number ?? '',
+        account_type: account?.account_type ?? 'CURRENT',
+        opening_balance: String(account?.opening_balance ?? '0'),
         opening_counterpart_account_id: '',
-        is_reconcilable: true,
-        status: 'ACTIVE',
+        is_reconcilable: account?.is_reconcilable ?? true,
+        status: account?.status ?? 'ACTIVE',
     });
 
     useFlashToastHandler();
@@ -44,12 +45,21 @@ export default function Create() {
         { title: 'Treasury & Cash', href: '' },
         { title: 'Banking', href: '' },
         { title: 'Bank Accounts', href: route('bank-accounts.index') },
-        { title: 'Create', href: route('bank-accounts.create') },
+        {
+            title: account ? 'Edit' : 'Create',
+            href: account
+                ? route('bank-accounts.edit', account.id)
+                : route('bank-accounts.create'),
+        },
     ];
 
     const submit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        post(route('bank-accounts.store'));
+        if (account) {
+            put(route('bank-accounts.update', account.id));
+        } else {
+            post(route('bank-accounts.store'));
+        }
     };
 
     const sectionClass = 'rounded-xl border bg-card shadow-sm';
@@ -63,7 +73,7 @@ export default function Create() {
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create Bank Account" />
+            <Head title={`${editing ? 'Edit' : 'Create'} Bank Account`} />
 
             <div className="w-full max-w-5xl space-y-5 pb-24 text-foreground">
                 {/* Page heading */}
@@ -76,7 +86,9 @@ export default function Create() {
                         <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                                 <h1 className="text-xl font-semibold tracking-tight">
-                                    Create Bank Account
+                                    {editing
+                                        ? 'Edit Bank Account'
+                                        : 'Create Bank Account'}
                                 </h1>
 
                                 <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground">
@@ -86,9 +98,9 @@ export default function Create() {
                             </div>
 
                             <p className="max-w-2xl text-sm leading-5 text-muted-foreground">
-                                Register a bank account, link it to your
-                                financial ledger, and configure its branch and
-                                reconciliation settings.
+                                {editing
+                                    ? 'Update bank account details, branch assignment, and reconciliation settings.'
+                                    : 'Register a bank account, link it to your financial ledger, and configure its branch and reconciliation settings.'}
                             </p>
                         </div>
                     </div>
@@ -345,11 +357,14 @@ export default function Create() {
 
                             <div className="min-w-0 flex-1">
                                 <h2 className="text-sm font-semibold">
-                                    Opening balance & controls
+                                    {editing
+                                        ? 'Financial controls'
+                                        : 'Opening balance & controls'}
                                 </h2>
                                 <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                                    Set the opening deposit and configure
-                                    reconciliation preferences.
+                                    {editing
+                                        ? 'Configure reconciliation preferences. Opening deposits are managed through bank transactions.'
+                                        : 'Set the opening deposit and configure reconciliation preferences.'}
                                 </p>
                             </div>
 
@@ -359,101 +374,119 @@ export default function Create() {
                         </div>
 
                         <div className="space-y-5 p-4 sm:p-5">
-                            <div className="max-w-xl space-y-1.5">
-                                <label
-                                    htmlFor="opening_balance"
-                                    className={labelClass}
-                                >
-                                    Opening balance
-                                    <span className="ml-1 text-destructive">
-                                        *
-                                    </span>
-                                </label>
+                            {!editing && (
+                                <>
+                                    <div className="max-w-xl space-y-1.5">
+                                        <label
+                                            htmlFor="opening_balance"
+                                            className={labelClass}
+                                        >
+                                            Opening balance
+                                            <span className="ml-1 text-destructive">
+                                                *
+                                            </span>
+                                        </label>
 
-                                <div className="flex h-11 items-center rounded-lg border bg-background transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring">
-                                    <div className="flex h-full items-center border-r bg-muted/40 px-3">
-                                        <span className="text-sm font-semibold text-muted-foreground">
-                                            ৳
-                                        </span>
+                                        <div className="flex h-11 items-center rounded-lg border bg-background transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring">
+                                            <div className="flex h-full items-center border-r bg-muted/40 px-3">
+                                                <span className="text-sm font-semibold text-muted-foreground">
+                                                    ৳
+                                                </span>
+                                            </div>
+
+                                            <Input
+                                                id="opening_balance"
+                                                type="number"
+                                                min="0"
+                                                step="0.0001"
+                                                className="h-full border-0 bg-transparent shadow-none focus-visible:ring-0"
+                                                value={data.opening_balance}
+                                                placeholder="0.0000"
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'opening_balance',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                required
+                                            />
+                                        </div>
+
+                                        <InputError
+                                            message={errors.opening_balance}
+                                        />
+
+                                        <p className="text-xs leading-5 text-muted-foreground">
+                                            A positive amount queues a pending
+                                            deposit. Posting it updates the book
+                                            balance and creates the voucher; the
+                                            selected branch needs an open
+                                            business day.
+                                        </p>
                                     </div>
 
-                                    <Input
-                                        id="opening_balance"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        className="h-full border-0 bg-transparent shadow-none focus-visible:ring-0"
-                                        value={data.opening_balance}
-                                        placeholder="0.0000"
-                                        onChange={(event) =>
-                                            setData(
-                                                'opening_balance',
-                                                event.target.value,
-                                            )
-                                        }
-                                        required
-                                    />
-                                </div>
+                                    <div className="max-w-xl space-y-1.5">
+                                        <label
+                                            htmlFor="opening_counterpart_account_id"
+                                            className={labelClass}
+                                        >
+                                            Opening balance counterpart
+                                            {Number(data.opening_balance) >
+                                                0 && (
+                                                <span className="ml-1 text-destructive">
+                                                    *
+                                                </span>
+                                            )}
+                                        </label>
 
-                                <InputError message={errors.opening_balance} />
+                                        <Select
+                                            id="opening_counterpart_account_id"
+                                            className={fieldClass}
+                                            value={
+                                                data.opening_counterpart_account_id
+                                            }
+                                            disabled={
+                                                Number(data.opening_balance) <=
+                                                0
+                                            }
+                                            onChange={(value) =>
+                                                setData(
+                                                    'opening_counterpart_account_id',
+                                                    value,
+                                                )
+                                            }
+                                            placeholder="Select counterpart account"
+                                            options={[
+                                                {
+                                                    value: '',
+                                                    label: 'Select counterpart account',
+                                                },
+                                                ...ledger_accounts.map(
+                                                    (account) => ({
+                                                        value: String(
+                                                            account.id,
+                                                        ),
+                                                        label: `${account.code} — ${account.name}`,
+                                                    }),
+                                                ),
+                                            ]}
+                                        />
 
-                                <p className="text-xs leading-5 text-muted-foreground">
-                                    A positive amount queues a pending deposit.
-                                    Posting it updates the book balance and
-                                    creates the voucher; the selected branch
-                                    needs an open business day.
-                                </p>
-                            </div>
+                                        <InputError
+                                            message={
+                                                errors.opening_counterpart_account_id
+                                            }
+                                        />
 
-                            <div className="max-w-xl space-y-1.5">
-                                <label
-                                    htmlFor="opening_counterpart_account_id"
-                                    className={labelClass}
-                                >
-                                    Opening balance counterpart
-                                    {Number(data.opening_balance) > 0 && (
-                                        <span className="ml-1 text-destructive">
-                                            *
-                                        </span>
-                                    )}
-                                </label>
-
-                                <Select
-                                    id="opening_counterpart_account_id"
-                                    className={fieldClass}
-                                    value={data.opening_counterpart_account_id}
-                                    disabled={Number(data.opening_balance) <= 0}
-                                    onChange={(value) =>
-                                        setData(
-                                            'opening_counterpart_account_id',
-                                            value,
-                                        )
-                                    }
-                                    placeholder="Select counterpart account"
-                                    options={[
-                                        {
-                                            value: '',
-                                            label: 'Select counterpart account',
-                                        },
-                                        ...ledger_accounts.map((account) => ({
-                                            value: String(account.id),
-                                            label: `${account.code} — ${account.name}`,
-                                        })),
-                                    ]}
-                                />
-
-                                <InputError
-                                    message={
-                                        errors.opening_counterpart_account_id
-                                    }
-                                />
-
-                                <p className="text-xs leading-5 text-muted-foreground">
-                                    Required for a positive opening balance. The
-                                    chosen ledger account will be credited when
-                                    the opening deposit is posted.
-                                </p>
-                            </div>
+                                        <p className="text-xs leading-5 text-muted-foreground">
+                                            Required for a positive opening
+                                            balance. The chosen ledger account
+                                            will be credited when the opening
+                                            deposit is posted.
+                                        </p>
+                                    </div>
+                                </>
+                            )}
 
                             <div className="rounded-lg border bg-muted/20 p-3.5">
                                 <label
@@ -563,7 +596,9 @@ export default function Create() {
 
                                     {processing
                                         ? 'Creating account...'
-                                        : 'Create bank account'}
+                                        : editing
+                                          ? 'Save changes'
+                                          : 'Create bank account'}
 
                                     {!processing && (
                                         <ChevronRight className="ml-2 size-4" />

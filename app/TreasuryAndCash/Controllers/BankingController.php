@@ -12,6 +12,7 @@ use App\TreasuryAndCash\Application\FinancialAccountNumberService;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Requests\StoreBankAccountRequest;
 use App\TreasuryAndCash\Requests\StoreBankTransactionRequest;
+use App\TreasuryAndCash\Requests\UpdateBankAccountRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,8 +28,9 @@ class BankingController extends Controller
         private readonly BankTransactionService $bankTransactionService,
         private readonly FinancialAccountNumberService $financialAccountNumberService,
     ) {
-        $this->middleware('permission:bank_accounts.view')->only(['accounts']);
+        $this->middleware('permission:bank_accounts.view')->only(['accounts', 'showAccount']);
         $this->middleware('permission:bank_accounts.create')->only(['createAccount', 'storeAccount']);
+        $this->middleware('permission:bank_accounts.update')->only(['editAccount', 'updateAccount']);
         $this->middleware('permission:bank_transactions.view')->only(['transactions']);
         $this->middleware('permission:bank_transactions.create')->only(['createTransaction', 'storeTransaction', 'postTransaction']);
     }
@@ -47,6 +49,17 @@ class BankingController extends Controller
         ]);
     }
 
+    public function showAccount(Request $request, BankAccount $account): Response
+    {
+        $account = $this->bankingDataService->findAccount(
+            $request->attributes->get('active_organization')->id,
+            $account->id,
+        );
+        abort_unless($account, 404);
+
+        return Inertia::render('treasury-cash/banking/accounts/show', ['account' => $account]);
+    }
+
     public function createAccount(Request $request): Response
     {
         $organizationId = $request->attributes->get('active_organization')->id;
@@ -54,6 +67,18 @@ class BankingController extends Controller
         return Inertia::render('treasury-cash/banking/accounts/create', [
             'branches' => Branch::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'code', 'name']),
             'ledger_accounts' => $this->counterpartLedgerAccounts($organizationId),
+        ]);
+    }
+
+    public function editAccount(Request $request, BankAccount $account): Response
+    {
+        $organizationId = $request->attributes->get('active_organization')->id;
+        abort_unless((int) $account->organization_id === (int) $organizationId, 404);
+
+        return Inertia::render('treasury-cash/banking/accounts/create', [
+            'account' => $account->load('branch'),
+            'branches' => Branch::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'code', 'name']),
+            'ledger_accounts' => [],
         ]);
     }
 
@@ -131,6 +156,31 @@ class BankingController extends Controller
             ? 'Bank account created. Opening deposit is pending posting.'
             : 'Bank account created successfully.',
         );
+    }
+
+    public function updateAccount(UpdateBankAccountRequest $request, BankAccount $account): RedirectResponse
+    {
+        $organizationId = $request->attributes->get('active_organization')->id;
+        abort_unless((int) $account->organization_id === (int) $organizationId, 404);
+        $data = $request->validated();
+
+        DB::transaction(function () use ($account, $data): void {
+            $account->update([
+                'branch_id' => $data['branch_id'] ?? null,
+                'account_name' => $data['account_name'],
+                'account_number' => $data['account_number'],
+                'routing_number' => $data['routing_number'] ?? null,
+                'account_type' => $data['account_type'],
+                'is_reconcilable' => (bool) ($data['is_reconcilable'] ?? false),
+                'status' => $data['status'],
+            ]);
+            $account->financialAccount?->update([
+                'branch_id' => $data['branch_id'] ?? null,
+                'name' => $data['account_name'],
+            ]);
+        });
+
+        return redirect()->route('bank-accounts.index')->with('success', 'Bank account updated successfully.');
     }
 
     public function transactions(Request $request): Response

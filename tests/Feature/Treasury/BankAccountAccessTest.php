@@ -34,6 +34,26 @@ function grantBankingViewPermission(User $user): void
     $user->roles()->syncWithoutDetaching([$role->id]);
 }
 
+function grantBankAccountUpdatePermission(User $user): void
+{
+    $role = Role::firstOrCreate(
+        ['slug' => 'bank_accounts_update_test'],
+        ['name' => 'Bank Accounts Update Test'],
+    );
+
+    $permission = Permission::firstOrCreate(
+        ['slug' => 'bank_accounts.update'],
+        [
+            'module' => 'bank_accounts',
+            'name' => 'Update Bank Accounts',
+            'action' => 'update',
+        ],
+    );
+
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+}
+
 function grantBankTransactionPermissions(User $user): void
 {
     $role = Role::firstOrCreate(
@@ -111,6 +131,49 @@ it('loads bank accounts for authorized organization users', function () {
             ->has('accounts.data', 1)
             ->where('accounts.data.0.account_number', $fixture['account']->account_number)
             ->where('accounts.data.0.balance', fn ($balance) => (float) $balance === 25000.0));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('bank-accounts.show', $fixture['account']))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/banking/accounts/show')
+            ->where('account.balance', fn ($balance) => (float) $balance === 25000.0));
+});
+
+it('updates bank account details without changing opening balance or internal account number', function () {
+    $fixture = bankAccountFixture();
+    grantBankAccountUpdatePermission($fixture['user']);
+    $internalAccountNumber = $fixture['account']->financialAccount->account_no;
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('bank-accounts.edit', $fixture['account']))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/banking/accounts/create')
+            ->where('account.id', $fixture['account']->id));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('bank-accounts.update', $fixture['account']), [
+            'branch_id' => $fixture['branch']->id,
+            'account_name' => 'Updated Operating Account',
+            'account_number' => '00987654321',
+            'routing_number' => '220002',
+            'account_type' => 'SAVINGS',
+            'opening_balance' => 1,
+            'is_reconcilable' => false,
+            'status' => 'ACTIVE',
+        ])
+        ->assertRedirect(route('bank-accounts.index'));
+
+    $fixture['account']->refresh();
+    expect($fixture['account']->account_name)->toBe('Updated Operating Account')
+        ->and($fixture['account']->account_number)->toBe('00987654321')
+        ->and((float) $fixture['account']->opening_balance)->toBe(25000.0)
+        ->and($fixture['account']->financialAccount->account_no)->toBe($internalAccountNumber)
+        ->and($fixture['account']->financialAccount->name)->toBe('Updated Operating Account');
 });
 
 it('does not expose bank accounts without banking permission', function () {

@@ -12,19 +12,21 @@ import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { TellerIndexProps } from '@/types/teller';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus, UserRound } from 'lucide-react';
+import { Eye, Pencil, Plus, UserRound } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
 export default function Index() {
     const { tellers, filters, auth } = usePage<TellerIndexProps>().props;
     useFlashToastHandler();
-    const canCreate = [
+    const permissions = new Set([
         ...(auth.user.permissions ?? []).map((permission) => permission.slug),
         ...auth.user.roles.flatMap((role) =>
             (role.permissions ?? []).map((permission) => permission.slug),
         ),
-    ].includes('cash_management.create');
+    ]);
+    const canCreate = permissions.has('cash_management.create');
+    const canUpdate = permissions.has('cash_management.update');
 
     const { data, setData, get } = useForm({
         search: filters.search || '',
@@ -160,21 +162,40 @@ export default function Index() {
                                             {teller.maximum_cash ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            <Button
-                                                asChild
-                                                variant="ghost"
-                                                size="icon"
-                                                title="Edit teller"
-                                            >
-                                                <a
-                                                    href={route(
-                                                        'tellers.edit',
-                                                        teller.id,
-                                                    )}
+                                            <div className="flex items-center">
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="View teller"
                                                 >
-                                                    <Pencil className="h-4 w-4" />
-                                                </a>
-                                            </Button>
+                                                    <Link
+                                                        href={route(
+                                                            'tellers.show',
+                                                            teller.id,
+                                                        )}
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                {canUpdate && (
+                                                    <Button
+                                                        asChild
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        title="Edit teller"
+                                                    >
+                                                        <Link
+                                                            href={route(
+                                                                'tellers.edit',
+                                                                teller.id,
+                                                            )}
+                                                        >
+                                                            <Pencil className="h-4 w-4" />
+                                                        </Link>
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

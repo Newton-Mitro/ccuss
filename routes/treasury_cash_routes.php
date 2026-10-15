@@ -1,13 +1,13 @@
 <?php
 
-use App\TreasuryAndCash\Controllers\BranchDayController;
 use App\TreasuryAndCash\Controllers\BankingController;
+use App\TreasuryAndCash\Controllers\BankReconciliationController;
+use App\TreasuryAndCash\Controllers\BranchCashSummaryController;
+use App\TreasuryAndCash\Controllers\BranchDayController;
 use App\TreasuryAndCash\Controllers\BranchOperationsDashboardController;
+use App\TreasuryAndCash\Controllers\CashCountController;
 use App\TreasuryAndCash\Controllers\CashManagementController;
 use App\TreasuryAndCash\Controllers\CashMovementController;
-use App\TreasuryAndCash\Controllers\CashCountController;
-use App\TreasuryAndCash\Controllers\BranchCashSummaryController;
-use App\TreasuryAndCash\Controllers\BankReconciliationController;
 use App\TreasuryAndCash\Controllers\ChequeClearingController;
 use App\TreasuryAndCash\Controllers\ChequeController;
 use App\TreasuryAndCash\Controllers\PettyCashController;
@@ -78,6 +78,9 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/vaults', [CashManagementController::class, 'storeVault'])
             ->middleware('permission:cash_management.create')
             ->name('vaults.store');
+        Route::get('/vaults/{vault}', [CashManagementController::class, 'showVault'])
+            ->middleware('permission:cash_management.view')
+            ->name('vaults.show');
         Route::get('/vaults/{vault}/edit', [CashManagementController::class, 'editVault'])
             ->middleware('permission:cash_management.update')
             ->name('vaults.edit');
@@ -93,6 +96,9 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/tellers', [CashManagementController::class, 'storeTeller'])
             ->middleware('permission:cash_management.create')
             ->name('tellers.store');
+        Route::get('/tellers/{teller}', [CashManagementController::class, 'showTeller'])
+            ->middleware('permission:cash_management.view')
+            ->name('tellers.show');
         Route::get('/tellers/{teller}/edit', [CashManagementController::class, 'editTeller'])
             ->middleware('permission:cash_management.update')
             ->name('tellers.edit');
@@ -342,6 +348,9 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/petty-cash-accounts', [PettyCashController::class, 'store'])
             ->middleware('permission:petty_cash.create')
             ->name('petty-cash-accounts.store');
+        Route::get('/petty-cash-accounts/{fund}', [PettyCashController::class, 'show'])
+            ->middleware('permission:petty_cash.view')
+            ->name('petty-cash-accounts.show');
         Route::get('/petty-cash-accounts/{fund}/edit', [PettyCashController::class, 'edit'])
             ->middleware('permission:petty_cash.update')
             ->name('petty-cash-accounts.edit');
@@ -375,6 +384,15 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/bank-accounts', [BankingController::class, 'storeAccount'])
             ->middleware('permission:bank_accounts.create')
             ->name('bank-accounts.store');
+        Route::get('/bank-accounts/{account}', [BankingController::class, 'showAccount'])
+            ->middleware('permission:bank_accounts.view')
+            ->name('bank-accounts.show');
+        Route::get('/bank-accounts/{account}/edit', [BankingController::class, 'editAccount'])
+            ->middleware('permission:bank_accounts.update')
+            ->name('bank-accounts.edit');
+        Route::put('/bank-accounts/{account}', [BankingController::class, 'updateAccount'])
+            ->middleware('permission:bank_accounts.update')
+            ->name('bank-accounts.update');
         Route::get('/bank-transactions', [BankingController::class, 'transactions'])
             ->middleware('permission:bank_transactions.view')
             ->name('bank-transactions.index');
