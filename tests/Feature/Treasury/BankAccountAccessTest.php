@@ -11,7 +11,6 @@ use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
-use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BankTransaction;
 
@@ -78,13 +77,6 @@ function bankAccountFixture(): array
         'end_date' => '2026-12-31',
         'status' => 'OPEN',
     ]);
-    $bank = Bank::create([
-        'organization_id' => $organization->id,
-        'code' => 'BANK-001',
-        'name' => 'Main Commercial Bank',
-        'short_name' => 'MCB',
-        'status' => true,
-    ]);
     $financialAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
@@ -93,7 +85,6 @@ function bankAccountFixture(): array
     $account = BankAccount::create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
-        'bank_id' => $bank->id,
         'financial_account_id' => $financialAccount->id,
         'account_name' => 'Main Operating Account',
         'account_number' => '00123456789',
@@ -104,7 +95,7 @@ function bankAccountFixture(): array
         'status' => 'ACTIVE',
     ]);
 
-    return compact('organization', 'branch', 'user', 'bank', 'account');
+    return compact('organization', 'branch', 'user', 'account');
 }
 
 it('loads bank accounts for authorized organization users', function () {
@@ -183,5 +174,6 @@ it('creates and posts a bank transaction for an open branch day', function () {
         ->assertRedirect(route('bank-transactions.index'));
 
     expect($transaction->fresh()->status)->toBe('POSTED')
-        ->and($transaction->fresh()->balance_after)->toBe('25500.0000');
+        ->and($transaction->fresh()->balance_after)->toBe('25500.0000')
+        ->and(\App\GeneralAccounting\Models\Voucher::query()->where('voucher_no', 'BANK-GL-' . $transaction->id)->exists())->toBeTrue();
 });

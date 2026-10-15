@@ -7,22 +7,10 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('banks', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->string('code', 50);
-            $table->string('name', 150);
-            $table->string('short_name', 50)->nullable();
-            $table->boolean('status')->default(true);
-            $table->timestamps();
-            $table->unique(['organization_id', 'code']);
-        });
-
         Schema::create('bank_accounts', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('bank_id')->constrained()->restrictOnDelete();
             $table->foreignId('financial_account_id')->constrained('financial_accounts')->restrictOnDelete();
             $table->string('account_name', 200);
             $table->string('account_number', 100);
@@ -33,7 +21,7 @@ return new class extends Migration {
             $table->enum('status', ['ACTIVE', 'INACTIVE', 'CLOSED'])->default('ACTIVE');
             $table->timestamps();
             $table->unique(['organization_id', 'account_number']);
-            $table->index(['branch_id', 'bank_id']);
+            $table->index('branch_id');
         });
 
         Schema::create('bank_transactions', function (Blueprint $table): void {
@@ -153,6 +141,5 @@ return new class extends Migration {
         Schema::dropIfExists('bank_reconciliations');
         Schema::dropIfExists('bank_transactions');
         Schema::dropIfExists('bank_accounts');
-        Schema::dropIfExists('banks');
     }
 };

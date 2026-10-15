@@ -88,7 +88,6 @@ export default function Index() {
                                     {[
                                         '#',
                                         'Account',
-                                        'Bank',
                                         'Branch',
                                         'Type',
                                         'Opening Balance',
@@ -128,9 +127,6 @@ export default function Index() {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td className="px-2 py-2">
-                                            {account.bank?.name ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             {account.branch?.name ??

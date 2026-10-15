@@ -15,7 +15,6 @@ use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Application\ChequeService;
 use App\TreasuryAndCash\Application\ChequePaymentService;
-use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
@@ -109,12 +108,6 @@ function chequeFixture(): array
         'end_date' => '2026-12-31',
         'status' => 'OPEN',
     ]);
-    $bank = Bank::create([
-        'organization_id' => $organization->id,
-        'code' => 'CHEQUE-BANK',
-        'name' => 'Cheque Bank',
-        'status' => true,
-    ]);
     $financialAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
@@ -123,7 +116,6 @@ function chequeFixture(): array
     $bankAccount = BankAccount::create([
         'organization_id' => $organization->id,
         'branch_id' => $branch->id,
-        'bank_id' => $bank->id,
         'financial_account_id' => $financialAccount->id,
         'account_name' => 'Cheque Operating Account',
         'account_number' => 'CHEQUE-001',

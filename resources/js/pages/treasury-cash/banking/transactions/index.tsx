@@ -148,10 +148,6 @@ export default function Index() {
                                             <div className="text-xs text-muted-foreground">
                                                 {transaction.bank_account
                                                     ?.account_number ?? '-'}
-                                                {transaction.bank_account?.bank
-                                                    ?.name
-                                                    ? ` - ${transaction.bank_account.bank.name}`
-                                                    : ''}
                                             </div>
                                         </td>
                                         <td className="px-2 py-2">

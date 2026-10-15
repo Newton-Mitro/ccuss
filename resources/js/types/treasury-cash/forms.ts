@@ -2,13 +2,7 @@ import type { SharedData } from '@/types';
 import type { Customer } from '@/types/customer_kyc_module';
 
 export interface BankAccountCreatePageProps extends SharedData {
-    banks: { id: number; code: string; name: string }[];
-    financial_accounts: { id: number; account_no: string; name: string }[];
     branches: { id: number; code: string; name: string }[];
-}
-
-export interface BankCreatePageProps extends Omit<SharedData, 'organization'> {
-    organization?: { id: number; name: string };
 }
 
 export interface BankTransactionListItem {
@@ -31,7 +25,6 @@ export interface BankTransactionListItem {
     bank_account?: {
         account_name: string;
         account_number: string;
-        bank?: { name: string; code: string } | null;
     } | null;
 }
 

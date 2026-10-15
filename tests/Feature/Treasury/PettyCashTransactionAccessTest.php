@@ -229,6 +229,49 @@ it('posts a petty cash expense and reduces the fund balance', function () {
         ->and($fixture['fund']->fresh()->current_balance)->toBe('3375.0000');
 });
 
+it('posts petty cash opening funding and creates a voucher', function () {
+    $fixture = pettyCashTransactionFixture();
+    grantPettyCashPostPermission($fixture['user']);
+    $transaction = PettyCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'petty_cash_fund_id' => $fixture['fund']->id,
+        'transaction_no' => 'PETTY-OPEN-001',
+        'type' => 'FUNDING',
+        'amount' => 1000,
+        'description' => 'Opening funding',
+        'status' => 'PENDING',
+        'created_by' => $fixture['user']->id,
+    ]);
+
+    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    $cashAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    $bankAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    TreasuryGlMapping::query()->create([
+        'organization_id' => $fixture['organization']->id,
+        'source_type' => 'PETTY_CASH_TRANSACTION',
+        'source_code' => 'DEFAULT',
+        'transaction_type' => 'FUNDING',
+        'debit_account_id' => $cashAccount->id,
+        'credit_account_id' => $bankAccount->id,
+        'status' => true,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('petty-cash-transactions.post', $transaction))
+        ->assertRedirect(route('petty-cash-transactions.index'));
+
+    expect($transaction->fresh()->status)->toBe('POSTED')
+        ->and($fixture['fund']->fresh()->current_balance)->toBe('4500.0000')
+        ->and(\App\GeneralAccounting\Models\Voucher::query()->where('voucher_no', 'PETTY-GL-' . $transaction->id)->exists())->toBeTrue();
+});
+
 it('keeps a petty cash transaction pending when its GL mapping is missing', function () {
     $fixture = pettyCashTransactionFixture();
     grantPettyCashPostPermission($fixture['user']);

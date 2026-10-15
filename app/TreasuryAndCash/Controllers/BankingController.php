@@ -7,15 +7,15 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\SystemAdministration\Models\Branch;
 use App\TreasuryAndCash\Application\BankingDataService;
 use App\TreasuryAndCash\Application\BankTransactionService;
-use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
-use App\TreasuryAndCash\Requests\StoreBankRequest;
 use App\TreasuryAndCash\Requests\StoreBankAccountRequest;
 use App\TreasuryAndCash\Requests\StoreBankTransactionRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Str;
 
 class BankingController extends Controller
 {
@@ -23,46 +23,10 @@ class BankingController extends Controller
         private readonly BankingDataService $bankingDataService,
         private readonly BankTransactionService $bankTransactionService,
     ) {
-        $this->middleware('permission:banks.view')->only(['banks']);
-        $this->middleware('permission:banks.create')->only(['create', 'store']);
         $this->middleware('permission:bank_accounts.view')->only(['accounts']);
         $this->middleware('permission:bank_accounts.create')->only(['createAccount', 'storeAccount']);
         $this->middleware('permission:bank_transactions.view')->only(['transactions']);
         $this->middleware('permission:bank_transactions.create')->only(['createTransaction', 'storeTransaction', 'postTransaction']);
-    }
-
-    public function banks(Request $request): Response
-    {
-        $banks = $this->bankingDataService->listBanks(
-            $request->attributes->get('active_organization')->id,
-            $request->input('search'),
-            $request->input('per_page', 18),
-        );
-
-        return Inertia::render('treasury-cash/banking/banks/index', [
-            'banks' => $banks,
-            'filters' => $request->only(['search', 'per_page', 'page']),
-        ]);
-    }
-
-    public function create(Request $request): Response
-    {
-        return Inertia::render('treasury-cash/banking/banks/create', [
-            'organization' => $request->attributes->get('active_organization'),
-        ]);
-    }
-
-    public function store(StoreBankRequest $request): RedirectResponse
-    {
-        Bank::create([
-            'organization_id' => $request->attributes->get('active_organization')->id,
-            'code' => $request->validated('code'),
-            'name' => $request->validated('name'),
-            'short_name' => $request->validated('short_name'),
-            'status' => (bool) $request->validated('status', true),
-        ]);
-
-        return redirect()->route('banks.index')->with('success', 'Bank created successfully.');
     }
 
     public function accounts(Request $request): Response
@@ -84,8 +48,6 @@ class BankingController extends Controller
         $organizationId = $request->attributes->get('active_organization')->id;
 
         return Inertia::render('treasury-cash/banking/accounts/create', [
-            'banks' => Bank::query()->where('organization_id', $organizationId)->where('status', true)->orderBy('name')->get(['id', 'code', 'name']),
-            'financial_accounts' => FinancialAccount::query()->where('organization_id', $organizationId)->where('status', 'ACTIVE')->orderBy('account_no')->get(['id', 'account_no', 'name']),
             'branches' => Branch::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'code', 'name']),
         ]);
     }
@@ -94,21 +56,71 @@ class BankingController extends Controller
     {
         $organizationId = $request->attributes->get('active_organization')->id;
         $data = $request->validated();
+        $user = $request->user();
+        $openingAmount = (float) $data['opening_balance'];
 
         abort_unless(
-            Bank::query()->whereKey($data['bank_id'])->where('organization_id', $organizationId)->exists()
-            && FinancialAccount::query()->whereKey($data['financial_account_id'])->where('organization_id', $organizationId)->exists()
-            && (!$data['branch_id'] || Branch::query()->whereKey($data['branch_id'])->where('organization_id', $organizationId)->exists()),
+            !$data['branch_id'] || Branch::query()->whereKey($data['branch_id'])->where('organization_id', $organizationId)->exists(),
             404,
         );
 
-        BankAccount::create([
-            ...$data,
-            'organization_id' => $organizationId,
-            'is_reconcilable' => (bool) ($data['is_reconcilable'] ?? false),
-        ]);
+        if ($openingAmount > 0 && $data['status'] !== 'ACTIVE') {
+            return back()->withInput()->with('error', 'An opening deposit requires an active bank account.');
+        }
 
-        return redirect()->route('bank-accounts.index')->with('success', 'Bank account created successfully.');
+        $transactionBranchId = (int) ($data['branch_id'] ?? $user?->branch_id ?? 0);
+        if ($openingAmount > 0 && $transactionBranchId <= 0) {
+            return back()->withInput()->with('error', 'A branch is required to create an opening deposit transaction.');
+        }
+
+        try {
+            DB::transaction(function () use ($organizationId, $data, $openingAmount, $transactionBranchId): void {
+                $financialAccount = FinancialAccount::create([
+                    'organization_id' => $organizationId,
+                    'branch_id' => $data['branch_id'] ?? null,
+                    'product_type' => null,
+                    'product_id' => null,
+                    'holder_type' => null,
+                    'holder_id' => null,
+                    'account_no' => 'BANK-' . Str::uuid(),
+                    'name' => $data['account_name'],
+                    'account_type' => 'BANK',
+                    'status' => 'ACTIVE',
+                    'balance' => 0,
+                    'available_balance' => 0,
+                    'interest_accrued' => 0,
+                    'opened_at' => now()->toDateString(),
+                    'metadata' => ['managed_by' => 'bank_account'],
+                ]);
+
+                $account = BankAccount::create([
+                    ...$data,
+                    'organization_id' => $organizationId,
+                    'financial_account_id' => $financialAccount->id,
+                    'opening_balance' => 0,
+                    'is_reconcilable' => (bool) ($data['is_reconcilable'] ?? false),
+                ]);
+
+                if ($openingAmount > 0) {
+                    $this->bankTransactionService->create($organizationId, $transactionBranchId, [
+                        'bank_account_id' => $account->id,
+                        'type' => 'DEPOSIT',
+                        'amount' => $openingAmount,
+                        'reference' => 'OPENING-' . $account->account_number,
+                        'description' => 'Opening balance deposit for ' . $account->account_name,
+                    ]);
+                }
+            });
+        } catch (\RuntimeException $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('bank-accounts.index')->with(
+            'success',
+            $openingAmount > 0
+            ? 'Bank account created. Opening deposit is pending posting.'
+            : 'Bank account created successfully.',
+        );
     }
 
     public function transactions(Request $request): Response

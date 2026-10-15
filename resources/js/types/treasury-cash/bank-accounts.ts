@@ -16,7 +16,6 @@ export interface BankAccountListItem {
     opening_balance: string | number;
     is_reconcilable: boolean;
     status: BankAccountStatus;
-    bank?: { name: string; code: string } | null;
     branch?: { name: string; code: string } | null;
 }
 

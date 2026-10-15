@@ -15,7 +15,6 @@ use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
 use App\SystemAdministration\Models\Organization;
-use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\ChequeBook;
@@ -354,18 +353,6 @@ class FinancialServicesSeeder extends Seeder
         $hasChequeFinancialAccount = Schema::hasColumn('cheques', 'financial_account_id');
         $hasBankAccountColumn = Schema::hasColumn('cheque_books', 'bank_account_id');
 
-        $bank = Bank::query()->firstOrCreate(
-            [
-                'organization_id' => $organization->id,
-                'code' => 'BANK-CORE',
-            ],
-            [
-                'name' => 'Core Bank',
-                'short_name' => 'CORE',
-                'status' => true,
-            ],
-        );
-
         $bankAccount = BankAccount::query()->firstOrCreate(
             [
                 'organization_id' => $organization->id,
@@ -373,7 +360,6 @@ class FinancialServicesSeeder extends Seeder
             ],
             [
                 'branch_id' => $branchId,
-                'bank_id' => $bank->id,
                 'financial_account_id' => $financialAccount->id,
                 'account_name' => $financialAccount->name . ' Cheque Account',
                 'routing_number' => '0001',

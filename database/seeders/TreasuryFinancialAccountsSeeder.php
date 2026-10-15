@@ -9,7 +9,6 @@ use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\Voucher;
 use App\SystemAdministration\Models\Organization;
-use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -32,9 +31,6 @@ class TreasuryFinancialAccountsSeeder extends Seeder
         DB::transaction(function () use ($organization, $branchId, $ledgerAccounts): void {
             foreach ([
                 [
-                    'bank_code' => 'DBBL',
-                    'bank_name' => 'Dutch-Bangla Bank PLC',
-                    'bank_short_name' => 'DBBL',
                     'financial_account_no' => 'BANK-DBBL-001',
                     'financial_account_name' => 'Dutch-Bangla Bank Operating Account',
                     'account_number' => 'DBBL-CCUSS-001',
@@ -43,9 +39,6 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                     'opening_balance' => 500000,
                 ],
                 [
-                    'bank_code' => 'SONALI',
-                    'bank_name' => 'Sonali Bank PLC',
-                    'bank_short_name' => 'Sonali',
                     'financial_account_no' => 'BANK-SONALI-001',
                     'financial_account_name' => 'Sonali Bank Reserve Account',
                     'account_number' => 'SONALI-CCUSS-001',
@@ -54,18 +47,6 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                     'opening_balance' => 300000,
                 ],
             ] as $bankDefinition) {
-                $bank = Bank::query()->updateOrCreate(
-                    [
-                        'organization_id' => $organization->id,
-                        'code' => $bankDefinition['bank_code'],
-                    ],
-                    [
-                        'name' => $bankDefinition['bank_name'],
-                        'short_name' => $bankDefinition['bank_short_name'],
-                        'status' => true,
-                    ],
-                );
-
                 $financialAccount = FinancialAccount::query()->updateOrCreate(
                     [
                         'organization_id' => $organization->id,
@@ -81,7 +62,7 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                         'balance' => $bankDefinition['opening_balance'],
                         'available_balance' => $bankDefinition['opening_balance'],
                         'opened_at' => self::OPENING_DATE,
-                        'metadata' => ['seeded' => true, 'bank_code' => $bank->code],
+                        'metadata' => ['seeded' => true],
                     ],
                 );
 
@@ -92,7 +73,6 @@ class TreasuryFinancialAccountsSeeder extends Seeder
                     ],
                     [
                         'branch_id' => $branchId,
-                        'bank_id' => $bank->id,
                         'financial_account_id' => $financialAccount->id,
                         'account_name' => $bankDefinition['account_name'],
                         'routing_number' => $bankDefinition['routing_number'],

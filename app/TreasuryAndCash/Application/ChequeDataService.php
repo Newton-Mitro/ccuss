@@ -15,7 +15,7 @@ class ChequeDataService
                 $builder->whereHas('financialAccount', fn($account) => $account->where('organization_id', $organizationId))
                     ->orWhereHas('bankAccount.financialAccount', fn($account) => $account->where('organization_id', $organizationId));
             })
-            ->with('financialAccount.product', 'financialAccount.holder', 'bankAccount.bank', 'bankAccount.branch')
+            ->with('financialAccount.product', 'financialAccount.holder', 'bankAccount.branch')
             ->latest();
 
         if (!empty($search)) {
@@ -33,10 +33,7 @@ class ChequeDataService
                     })
                     ->orWhereHas('bankAccount', function ($accountQuery) use ($searchTerm) {
                         $accountQuery->where('account_name', 'like', "%{$searchTerm}%")
-                            ->orWhere('account_number', 'like', "%{$searchTerm}%")
-                            ->orWhereHas('bank', function ($bankQuery) use ($searchTerm) {
-                                $bankQuery->where('name', 'like', "%{$searchTerm}%");
-                            });
+                            ->orWhere('account_number', 'like', "%{$searchTerm}%");
                     });
             });
         }
@@ -52,7 +49,7 @@ class ChequeDataService
                     ->orWhereHas('chequeBook.financialAccount', fn($account) => $account->where('organization_id', $organizationId))
                     ->orWhereHas('chequeBook.bankAccount.financialAccount', fn($account) => $account->where('organization_id', $organizationId));
             })
-            ->with('financialAccount.holder', 'chequeBook.financialAccount.holder', 'chequeBook.bankAccount.bank')
+            ->with('financialAccount.holder', 'chequeBook.financialAccount.holder', 'chequeBook.bankAccount')
             ->latest();
 
         if (!empty($search)) {

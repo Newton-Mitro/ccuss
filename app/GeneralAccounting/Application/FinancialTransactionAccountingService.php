@@ -136,22 +136,16 @@ class FinancialTransactionAccountingService
             return ['type' => 'CASH_LOCATION', 'code' => 'MIXED'];
         }
 
-        $bankCodes = BankAccount::query()
+        $bankAccounts = BankAccount::query()
             ->where('organization_id', $transaction->organization_id)
             ->whereIn('financial_account_id', $accountIds)
-            ->with('bank:id,code')
-            ->get()
-            ->map(fn($account) => $account->bank?->code)
-            ->filter()
-            ->unique();
+            ->pluck('id');
 
-        if ($bankCodes->count() === 1) {
-            return ['type' => 'BANK_ACCOUNT', 'code' => $bankCodes->first()];
+        if ($bankAccounts->isNotEmpty()) {
+            return ['type' => 'BANK_ACCOUNT', 'code' => 'DEFAULT'];
         }
 
-        return $bankCodes->count() > 1
-            ? ['type' => 'BANK_ACCOUNT', 'code' => 'MIXED']
-            : null;
+        return null;
     }
 
     public function reverse(FinancialTransaction $transaction): void

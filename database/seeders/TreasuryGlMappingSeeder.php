@@ -44,7 +44,7 @@ class TreasuryGlMappingSeeder extends Seeder
             ['LOAN_REPAYMENT', '1200', '1300'],
             ['FINE_PAYMENT', '1200', '1400'],
         ] as [$transactionType, $debitCode, $creditCode]) {
-            $mappingRows[] = ['BANK_ACCOUNT', 'DBBL', $transactionType, $debitCode, $creditCode];
+            $mappingRows[] = ['BANK_ACCOUNT', 'DEFAULT', $transactionType, $debitCode, $creditCode];
         }
 
         $accountCodes = collect($mappingRows)

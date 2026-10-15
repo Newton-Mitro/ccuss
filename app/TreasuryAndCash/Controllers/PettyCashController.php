@@ -119,29 +119,65 @@ class PettyCashController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($organization, $user, $data): void {
-            $location = CashLocation::create([
-                'organization_id' => $organization->id,
-                'branch_id' => $data['branch_id'],
-                'code' => $data['code'],
-                'name' => $data['name'],
-                'type' => 'PETTY_CASH',
-                'is_active' => ($data['status'] ?? 'ACTIVE') === 'ACTIVE',
+        $openingAmount = (float) ($data['current_balance'] ?? 0);
+        if ($openingAmount > (float) $data['fund_limit']) {
+            throw ValidationException::withMessages([
+                'current_balance' => 'The opening funding amount cannot exceed the fund limit.',
             ]);
+        }
 
-            PettyCashFund::create([
-                'cash_location_id' => $location->id,
-                'custodian_id' => $data['custodian_id'],
-                'code' => $data['code'],
-                'name' => $data['name'],
-                'fund_limit' => $data['fund_limit'],
-                'current_balance' => $data['current_balance'] ?? 0,
-                'method' => $data['method'] ?? 'IMPREST',
-                'status' => $data['status'] ?? 'ACTIVE',
+        if ($openingAmount > 0 && ($data['status'] ?? 'ACTIVE') !== 'ACTIVE') {
+            throw ValidationException::withMessages([
+                'current_balance' => 'An opening funding transaction requires an active fund.',
             ]);
-        });
+        }
 
-        return redirect()->route('petty-cash-accounts.index')->with('success', 'Petty cash fund created successfully.');
+        try {
+            DB::transaction(function () use ($organization, $user, $data, $openingAmount): void {
+                $location = CashLocation::create([
+                    'organization_id' => $organization->id,
+                    'branch_id' => $data['branch_id'],
+                    'code' => $data['code'],
+                    'name' => $data['name'],
+                    'type' => 'PETTY_CASH',
+                    'is_active' => ($data['status'] ?? 'ACTIVE') === 'ACTIVE',
+                ]);
+
+                $fund = PettyCashFund::create([
+                    'cash_location_id' => $location->id,
+                    'custodian_id' => $data['custodian_id'],
+                    'code' => $data['code'],
+                    'name' => $data['name'],
+                    'fund_limit' => $data['fund_limit'],
+                    'current_balance' => 0,
+                    'method' => $data['method'] ?? 'IMPREST',
+                    'status' => $data['status'] ?? 'ACTIVE',
+                ]);
+
+                if ($openingAmount > 0) {
+                    $this->pettyCashTransactionService->create(
+                        $organization->id,
+                        (int) $data['branch_id'],
+                        $user->id,
+                        'FUNDING',
+                        [
+                            'petty_cash_fund_id' => $fund->id,
+                            'amount' => $openingAmount,
+                            'description' => 'Opening funding for petty cash fund ' . $fund->code,
+                        ],
+                    );
+                }
+            });
+        } catch (\RuntimeException $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('petty-cash-accounts.index')->with(
+            'success',
+            $openingAmount > 0
+            ? 'Petty cash fund created. Opening funding is pending posting.'
+            : 'Petty cash fund created successfully.',
+        );
     }
 
     public function edit(Request $request, PettyCashFund $fund): Response

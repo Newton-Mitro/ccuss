@@ -12,7 +12,6 @@ use App\GeneralAccounting\Models\FiscalYear;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\TreasuryGlMapping;
 use App\GeneralAccounting\Models\Voucher;
-use App\TreasuryAndCash\Models\Bank;
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashLocation;
@@ -293,12 +292,6 @@ it('filters vault transfer options to the correct source and destination types',
 it('loads active bank accounts as the source for bank-to-vault funding', function () {
     $fixture = cashTransferFixture();
     grantCashTransferCreatePermission($fixture['user']);
-    $bank = Bank::create([
-        'organization_id' => $fixture['organization']->id,
-        'code' => 'TRANSFER-BANK-001',
-        'name' => 'Transfer Bank',
-        'status' => true,
-    ]);
     $financialAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
@@ -308,7 +301,6 @@ it('loads active bank accounts as the source for bank-to-vault funding', functio
     $bankAccount = BankAccount::create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
-        'bank_id' => $bank->id,
         'financial_account_id' => $financialAccount->id,
         'account_name' => 'Vault Funding Account',
         'account_number' => 'TRANSFER-BANK-ACCOUNT-001',
@@ -417,12 +409,6 @@ it('funds an open vault from a bank and updates both balances on completion', fu
     grantCashTransferCreatePermission($fixture['user']);
     grantCashTransferLifecyclePermissions($fixture['user']);
 
-    $bank = Bank::create([
-        'organization_id' => $fixture['organization']->id,
-        'code' => 'TRANSFER-BANK-002',
-        'name' => 'Vault Funding Bank',
-        'status' => true,
-    ]);
     $financialAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
@@ -432,7 +418,6 @@ it('funds an open vault from a bank and updates both balances on completion', fu
     $bankAccount = BankAccount::create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
-        'bank_id' => $bank->id,
         'financial_account_id' => $financialAccount->id,
         'account_name' => 'Vault Funding Account',
         'account_number' => 'TRANSFER-BANK-ACCOUNT-002',

@@ -44,7 +44,7 @@ class BankTransactionService
                 'transaction_no' => 'BANK-' . now()->format('Ymd') . '-' . str_pad((string) $number, 5, '0', STR_PAD_LEFT),
                 'type' => $data['type'],
                 'amount' => $data['amount'],
-                'transaction_date' => $data['transaction_date'],
+                'transaction_date' => $data['transaction_date'] ?? $branchDay->business_date,
                 'reference' => $data['reference'] ?? null,
                 'description' => $data['description'] ?? null,
                 'status' => 'PENDING',
