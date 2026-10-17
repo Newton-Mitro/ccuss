@@ -1,13 +1,21 @@
+import DataTablePagination from '@/components/data-table-pagination';
 import { ResourcePageHeader } from '@/components/resource-page-shell';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Pencil } from 'lucide-react';
+import { Pencil, Plus, Search } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -37,6 +45,10 @@ type Props = SharedData & {
 export default function DefaultRulesIndex() {
     const { rules, products, auth } = usePage<Props>().props;
     const [editingRuleId, setEditingRuleId] = useState<number | null>(null);
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const [perPage, setPerPage] = useState(10);
     const canUpdate = (auth.user.permissions ?? []).some(
         (permission) => permission.slug === 'financial.products.update',
     );
@@ -66,11 +78,13 @@ export default function DefaultRulesIndex() {
               ].includes(product.category),
     );
     const cancelEdit = () => {
+        setIsFormOpen(false);
         setEditingRuleId(null);
         reset();
     };
     const editRule = (rule: Rule) => {
         setEditingRuleId(rule.id);
+        setIsFormOpen(true);
         setData({
             financial_product_id: rule.financial_product_id
                 ? String(rule.financial_product_id)
@@ -89,6 +103,32 @@ export default function DefaultRulesIndex() {
             is_active: rule.is_active,
         });
     };
+    const normalizedSearch = search.trim().toLowerCase();
+    const filteredRules = rules.filter((rule) =>
+        [
+            rule.name,
+            rule.account_type,
+            rule.fine_calculation,
+            rule.fine_amount,
+            rule.fine_rate,
+            rule.maximum_fine,
+            rule.grace_days,
+            rule.effective_from,
+            rule.effective_to,
+            rule.is_active ? 'active' : 'inactive',
+            rule.product?.code,
+            rule.product?.name,
+        ]
+            .join(' ')
+            .toLowerCase()
+            .includes(normalizedSearch),
+    );
+    const totalPages = Math.max(1, Math.ceil(filteredRules.length / perPage));
+    const currentPage = Math.min(page, totalPages);
+    const visibleRules = filteredRules.slice(
+        (currentPage - 1) * perPage,
+        currentPage * perPage,
+    );
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Default Rules', href: route('account-default-rules.index') },
@@ -101,199 +141,253 @@ export default function DefaultRulesIndex() {
                 <ResourcePageHeader
                     title="Default Rules"
                     description="Configure effective account and product fine rules."
-                />
-                <section className="rounded-lg border bg-card p-4">
-                    <form
-                        className="grid gap-3 sm:grid-cols-3"
-                        onSubmit={(event) => {
-                            event.preventDefault();
-                            const options = {
-                                preserveScroll: true,
-                                onSuccess: () => {
+                    action={
+                        canUpdate && (
+                            <Button
+                                onClick={() => {
                                     setEditingRuleId(null);
                                     reset();
-                                },
-                            };
-
-                            if (editingRuleId === null) {
-                                post(
-                                    route('account-default-rules.store'),
-                                    options,
-                                );
-                            } else {
-                                put(
-                                    route(
-                                        'account-default-rules.update',
-                                        editingRuleId,
-                                    ),
-                                    options,
-                                );
-                            }
-                        }}
-                    >
-                        {editingRuleId !== null && (
-                            <div className="text-sm font-medium sm:col-span-3">
-                                Editing rule #{editingRuleId}
-                            </div>
-                        )}
-                        <div>
-                            <Label>Name</Label>
-                            <Input
-                                value={data.name}
-                                onChange={(event) =>
-                                    setData('name', event.target.value)
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>Account type</Label>
-                            <Select
-                                className="h-9"
-                                value={data.account_type}
-                                onChange={(value) =>
-                                    setData((current) => ({
-                                        ...current,
-                                        account_type: value,
-                                        financial_product_id: '',
-                                    }))
-                                }
-                                options={[
-                                    'SAVINGS',
-                                    'SHARE',
-                                    'FIXED_DEPOSIT',
-                                    'RECURRING_DEPOSIT',
-                                    'LOAN',
-                                    'OTHER',
-                                ].map((value) => ({ value, label: value }))}
-                            />
-                        </div>
-                        <div>
-                            <Label>Product scope</Label>
-                            <Select
-                                className="h-9"
-                                value={data.financial_product_id}
-                                onChange={(value) =>
-                                    setData('financial_product_id', value)
-                                }
-                                placeholder="All products"
-                                options={[
-                                    { value: '', label: 'All products' },
-                                    ...scopedProducts.map((product) => ({
-                                        value: String(product.id),
-                                        label: `${product.code} · ${product.name}`,
-                                    })),
-                                ]}
-                            />
-                        </div>
-                        <div>
-                            <Label>Grace days</Label>
-                            <Input
-                                type="number"
-                                min="0"
-                                value={data.grace_days}
-                                onChange={(event) =>
-                                    setData('grace_days', event.target.value)
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>Fine amount</Label>
-                            <Input
-                                type="number"
-                                min="0"
-                                step="0.0001"
-                                value={data.fine_amount}
-                                onChange={(event) =>
-                                    setData('fine_amount', event.target.value)
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>Fine rate %</Label>
-                            <Input
-                                type="number"
-                                min="0"
-                                step="0.0001"
-                                value={data.fine_rate}
-                                onChange={(event) =>
-                                    setData('fine_rate', event.target.value)
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>Maximum fine</Label>
-                            <Input
-                                type="number"
-                                min="0"
-                                step="0.0001"
-                                value={data.maximum_fine}
-                                onChange={(event) =>
-                                    setData('maximum_fine', event.target.value)
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>Effective from</Label>
-                            <AppDatePicker
-                                value={data.effective_from}
-                                onChange={(value) =>
-                                    setData('effective_from', value)
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>Effective to</Label>
-                            <AppDatePicker
-                                value={data.effective_to}
-                                onChange={(value) =>
-                                    setData('effective_to', value)
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>Maturity extension days</Label>
-                            <Input
-                                type="number"
-                                min="0"
-                                value={data.maturity_extension_days}
-                                onChange={(event) =>
-                                    setData(
-                                        'maturity_extension_days',
-                                        event.target.value,
-                                    )
-                                }
-                            />
-                        </div>
-                        <label className="flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                checked={data.extends_maturity}
-                                onChange={(event) =>
-                                    setData(
-                                        'extends_maturity',
-                                        event.target.checked,
-                                    )
-                                }
-                            />
-                            Extend maturity
-                        </label>
-                        <label className="flex items-center gap-2 text-sm">
-                            <input
-                                type="checkbox"
-                                checked={data.is_active}
-                                onChange={(event) =>
-                                    setData('is_active', event.target.checked)
-                                }
-                            />
-                            Active
-                        </label>
-                        <div className="flex items-end gap-2">
-                            <Button type="submit" disabled={processing}>
-                                {editingRuleId === null
-                                    ? 'Create rule'
-                                    : 'Save changes'}
+                                    setIsFormOpen(true);
+                                }}
+                            >
+                                <Plus className="h-4 w-4" />
+                                Create rule
                             </Button>
-                            {editingRuleId !== null && (
+                        )
+                    }
+                />
+                <div className="flex items-center gap-2 sm:max-w-sm">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                        className="bg-card"
+                        placeholder="Search rules..."
+                        value={search}
+                        onChange={(event) => {
+                            setSearch(event.target.value);
+                            setPage(1);
+                        }}
+                    />
+                </div>
+                <Dialog
+                    open={isFormOpen}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            cancelEdit();
+                        } else {
+                            setIsFormOpen(true);
+                        }
+                    }}
+                >
+                    <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {editingRuleId === null
+                                    ? 'Create default rule'
+                                    : 'Edit default rule'}
+                            </DialogTitle>
+                            <DialogDescription>
+                                Configure the account scope, fine, and effective
+                                dates for this rule.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form
+                            className="grid gap-3 sm:grid-cols-3"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                const options = {
+                                    preserveScroll: true,
+                                    onSuccess: () => {
+                                        setIsFormOpen(false);
+                                        setEditingRuleId(null);
+                                        reset();
+                                    },
+                                };
+
+                                if (editingRuleId === null) {
+                                    post(
+                                        route('account-default-rules.store'),
+                                        options,
+                                    );
+                                } else {
+                                    put(
+                                        route(
+                                            'account-default-rules.update',
+                                            editingRuleId,
+                                        ),
+                                        options,
+                                    );
+                                }
+                            }}
+                        >
+                            <div>
+                                <Label>Name</Label>
+                                <Input
+                                    value={data.name}
+                                    onChange={(event) =>
+                                        setData('name', event.target.value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Account type</Label>
+                                <Select
+                                    className="h-9"
+                                    value={data.account_type}
+                                    onChange={(value) =>
+                                        setData((current) => ({
+                                            ...current,
+                                            account_type: value,
+                                            financial_product_id: '',
+                                        }))
+                                    }
+                                    options={[
+                                        'SAVINGS',
+                                        'SHARE',
+                                        'FIXED_DEPOSIT',
+                                        'RECURRING_DEPOSIT',
+                                        'LOAN',
+                                        'OTHER',
+                                    ].map((value) => ({ value, label: value }))}
+                                />
+                            </div>
+                            <div>
+                                <Label>Product scope</Label>
+                                <Select
+                                    className="h-9"
+                                    value={data.financial_product_id}
+                                    onChange={(value) =>
+                                        setData('financial_product_id', value)
+                                    }
+                                    placeholder="All products"
+                                    options={[
+                                        { value: '', label: 'All products' },
+                                        ...scopedProducts.map((product) => ({
+                                            value: String(product.id),
+                                            label: `${product.code} · ${product.name}`,
+                                        })),
+                                    ]}
+                                />
+                            </div>
+                            <div>
+                                <Label>Grace days</Label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    value={data.grace_days}
+                                    onChange={(event) =>
+                                        setData(
+                                            'grace_days',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Fine amount</Label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.0001"
+                                    value={data.fine_amount}
+                                    onChange={(event) =>
+                                        setData(
+                                            'fine_amount',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Fine rate %</Label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.0001"
+                                    value={data.fine_rate}
+                                    onChange={(event) =>
+                                        setData('fine_rate', event.target.value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Maximum fine</Label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.0001"
+                                    value={data.maximum_fine}
+                                    onChange={(event) =>
+                                        setData(
+                                            'maximum_fine',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Effective from</Label>
+                                <AppDatePicker
+                                    value={data.effective_from}
+                                    onChange={(value) =>
+                                        setData('effective_from', value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Effective to</Label>
+                                <AppDatePicker
+                                    value={data.effective_to}
+                                    onChange={(value) =>
+                                        setData('effective_to', value)
+                                    }
+                                />
+                            </div>
+                            <div>
+                                <Label>Maturity extension days</Label>
+                                <Input
+                                    type="number"
+                                    min="0"
+                                    value={data.maturity_extension_days}
+                                    onChange={(event) =>
+                                        setData(
+                                            'maturity_extension_days',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <label className="flex items-center gap-2 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.extends_maturity}
+                                    onChange={(event) =>
+                                        setData(
+                                            'extends_maturity',
+                                            event.target.checked,
+                                        )
+                                    }
+                                />
+                                Extend maturity
+                            </label>
+                            <label className="flex items-center gap-2 text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={data.is_active}
+                                    onChange={(event) =>
+                                        setData(
+                                            'is_active',
+                                            event.target.checked,
+                                        )
+                                    }
+                                />
+                                Active
+                            </label>
+                            <div className="flex items-end gap-2">
+                                <Button type="submit" disabled={processing}>
+                                    {editingRuleId === null
+                                        ? 'Create rule'
+                                        : 'Save changes'}
+                                </Button>
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -302,61 +396,135 @@ export default function DefaultRulesIndex() {
                                 >
                                     Cancel
                                 </Button>
-                            )}
-                        </div>
-                    </form>
-                </section>
-                <section className="rounded-lg border bg-card">
-                    <div className="divide-y">
-                        {rules.map((rule) => (
-                            <div
-                                key={rule.id}
-                                className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm"
-                            >
-                                <div>
-                                    <p className="font-medium">
-                                        {rule.name} · {rule.account_type}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        {rule.product?.code ?? 'All products'} ·
-                                        Grace {rule.grace_days} days ·{' '}
+                            </div>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+                <div className="h-[calc(100vh-360px)] min-h-60 overflow-auto rounded-md border bg-card">
+                    <table className="w-full border-collapse text-sm">
+                        <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
+                            <tr>
+                                {[
+                                    'Name',
+                                    'Product scope',
+                                    'Fine',
+                                    'Grace days',
+                                    'Effective dates',
+                                    'Status',
+                                    'Actions',
+                                ].map((heading) => (
+                                    <th
+                                        key={heading}
+                                        className="border-b p-3 text-left font-medium"
+                                    >
+                                        {heading}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {visibleRules.map((rule) => (
+                                <tr
+                                    key={rule.id}
+                                    className="border-b even:bg-muted/40 hover:bg-accent/20"
+                                >
+                                    <td className="p-3">
+                                        <p className="font-medium">
+                                            {rule.name}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {rule.account_type}
+                                        </p>
+                                    </td>
+                                    <td className="p-3">
+                                        {rule.product
+                                            ? `${rule.product.code} · ${rule.product.name}`
+                                            : 'All products'}
+                                    </td>
+                                    <td className="p-3">
                                         {rule.fine_calculation === 'PERCENTAGE'
                                             ? `${rule.fine_rate}%`
-                                            : rule.fine_amount}{' '}
-                                        ·{' '}
+                                            : rule.fine_amount}
+                                    </td>
+                                    <td className="p-3">{rule.grace_days}</td>
+                                    <td className="p-3">
+                                        {rule.effective_from?.slice(0, 10) ??
+                                            '—'}
+                                        {' – '}
+                                        {rule.effective_to?.slice(0, 10) ??
+                                            'No end date'}
+                                    </td>
+                                    <td className="p-3">
                                         {rule.is_active ? 'Active' : 'Inactive'}
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {canUpdate && (
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => editRule(rule)}
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                            Edit
-                                        </Button>
-                                    )}
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() =>
-                                            router.delete(
-                                                route(
-                                                    'account-default-rules.destroy',
-                                                    rule.id,
-                                                ),
-                                            )
-                                        }
+                                    </td>
+                                    <td className="p-3">
+                                        <div className="flex items-center gap-2">
+                                            {canUpdate && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() =>
+                                                        editRule(rule)
+                                                    }
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                    Edit
+                                                </Button>
+                                            )}
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                    router.delete(
+                                                        route(
+                                                            'account-default-rules.destroy',
+                                                            rule.id,
+                                                        ),
+                                                    )
+                                                }
+                                            >
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            {visibleRules.length === 0 && (
+                                <tr>
+                                    <td
+                                        colSpan={7}
+                                        className="p-8 text-center text-muted-foreground"
                                     >
-                                        Delete
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
+                                        {rules.length === 0
+                                            ? 'No default rules found.'
+                                            : 'No rules match your search.'}
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                {filteredRules.length > 0 && (
+                    <DataTablePagination
+                        perPage={perPage}
+                        onPerPageChange={(value) => {
+                            setPerPage(value);
+                            setPage(1);
+                        }}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredRules.length}
+                        onPageChange={setPage}
+                        onNext={() =>
+                            setPage((current) =>
+                                Math.min(current + 1, totalPages),
+                            )
+                        }
+                        onPrevious={() =>
+                            setPage((current) => Math.max(current - 1, 1))
+                        }
+                    />
+                )}
             </div>
         </CustomAuthLayout>
     );
