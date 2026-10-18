@@ -507,9 +507,9 @@ export default function CreatePettyCashAccount() {
                         </div>
                     </section>
 
-                    {/* Sticky actions */}
-                    <div className="sticky bottom-0 z-20 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                        <div className="mx-auto flex max-w-5xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    {/* Form actions */}
+                    <div className="fixed inset-x-4 bottom-0 z-30 border-t bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:right-6 md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)]">
+                        <div className="flex max-w-5xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-1.5 text-xs text-muted-foreground md:flex">
                                 <ShieldCheck className="size-3.5" />
                                 Review all details before saving.

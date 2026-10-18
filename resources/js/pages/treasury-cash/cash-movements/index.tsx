@@ -10,7 +10,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { CashTransferIndexProps } from '@/types/treasury-cash/cash-movements';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowRightLeft, CheckCircle2, ClipboardCheck } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
@@ -31,6 +31,7 @@ export default function Index() {
             (role.permissions ?? []).map((permission) => permission.slug),
         ),
     ]);
+    const canCreate = permissions.has('cash_transfers.create');
     const canApprove = permissions.has('cash_transfers.approve');
     const canComplete = permissions.has('cash_transfers.complete');
 
@@ -60,6 +61,72 @@ export default function Index() {
                 <ResourcePageHeader
                     title="Cash Transfer Queue"
                     description="Approve and complete cash transfers between active branch locations."
+                    action={
+                        canCreate ? (
+                            <div className="flex flex-wrap justify-end gap-2">
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'cash-movements.teller-to-teller-transfer',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-people-arrows-left-right" />
+                                        Teller to teller
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'vault-transfers.root.vault-to-teller',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-vault" />
+                                        Vault to teller
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'vault-transfers.root.teller-to-vault',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-building-columns" />
+                                        Teller to vault
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'vault-transfers.root.vault-to-vault',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-right-left" />
+                                        Vault to vault
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'vault-transfers.root.bank-to-vault',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-building-columns" />
+                                        Bank to vault
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'vault-transfers.root.vault-to-bank',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-money-bill-transfer" />
+                                        Vault to bank
+                                    </Link>
+                                </Button>
+                            </div>
+                        ) : undefined
+                    }
                 />
                 <Input
                     className="w-full bg-card sm:w-80"

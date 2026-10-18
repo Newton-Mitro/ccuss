@@ -4,16 +4,14 @@ import {
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
-import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -41,29 +39,16 @@ type Props = {
         current_page: number;
         last_page: number;
     };
-    fiscalYears: {
-        id: number;
-        name: string;
-        start_date: string;
-        end_date: string;
-    }[];
     filters: { search?: string; page?: number; per_page?: number };
 };
 
 export default function DividendsIndex() {
-    const { declarations, fiscalYears, filters } = usePage<Props>().props;
+    const { declarations, filters } = usePage<Props>().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [perPage, setPerPage] = useState(Number(filters.per_page) || 20);
     const [page, setPage] = useState(
         Number(filters.page) || declarations.current_page,
     );
-    const { data, setData, post, processing } = useForm({
-        fiscal_year_id: '',
-        dividend_rate: '0',
-        declaration_date: new Date().toISOString().slice(0, 10),
-        note: '',
-    });
-
     useEffect(() => {
         const delay = setTimeout(
             () =>
@@ -96,74 +81,15 @@ export default function DividendsIndex() {
                 <ResourcePageHeader
                     title="Share Dividends"
                     description="Declare, calculate, review, and approve member dividends."
-                />
-                <section className="rounded-lg border bg-card p-4">
-                    <form
-                        className="grid gap-3 sm:grid-cols-3"
-                        onSubmit={(event) => {
-                            event.preventDefault();
-                            post(route('dividends.store'));
-                        }}
-                    >
-                        <div>
-                            <Label>Fiscal year</Label>
-                            <Select
-                                className="h-9"
-                                value={data.fiscal_year_id}
-                                onChange={(value) =>
-                                    setData('fiscal_year_id', value)
-                                }
-                                placeholder="Select fiscal year"
-                                options={[
-                                    {
-                                        value: '',
-                                        label: 'Select fiscal year',
-                                    },
-                                    ...fiscalYears.map((year) => ({
-                                        value: String(year.id),
-                                        label: `${year.name} · ${formatDate(year.start_date)} to ${formatDate(year.end_date)}`,
-                                    })),
-                                ]}
-                            />
-                        </div>
-                        <div>
-                            <Label>Dividend rate %</Label>
-                            <Input
-                                type="number"
-                                min="0"
-                                step="0.0001"
-                                value={data.dividend_rate}
-                                onChange={(event) =>
-                                    setData('dividend_rate', event.target.value)
-                                }
-                            />
-                        </div>
-                        <div>
-                            <Label>Declaration date</Label>
-                            <AppDatePicker
-                                value={data.declaration_date}
-                                onChange={(value) =>
-                                    setData('declaration_date', value)
-                                }
-                            />
-                        </div>
-                        <div className="sm:col-span-3">
-                            <Label>Note</Label>
-                            <Input
-                                value={data.note}
-                                onChange={(event) =>
-                                    setData('note', event.target.value)
-                                }
-                                placeholder="Optional declaration note"
-                            />
-                        </div>
-                        <div className="sm:col-span-3">
-                            <Button type="submit" disabled={processing}>
+                    action={
+                        <Button asChild>
+                            <Link href={route('dividends.create')}>
+                                <Plus />
                                 Create declaration
-                            </Button>
-                        </div>
-                    </form>
-                </section>
+                            </Link>
+                        </Button>
+                    }
+                />
                 <Input
                     className="w-full bg-card sm:w-96"
                     placeholder="Search declaration, status, or note..."

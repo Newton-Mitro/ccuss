@@ -634,7 +634,14 @@ export default function CustomAuthLayout({
                     </div>
                 </header>
 
-                <main className="app-main flex-1 overflow-auto bg-background/80 p-4 md:p-6">
+                <main
+                    className={cn(
+                        'app-main flex-1 overflow-auto bg-background/80 p-4 md:p-6',
+                        sidebarFloating || !sidebarOpen
+                            ? '[--app-sidebar-offset:4rem]'
+                            : '[--app-sidebar-offset:18rem]',
+                    )}
+                >
                     {children}
                     <Toaster
                         position="top-center"

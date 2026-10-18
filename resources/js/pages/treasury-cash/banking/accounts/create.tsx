@@ -562,9 +562,9 @@ export default function Create() {
                         </div>
                     </section>
 
-                    {/* Sticky action bar */}
-                    <div className="sticky bottom-0 z-20 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                        <div className="mx-auto flex max-w-5xl flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    {/* Form actions */}
+                    <div className="fixed inset-x-4 bottom-0 z-30 w-auto max-w-5xl border-t bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)] md:w-[calc(100%-var(--app-sidebar-offset,0px)-3rem)]">
+                        <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-2 text-xs text-muted-foreground md:flex">
                                 <ShieldCheck className="size-4 shrink-0" />
                                 Review account details before submitting.

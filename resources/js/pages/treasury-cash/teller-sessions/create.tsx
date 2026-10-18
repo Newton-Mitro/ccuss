@@ -1,4 +1,3 @@
-import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -9,6 +8,7 @@ import {
     CheckCircle2,
     CircleDollarSign,
     FileText,
+    Info,
     ShieldCheck,
     UserRound,
     Wallet,
@@ -21,6 +21,7 @@ import { Input } from '../../../components/ui/input';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 
 type BranchDay = {
     id: number;
@@ -317,6 +318,28 @@ export default function CreateTellerSessionPage() {
                                             Choose the teller who will be
                                             responsible for this session.
                                         </p>
+
+                                        {selectedTeller && (
+                                            <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 px-3 py-2.5">
+                                                <div>
+                                                    <p className="text-xs font-medium">
+                                                        Current ledger balance
+                                                    </p>
+                                                    <p className="text-[11px] text-muted-foreground">
+                                                        Reference only; count
+                                                        the physical cash below.
+                                                    </p>
+                                                </div>
+                                                <p className="shrink-0 text-sm font-semibold tabular-nums">
+                                                    {selectedTeller.current_balance ==
+                                                    null
+                                                        ? '-'
+                                                        : formatBDTCurrency(
+                                                              selectedTeller.current_balance,
+                                                          )}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </section>
@@ -398,27 +421,6 @@ export default function CreateTellerSessionPage() {
                                 </div>
 
                                 <div className="space-y-4 p-4 sm:p-5">
-                                    {selectedTeller && (
-                                        <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 px-3 py-2.5">
-                                            <div>
-                                                <p className="text-xs font-medium">
-                                                    Current ledger balance
-                                                </p>
-                                                <p className="text-[11px] text-muted-foreground">
-                                                    Reference only; count the
-                                                    physical cash below.
-                                                </p>
-                                            </div>
-                                            <p className="shrink-0 text-sm font-semibold tabular-nums">
-                                                {selectedTeller.current_balance ==
-                                                null
-                                                    ? '-'
-                                                    : formatBDTCurrency(
-                                                          selectedTeller.current_balance,
-                                                      )}
-                                            </p>
-                                        </div>
-                                    )}
                                     <div>
                                         <label
                                             htmlFor="opening_cash"
@@ -496,10 +498,10 @@ export default function CreateTellerSessionPage() {
                                     Review these details before proceeding.
                                 </p>
 
-                                <div className="mt-4 space-y-3">
+                                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
                                     <div className="flex items-center gap-2.5 text-xs">
                                         {userHasBranch ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
                                         ) : (
                                             <span className="size-4 shrink-0 rounded-full border border-amber-500" />
                                         )}
@@ -516,7 +518,7 @@ export default function CreateTellerSessionPage() {
 
                                     <div className="flex items-center gap-2.5 text-xs">
                                         {hasBranchDay ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
                                         ) : (
                                             <span className="size-4 shrink-0 rounded-full border border-amber-500" />
                                         )}
@@ -533,7 +535,7 @@ export default function CreateTellerSessionPage() {
 
                                     <div className="flex items-center gap-2.5 text-xs">
                                         {data.teller_id ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
                                         ) : (
                                             <span className="size-4 shrink-0 rounded-full border" />
                                         )}
@@ -551,7 +553,7 @@ export default function CreateTellerSessionPage() {
                                     <div className="flex items-center gap-2.5 text-xs">
                                         {data.opening_cash !== '' &&
                                         Number(data.opening_cash) >= 0 ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
                                         ) : (
                                             <span className="size-4 shrink-0 rounded-full border" />
                                         )}
@@ -570,39 +572,54 @@ export default function CreateTellerSessionPage() {
                             </section>
 
                             {/* Actions */}
-                            <div className="space-y-3 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-                                <Button
-                                    type="submit"
-                                    disabled={processing || !canOpenSession}
-                                    className="h-11 w-full font-semibold"
-                                >
-                                    <Banknote className="mr-2 size-4" />
-                                    {processing
-                                        ? 'Opening session...'
-                                        : 'Open teller session'}
-                                    {!processing && (
-                                        <ArrowRight className="ml-auto size-4" />
-                                    )}
-                                </Button>
+                            <div className="space-y-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+                                <div className="flex flex-col gap-3 sm:flex-row">
+                                    <Button
+                                        type="submit"
+                                        disabled={processing || !canOpenSession}
+                                        className="h-11 w-full gap-2 rounded-lg font-semibold shadow-sm transition-all sm:flex-1"
+                                    >
+                                        <Banknote className="size-4 shrink-0" />
 
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="h-10 w-full"
-                                    disabled={processing}
-                                    onClick={() =>
-                                        router.visit(
-                                            route('teller-sessions.index'),
-                                        )
-                                    }
-                                >
-                                    Cancel
-                                </Button>
+                                        <span>
+                                            {processing
+                                                ? 'Opening session...'
+                                                : 'Open teller session'}
+                                        </span>
 
-                                <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-                                    Review the teller assignment and opening
-                                    cash before submitting.
-                                </p>
+                                        {!processing && (
+                                            <ArrowRight className="ml-auto size-4 shrink-0" />
+                                        )}
+
+                                        {processing && (
+                                            <span className="ml-auto size-4 shrink-0 animate-spin rounded-full border-2 border-current border-r-transparent" />
+                                        )}
+                                    </Button>
+
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="h-11 w-full gap-2 rounded-lg sm:w-auto sm:min-w-28"
+                                        disabled={processing}
+                                        onClick={() =>
+                                            router.visit(
+                                                route('teller-sessions.index'),
+                                            )
+                                        }
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+
+                                <div className="flex items-start gap-2.5 border-t pt-3">
+                                    <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+
+                                    <p className="text-xs leading-relaxed text-muted-foreground">
+                                        Review the teller assignment and opening
+                                        cash amount before opening the session.
+                                        Make sure the details are accurate.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

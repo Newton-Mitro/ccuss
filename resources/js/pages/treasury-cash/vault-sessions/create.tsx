@@ -514,20 +514,19 @@ export default function CreateVaultSessionPage() {
                             </section>
 
                             {/* Session readiness */}
-                            <section className="rounded-xl border bg-muted/20 p-4 shadow-sm sm:p-5">
+                            <section className="rounded-xl border bg-muted/20 p-4 sm:p-5">
                                 <h3 className="text-sm font-semibold">
                                     Session readiness
                                 </h3>
 
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                    Review the required details before
-                                    proceeding.
+                                    Review these details before proceeding.
                                 </p>
 
-                                <div className="mt-4 space-y-3">
+                                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
                                     <div className="flex items-center gap-2.5 text-xs">
                                         {userHasBranch ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
                                         ) : (
                                             <span className="size-4 shrink-0 rounded-full border border-amber-500" />
                                         )}
@@ -545,7 +544,7 @@ export default function CreateVaultSessionPage() {
 
                                     <div className="flex items-center gap-2.5 text-xs">
                                         {hasBranchDay ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
                                         ) : (
                                             <span className="size-4 shrink-0 rounded-full border border-amber-500" />
                                         )}
@@ -563,7 +562,7 @@ export default function CreateVaultSessionPage() {
 
                                     <div className="flex items-center gap-2.5 text-xs">
                                         {selectedVault ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
                                         ) : (
                                             <span className="size-4 shrink-0 rounded-full border" />
                                         )}
@@ -581,7 +580,7 @@ export default function CreateVaultSessionPage() {
 
                                     <div className="flex items-center gap-2.5 text-xs">
                                         {hasOpeningCash ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-primary" />
+                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
                                         ) : (
                                             <span className="size-4 shrink-0 rounded-full border" />
                                         )}
@@ -596,24 +595,6 @@ export default function CreateVaultSessionPage() {
                                             Opening amount entered
                                         </span>
                                     </div>
-                                </div>
-
-                                <div className="mt-4 border-t pt-3">
-                                    <p className="text-xs text-muted-foreground">
-                                        Opening balance
-                                    </p>
-
-                                    <p className="mt-1 text-xl font-bold tracking-tight tabular-nums">
-                                        ৳
-                                        {hasOpeningCash
-                                            ? Number(
-                                                  data.opening_cash,
-                                              ).toLocaleString('en-BD', {
-                                                  minimumFractionDigits: 2,
-                                                  maximumFractionDigits: 4,
-                                              })
-                                            : '0.00'}
-                                    </p>
                                 </div>
                             </section>
 

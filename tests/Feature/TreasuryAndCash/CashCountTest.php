@@ -35,7 +35,9 @@ it('has a bangladesh denomination preset', function () {
 
     expect($preset)->toBeArray()
         ->and($preset)->toContainEqual(['currency' => 'BDT', 'type' => 'NOTE', 'value' => 1000, 'name' => '1000 Taka', 'is_active' => true, 'sort_order' => 9])
-        ->and($preset)->toContainEqual(['currency' => 'BDT', 'type' => 'COIN', 'value' => 1, 'name' => '1 Taka Coin', 'is_active' => true, 'sort_order' => 12]);
+        ->and($preset)->toContainEqual(['currency' => 'BDT', 'type' => 'COIN', 'value' => 1, 'name' => '1 Taka Coin', 'is_active' => true, 'sort_order' => 12])
+        ->and(collect($preset)->pluck('value')->all())->not->toContain(2000)
+        ->and(collect($preset)->pluck('value')->all())->not->toContain(5000);
 });
 
 it('can seed the bangladesh denomination preset through the denomination store flow', function () {
@@ -54,13 +56,24 @@ it('can seed the bangladesh denomination preset through the denomination store f
     $role->permissions()->syncWithoutDetaching([$permission->id]);
     $user->roles()->syncWithoutDetaching([$role->id]);
 
+    foreach ([2000, 5000] as $value) {
+        CashDenomination::create([
+            'organization_id' => $organization->id,
+            'currency' => 'BDT',
+            'type' => 'NOTE',
+            'value' => $value,
+            'name' => "{$value} Taka",
+            'is_active' => true,
+        ]);
+    }
+
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
         ->post(route('cash-denominations.store'), ['preset' => 'BANGLADESH'])
         ->assertRedirect();
 
-    expect(CashDenomination::query()->where('organization_id', $organization->id)->count())->toBeGreaterThanOrEqual(12)
-        ->and(CashDenomination::query()->where('organization_id', $organization->id)->where('currency', 'BDT')->count())->toBeGreaterThan(0);
+    expect(CashDenomination::query()->where('organization_id', $organization->id)->where('currency', 'BDT')->where('type', 'NOTE')->whereIn('value', [2000, 5000])->where('is_active', true)->exists())->toBeFalse()
+        ->and(CashDenomination::query()->where('organization_id', $organization->id)->where('currency', 'BDT')->where('is_active', true)->count())->toBe(13);
 });
 
 it('rejects counts for a closed branch day', function () {

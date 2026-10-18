@@ -1,7 +1,6 @@
 import type { TellerCreatePageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
-    ArrowLeft,
     Banknote,
     Check,
     CheckCircle2,
@@ -85,7 +84,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={editing ? 'Edit Teller' : 'Create Teller'} />
 
-            <div className="max-w-4xl space-y-5 pb-24 text-foreground">
+            <div className="w-full max-w-4xl space-y-5 pb-24 text-foreground">
                 <ResourcePageHeader
                     title={editing ? 'Edit Teller' : 'Create Teller'}
                     description={
@@ -360,7 +359,13 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                     className="h-10 w-full"
                                     value={data.status}
                                     onChange={(value) =>
-                                        setData('status', value)
+                                        setData(
+                                            'status',
+                                            value as
+                                                | 'ACTIVE'
+                                                | 'INACTIVE'
+                                                | 'CLOSED',
+                                        )
                                     }
                                     options={[
                                         { value: 'ACTIVE', label: 'Active' },
@@ -394,19 +399,26 @@ export default function Create({ teller, branch_locked = false }: Props) {
                     </section>
 
                     {/* Form actions */}
-                    <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 shadow-[0_-4px_16px_-12px_rgba(0,0,0,0.2)] backdrop-blur supports-[backdrop-filter]:bg-background/85 lg:left-[var(--sidebar-width,0px)]">
-                        <div className="mx-auto flex max-w-4xl flex-col-reverse gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                            <a
-                                href={route('tellers.index')}
-                                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium transition-colors hover:bg-muted"
+                    <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:left-[var(--app-sidebar-offset,0px)]">
+                        <div className="ml-4 flex w-[calc(100%-2rem)] max-w-4xl flex-col-reverse gap-2 py-3 sm:flex-row sm:items-center sm:justify-between md:ml-6 md:w-[calc(100%-3rem)]">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => window.history.back()}
+                                disabled={processing}
+                                className="h-10 gap-2 rounded-lg px-4"
                             >
-                                <ArrowLeft className="size-4" />
-                                Back to tellers
-                            </a>
+                                <Info className="size-4" />
+                                Cancel
+                            </Button>
 
                             <Button
                                 type="submit"
-                                disabled={processing || branches.length === 0}
+                                disabled={
+                                    processing ||
+                                    (branches.length === 0 &&
+                                        !(editing && branch_locked))
+                                }
                                 className="h-10 gap-2 rounded-lg px-5"
                             >
                                 {processing ? (

@@ -10,8 +10,13 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import type { CashAdjustmentIndexProps } from '@/types/treasury-cash/cash-adjustments';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { CheckCircle2, ClipboardCheck, SlidersHorizontal } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import {
+    CheckCircle2,
+    ClipboardCheck,
+    Plus,
+    SlidersHorizontal,
+} from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
@@ -31,6 +36,7 @@ export default function Index() {
             (role.permissions ?? []).map((permission) => permission.slug),
         ),
     ]);
+    const canCreate = permissions.has('cash_transactions.create');
     const canPost = permissions.has('cash_transactions.post');
 
     useEffect(() => {
@@ -47,18 +53,32 @@ export default function Index() {
         { title: 'Treasury & Cash', href: '' },
         { title: 'Cash Management', href: '' },
         {
-            title: 'Cash Adjustment Queue',
+            title: 'Cash Adjustments',
             href: route('cash-adjustments.index'),
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Cash Adjustment Queue" />
+            <Head title="Cash Adjustments" />
             <div className="space-y-4 text-foreground">
                 <ResourcePageHeader
-                    title="Cash Adjustment Queue"
+                    title="Cash Adjustments"
                     description="Approve and post teller shortages and excesses after cash verification."
+                    action={
+                        canCreate ? (
+                            <Button asChild>
+                                <Link
+                                    href={route(
+                                        'cash-adjustments.teller-cash-adjustment',
+                                    )}
+                                >
+                                    <Plus />
+                                    Create cash adjustment
+                                </Link>
+                            </Button>
+                        ) : undefined
+                    }
                 />
                 <Input
                     className="w-full bg-card sm:w-80"

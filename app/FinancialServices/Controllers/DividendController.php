@@ -16,7 +16,7 @@ class DividendController extends Controller
     public function __construct(private readonly DividendService $service)
     {
         $this->middleware('permission:financial.accounts.view,financial.view')->only('index');
-        $this->middleware('permission:financial.transactions.create')->only(['store', 'calculate']);
+        $this->middleware('permission:financial.transactions.create')->only(['create', 'store', 'calculate']);
         $this->middleware('permission:financial.transactions.post')->only(['approve', 'post']);
     }
 
@@ -37,8 +37,20 @@ class DividendController extends Controller
 
         return Inertia::render('financial-services/dividends/index', [
             'declarations' => $query->paginate($request->integer('per_page', 20))->withQueryString(),
-            'fiscalYears' => FiscalYear::query()->where('organization_id', $organizationId)->whereIn('status', ['OPEN', 'CLOSED'])->orderByDesc('start_date')->get(['id', 'name', 'start_date', 'end_date']),
             'filters' => $request->only(['search', 'per_page', 'page']),
+        ]);
+    }
+
+    public function create(Request $request): Response
+    {
+        $organizationId = $this->organizationId($request);
+
+        return Inertia::render('financial-services/dividends/create', [
+            'fiscalYears' => FiscalYear::query()
+                ->where('organization_id', $organizationId)
+                ->whereIn('status', ['OPEN', 'CLOSED'])
+                ->orderByDesc('start_date')
+                ->get(['id', 'name', 'start_date', 'end_date']),
         ]);
     }
 
@@ -47,7 +59,7 @@ class DividendController extends Controller
         $data = $request->validate(['fiscal_year_id' => ['required', 'integer', 'exists:fiscal_years,id'], 'dividend_rate' => ['required', 'numeric', 'gte:0'], 'declaration_date' => ['nullable', 'date'], 'note' => ['nullable', 'string', 'max:2000']]);
         $this->service->createDeclaration($data, $this->organizationId($request));
 
-        return back()->with('success', 'Dividend declaration created.');
+        return redirect()->route('dividends.index')->with('success', 'Dividend declaration created.');
     }
 
     public function calculate(Request $request, ShareDividendDeclaration $shareDividendDeclaration)

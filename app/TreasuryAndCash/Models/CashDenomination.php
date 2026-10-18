@@ -30,8 +30,6 @@ class CashDenomination extends Model
             ['currency' => 'BDT', 'type' => 'NOTE', 'value' => 200, 'name' => '200 Taka', 'is_active' => true, 'sort_order' => 7],
             ['currency' => 'BDT', 'type' => 'NOTE', 'value' => 500, 'name' => '500 Taka', 'is_active' => true, 'sort_order' => 8],
             ['currency' => 'BDT', 'type' => 'NOTE', 'value' => 1000, 'name' => '1000 Taka', 'is_active' => true, 'sort_order' => 9],
-            ['currency' => 'BDT', 'type' => 'NOTE', 'value' => 2000, 'name' => '2000 Taka', 'is_active' => true, 'sort_order' => 10],
-            ['currency' => 'BDT', 'type' => 'NOTE', 'value' => 5000, 'name' => '5000 Taka', 'is_active' => true, 'sort_order' => 11],
             ['currency' => 'BDT', 'type' => 'COIN', 'value' => 1, 'name' => '1 Taka Coin', 'is_active' => true, 'sort_order' => 12],
             ['currency' => 'BDT', 'type' => 'COIN', 'value' => 2, 'name' => '2 Taka Coin', 'is_active' => true, 'sort_order' => 13],
             ['currency' => 'BDT', 'type' => 'COIN', 'value' => 5, 'name' => '5 Taka Coin', 'is_active' => true, 'sort_order' => 14],
@@ -40,6 +38,13 @@ class CashDenomination extends Model
 
     public static function seedBangladeshPreset(int $organizationId): void
     {
+        self::query()
+            ->where('organization_id', $organizationId)
+            ->where('currency', 'BDT')
+            ->where('type', 'NOTE')
+            ->whereIn('value', [2000, 5000])
+            ->update(['is_active' => false]);
+
         foreach (self::bangladeshPreset() as $denomination) {
             self::query()->firstOrCreate(
                 [

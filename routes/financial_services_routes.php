@@ -74,6 +74,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/interest-provisions/{interest_provision}/reject', [InterestProvisionController::class, 'reject'])->name('interest-provisions.reject');
     Route::post('/interest-provisions/{interest_provision}/post', [InterestProvisionController::class, 'post'])->name('interest-provisions.post');
     Route::get('/dividends', [DividendController::class, 'index'])->name('dividends.index');
+    Route::get('/dividends/create', [DividendController::class, 'create'])->name('dividends.create');
     Route::post('/dividends', [DividendController::class, 'store'])->name('dividends.store');
     Route::post('/dividends/{share_dividend_declaration}/calculate', [DividendController::class, 'calculate'])->name('dividends.calculate');
     Route::post('/dividends/{share_dividend_declaration}/approve', [DividendController::class, 'approve'])->name('dividends.approve');

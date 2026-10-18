@@ -79,28 +79,12 @@ export const branchOperations: SidebarItem[] = [
                 ],
             },
 
-            // Teller Cash Adjustment
             {
                 name: 'Cash Adjustments',
                 icon: <i className="fa-solid fa-sliders" />,
-                children_expanded: false,
+                path: '/cash-adjustments',
+                match_path: 'cash-adjustments',
                 permission: ['cash_transactions.view'],
-                children: [
-                    {
-                        name: 'Adjustment Queue',
-                        icon: <i className="fa-solid fa-clipboard-check" />,
-                        path: '/cash-adjustments',
-                        match_path: 'cash-adjustments',
-                        permission: ['cash_transactions.view'],
-                    },
-                    {
-                        name: 'Cash Adjustment',
-                        icon: <i className="fa-solid fa-sliders" />,
-                        path: '/cash-adjustments/teller-cash-adjustment',
-                        match_path: 'cash-adjustments',
-                        permission: ['cash_transactions.create'],
-                    },
-                ],
             },
 
             // Reports

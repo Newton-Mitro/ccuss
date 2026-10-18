@@ -37,93 +37,11 @@ export const treasuryAndCash: SidebarItem[] = [
                         permission: ['vault_sessions.view'],
                     },
                     {
-                        name: 'Cash Transfers',
-                        icon: <i className="fa-solid fa-money-bill-transfer" />,
-                        children_expanded: false,
+                        name: 'Transfer Queue',
+                        icon: <i className="fa-solid fa-list-check" />,
+                        path: '/cash-movements/transfers',
+                        match_path: 'cash-movements/transfers',
                         permission: ['cash_transfers.view'],
-                        children: [
-                            {
-                                name: 'Transfer Queue',
-                                icon: <i className="fa-solid fa-list-check" />,
-                                path: '/cash-movements/transfers',
-                                match_path: 'cash-movements/transfers',
-                                permission: ['cash_transfers.view'],
-                            },
-                            {
-                                name: 'Teller to Teller',
-                                icon: (
-                                    <i className="fa-solid fa-people-arrows-left-right" />
-                                ),
-                                path: '/cash-movements/teller-to-teller-transfer',
-                                match_path: 'cash-movements',
-                                permission: ['cash_transfers.create'],
-                            },
-                            {
-                                name: 'Vault to Teller',
-                                icon: <i className="fa-solid fa-vault" />,
-                                path: '/vault-transfers/vault-to-teller',
-                                match_path: 'vault-transfers/vault-to-teller',
-                                permission: ['cash_transfers.create'],
-                            },
-                            {
-                                name: 'Teller to Vault',
-                                icon: (
-                                    <i className="fa-solid fa-building-columns" />
-                                ),
-                                path: '/vault-transfers/teller-to-vault',
-                                match_path: 'vault-transfers/teller-to-vault',
-                                permission: ['cash_transfers.create'],
-                            },
-                            {
-                                name: 'Vault to Vault',
-                                icon: <i className="fa-solid fa-right-left" />,
-                                path: '/vault-transfers/vault-to-vault',
-                                match_path: 'vault-transfers/vault-to-vault',
-                                permission: ['cash_transfers.create'],
-                            },
-                            {
-                                name: 'Bank to Vault',
-                                icon: (
-                                    <i className="fa-solid fa-building-columns" />
-                                ),
-                                path: '/vault-transfers/bank-to-vault',
-                                match_path: 'vault-transfers/bank-to-vault',
-                                permission: ['cash_transfers.create'],
-                            },
-                            {
-                                name: 'Vault to Bank',
-                                icon: (
-                                    <i className="fa-solid fa-money-bill-transfer" />
-                                ),
-                                path: '/vault-transfers/vault-to-bank',
-                                match_path: 'vault-transfers/vault-to-bank',
-                                permission: ['cash_transfers.create'],
-                            },
-                        ],
-                    },
-                    {
-                        name: 'Cash Adjustments',
-                        icon: <i className="fa-solid fa-sliders" />,
-                        children_expanded: false,
-                        permission: ['cash_transactions.view'],
-                        children: [
-                            {
-                                name: 'Adjustment Queue',
-                                icon: (
-                                    <i className="fa-solid fa-clipboard-check" />
-                                ),
-                                path: '/vault-adjustments',
-                                match_path: 'vault-adjustments',
-                                permission: ['cash_transactions.view'],
-                            },
-                            {
-                                name: 'Cash Adjustment',
-                                icon: <i className="fa-solid fa-sliders" />,
-                                path: '/vault-adjustments/create',
-                                match_path: 'vault-adjustments/create',
-                                permission: ['cash_transactions.create'],
-                            },
-                        ],
                     },
                 ],
             },
