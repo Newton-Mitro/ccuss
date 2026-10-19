@@ -422,7 +422,7 @@ const RolePermissionForm = ({
                                                                     } ${selectedRole.preset ? 'cursor-default' : 'cursor-pointer'}`}
                                                                 >
                                                                     <div className="flex items-center gap-2">
-                                                                        <input
+                                                                        <Input
                                                                             type="checkbox"
                                                                             disabled={
                                                                                 selectedRole.preset

@@ -15,7 +15,7 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Search } from 'lucide-react';
+import { Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -157,9 +157,9 @@ export default function DefaultRulesIndex() {
                     }
                 />
                 <div className="flex items-center gap-2 sm:max-w-sm">
-                    <Search className="h-4 w-4 text-muted-foreground" />
                     <Input
                         className="bg-card"
+                        type="search"
                         placeholder="Search rules..."
                         value={search}
                         onChange={(event) => {
@@ -357,7 +357,7 @@ export default function DefaultRulesIndex() {
                                 />
                             </div>
                             <label className="flex items-center gap-2 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={data.extends_maturity}
                                     onChange={(event) =>
@@ -370,7 +370,7 @@ export default function DefaultRulesIndex() {
                                 Extend maturity
                             </label>
                             <label className="flex items-center gap-2 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={data.is_active}
                                     onChange={(event) =>

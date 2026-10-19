@@ -259,7 +259,7 @@ const UserForm = ({
                             </div>
 
                             {/* Input */}
-                            <input
+                            <Input
                                 type="file"
                                 accept="image/*"
                                 onChange={handlePhotoChange}
@@ -283,7 +283,7 @@ const UserForm = ({
                                     className="flex items-center gap-3 rounded-md border p-2 hover:bg-accent/30"
                                 >
                                     {/* Checkbox */}
-                                    <input
+                                    <Input
                                         type="checkbox"
                                         value={role.id}
                                         checked={isChecked}
@@ -412,7 +412,7 @@ const UserForm = ({
                                                             }`}
                                                         >
                                                             <div className="flex items-center gap-2">
-                                                                <input
+                                                                <Input
                                                                     type="checkbox"
                                                                     checked={
                                                                         checked

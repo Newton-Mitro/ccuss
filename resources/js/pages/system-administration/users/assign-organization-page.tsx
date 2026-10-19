@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     Building2,
@@ -119,7 +120,7 @@ export default function AssignOrganizationPage() {
                                             key={organization.id}
                                             className="flex items-center gap-3 rounded-lg border bg-muted/20 p-3 text-sm hover:bg-accent/40"
                                         >
-                                            <input
+                                            <Input
                                                 type="checkbox"
                                                 checked={data.organization_ids.includes(
                                                     organization.id,

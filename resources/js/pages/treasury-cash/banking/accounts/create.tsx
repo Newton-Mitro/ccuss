@@ -493,7 +493,7 @@ export default function Create() {
                                     htmlFor="is_reconcilable"
                                     className="flex cursor-pointer items-start gap-3"
                                 >
-                                    <input
+                                    <Input
                                         id="is_reconcilable"
                                         type="checkbox"
                                         checked={data.is_reconcilable}

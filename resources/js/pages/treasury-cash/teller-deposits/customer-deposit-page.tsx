@@ -580,7 +580,7 @@ export default function CustomerDepositPage() {
                                                     >
                                                         <td className="px-3 py-2.5 text-center">
                                                             <label className="inline-flex cursor-pointer items-center justify-center rounded-md p-1.5 transition-colors hover:bg-primary/10">
-                                                                <input
+                                                                <Input
                                                                     type="checkbox"
                                                                     checked={Boolean(
                                                                         selectedRows[

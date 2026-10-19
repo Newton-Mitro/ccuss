@@ -618,7 +618,7 @@ export default function FinancialAccountShow() {
                                     </div>
                                     <div className="flex items-center justify-between gap-2">
                                         <label className="flex items-center gap-2 text-sm">
-                                            <input
+                                            <Input
                                                 type="checkbox"
                                                 checked={data.is_primary}
                                                 onChange={(event) =>

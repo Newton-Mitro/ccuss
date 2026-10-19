@@ -351,7 +351,7 @@ export default function FinancialProductForm() {
                                             </Button>
                                         )}
                                     </div>
-                                    <input
+                                    <Input
                                         type="hidden"
                                         name={`terms.${index}.id`}
                                         value={term.id ?? ''}
@@ -612,7 +612,7 @@ export default function FinancialProductForm() {
                                             />
                                         </div>
                                         <label className="flex items-center gap-2 text-sm">
-                                            <input
+                                            <Input
                                                 type="checkbox"
                                                 checked={term.status}
                                                 onChange={(event) =>
@@ -633,7 +633,7 @@ export default function FinancialProductForm() {
                     <div className="flex items-center justify-between border-t pt-3">
                         <div className="space-y-2">
                             <label className="flex items-center gap-2 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={data.status}
                                     onChange={(event) =>
@@ -643,7 +643,7 @@ export default function FinancialProductForm() {
                                 Active product
                             </label>
                             <label className="flex items-center gap-2 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={
                                         data.customer_can_open_multiple_account

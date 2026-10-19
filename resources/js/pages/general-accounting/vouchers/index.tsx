@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import {
     Tooltip,
     TooltipContent,
@@ -96,7 +97,7 @@ export default function Index() {
                         {/* Search */}
                         <div className="relative min-w-0 flex-1 sm:max-w-sm">
                             <i className="fa-solid fa-magnifying-glass pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs text-muted-foreground" />
-                            <input
+                            <Input
                                 type="text"
                                 placeholder="Search vouchers..."
                                 value={data.search}

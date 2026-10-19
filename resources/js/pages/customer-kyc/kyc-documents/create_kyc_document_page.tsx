@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { CheckCheck, ListFilter, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -171,7 +172,7 @@ const CreateKycDocument = () => {
                 {/* FILE UPLOAD */}
                 <div>
                     <Label className="text-xs">Upload File</Label>
-                    <input
+                    <Input
                         type="file"
                         onChange={(e) =>
                             handleFileChange(e.target.files?.[0] || null)

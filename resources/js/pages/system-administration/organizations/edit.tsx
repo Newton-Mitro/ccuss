@@ -399,7 +399,7 @@ function EditOrganization() {
                                 </div>
 
                                 {/* Hidden Input */}
-                                <input
+                                <Input
                                     id="photoInput"
                                     type="file"
                                     accept="image/*"

@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import {
     ResourcePageHeader,
     StatusBadge,
@@ -698,7 +699,7 @@ export default function ChequePaymentReview() {
                                                     : 'hover:bg-muted/40'
                                             }`}
                                         >
-                                            <input
+                                            <Input
                                                 type="checkbox"
                                                 checked={data.details_verified}
                                                 onChange={(event) =>
@@ -734,7 +735,7 @@ export default function ChequePaymentReview() {
                                                     : 'hover:bg-muted/40'
                                             }`}
                                         >
-                                            <input
+                                            <Input
                                                 type="checkbox"
                                                 checked={data.signature_match}
                                                 onChange={(event) =>

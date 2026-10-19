@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import InputError from "../input-error";
+import { Input } from "./input";
 
 interface Option {
   value: string;
@@ -174,7 +175,7 @@ const Select: React.FC<SelectSearchProps> = ({
           className="z-[100] rounded-md border border-border bg-card p-1"
         >
           {/* Search */}
-          <input
+          <Input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

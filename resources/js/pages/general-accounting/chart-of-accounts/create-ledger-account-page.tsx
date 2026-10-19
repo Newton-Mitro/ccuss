@@ -160,7 +160,7 @@ export default function Create({ accountGroups = [], parents = [] }: any) {
 
                         <div className="mt-3 grid gap-3 md:grid-cols-2">
                             <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={data.is_control_account}
                                     onChange={(e) =>
@@ -173,7 +173,7 @@ export default function Create({ accountGroups = [], parents = [] }: any) {
                                 <span>Control account</span>
                             </label>
                             <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={data.is_reconcilable}
                                     onChange={(e) =>
@@ -186,7 +186,7 @@ export default function Create({ accountGroups = [], parents = [] }: any) {
                                 <span>Reconcilable</span>
                             </label>
                             <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={data.is_system}
                                     onChange={(e) =>
@@ -196,7 +196,7 @@ export default function Create({ accountGroups = [], parents = [] }: any) {
                                 <span>System account</span>
                             </label>
                             <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={data.status}
                                     onChange={(e) =>

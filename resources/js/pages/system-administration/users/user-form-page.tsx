@@ -170,7 +170,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                         key={org.id}
                                         className="flex items-center gap-2 rounded-md border p-2 text-sm hover:bg-accent/40"
                                     >
-                                        <input
+                                        <Input
                                             type="checkbox"
                                             checked={
                                                 Array.isArray(
@@ -301,7 +301,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                             </div>
 
                             {/* Input */}
-                            <input
+                            <Input
                                 type="file"
                                 accept="image/*"
                                 onChange={handlePhotoChange}
@@ -325,7 +325,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                     className="flex items-center gap-3 rounded-md border p-2 hover:bg-accent/30"
                                 >
                                     {/* Checkbox */}
-                                    <input
+                                    <Input
                                         type="checkbox"
                                         value={role.id}
                                         checked={isChecked}

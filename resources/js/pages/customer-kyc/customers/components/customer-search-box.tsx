@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
 import { Search } from 'lucide-react';
@@ -79,7 +80,7 @@ export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
             {/* INPUT + SEARCH BUTTON */}
             <div className="relative w-full">
                 {label && <Label>{label}</Label>}
-                <input
+                <Input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}

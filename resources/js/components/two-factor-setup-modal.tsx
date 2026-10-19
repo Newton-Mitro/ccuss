@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import {
@@ -107,11 +108,12 @@ function TwoFactorSetupStep({
                                 </div>
                             ) : (
                                 <>
-                                    <input
+                                    <Input
                                         type="text"
                                         readOnly
                                         value={manualSetupKey}
-                                        className="h-full w-full bg-background p-3 text-foreground outline-none"
+                                        wrapperClassName="min-w-0 flex-1"
+                                        className="h-full w-full rounded-none border-0 bg-background p-3 text-foreground outline-none focus-visible:ring-0"
                                     />
                                     <button
                                         onClick={() => copy(manualSetupKey)}

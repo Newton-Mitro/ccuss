@@ -199,7 +199,7 @@ export default function PartyForm({ party }: PartyFormProps) {
                             htmlFor="status"
                             className="flex cursor-pointer items-center gap-2 text-sm"
                         >
-                            <input
+                            <Input
                                 id="status"
                                 type="checkbox"
                                 checked={data.status}

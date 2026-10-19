@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import type { Customer } from '@/types/customer_kyc_module';
 import axios from 'axios';
 import { Search, WalletCards, X } from 'lucide-react';
@@ -106,7 +107,7 @@ export function FinancialAccountSearchInput({
     return (
         <div className="relative w-full" ref={containerRef}>
             <div className="relative">
-                <input
+                <Input
                     type="text"
                     value={query}
                     onChange={(event) => {

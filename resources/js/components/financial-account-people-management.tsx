@@ -501,7 +501,7 @@ export default function FinancialAccountPeopleManagement({
                         </div>
                     </div>
                     <label className="flex items-center gap-2 text-sm">
-                        <input
+                        <Input
                             type="checkbox"
                             checked={authorizedPersonForm.data.is_active}
                             onChange={(event) =>
@@ -703,7 +703,7 @@ export default function FinancialAccountPeopleManagement({
                             </div>
                         </div>
                         <label className="flex items-center gap-2 text-sm">
-                            <input
+                            <Input
                                 type="checkbox"
                                 checked={nomineeForm.data.is_primary}
                                 onChange={(event) =>

@@ -121,7 +121,7 @@ export default function AccountGroupForm({ accountGroup, parents = [] }: any) {
                         <InputError message={errors.parent_id} />
                     </div>
                     <label className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/35 px-3 py-2 text-sm text-muted-foreground">
-                        <input
+                        <Input
                             type="checkbox"
                             className="h-4 w-4 accent-primary"
                             checked={data.status}

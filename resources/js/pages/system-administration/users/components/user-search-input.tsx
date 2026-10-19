@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -72,7 +73,7 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
             {label && <Label className="text-xs">{label}</Label>}
 
             <div className="relative">
-                <input
+                <Input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}

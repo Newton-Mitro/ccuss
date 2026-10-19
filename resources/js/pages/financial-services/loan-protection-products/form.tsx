@@ -140,7 +140,7 @@ export default function LoanProtectionProductForm() {
                         </div>
 
                         <label className="flex items-center gap-2 text-sm sm:col-span-2">
-                            <input
+                            <Input
                                 type="checkbox"
                                 checked={data.status}
                                 onChange={(event) =>

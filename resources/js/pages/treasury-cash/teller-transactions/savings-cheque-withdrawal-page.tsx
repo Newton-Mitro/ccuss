@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { appSwal } from '@/lib/appSwal';
 import {
     FinancialAccountSearchInput,
@@ -752,7 +753,7 @@ export default function SavingsChequeWithdrawalPage() {
                                     >
                                         Note
                                     </label>
-                                    <input
+                                    <Input
                                         id="note"
                                         type="text"
                                         className="h-9 w-full rounded-md border bg-background px-3 text-sm"

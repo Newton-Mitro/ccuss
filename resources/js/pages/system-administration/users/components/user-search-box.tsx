@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { formatDateTime } from '@/lib/date_util';
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
@@ -81,7 +82,7 @@ export const UserSearchBox: React.FC<UserSearchBoxProps> = ({
             {/* INPUT + SEARCH BUTTON */}
             <div className="relative w-full">
                 {label && <Label>{label}</Label>}
-                <input
+                <Input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}

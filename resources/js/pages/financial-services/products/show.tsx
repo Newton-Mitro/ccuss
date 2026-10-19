@@ -236,7 +236,7 @@ export default function FinancialProductShow() {
                         </div>
                         <div className="flex items-center justify-between gap-2">
                             <label className="flex items-center gap-2 text-sm">
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={data.status}
                                     onChange={(event) =>

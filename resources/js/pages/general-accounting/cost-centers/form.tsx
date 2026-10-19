@@ -100,7 +100,7 @@ export default function CostCenterForm({
                         <InputError message={errors.parent_id} />
                     </div>
                     <label className="flex items-center gap-2">
-                        <input
+                        <Input
                             type="checkbox"
                             checked={data.status}
                             onChange={(event) =>

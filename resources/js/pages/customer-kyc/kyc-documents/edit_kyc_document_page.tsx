@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CheckCheck, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -104,7 +105,7 @@ export default function EditKycDocument() {
 
                     <div>
                         <Label>Alt Text</Label>
-                        <input
+                        <Input
                             value={data.alt_text}
                             onChange={(event) =>
                                 setData('alt_text', event.target.value)
@@ -124,7 +125,7 @@ export default function EditKycDocument() {
 
                     <div>
                         <Label>Replace File</Label>
-                        <input
+                        <Input
                             type="file"
                             accept="image/*,.pdf"
                             onChange={(event) =>

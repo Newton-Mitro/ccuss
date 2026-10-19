@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/input";
 import { JobHistory } from '../types';
 import DetailInput from './detail-input';
 import RepeatableRow from './repeatable-row';
@@ -91,7 +92,7 @@ export default function JobHistorySection({ rows, onChange }: Props) {
                             onChange={(v) => update(index, 'end_date', v)}
                         />
                         <label className="flex min-h-9 items-center gap-2 text-sm sm:col-span-2 lg:col-span-3">
-                            <input
+                            <Input
                                 type="checkbox"
                                 className="size-4 rounded border-input accent-primary"
                                 checked={row.is_current}
