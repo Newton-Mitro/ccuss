@@ -38,6 +38,9 @@ class CostCenterController extends Controller
 
         return Inertia::render('general-accounting/cost-centers/index', [
             'costCenters' => $costCenters,
+            'parents' => $this->organizationQuery($request)
+                ->orderBy('code')
+                ->get(['id', 'code', 'name']),
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }

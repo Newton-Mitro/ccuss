@@ -1,79 +1,67 @@
+import DataTablePagination from '@/components/data-table-pagination';
 import {
+    ResourceEmptyState,
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeftRight, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-
-interface LedgerAccount {
-    id: number;
-    code: string;
-    name: string;
-    is_control_account: boolean;
-    is_cash_account: boolean;
-}
-
-interface Mapping {
-    id: number;
-    source_type: string;
-    source_code: string;
-    transaction_type: string;
-    status: boolean;
-    debit_account: LedgerAccount;
-    credit_account: LedgerAccount;
-}
+import {
+    MappingDetailsDialog,
+    MappingFormDialog,
+    type TreasuryGlLedgerAccount,
+    type TreasuryGlMapping,
+} from './mapping-dialog';
 
 interface Props extends SharedData {
-    mappings: Mapping[];
-    accounts: LedgerAccount[];
+    mappings: {
+        data: TreasuryGlMapping[];
+        links: { url: string | null; label: string; active: boolean }[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    accounts: TreasuryGlLedgerAccount[];
     sourceTypes: string[];
+    filters: { search?: string; per_page?: string; page?: string };
 }
 
-const transactionTypes: Record<string, string[]> = {
-    PETTY_CASH_TRANSACTION: [
-        'FUNDING',
-        'EXPENSE',
-        'REPLENISHMENT',
-        'RETURN',
-        'ADJUSTMENT',
-    ],
-    CASH_LOCATION: ['DEPOSIT', 'WITHDRAWAL'],
-};
-
 export default function TreasuryGlMappingsPage() {
-    const { mappings, accounts, sourceTypes } = usePage<Props>().props;
-    const { data, setData, post, processing, errors, reset } = useForm({
-        source_type: sourceTypes[0] ?? 'BANK_ACCOUNT',
-        source_code: 'DEFAULT',
-        transaction_type: 'DEPOSIT',
-        debit_account_id: '',
-        credit_account_id: '',
+    const { mappings, accounts, sourceTypes, filters } = usePage<Props>().props;
+    const { data, setData, get } = useForm({
+        search: filters.search ?? '',
+        per_page: Number(filters.per_page) || 18,
+        page: Number(filters.page) || 1,
     });
+    const [formOpen, setFormOpen] = useState(false);
+    const [editingMapping, setEditingMapping] =
+        useState<TreasuryGlMapping | null>(null);
+    const [viewingMapping, setViewingMapping] =
+        useState<TreasuryGlMapping | null>(null);
 
     useFlashToastHandler();
 
-    const save = (event: React.FormEvent) => {
-        event.preventDefault();
-        post(route('treasury-gl-mappings.store'), {
-            preserveScroll: true,
-            onSuccess: () =>
-                reset(
-                    'transaction_type',
-                    'debit_account_id',
-                    'credit_account_id',
-                ),
-        });
-    };
+    useEffect(() => {
+        const delay = setTimeout(() => {
+            get(route('treasury-gl-mappings.index'), {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+        }, 400);
 
-    const remove = (mapping: Mapping) => {
+        return () => clearTimeout(delay);
+    }, [data.search, data.per_page, data.page]);
+
+    const remove = (mapping: TreasuryGlMapping) => {
         router.delete(route('treasury-gl-mappings.destroy', mapping.id), {
             preserveScroll: true,
         });
@@ -87,20 +75,6 @@ export default function TreasuryGlMappingsPage() {
         },
     ];
 
-    const accountOptions = [
-        { value: '', label: 'Select GL account' },
-        ...accounts.map((account) => ({
-            value: String(account.id),
-            label: `${account.code} - ${account.name}${account.is_control_account && account.is_cash_account ? ' · Cash control' : account.is_cash_account ? ' · Cash' : ''}`,
-        })),
-    ];
-    const cashControlSide =
-        data.source_type === 'CASH_LOCATION'
-            ? data.transaction_type === 'DEPOSIT'
-                ? 'debit'
-                : 'credit'
-            : null;
-
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Treasury GL Mappings" />
@@ -109,242 +83,182 @@ export default function TreasuryGlMappingsPage() {
                     title="Treasury GL Mappings"
                     description="Map Treasury transaction categories to balanced General Ledger entries."
                     action={
-                        <Button asChild variant="outline" size="sm">
-                            <Link href={route('general-accounting.dashboard')}>
-                                <ArrowLeftRight className="mr-1 h-4 w-4" />
-                                Accounting
-                            </Link>
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    setEditingMapping(null);
+                                    setFormOpen(true);
+                                }}
+                                disabled={accounts.length < 2}
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add mapping
+                            </Button>
+                            <Button asChild variant="outline" size="sm">
+                                <Link
+                                    href={route('general-accounting.dashboard')}
+                                >
+                                    <ArrowLeftRight className="mr-1 h-4 w-4" />
+                                    Accounting
+                                </Link>
+                            </Button>
+                        </div>
                     }
                 />
 
-                <form
-                    onSubmit={save}
-                    className="grid gap-3 rounded-md border bg-card p-4 md:grid-cols-6 md:items-end"
-                >
-                    <div>
-                        <Label htmlFor="source_type">Source type</Label>
-                        <Select
-                            value={data.source_type}
-                            onChange={(value) => {
-                                setData('source_type', value);
-                                if (transactionTypes[value]) {
-                                    setData(
-                                        'transaction_type',
-                                        transactionTypes[value][0],
-                                    );
-                                }
-                            }}
-                            options={sourceTypes.map((type) => ({
-                                value: type,
-                                label: type.replaceAll('_', ' '),
-                            }))}
-                        />
-                        {errors.source_type && (
-                            <p className="mt-1 text-xs text-destructive">
-                                {errors.source_type}
-                            </p>
-                        )}
-                    </div>
-                    <div>
-                        <Label htmlFor="source_code">Source code</Label>
-                        <Input
-                            id="source_code"
-                            value={data.source_code}
-                            onChange={(event) =>
-                                setData('source_code', event.target.value)
-                            }
-                            placeholder="DEFAULT, TELLER, or VAULT"
-                            required
-                        />
-                        {errors.source_code && (
-                            <p className="mt-1 text-xs text-destructive">
-                                {errors.source_code}
-                            </p>
-                        )}
-                    </div>
-                    <div>
-                        <Label htmlFor="transaction_type">
-                            Transaction type
-                        </Label>
-                        {transactionTypes[data.source_type] ? (
-                            <Select
-                                value={data.transaction_type}
-                                onChange={(value) =>
-                                    setData('transaction_type', value)
-                                }
-                                options={transactionTypes[data.source_type].map(
-                                    (type) => ({
-                                        value: type,
-                                        label: type.replaceAll('_', ' '),
-                                    }),
-                                )}
-                            />
-                        ) : (
-                            <Input
-                                id="transaction_type"
-                                value={data.transaction_type}
-                                onChange={(event) =>
-                                    setData(
-                                        'transaction_type',
-                                        event.target.value.toUpperCase(),
-                                    )
-                                }
-                                placeholder="Transaction type"
-                                required
-                            />
-                        )}
-                        {errors.transaction_type && (
-                            <p className="mt-1 text-xs text-destructive">
-                                {errors.transaction_type}
-                            </p>
-                        )}
-                    </div>
-                    <div>
-                        <Label htmlFor="debit_account_id">
-                            {cashControlSide === 'debit'
-                                ? 'Debit account (Cash on Hand control)'
-                                : 'Debit account'}
-                        </Label>
-                        <Select
-                            value={data.debit_account_id}
-                            onChange={(value) =>
-                                setData('debit_account_id', value)
-                            }
-                            options={accountOptions}
-                        />
-                        {errors.debit_account_id && (
-                            <p className="mt-1 text-xs text-destructive">
-                                {errors.debit_account_id}
-                            </p>
-                        )}
-                    </div>
-                    <div>
-                        <Label htmlFor="credit_account_id">
-                            {cashControlSide === 'credit'
-                                ? 'Credit account (Cash on Hand control)'
-                                : 'Credit account'}
-                        </Label>
-                        <Select
-                            value={data.credit_account_id}
-                            onChange={(value) =>
-                                setData('credit_account_id', value)
-                            }
-                            options={accountOptions}
-                        />
-                        {errors.credit_account_id && (
-                            <p className="mt-1 text-xs text-destructive">
-                                {errors.credit_account_id}
-                            </p>
-                        )}
-                    </div>
-                    {cashControlSide && (
-                        <p className="text-xs text-muted-foreground md:col-span-6">
-                            The cash-side account must be marked as both a cash
-                            account and a control account in the chart of
-                            accounts.
-                        </p>
-                    )}
-                    <Button
-                        type="submit"
-                        disabled={processing || accounts.length < 2}
-                    >
-                        Save mapping
-                    </Button>
-                </form>
+                <div className="w-full sm:w-60">
+                    <Input
+                        className="bg-card"
+                        placeholder="Search mappings..."
+                        value={data.search}
+                        onChange={(event) => {
+                            setData('search', event.target.value);
+                            setData('page', 1);
+                        }}
+                    />
+                </div>
 
-                <div className="overflow-x-auto rounded-md border bg-card">
-                    <table className="w-full min-w-225 text-sm">
-                        <thead className="border-b bg-muted/40 text-left text-xs text-muted-foreground">
-                            <tr>
-                                <th className="px-4 py-3 font-medium">
-                                    Source
-                                </th>
-                                <th className="px-4 py-3 font-medium">
-                                    Transaction
-                                </th>
-                                <th className="px-4 py-3 font-medium">Debit</th>
-                                <th className="px-4 py-3 font-medium">
-                                    Credit
-                                </th>
-                                <th className="px-4 py-3 font-medium">
-                                    Status
-                                </th>
-                                <th className="px-4 py-3 text-right font-medium">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {mappings.map((mapping) => (
-                                <tr
-                                    key={mapping.id}
-                                    className="border-b last:border-0"
-                                >
-                                    <td className="px-4 py-3">
-                                        <div>
-                                            {mapping.source_type.replaceAll(
+                {mappings.data.length === 0 ? (
+                    <ResourceEmptyState
+                        title="No Treasury GL mappings found"
+                        description="Try adjusting your search or add a mapping."
+                    />
+                ) : (
+                    <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                        <table className="w-full min-w-225 border-collapse text-sm">
+                            <thead className="sticky top-0 z-10 bg-muted text-left text-sm text-muted-foreground">
+                                <tr>
+                                    <th className="px-4 py-3 font-medium">
+                                        Source
+                                    </th>
+                                    <th className="px-4 py-3 font-medium">
+                                        Transaction
+                                    </th>
+                                    <th className="px-4 py-3 font-medium">
+                                        Debit
+                                    </th>
+                                    <th className="px-4 py-3 font-medium">
+                                        Credit
+                                    </th>
+                                    <th className="px-4 py-3 font-medium">
+                                        Status
+                                    </th>
+                                    <th className="px-4 py-3 text-right font-medium">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {mappings.data.map((mapping) => (
+                                    <tr
+                                        key={mapping.id}
+                                        className="border-b last:border-0"
+                                    >
+                                        <td className="px-4 py-3">
+                                            <div>
+                                                {mapping.source_type.replaceAll(
+                                                    '_',
+                                                    ' ',
+                                                )}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {mapping.source_code}
+                                            </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {mapping.transaction_type.replaceAll(
                                                 '_',
                                                 ' ',
                                             )}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {mapping.source_code}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {mapping.transaction_type.replaceAll(
-                                            '_',
-                                            ' ',
-                                        )}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {mapping.debit_account.code} -{' '}
-                                        {mapping.debit_account.name}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        {mapping.credit_account.code} -{' '}
-                                        {mapping.credit_account.name}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <StatusBadge
-                                            tone={
-                                                mapping.status
-                                                    ? 'success'
-                                                    : 'danger'
-                                            }
-                                        >
-                                            {mapping.status
-                                                ? 'Active'
-                                                : 'Inactive'}
-                                        </StatusBadge>
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            title="Delete mapping"
-                                            onClick={() => remove(mapping)}
-                                        >
-                                            <Trash2 className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {mappings.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="px-4 py-8 text-center text-muted-foreground"
-                                    >
-                                        No Treasury GL mappings configured.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {mapping.debit_account.code} -{' '}
+                                            {mapping.debit_account.name}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {mapping.credit_account.code} -{' '}
+                                            {mapping.credit_account.name}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <StatusBadge
+                                                tone={
+                                                    mapping.status
+                                                        ? 'success'
+                                                        : 'danger'
+                                                }
+                                            >
+                                                {mapping.status
+                                                    ? 'Active'
+                                                    : 'Inactive'}
+                                            </StatusBadge>
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                title="View mapping"
+                                                aria-label="View mapping"
+                                                onClick={() =>
+                                                    setViewingMapping(mapping)
+                                                }
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                title="Edit mapping"
+                                                aria-label="Edit mapping"
+                                                onClick={() => {
+                                                    setEditingMapping(mapping);
+                                                    setFormOpen(true);
+                                                }}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                title="Delete mapping"
+                                                aria-label="Delete mapping"
+                                                onClick={() => remove(mapping)}
+                                            >
+                                                <Trash2 className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+                {mappings.data.length > 0 && (
+                    <DataTablePagination
+                        perPage={mappings.per_page}
+                        onPerPageChange={(value) => {
+                            setData('per_page', value);
+                            setData('page', 1);
+                        }}
+                        links={mappings.links}
+                    />
+                )}
+                <MappingFormDialog
+                    open={formOpen}
+                    onOpenChange={setFormOpen}
+                    sourceTypes={sourceTypes}
+                    accounts={accounts}
+                    mapping={editingMapping}
+                />
+                <MappingDetailsDialog
+                    mapping={viewingMapping}
+                    onOpenChange={(open) => {
+                        if (!open) setViewingMapping(null);
+                    }}
+                />
             </div>
         </CustomAuthLayout>
     );

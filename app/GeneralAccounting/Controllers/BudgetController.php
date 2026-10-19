@@ -34,7 +34,7 @@ class BudgetController extends Controller
     public function index(Request $request): Response
     {
         $budgets = $this->organizationQuery($request)
-            ->with('fiscalYear')
+            ->with(['fiscalYear', 'entries'])
             ->withCount('entries')
             ->withSum('entries', 'amount')
             ->orderByDesc('id')
@@ -43,6 +43,7 @@ class BudgetController extends Controller
 
         return Inertia::render('general-accounting/budgets/index', [
             'budgets' => $budgets,
+            ...$this->formData($request),
             'filters' => $request->only(['per_page', 'page']),
         ]);
     }

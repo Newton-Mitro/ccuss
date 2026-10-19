@@ -12,25 +12,37 @@ import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Check, Eye, Lock, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
+import BudgetDialog, { type BudgetDialogItem } from './budget-dialog';
 
-interface Budget {
-    id: number;
-    name: string;
-    status: 'DRAFT' | 'ACTIVE' | 'CLOSED';
+interface Budget extends BudgetDialogItem {
     entries_count: number;
     entries_sum_amount: string;
     fiscal_year: { name: string };
 }
 
 export default function BudgetIndex() {
-    const { budgets } = usePage().props as unknown as {
-        budgets: {
-            data: Budget[];
-            links: { url: string | null; label: string; active: boolean }[];
-            per_page?: number;
+    const { budgets, fiscalYears, fiscalPeriods, accounts, costCenters } =
+        usePage().props as unknown as {
+            budgets: {
+                data: Budget[];
+                links: { url: string | null; label: string; active: boolean }[];
+                per_page?: number;
+            };
+            fiscalYears: { id: number; name: string }[];
+            fiscalPeriods: {
+                id: number;
+                name: string;
+                fiscal_year_id: number;
+            }[];
+            accounts: { id: number; code: string; name: string }[];
+            costCenters: { id: number; code: string; name: string }[];
         };
-    };
+    const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
+    const [editingBudget, setEditingBudget] = useState<BudgetDialogItem | null>(
+        null,
+    );
     useFlashToastHandler();
 
     const confirmAction = (title: string, url: string, text: string) => {
@@ -65,12 +77,15 @@ export default function BudgetIndex() {
                                     Budget vs Actual
                                 </Button>
                             </Link>
-                            <Link href={route('budgets.create')}>
-                                <Button size="sm">
-                                    <Plus className="mr-1 h-4 w-4" /> Create
-                                    Budget
-                                </Button>
-                            </Link>
+                            <Button
+                                size="sm"
+                                onClick={() => {
+                                    setEditingBudget(null);
+                                    setBudgetDialogOpen(true);
+                                }}
+                            >
+                                <Plus className="mr-1 h-4 w-4" /> Create Budget
+                            </Button>
                         </div>
                     }
                 />
@@ -154,15 +169,23 @@ export default function BudgetIndex() {
                                                 </Link>
                                                 {budget.status === 'DRAFT' && (
                                                     <>
-                                                        <Link
-                                                            href={route(
-                                                                'budgets.edit',
-                                                                budget.id,
-                                                            )}
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
                                                             title="Edit budget"
+                                                            aria-label="Edit budget"
+                                                            onClick={() => {
+                                                                setEditingBudget(
+                                                                    budget,
+                                                                );
+                                                                setBudgetDialogOpen(
+                                                                    true,
+                                                                );
+                                                            }}
                                                         >
                                                             <Pencil className="h-4 w-4" />
-                                                        </Link>
+                                                        </Button>
                                                         <button
                                                             title="Activate budget"
                                                             onClick={() =>
@@ -236,6 +259,15 @@ export default function BudgetIndex() {
                             { preserveScroll: true, preserveState: true },
                         )
                     }
+                />
+                <BudgetDialog
+                    open={budgetDialogOpen}
+                    onOpenChange={setBudgetDialogOpen}
+                    budget={editingBudget}
+                    fiscalYears={fiscalYears}
+                    fiscalPeriods={fiscalPeriods}
+                    accounts={accounts}
+                    costCenters={costCenters}
                 />
             </div>
         </CustomAuthLayout>

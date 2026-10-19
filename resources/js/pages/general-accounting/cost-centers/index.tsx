@@ -8,20 +8,23 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Head, router, usePage } from '@inertiajs/react';
+import {
+    ChevronDown,
+    ChevronRight,
+    Eye,
+    Pencil,
+    Plus,
+    Trash2,
+} from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
-
-interface CostCenter {
-    id: number;
-    parent_id?: number | null;
-    code: string;
-    name: string;
-    level: number;
-    status: boolean;
-    parent?: { code: string; name: string } | null;
-}
+import {
+    CostCenterDetailsDialog,
+    CostCenterFormDialog,
+    type CostCenter,
+    type CostCenterParent,
+} from './cost-center-dialog';
 
 interface Props extends SharedData {
     costCenters: {
@@ -29,13 +32,19 @@ interface Props extends SharedData {
         links: { url: string | null; label: string; active: boolean }[];
         per_page?: number;
     };
+    parents: CostCenterParent[];
     filters: { search?: string; per_page?: string; page?: string };
 }
 
 export default function CostCenterIndex() {
-    const { costCenters, filters } = usePage<Props>().props;
+    const { costCenters, filters, parents } = usePage<Props>().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [expanded, setExpanded] = useState<number[]>([]);
+    const [costCenterDialogOpen, setCostCenterDialogOpen] = useState(false);
+    const [editingCostCenter, setEditingCostCenter] =
+        useState<CostCenter | null>(null);
+    const [viewingCostCenter, setViewingCostCenter] =
+        useState<CostCenter | null>(null);
     useFlashToastHandler();
 
     const childrenByParent = useMemo(() => {
@@ -141,19 +150,39 @@ export default function CostCenterIndex() {
                             </StatusBadge>
                         </div>
                         <div className="flex items-center justify-end gap-1.5">
-                            <Link
-                                href={route('cost-centers.edit', costCenter.id)}
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                title="View cost center"
+                                aria-label="View cost center"
+                                onClick={() => setViewingCostCenter(costCenter)}
+                            >
+                                <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
                                 title="Edit cost center"
+                                aria-label="Edit cost center"
+                                onClick={() => {
+                                    setEditingCostCenter(costCenter);
+                                    setCostCenterDialogOpen(true);
+                                }}
                             >
                                 <Pencil className="h-4 w-4" />
-                            </Link>
-                            <button
+                            </Button>
+                            <Button
                                 type="button"
-                                onClick={() => destroy(costCenter)}
+                                variant="ghost"
+                                size="icon"
                                 title="Delete cost center"
+                                aria-label="Delete cost center"
+                                onClick={() => destroy(costCenter)}
                             >
                                 <Trash2 className="h-4 w-4 text-destructive" />
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -212,11 +241,15 @@ export default function CostCenterIndex() {
                     title="Cost Centers"
                     description="Track expenses by department, branch, project, or activity."
                     action={
-                        <Button asChild size="sm">
-                            <Link href={route('cost-centers.create')}>
-                                <Plus className="mr-1 h-4 w-4" /> Add Cost
-                                Center
-                            </Link>
+                        <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => {
+                                setEditingCostCenter(null);
+                                setCostCenterDialogOpen(true);
+                            }}
+                        >
+                            <Plus className="mr-1 h-4 w-4" /> Add Cost Center
                         </Button>
                     }
                 />
@@ -242,12 +275,18 @@ export default function CostCenterIndex() {
                             Try adjusting your search or create a new cost
                             center
                         </p>
-                        <Link
-                            href={route('cost-centers.create')}
-                            className="mt-4 rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
+                        <Button
+                            type="button"
+                            size="sm"
+                            className="mt-4"
+                            onClick={() => {
+                                setEditingCostCenter(null);
+                                setCostCenterDialogOpen(true);
+                            }}
                         >
+                            <Plus className="mr-1 h-4 w-4" />
                             Create Cost Center
-                        </Link>
+                        </Button>
                     </div>
                 ) : (
                     <>
@@ -295,28 +334,40 @@ export default function CostCenterIndex() {
                                     <div className="flex justify-end gap-2">
                                         <Button
                                             type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            asChild
+                                            variant="ghost"
+                                            size="icon"
+                                            title="View cost center"
+                                            aria-label="View cost center"
+                                            onClick={() =>
+                                                setViewingCostCenter(costCenter)
+                                            }
                                         >
-                                            <Link
-                                                href={route(
-                                                    'cost-centers.edit',
-                                                    costCenter.id,
-                                                )}
-                                            >
-                                                <Pencil className="h-4 w-4" />{' '}
-                                                Edit
-                                            </Link>
+                                            <Eye className="h-4 w-4" />
                                         </Button>
                                         <Button
                                             type="button"
-                                            variant="outline"
-                                            size="sm"
+                                            variant="ghost"
+                                            size="icon"
+                                            title="Edit cost center"
+                                            aria-label="Edit cost center"
+                                            onClick={() => {
+                                                setEditingCostCenter(
+                                                    costCenter,
+                                                );
+                                                setCostCenterDialogOpen(true);
+                                            }}
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            title="Delete cost center"
+                                            aria-label="Delete cost center"
                                             onClick={() => destroy(costCenter)}
                                         >
-                                            <Trash2 className="h-4 w-4 text-destructive" />{' '}
-                                            Delete
+                                            <Trash2 className="h-4 w-4 text-destructive" />
                                         </Button>
                                     </div>
                                 </div>
@@ -324,6 +375,18 @@ export default function CostCenterIndex() {
                         </div>
                     </>
                 )}
+                <CostCenterFormDialog
+                    open={costCenterDialogOpen}
+                    onOpenChange={setCostCenterDialogOpen}
+                    parents={parents}
+                    costCenter={editingCostCenter}
+                />
+                <CostCenterDetailsDialog
+                    costCenter={viewingCostCenter}
+                    onOpenChange={(open) => {
+                        if (!open) setViewingCostCenter(null);
+                    }}
+                />
             </div>
         </CustomAuthLayout>
     );

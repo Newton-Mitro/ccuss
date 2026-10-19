@@ -55,6 +55,7 @@ class PeriodEndController extends Controller
     private function periodActionPage(Request $request, string $operation): Response
     {
         $organizationId = $request->attributes->get('active_organization')->id;
+        $search = trim($request->string('search')->toString());
 
         return Inertia::render('general-accounting/period-end/period-action', [
             'operation' => $operation,
@@ -62,8 +63,17 @@ class PeriodEndController extends Controller
                 ->whereHas('fiscalYear', fn($query) => $query->where('organization_id', $organizationId))
                 ->with('fiscalYear:id,name')
                 ->withCount(['vouchers as draft_vouchers_count' => fn($query) => $query->where('status', 'DRAFT')])
+                ->where('status', $operation === 'close' ? 'OPEN' : 'CLOSED')
+                ->when($search !== '', function ($query) use ($search) {
+                    $query->where(function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('fiscalYear', fn($query) => $query->where('name', 'like', "%{$search}%"));
+                    });
+                })
                 ->orderByDesc('start_date')
-                ->get(),
+                ->paginate($request->integer('per_page', 18))
+                ->withQueryString(),
+            'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
 }

@@ -30,6 +30,7 @@ export interface AccountGroupSummary {
 export interface GeneralLedgerAccountsPageProps extends SharedData {
     glAccounts: AccountingPagination<GeneralLedgerAccount>;
     accountGroups: AccountGroupSummary[] | { data?: AccountGroupSummary[] };
+    parents: Pick<GeneralLedgerAccount, 'id' | 'code' | 'name'>[];
     filters: AccountingFilters;
     fiscalYears: FiscalYear[];
     fiscalPeriods: FiscalPeriod[];

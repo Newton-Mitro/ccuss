@@ -33,6 +33,22 @@ class TreasuryGlMappingController extends Controller
             'mappings' => TreasuryGlMapping::query()
                 ->where('organization_id', $organizationId)
                 ->whereIn('source_type', self::SOURCE_TYPES)
+                ->when($request->filled('search'), function ($query) use ($request): void {
+                    $search = $request->string('search')->trim();
+                    $query->where(function ($query) use ($search): void {
+                        $query->where('source_type', 'like', "%{$search}%")
+                            ->orWhere('source_code', 'like', "%{$search}%")
+                            ->orWhere('transaction_type', 'like', "%{$search}%")
+                            ->orWhereHas('debitAccount', function ($accountQuery) use ($search): void {
+                                $accountQuery->where('code', 'like', "%{$search}%")
+                                    ->orWhere('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('creditAccount', function ($accountQuery) use ($search): void {
+                                $accountQuery->where('code', 'like', "%{$search}%")
+                                    ->orWhere('name', 'like', "%{$search}%");
+                            });
+                    });
+                })
                 ->with([
                     'debitAccount:id,code,name,is_control_account,is_cash_account',
                     'creditAccount:id,code,name,is_control_account,is_cash_account',
@@ -40,23 +56,95 @@ class TreasuryGlMappingController extends Controller
                 ->orderBy('source_type')
                 ->orderBy('source_code')
                 ->orderBy('transaction_type')
-                ->get(),
+                ->paginate($request->integer('per_page', 18))
+                ->withQueryString(),
             'accounts' => LedgerAccount::query()
                 ->where('organization_id', $organizationId)
                 ->where('status', true)
                 ->orderBy('code')
                 ->get(['id', 'code', 'name', 'is_control_account', 'is_cash_account']),
             'sourceTypes' => self::SOURCE_TYPES,
+            'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $organizationId = $request->attributes->get('active_organization')->id;
+        $data = $this->validatedMappingData($request, $organizationId);
+
+        TreasuryGlMapping::query()->updateOrCreate(
+            [
+                'organization_id' => $organizationId,
+                'source_type' => $data['source_type'],
+                'source_code' => $data['source_code'],
+                'transaction_type' => $data['transaction_type'],
+            ],
+            [
+                'debit_account_id' => $data['debit_account_id'],
+                'credit_account_id' => $data['credit_account_id'],
+                'status' => true,
+            ],
+        );
+
+        return redirect()->route('treasury-gl-mappings.index')->with('success', 'Treasury GL mapping saved.');
+    }
+
+    public function update(Request $request, TreasuryGlMapping $mapping): RedirectResponse
+    {
+        $organizationId = $request->attributes->get('active_organization')->id;
+        $this->authorizeMapping($mapping, $organizationId);
+        $data = $this->validatedMappingData($request, $organizationId, $mapping);
+
+        $mapping->update([
+            ...$data,
+            'status' => $request->boolean('status', true),
+        ]);
+
+        return redirect()->route('treasury-gl-mappings.index')->with('success', 'Treasury GL mapping updated.');
+    }
+
+    public function destroy(Request $request, TreasuryGlMapping $mapping): RedirectResponse
+    {
+        $this->authorizeMapping(
+            $mapping,
+            $request->attributes->get('active_organization')->id,
+        );
+
+        $mapping->delete();
+
+        return redirect()->route('treasury-gl-mappings.index')->with('success', 'Treasury GL mapping deleted.');
+    }
+
+    private function validatedMappingData(
+        Request $request,
+        int $organizationId,
+        ?TreasuryGlMapping $mapping = null,
+    ): array {
+        $request->merge([
+            'source_code' => strtoupper(trim((string) $request->input('source_code'))),
+            'transaction_type' => strtoupper(trim((string) $request->input('transaction_type'))),
+        ]);
+
+        $transactionTypeRules = ['required', 'string', 'max:50'];
+        if ($mapping) {
+            $sourceType = $request->input('source_type');
+            $sourceCode = $request->input('source_code');
+            $transactionTypeRules[] = Rule::unique(
+                'gl_account_mappings',
+                'transaction_type',
+            )
+                ->where(fn ($query) => $query
+                    ->where('organization_id', $organizationId)
+                    ->where('source_type', $sourceType)
+                    ->where('source_code', $sourceCode))
+                ->ignore($mapping->id);
+        }
+
         $data = $request->validate([
             'source_type' => ['required', 'string', Rule::in(self::SOURCE_TYPES)],
             'source_code' => ['required', 'string', 'max:100'],
-            'transaction_type' => ['required', 'string', 'max:50'],
+            'transaction_type' => $transactionTypeRules,
             'debit_account_id' => [
                 'required',
                 'integer',
@@ -72,10 +160,8 @@ class TreasuryGlMappingController extends Controller
                     ->where('organization_id', $organizationId)
                     ->where('status', true)),
             ],
+            'status' => ['sometimes', 'boolean'],
         ]);
-
-        $data['source_code'] = strtoupper(trim($data['source_code']));
-        $data['transaction_type'] = strtoupper(trim($data['transaction_type']));
 
         if ($data['source_type'] === 'CASH_LOCATION') {
             if (! in_array($data['transaction_type'], ['DEPOSIT', 'WITHDRAWAL'], true)) {
@@ -106,33 +192,17 @@ class TreasuryGlMappingController extends Controller
             }
         }
 
-        TreasuryGlMapping::query()->updateOrCreate(
-            [
-                'organization_id' => $organizationId,
-                'source_type' => $data['source_type'],
-                'source_code' => $data['source_code'],
-                'transaction_type' => $data['transaction_type'],
-            ],
-            [
-                'debit_account_id' => $data['debit_account_id'],
-                'credit_account_id' => $data['credit_account_id'],
-                'status' => true,
-            ],
-        );
+        unset($data['status']);
 
-        return redirect()->route('treasury-gl-mappings.index')->with('success', 'Treasury GL mapping saved.');
+        return $data;
     }
 
-    public function destroy(Request $request, TreasuryGlMapping $mapping): RedirectResponse
+    private function authorizeMapping(TreasuryGlMapping $mapping, int $organizationId): void
     {
         abort_unless(
-            $mapping->organization_id === $request->attributes->get('active_organization')->id
-            && in_array($mapping->source_type, self::SOURCE_TYPES, true),
+            $mapping->organization_id === $organizationId
+                && in_array($mapping->source_type, self::SOURCE_TYPES, true),
             404,
         );
-
-        $mapping->delete();
-
-        return redirect()->route('treasury-gl-mappings.index')->with('success', 'Treasury GL mapping deleted.');
     }
 }

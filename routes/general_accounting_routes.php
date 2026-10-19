@@ -107,6 +107,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('treasury-gl-mappings.index');
     Route::post('/treasury-gl-mappings', [TreasuryGlMappingController::class, 'store'])
         ->name('treasury-gl-mappings.store');
+    Route::put('/treasury-gl-mappings/{mapping}', [TreasuryGlMappingController::class, 'update'])
+        ->name('treasury-gl-mappings.update');
     Route::delete('/treasury-gl-mappings/{mapping}', [TreasuryGlMappingController::class, 'destroy'])
         ->name('treasury-gl-mappings.destroy');
 
@@ -147,7 +149,6 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/opening-balances', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'store'])
         ->name('opening-balances.store');
 });
-
 
 
 

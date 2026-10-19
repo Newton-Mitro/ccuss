@@ -82,18 +82,6 @@ export default function CashDenominationsIndex() {
 
     const hasCountHistory = Boolean(editingDenomination?.count_lines_count);
 
-    const activeCount = denominations.filter(
-        (denomination) => denomination.is_active,
-    ).length;
-
-    const noteCount = denominations.filter(
-        (denomination) => denomination.type === 'NOTE',
-    ).length;
-
-    const coinCount = denominations.filter(
-        (denomination) => denomination.type === 'COIN',
-    ).length;
-
     const resetForm = () => {
         form.setData({
             preset: 'CUSTOM',
@@ -174,16 +162,16 @@ export default function CashDenominationsIndex() {
 
             <div className="w-full max-w-7xl space-y-5 pb-8 text-foreground">
                 {/* Page header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <ResourcePageHeader
                         title="Cash Denominations"
-                        description="Manage the notes and coins used in branch cash counts."
+                        description="Configure banknotes and coins used in branch cash counting and reconciliation."
                     />
 
                     {canCreate && (
                         <Button
                             onClick={openCreate}
-                            className="w-full shrink-0 gap-2 sm:w-auto"
+                            className="h-10 w-full shrink-0 gap-2 shadow-sm sm:w-auto"
                         >
                             <Plus className="size-4" />
                             Add denomination
@@ -191,57 +179,25 @@ export default function CashDenominationsIndex() {
                     )}
                 </div>
 
-                {/* Summary metrics */}
-                <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-                    <SummaryCard
-                        icon={Layers3}
-                        label="Total denominations"
-                        value={denominations.length}
-                        description="Configured entries"
-                    />
-
-                    <SummaryCard
-                        icon={CheckCircle2}
-                        label="Active"
-                        value={activeCount}
-                        description="Available for cash counts"
-                    />
-
-                    <SummaryCard
-                        icon={Banknote}
-                        label="Banknotes"
-                        value={noteCount}
-                        description="Configured note values"
-                    />
-
-                    <SummaryCard
-                        icon={Coins}
-                        label="Coins"
-                        value={coinCount}
-                        description="Configured coin values"
-                    />
-                </div>
-
-                {/* Denomination table */}
-                <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                {/* Denominations table */}
+                <section className="overflow-hidden rounded-xl border bg-card">
+                    <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                         <div className="flex items-center gap-3">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-muted/50">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border bg-muted/40">
                                 <Wallet className="size-5 text-muted-foreground" />
                             </div>
 
                             <div>
-                                <h2 className="text-sm font-semibold">
+                                <h2 className="text-sm font-semibold tracking-tight">
                                     Configured denominations
                                 </h2>
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                    Currency values available to your
-                                    organization.
+                                    Manage currency values and availability.
                                 </p>
                             </div>
                         </div>
 
-                        <span className="inline-flex w-fit items-center gap-2 rounded-full border bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                        <span className="inline-flex w-fit items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-xs font-medium text-muted-foreground">
                             <Layers3 className="size-3.5" />
                             {denominations.length} entries
                         </span>
@@ -249,7 +205,7 @@ export default function CashDenominationsIndex() {
 
                     {denominations.length > 0 ? (
                         <div className="overflow-x-auto">
-                            <table className="w-full min-w-[680px] text-sm">
+                            <table className="w-full min-w-[720px] text-sm">
                                 <thead className="bg-muted/40 text-xs text-muted-foreground">
                                     <tr className="border-b">
                                         <th className="px-5 py-3 text-left font-medium">
@@ -267,6 +223,7 @@ export default function CashDenominationsIndex() {
                                         <th className="px-4 py-3 text-left font-medium">
                                             Status
                                         </th>
+
                                         {canUpdate && (
                                             <th className="px-5 py-3 text-right font-medium">
                                                 Actions
@@ -275,29 +232,37 @@ export default function CashDenominationsIndex() {
                                     </tr>
                                 </thead>
 
-                                <tbody className="divide-y">
+                                <tbody className="divide-y divide-border/70">
                                     {denominations.map((denomination) => (
                                         <tr
                                             key={denomination.id}
-                                            className="group transition-colors hover:bg-muted/30"
+                                            className="transition-colors hover:bg-muted/30"
                                         >
                                             <td className="px-5 py-3.5">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background">
+                                                    <div
+                                                        className={`flex size-10 shrink-0 items-center justify-center rounded-xl border ${
+                                                            denomination.type ===
+                                                            'NOTE'
+                                                                ? 'bg-muted/40'
+                                                                : 'bg-background'
+                                                        }`}
+                                                    >
                                                         {denomination.type ===
                                                         'NOTE' ? (
-                                                            <Banknote className="size-4 text-muted-foreground" />
+                                                            <Banknote className="size-[18px] text-muted-foreground" />
                                                         ) : (
-                                                            <Coins className="size-4 text-muted-foreground" />
+                                                            <Coins className="size-[18px] text-muted-foreground" />
                                                         )}
                                                     </div>
 
                                                     <div className="min-w-0">
-                                                        <p className="font-medium">
+                                                        <p className="leading-5 font-medium">
                                                             {denomination.name ||
                                                                 `${denomination.value} ${denomination.currency}`}
                                                         </p>
-                                                        <p className="mt-0.5 text-xs text-muted-foreground">
+
+                                                        <p className="mt-1 text-xs text-muted-foreground">
                                                             {
                                                                 denomination.currency
                                                             }
@@ -312,43 +277,51 @@ export default function CashDenominationsIndex() {
                                             </td>
 
                                             <td className="px-4 py-3.5">
-                                                <span className="inline-flex items-center gap-1.5 rounded-md border bg-background px-2 py-1 text-xs font-medium">
+                                                <span className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-2.5 py-1.5 text-xs font-medium">
                                                     {denomination.type ===
                                                     'NOTE' ? (
                                                         <Banknote className="size-3.5 text-muted-foreground" />
                                                     ) : (
                                                         <Coins className="size-3.5 text-muted-foreground" />
                                                     )}
-                                                    {denomination.type}
+
+                                                    {denomination.type ===
+                                                    'NOTE'
+                                                        ? 'Banknote'
+                                                        : 'Coin'}
                                                 </span>
                                             </td>
 
                                             <td className="px-4 py-3.5 text-right">
-                                                <span className="font-semibold tabular-nums">
+                                                <div className="font-semibold tabular-nums">
                                                     {Number(
                                                         denomination.value,
                                                     ).toLocaleString('en-BD', {
                                                         minimumFractionDigits: 2,
                                                         maximumFractionDigits: 4,
                                                     })}
-                                                </span>
-                                                <span className="ml-1.5 text-xs text-muted-foreground">
+                                                </div>
+
+                                                <div className="mt-0.5 text-xs text-muted-foreground">
                                                     {denomination.currency}
-                                                </span>
+                                                </div>
                                             </td>
 
                                             <td className="px-4 py-3.5 text-center">
                                                 {denomination.count_lines_count >
                                                 0 ? (
-                                                    <span className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-xs font-medium">
+                                                    <span className="inline-flex items-center gap-1.5 rounded-lg border bg-muted/40 px-2.5 py-1.5 text-xs font-medium tabular-nums">
                                                         <FileClock className="size-3.5 text-muted-foreground" />
                                                         {
                                                             denomination.count_lines_count
                                                         }
+                                                        <span className="text-muted-foreground">
+                                                            records
+                                                        </span>
                                                     </span>
                                                 ) : (
                                                     <span className="text-xs text-muted-foreground">
-                                                        —
+                                                        No history
                                                     </span>
                                                 )}
                                             </td>
@@ -400,43 +373,42 @@ export default function CashDenominationsIndex() {
                                 No denominations configured
                             </h3>
 
-                            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                                Set up your currency notes and coins to start
-                                recording accurate cash counts.
+                            <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
+                                Configure banknotes and coins to start recording
+                                accurate branch cash counts.
                             </p>
 
-                            <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-                                {canCreate && (
-                                    <>
-                                        <Button
-                                            onClick={openCreate}
-                                            className="gap-2"
-                                        >
-                                            <Plus className="size-4" />
-                                            Add denomination
-                                        </Button>
+                            {canCreate && (
+                                <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                                    <Button
+                                        onClick={openCreate}
+                                        className="gap-2"
+                                    >
+                                        <Plus className="size-4" />
+                                        Add denomination
+                                    </Button>
 
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => {
-                                                resetForm();
-                                                form.setData(
-                                                    'preset',
-                                                    'BANGLADESH',
-                                                );
-                                                setDialogOpen(true);
-                                            }}
-                                            className="gap-2"
-                                        >
-                                            <RefreshCw className="size-4" />
-                                            Load Bangladesh preset
-                                        </Button>
-                                    </>
-                                )}
-                            </div>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            resetForm();
+                                            form.setData(
+                                                'preset',
+                                                'BANGLADESH',
+                                            );
+                                            setDialogOpen(true);
+                                        }}
+                                        className="gap-2"
+                                    >
+                                        <RefreshCw className="size-4" />
+                                        Load Bangladesh preset
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     )}
 
+                    {/* Table footer */}
                     <div className="flex flex-col gap-2 border-t bg-muted/20 px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-5">
                         <span>
                             Showing {denominations.length} denomination
@@ -444,8 +416,8 @@ export default function CashDenominationsIndex() {
                         </span>
 
                         <span className="flex items-center gap-1.5">
-                            <ShieldCheck className="size-3.5" />
-                            Changes follow cash count history restrictions.
+                            <ShieldCheck className="size-3.5 shrink-0" />
+                            Historical cash count restrictions are enforced.
                         </span>
                     </div>
                 </section>
@@ -461,30 +433,36 @@ export default function CashDenominationsIndex() {
                         }
                     }}
                 >
-                    <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
-                        <DialogHeader>
-                            <div className="mb-1 flex size-11 items-center justify-center rounded-xl border bg-muted/40">
-                                {editingId ? (
-                                    <Settings2 className="size-5 text-muted-foreground" />
-                                ) : (
-                                    <Banknote className="size-5 text-muted-foreground" />
-                                )}
-                            </div>
+                    <DialogContent className="max-h-[90dvh] overflow-y-auto p-0 sm:max-w-lg">
+                        <div className="border-b px-5 py-5 sm:px-6">
+                            <DialogHeader>
+                                <div className="mb-2 flex size-11 items-center justify-center rounded-xl border bg-muted/40">
+                                    {editingId ? (
+                                        <Settings2 className="size-5 text-muted-foreground" />
+                                    ) : (
+                                        <Banknote className="size-5 text-muted-foreground" />
+                                    )}
+                                </div>
 
-                            <DialogTitle className="text-lg">
-                                {editingId
-                                    ? 'Edit denomination'
-                                    : 'Add denomination'}
-                            </DialogTitle>
+                                <DialogTitle className="text-lg font-semibold tracking-tight">
+                                    {editingId
+                                        ? 'Edit denomination'
+                                        : 'Add denomination'}
+                                </DialogTitle>
 
-                            <DialogDescription>
-                                {editingId
-                                    ? 'Update the denomination settings while preserving historical cash counts.'
-                                    : 'Configure a custom denomination or load the Bangladesh currency preset.'}
-                            </DialogDescription>
-                        </DialogHeader>
+                                <DialogDescription className="leading-5">
+                                    {editingId
+                                        ? 'Update denomination settings while preserving historical cash counts.'
+                                        : 'Configure a custom denomination or load the Bangladesh currency preset.'}
+                                </DialogDescription>
+                            </DialogHeader>
+                        </div>
 
-                        <form className="space-y-5" onSubmit={submitForm}>
+                        <form
+                            className="space-y-5 px-5 py-5 sm:px-6"
+                            onSubmit={submitForm}
+                        >
+                            {/* Configuration preset */}
                             {!editingId && (
                                 <div className="space-y-2">
                                     <Label htmlFor="preset">
@@ -496,15 +474,13 @@ export default function CashDenominationsIndex() {
                                         className="h-10 w-full"
                                         value={form.data.preset}
                                         onChange={(value) => {
-                                            form.setData('preset', value);
-
-                                            if (value === 'BANGLADESH') {
-                                                form.setData((current) => ({
-                                                    ...current,
-                                                    preset: value,
-                                                    currency: 'BDT',
-                                                }));
-                                            }
+                                            form.setData((current) => ({
+                                                ...current,
+                                                preset: value,
+                                                ...(value === 'BANGLADESH'
+                                                    ? { currency: 'BDT' }
+                                                    : {}),
+                                            }));
                                         }}
                                         options={[
                                             {
@@ -519,8 +495,9 @@ export default function CashDenominationsIndex() {
                                     />
 
                                     {isPreset && (
-                                        <div className="flex gap-2 rounded-lg border bg-muted/30 p-3">
+                                        <div className="flex gap-2.5 rounded-lg border bg-muted/30 p-3">
                                             <RefreshCw className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+
                                             <p className="text-xs leading-5 text-muted-foreground">
                                                 The Bangladesh preset will be
                                                 submitted to the server to load
@@ -531,17 +508,20 @@ export default function CashDenominationsIndex() {
                                 </div>
                             )}
 
-                            <div className="space-y-4 rounded-xl border p-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex size-8 items-center justify-center rounded-lg bg-muted/50">
+                            {/* Denomination details */}
+                            <section className="space-y-4 rounded-xl border p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/40">
                                         <Settings2 className="size-4 text-muted-foreground" />
                                     </div>
+
                                     <div>
                                         <h3 className="text-sm font-semibold">
                                             Denomination details
                                         </h3>
-                                        <p className="text-xs text-muted-foreground">
-                                            Currency and face value
+
+                                        <p className="mt-0.5 text-xs text-muted-foreground">
+                                            Currency, type and face value
                                         </p>
                                     </div>
                                 </div>
@@ -550,6 +530,7 @@ export default function CashDenominationsIndex() {
                                     <Label htmlFor="currency">
                                         Currency code
                                     </Label>
+
                                     <Input
                                         id="currency"
                                         value={form.data.currency}
@@ -564,6 +545,7 @@ export default function CashDenominationsIndex() {
                                         placeholder="BDT"
                                         className="h-10"
                                     />
+
                                     {form.errors.currency && (
                                         <p className="text-xs text-destructive">
                                             {form.errors.currency}
@@ -576,6 +558,7 @@ export default function CashDenominationsIndex() {
                                         <Label htmlFor="type">
                                             Denomination type
                                         </Label>
+
                                         <Select
                                             id="type"
                                             className="h-10 w-full"
@@ -597,6 +580,7 @@ export default function CashDenominationsIndex() {
                                                 },
                                             ]}
                                         />
+
                                         {form.errors.type && (
                                             <p className="text-xs text-destructive">
                                                 {form.errors.type}
@@ -608,6 +592,7 @@ export default function CashDenominationsIndex() {
                                         <Label htmlFor="value">
                                             Face value
                                         </Label>
+
                                         <Input
                                             id="value"
                                             type="number"
@@ -626,6 +611,7 @@ export default function CashDenominationsIndex() {
                                             placeholder="100"
                                             className="h-10 tabular-nums"
                                         />
+
                                         {form.errors.value && (
                                             <p className="text-xs text-destructive">
                                                 {form.errors.value}
@@ -641,6 +627,7 @@ export default function CashDenominationsIndex() {
                                             (Optional)
                                         </span>
                                     </Label>
+
                                     <Input
                                         id="denomination-name"
                                         value={form.data.name}
@@ -655,21 +642,25 @@ export default function CashDenominationsIndex() {
                                         maxLength={255}
                                         className="h-10"
                                     />
+
                                     {form.errors.name && (
                                         <p className="text-xs text-destructive">
                                             {form.errors.name}
                                         </p>
                                     )}
                                 </div>
-                            </div>
+                            </section>
 
+                            {/* Historical record protection */}
                             {hasCountHistory && (
-                                <div className="flex gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+                                <div className="flex gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3.5">
                                     <ShieldCheck className="mt-0.5 size-5 shrink-0 text-amber-600" />
+
                                     <div className="space-y-1">
-                                        <p className="text-sm font-medium">
+                                        <p className="text-sm font-semibold">
                                             Historical record protection
                                         </p>
+
                                         <p className="text-xs leading-5 text-muted-foreground">
                                             This denomination has been used in{' '}
                                             {
@@ -684,23 +675,26 @@ export default function CashDenominationsIndex() {
                                 </div>
                             )}
 
+                            {/* Active status */}
                             {editingId && (
-                                <div className="flex items-center justify-between gap-3 rounded-xl border p-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex size-9 items-center justify-center rounded-lg bg-muted/50">
-                                            <CheckCircle2 className="size-4 text-muted-foreground" />
+                                <section className="flex items-center justify-between gap-4 rounded-xl border p-4">
+                                    <div className="flex min-w-0 items-center gap-3">
+                                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border bg-muted/40">
+                                            <CheckCircle2 className="size-5 text-muted-foreground" />
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-medium">
+
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold">
                                                 Active status
                                             </p>
-                                            <p className="text-xs text-muted-foreground">
+
+                                            <p className="mt-0.5 text-xs text-muted-foreground">
                                                 Available for cash counts
                                             </p>
                                         </div>
                                     </div>
 
-                                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                                    <label className="flex shrink-0 cursor-pointer items-center gap-2.5">
                                         <input
                                             type="checkbox"
                                             checked={form.data.is_active}
@@ -712,7 +706,8 @@ export default function CashDenominationsIndex() {
                                             }
                                             className="size-4 rounded border-input accent-primary"
                                         />
-                                        <span className="font-medium">
+
+                                        <span className="text-sm font-medium">
                                             {form.data.is_active
                                                 ? 'Active'
                                                 : 'Inactive'}
@@ -724,9 +719,10 @@ export default function CashDenominationsIndex() {
                                             {form.errors.is_active}
                                         </p>
                                     )}
-                                </div>
+                                </section>
                             )}
 
+                            {/* Form actions */}
                             <DialogFooter className="gap-2 border-t pt-4 sm:gap-2">
                                 <Button
                                     type="button"
@@ -770,46 +766,14 @@ export default function CashDenominationsIndex() {
     );
 }
 
-function SummaryCard({
-    icon: Icon,
-    label,
-    value,
-    description,
-}: {
-    icon: typeof Layers3;
-    label: string;
-    value: number;
-    description: string;
-}) {
-    return (
-        <section className="rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
-            <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                    <p className="text-xs font-medium text-muted-foreground">
-                        {label}
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums">
-                        {value}
-                    </p>
-                </div>
-
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/40">
-                    <Icon className="size-4 text-muted-foreground" />
-                </div>
-            </div>
-
-            <p className="mt-2 text-xs text-muted-foreground">{description}</p>
-        </section>
-    );
-}
-
+/* Denomination status badge */
 function StatusBadge({ active }: { active: boolean }) {
     return (
         <span
             className={
                 active
                     ? 'inline-flex items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400'
-                    : 'inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground'
+                    : 'inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-2.5 py-1 text-xs font-medium text-muted-foreground'
             }
         >
             <span
@@ -819,6 +783,7 @@ function StatusBadge({ active }: { active: boolean }) {
                         : 'size-1.5 rounded-full bg-muted-foreground/50'
                 }
             />
+
             {active ? 'Active' : 'Inactive'}
         </span>
     );

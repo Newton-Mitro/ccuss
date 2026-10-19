@@ -1,3 +1,4 @@
+import InputError from '@/components/input-error';
 import {
     ResourcePageHeader,
     ResourceTableCard,
@@ -5,6 +6,8 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import type { GeneralLedgerAccountsPageProps } from '@/types/general-accounting';
@@ -27,7 +30,20 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '../../../components/ui/dialog';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
+import AccountDetailsDialog from './account-details-dialog';
+import AccountGroupDialog, {
+    type AccountGroupDialogItem,
+} from './account-group-dialog';
+import { accountTypes } from './data/account-type';
 import { TYPE_COLORS } from './utils';
 
 const ledgerTypeIcons: Record<string, any> = {
@@ -52,7 +68,7 @@ interface AccountGroupTreeItem {
 }
 
 export default function GlAccountsIndex() {
-    const { glAccounts, accountGroups, filters } =
+    const { glAccounts, accountGroups, parents, filters, auth } =
         usePage<GeneralLedgerAccountsPageProps>().props;
     const accountRows = useMemo(() => glAccounts?.data ?? [], [glAccounts]);
     const groups = useMemo(
@@ -68,8 +84,171 @@ export default function GlAccountsIndex() {
         per_page: Number(filters.per_page) || 50,
         page: Number(filters.page) || 1,
     });
+    const ledgerForm = useForm({
+        code: '',
+        name: '',
+        type: '',
+        normal_balance: 'DEBIT',
+        account_group_id: '',
+        parent_id: '',
+        is_control_account: false,
+        is_reconcilable: false,
+        is_cash_account: false,
+        is_system: false,
+        status: true,
+    });
 
     useFlashToastHandler();
+
+    const permissions = new Set([
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ]);
+    const canCreateLedger = permissions.has('accounting.coa.create');
+    const canUpdateLedger = permissions.has('accounting.coa.update');
+    const canCreateGroup = permissions.has('accounting.coa.create');
+    const canUpdateGroup = permissions.has('accounting.coa.update');
+    const [ledgerDialogOpen, setLedgerDialogOpen] = useState(false);
+    const [editingLedgerId, setEditingLedgerId] = useState<number | null>(null);
+    const [groupDialogOpen, setGroupDialogOpen] = useState(false);
+    const [editingGroup, setEditingGroup] =
+        useState<AccountGroupDialogItem | null>(null);
+    const [accountDetails, setAccountDetails] = useState<{
+        kind: 'ledger' | 'group';
+        title: string;
+        description: string;
+        details: { label: string; value: string | number | boolean | null }[];
+    } | null>(null);
+
+    const resetLedgerForm = () => {
+        ledgerForm.setData({
+            code: '',
+            name: '',
+            type: '',
+            normal_balance: 'DEBIT',
+            account_group_id: '',
+            parent_id: '',
+            is_control_account: false,
+            is_reconcilable: false,
+            is_cash_account: false,
+            is_system: false,
+            status: true,
+        });
+        ledgerForm.clearErrors();
+        setEditingLedgerId(null);
+    };
+
+    const openCreateLedger = () => {
+        resetLedgerForm();
+        setLedgerDialogOpen(true);
+    };
+
+    const openCreateGroup = () => {
+        setEditingGroup(null);
+        setGroupDialogOpen(true);
+    };
+
+    const openEditGroup = (group: AccountGroupTreeItem) => {
+        setEditingGroup(group);
+        setGroupDialogOpen(true);
+    };
+
+    const openAccountDetails = (account: (typeof accountRows)[number]) => {
+        setAccountDetails({
+            kind: 'ledger',
+            title: account.name,
+            description: 'Ledger account configuration and hierarchy.',
+            details: [
+                { label: 'Code', value: account.code },
+                { label: 'Name', value: account.name },
+                { label: 'Type', value: account.type },
+                { label: 'Normal balance', value: account.normal_balance },
+                { label: 'Account group', value: account.group?.name ?? null },
+                {
+                    label: 'Parent account',
+                    value: account.parent?.name ?? null,
+                },
+                { label: 'Control account', value: account.is_control_account },
+                { label: 'Reconcilable', value: account.is_reconcilable },
+                {
+                    label: 'Cash account',
+                    value: account.is_cash_account ?? false,
+                },
+                { label: 'System account', value: account.is_system },
+                {
+                    label: 'Status',
+                    value: account.status ? 'Active' : 'Inactive',
+                },
+                { label: 'Children', value: account.children?.length ?? 0 },
+            ],
+        });
+    };
+
+    const openGroupDetails = (group: AccountGroupTreeItem) => {
+        const parent = groups.find((item) => item.id === group.parent_id);
+        setAccountDetails({
+            kind: 'group',
+            title: group.name,
+            description: 'Account group classification and hierarchy.',
+            details: [
+                { label: 'Code', value: group.code },
+                { label: 'Name', value: group.name },
+                { label: 'Type', value: group.type },
+                { label: 'Normal balance', value: group.normal_balance },
+                { label: 'Parent group', value: parent?.name ?? null },
+                {
+                    label: 'Status',
+                    value: group.status ? 'Active' : 'Inactive',
+                },
+                { label: 'Ledger accounts', value: group.accounts_count },
+                { label: 'Child groups', value: group.children_count },
+                { label: 'Level', value: group.level },
+            ],
+        });
+    };
+
+    const openEditLedger = (
+        account: GeneralLedgerAccountsPageProps['glAccounts']['data'][number],
+    ) => {
+        ledgerForm.setData({
+            code: account.code,
+            name: account.name,
+            type: account.type,
+            normal_balance: account.normal_balance,
+            account_group_id: String(account.account_group_id ?? ''),
+            parent_id: String(account.parent_id ?? ''),
+            is_control_account: account.is_control_account,
+            is_reconcilable: account.is_reconcilable,
+            is_cash_account: account.is_cash_account ?? false,
+            is_system: account.is_system,
+            status: account.status,
+        });
+        ledgerForm.clearErrors();
+        setEditingLedgerId(account.id);
+        setLedgerDialogOpen(true);
+    };
+
+    const submitLedgerForm = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => {
+                setLedgerDialogOpen(false);
+                resetLedgerForm();
+            },
+        };
+
+        if (editingLedgerId) {
+            ledgerForm.put(
+                route('ledger-accounts.update', editingLedgerId),
+                options,
+            );
+        } else {
+            ledgerForm.post(route('ledger-accounts.store'), options);
+        }
+    };
 
     const accountsByGroup = useMemo(() => {
         const map = new Map<number, any[]>();
@@ -277,22 +456,26 @@ export default function GlAccountsIndex() {
                     )}
                 </div>
                 <div className="flex items-center gap-1">
-                    <Link
-                        href={route('ledger-accounts.show', account.id)}
+                    <button
+                        type="button"
+                        onClick={() => openAccountDetails(account)}
                         className="text-info"
                         aria-label={`View ${account.code} ${account.name}`}
                         title="View account"
                     >
                         <ScanEye className="h-4 w-4" />
-                    </Link>
-                    <Link
-                        href={route('ledger-accounts.edit', account.id)}
-                        className="text-warning"
-                        aria-label={`Edit ${account.code} ${account.name}`}
-                        title="Edit account"
-                    >
-                        <Pencil className="h-4 w-4" />
-                    </Link>
+                    </button>
+                    {canUpdateLedger && (
+                        <button
+                            type="button"
+                            onClick={() => openEditLedger(account)}
+                            className="text-warning"
+                            aria-label={`Edit ${account.code} ${account.name}`}
+                            title="Edit account"
+                        >
+                            <Pencil className="h-4 w-4" />
+                        </button>
+                    )}
                     <button
                         type="button"
                         onClick={() => handleDelete(account.id, account.name)}
@@ -433,15 +616,27 @@ export default function GlAccountsIndex() {
                     </div>
                     <div className="flex items-center gap-1">
                         <Button
-                            asChild
+                            type="button"
                             variant="ghost"
                             size="icon"
-                            title="Edit account group"
+                            title="View account group"
+                            aria-label={`View group ${group.code} ${group.name}`}
+                            onClick={() => openGroupDetails(group)}
                         >
-                            <Link href={route('account-groups.edit', group.id)}>
-                                <Pencil className="h-4 w-4 text-emerald-600" />
-                            </Link>
+                            <ScanEye className="h-4 w-4 text-info" />
                         </Button>
+                        {canUpdateGroup && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                title="Edit account group"
+                                aria-label={`Edit group ${group.code} ${group.name}`}
+                                onClick={() => openEditGroup(group)}
+                            >
+                                <Pencil className="h-4 w-4 text-emerald-600" />
+                            </Button>
+                        )}
                         <Button
                             type="button"
                             variant="ghost"
@@ -531,18 +726,25 @@ export default function GlAccountsIndex() {
                                 <ChevronUp className="mr-1 h-4 w-4" />
                                 Collapse all
                             </Button>
-                            <Link
-                                href={route('account-groups.create')}
-                                className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                            >
-                                <Plus className="h-4 w-4" /> Add Group
-                            </Link>
-                            <Link
-                                href={route('ledger-accounts.create')}
-                                className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                            >
-                                <Plus className="h-4 w-4" /> Add Ledger
-                            </Link>
+                            {canCreateGroup && (
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={openCreateGroup}
+                                >
+                                    <Plus className="h-4 w-4" /> Add Group
+                                </Button>
+                            )}
+                            {canCreateLedger && (
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={openCreateLedger}
+                                >
+                                    <Plus className="h-4 w-4" /> Add Ledger
+                                </Button>
+                            )}
                             <Link
                                 href={route('opening-balances.create')}
                                 className="flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
@@ -580,18 +782,25 @@ export default function GlAccountsIndex() {
                                 : 'Create an account group or ledger account to start building your chart of accounts.'}
                         </p>
                         <div className="mt-4 flex flex-wrap justify-center gap-2">
-                            <Link
-                                href={route('account-groups.create')}
-                                className="rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
-                            >
-                                Add Group
-                            </Link>
-                            <Link
-                                href={route('ledger-accounts.create')}
-                                className="rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
-                            >
-                                Add Ledger
-                            </Link>
+                            {canCreateGroup && (
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={openCreateGroup}
+                                >
+                                    Add Group
+                                </Button>
+                            )}
+                            {canCreateLedger && (
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={openCreateLedger}
+                                >
+                                    Add Ledger
+                                </Button>
+                            )}
                         </div>
                     </div>
                 ) : (
@@ -616,6 +825,279 @@ export default function GlAccountsIndex() {
                         </ResourceTableCard>
                     </>
                 )}
+                <Dialog
+                    open={ledgerDialogOpen}
+                    onOpenChange={(open) => {
+                        setLedgerDialogOpen(open);
+                        if (!open && !ledgerForm.processing) {
+                            resetLedgerForm();
+                        }
+                    }}
+                >
+                    <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {editingLedgerId
+                                    ? 'Edit ledger account'
+                                    : 'Create ledger account'}
+                            </DialogTitle>
+                            <DialogDescription>
+                                Set the account classification, hierarchy, and
+                                reconciliation behavior.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form
+                            onSubmit={(event) => submitLedgerForm(event)}
+                            className="space-y-5"
+                        >
+                            <section className="space-y-3">
+                                <h3 className="text-sm font-semibold text-muted-foreground">
+                                    Basic information
+                                </h3>
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="ledger-code">
+                                            Code
+                                        </Label>
+                                        <Input
+                                            id="ledger-code"
+                                            value={ledgerForm.data.code}
+                                            onChange={(event) =>
+                                                ledgerForm.setData(
+                                                    'code',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="1100"
+                                        />
+                                        <InputError
+                                            message={ledgerForm.errors.code}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label htmlFor="ledger-name">
+                                            Name
+                                        </Label>
+                                        <Input
+                                            id="ledger-name"
+                                            value={ledgerForm.data.name}
+                                            onChange={(event) =>
+                                                ledgerForm.setData(
+                                                    'name',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Cash on hand"
+                                        />
+                                        <InputError
+                                            message={ledgerForm.errors.name}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label>Account type</Label>
+                                        <Select
+                                            value={ledgerForm.data.type}
+                                            onChange={(value) =>
+                                                ledgerForm.setData(
+                                                    'type',
+                                                    value,
+                                                )
+                                            }
+                                            options={[
+                                                {
+                                                    value: '',
+                                                    label: 'Select type',
+                                                },
+                                                ...accountTypes,
+                                            ]}
+                                        />
+                                        <InputError
+                                            message={ledgerForm.errors.type}
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label>Account group</Label>
+                                        <Select
+                                            value={
+                                                ledgerForm.data.account_group_id
+                                            }
+                                            onChange={(value) =>
+                                                ledgerForm.setData(
+                                                    'account_group_id',
+                                                    value,
+                                                )
+                                            }
+                                            options={[
+                                                {
+                                                    value: '',
+                                                    label: 'Select group',
+                                                },
+                                                ...groups.map((group) => ({
+                                                    value: String(group.id),
+                                                    label: `${group.code} - ${group.name}`,
+                                                })),
+                                            ]}
+                                        />
+                                        <InputError
+                                            message={
+                                                ledgerForm.errors
+                                                    .account_group_id
+                                            }
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label>Normal balance</Label>
+                                        <Select
+                                            value={
+                                                ledgerForm.data.normal_balance
+                                            }
+                                            onChange={(value) =>
+                                                ledgerForm.setData(
+                                                    'normal_balance',
+                                                    value,
+                                                )
+                                            }
+                                            options={[
+                                                {
+                                                    value: 'DEBIT',
+                                                    label: 'Debit',
+                                                },
+                                                {
+                                                    value: 'CREDIT',
+                                                    label: 'Credit',
+                                                },
+                                            ]}
+                                        />
+                                        <InputError
+                                            message={
+                                                ledgerForm.errors.normal_balance
+                                            }
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <Label>Parent account</Label>
+                                        <Select
+                                            value={ledgerForm.data.parent_id}
+                                            onChange={(value) =>
+                                                ledgerForm.setData(
+                                                    'parent_id',
+                                                    value,
+                                                )
+                                            }
+                                            options={[
+                                                {
+                                                    value: '',
+                                                    label: 'None',
+                                                },
+                                                ...parents
+                                                    .filter(
+                                                        (parent) =>
+                                                            parent.id !==
+                                                            editingLedgerId,
+                                                    )
+                                                    .map((parent) => ({
+                                                        value: String(
+                                                            parent.id,
+                                                        ),
+                                                        label: `${parent.code} - ${parent.name}`,
+                                                    })),
+                                            ]}
+                                        />
+                                        <InputError
+                                            message={
+                                                ledgerForm.errors.parent_id
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className="space-y-3">
+                                <h3 className="text-sm font-semibold text-muted-foreground">
+                                    Account settings
+                                </h3>
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    {[
+                                        {
+                                            key: 'is_control_account' as const,
+                                            label: 'Control account',
+                                        },
+                                        {
+                                            key: 'is_reconcilable' as const,
+                                            label: 'Reconcilable',
+                                        },
+                                        {
+                                            key: 'is_cash_account' as const,
+                                            label: 'Cash account',
+                                        },
+                                        {
+                                            key: 'is_system' as const,
+                                            label: 'System account',
+                                        },
+                                        {
+                                            key: 'status' as const,
+                                            label: 'Active',
+                                        },
+                                    ].map(({ key, label }) => (
+                                        <label
+                                            key={key}
+                                            className="flex items-center gap-2 rounded-md border p-3 text-sm"
+                                        >
+                                            <Input
+                                                type="checkbox"
+                                                checked={ledgerForm.data[key]}
+                                                onChange={(event) =>
+                                                    ledgerForm.setData(
+                                                        key,
+                                                        event.target.checked,
+                                                    )
+                                                }
+                                            />
+                                            <span>{label}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </section>
+
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    disabled={ledgerForm.processing}
+                                    onClick={() => setLedgerDialogOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={ledgerForm.processing}
+                                >
+                                    {ledgerForm.processing
+                                        ? 'Saving...'
+                                        : editingLedgerId
+                                          ? 'Save changes'
+                                          : 'Create ledger account'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+                <AccountGroupDialog
+                    open={groupDialogOpen}
+                    onOpenChange={setGroupDialogOpen}
+                    groups={groups}
+                    group={editingGroup}
+                />
+                <AccountDetailsDialog
+                    open={accountDetails !== null}
+                    onOpenChange={(open) => {
+                        if (!open) setAccountDetails(null);
+                    }}
+                    kind={accountDetails?.kind ?? 'ledger'}
+                    title={accountDetails?.title ?? ''}
+                    description={accountDetails?.description ?? ''}
+                    details={accountDetails?.details ?? []}
+                />
             </div>
         </CustomAuthLayout>
     );

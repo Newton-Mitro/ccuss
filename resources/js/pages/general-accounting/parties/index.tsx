@@ -1,4 +1,6 @@
+import DataTablePagination from '@/components/data-table-pagination';
 import {
+    ResourceEmptyState,
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -8,20 +10,15 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-
-interface Party {
-    id: number;
-    code: string;
-    name: string;
-    party_type: string;
-    phone: string | null;
-    email: string | null;
-    status: boolean;
-}
+import {
+    PartyDetailsDialog,
+    PartyFormDialog,
+    type Party,
+} from './party-dialog';
 
 interface Props extends SharedData {
     parties: {
@@ -37,20 +34,27 @@ interface Props extends SharedData {
 
 export default function PartyIndex() {
     const { parties, filters } = usePage<Props>().props;
-    const [search, setSearch] = useState(filters.search ?? '');
+    const { data, setData, get } = useForm({
+        search: filters.search ?? '',
+        per_page: Number(filters.per_page) || 18,
+        page: Number(filters.page) || 1,
+    });
+    const [partyDialogOpen, setPartyDialogOpen] = useState(false);
+    const [editingParty, setEditingParty] = useState<Party | null>(null);
+    const [viewingParty, setViewingParty] = useState<Party | null>(null);
     useFlashToastHandler();
 
     useEffect(() => {
-        const timeout = setTimeout(() => {
-            router.get(
-                route('parties.index'),
-                { search, per_page: filters.per_page },
-                { preserveState: true, preserveScroll: true, replace: true },
-            );
-        }, 350);
+        const delay = setTimeout(() => {
+            get(route('parties.index'), {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            });
+        }, 400);
 
-        return () => clearTimeout(timeout);
-    }, [search]);
+        return () => clearTimeout(delay);
+    }, [data.search, data.per_page, data.page]);
 
     const destroy = (party: Party) => {
         appSwal
@@ -82,84 +86,141 @@ export default function PartyIndex() {
                     title="Parties"
                     description="Manage customers, suppliers, employees, and other accounting parties."
                     action={
-                        <Button asChild size="sm">
-                            <Link href={route('parties.create')}>
-                                <Plus className="mr-1 h-4 w-4" /> Add Party
-                            </Link>
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                setEditingParty(null);
+                                setPartyDialogOpen(true);
+                            }}
+                        >
+                            <Plus className="h-4 w-4" />
+                            <span className="hidden sm:inline">Add Party</span>
                         </Button>
                     }
                 />
 
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="w-full sm:w-60">
                     <Input
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                        placeholder="Search code, name, email, or phone..."
-                        className="w-full bg-card sm:w-96"
+                        className="bg-card"
+                        value={data.search}
+                        onChange={(event) => {
+                            setData('search', event.target.value);
+                            setData('page', 1);
+                        }}
+                        placeholder="Search parties..."
                     />
-                    <span className="text-sm text-muted-foreground">
-                        {parties.total} records
-                    </span>
                 </div>
 
                 {parties.data.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
-                        <p className="text-base font-medium">No parties found</p>
-                        <p className="text-xs">
-                            Try adjusting your search or create a party.
-                        </p>
-                        <Button asChild size="sm" className="mt-4">
-                            <Link href={route('parties.create')}>
-                                <Plus className="mr-1 h-4 w-4" /> Create Party
-                            </Link>
-                        </Button>
-                    </div>
+                    <ResourceEmptyState
+                        title="No parties found"
+                        description="Try adjusting your search or create a party."
+                    />
                 ) : (
                     <>
-                        <div className="overflow-x-auto rounded-md border bg-card">
-                            <table className="w-full min-w-[760px] text-sm">
-                                <thead className="border-b bg-muted/40 text-left text-xs text-muted-foreground">
+                        <div className="hidden h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card md:block">
+                            <table className="w-full border-collapse">
+                                <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                     <tr>
-                                        <th className="px-4 py-3 font-medium">Code</th>
-                                        <th className="px-4 py-3 font-medium">Name</th>
-                                        <th className="px-4 py-3 font-medium">Type</th>
-                                        <th className="px-4 py-3 font-medium">Contact</th>
-                                        <th className="px-4 py-3 font-medium">Status</th>
-                                        <th className="px-4 py-3 text-right font-medium">Actions</th>
+                                        {[
+                                            'Code',
+                                            'Name',
+                                            'Type',
+                                            'Phone',
+                                            'Email',
+                                            'Status',
+                                            'Actions',
+                                        ].map((heading) => (
+                                            <th
+                                                key={heading}
+                                                className="border-b p-2 text-left text-sm font-medium"
+                                            >
+                                                {heading}
+                                            </th>
+                                        ))}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {parties.data.map((party) => (
-                                        <tr key={party.id} className="border-b last:border-0 hover:bg-muted/20">
-                                            <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                                        <tr
+                                            key={party.id}
+                                            className="border-b even:bg-muted hover:bg-accent/20"
+                                        >
+                                            <td className="px-2 py-1 font-mono text-xs">
                                                 {party.code}
                                             </td>
-                                            <td className="px-4 py-3 font-medium">{party.name}</td>
-                                            <td className="px-4 py-3">{party.party_type.replaceAll('_', ' ')}</td>
-                                            <td className="px-4 py-3 text-muted-foreground">
-                                                <div>{party.email || '-'}</div>
-                                                {party.phone && <div className="text-xs">{party.phone}</div>}
+                                            <td className="px-2 py-1 font-medium">
+                                                {party.name}
                                             </td>
-                                            <td className="px-4 py-3">
-                                                <StatusBadge tone={party.status ? 'success' : 'danger'}>
-                                                    {party.status ? 'Active' : 'Inactive'}
+                                            <td className="px-2 py-1 capitalize">
+                                                {party.party_type.replaceAll(
+                                                    '_',
+                                                    ' ',
+                                                )}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {party.phone || '—'}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                {party.email || '—'}
+                                            </td>
+                                            <td className="px-2 py-1">
+                                                <StatusBadge
+                                                    tone={
+                                                        party.status
+                                                            ? 'success'
+                                                            : 'danger'
+                                                    }
+                                                >
+                                                    {party.status
+                                                        ? 'Active'
+                                                        : 'Inactive'}
                                                 </StatusBadge>
                                             </td>
-                                            <td className="px-4 py-3">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button asChild variant="outline" size="icon" title="Edit party">
-                                                        <Link href={route('parties.edit', party.id)}>
-                                                            <Pencil className="h-4 w-4" />
-                                                        </Link>
+                                            <td className="px-2 py-1">
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        title="View party"
+                                                        aria-label="View party"
+                                                        onClick={() =>
+                                                            setViewingParty(
+                                                                party,
+                                                            )
+                                                        }
+                                                    >
+                                                        <Eye className="h-5 w-5" />
                                                     </Button>
                                                     <Button
                                                         type="button"
-                                                        variant="outline"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        title="Edit party"
+                                                        aria-label="Edit party"
+                                                        onClick={() => {
+                                                            setEditingParty(
+                                                                party,
+                                                            );
+                                                            setPartyDialogOpen(
+                                                                true,
+                                                            );
+                                                        }}
+                                                    >
+                                                        <Pencil className="h-5 w-5" />
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
                                                         size="icon"
                                                         title="Delete party"
-                                                        onClick={() => destroy(party)}
+                                                        aria-label="Delete party"
+                                                        onClick={() =>
+                                                            destroy(party)
+                                                        }
                                                     >
-                                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                                        <Trash2 className="h-5 w-5 text-destructive" />
                                                     </Button>
                                                 </div>
                                             </td>
@@ -169,23 +230,105 @@ export default function PartyIndex() {
                             </table>
                         </div>
 
-                        {parties.last_page > 1 && (
-                            <nav className="flex flex-wrap justify-end gap-1" aria-label="Pagination">
-                                {parties.links.map((link, index) => (
-                                    <Button
-                                        key={`${index}-${link.label}`}
-                                        variant={link.active ? 'default' : 'outline'}
-                                        size="sm"
-                                        disabled={!link.url}
-                                        onClick={() => link.url && router.get(link.url, {}, { preserveScroll: true })}
-                                    >
-                                        <span dangerouslySetInnerHTML={{ __html: link.label }} />
-                                    </Button>
-                                ))}
-                            </nav>
-                        )}
+                        <div className="space-y-3 md:hidden">
+                            {parties.data.map((party) => (
+                                <div
+                                    key={party.id}
+                                    className="space-y-2 rounded-md border bg-card p-3"
+                                >
+                                    <div className="flex justify-between gap-3">
+                                        <div>
+                                            <p className="font-medium">
+                                                {party.name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {party.code} ·{' '}
+                                                {party.party_type.replaceAll(
+                                                    '_',
+                                                    ' ',
+                                                )}
+                                            </p>
+                                        </div>
+                                        <StatusBadge
+                                            tone={
+                                                party.status
+                                                    ? 'success'
+                                                    : 'danger'
+                                            }
+                                        >
+                                            {party.status
+                                                ? 'Active'
+                                                : 'Inactive'}
+                                        </StatusBadge>
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                        {party.phone || '—'} <br />
+                                        {party.email || '—'}
+                                    </div>
+                                    <div className="flex justify-end gap-3">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            title="View party"
+                                            aria-label="View party"
+                                            onClick={() =>
+                                                setViewingParty(party)
+                                            }
+                                        >
+                                            <Eye className="h-5 w-5" />
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            title="Edit party"
+                                            aria-label="Edit party"
+                                            onClick={() => {
+                                                setEditingParty(party);
+                                                setPartyDialogOpen(true);
+                                            }}
+                                        >
+                                            <Pencil className="h-5 w-5" />
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            title="Delete party"
+                                            aria-label="Delete party"
+                                            onClick={() => destroy(party)}
+                                        >
+                                            <Trash2 className="h-5 w-5 text-destructive" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </>
                 )}
+
+                {parties.data.length > 0 && (
+                    <DataTablePagination
+                        perPage={parties.per_page}
+                        onPerPageChange={(value) => {
+                            setData('per_page', value);
+                            setData('page', 1);
+                        }}
+                        links={parties.links}
+                    />
+                )}
+                <PartyFormDialog
+                    open={partyDialogOpen}
+                    onOpenChange={setPartyDialogOpen}
+                    party={editingParty}
+                />
+                <PartyDetailsDialog
+                    party={viewingParty}
+                    onOpenChange={(open) => {
+                        if (!open) setViewingParty(null);
+                    }}
+                />
             </div>
         </CustomAuthLayout>
     );

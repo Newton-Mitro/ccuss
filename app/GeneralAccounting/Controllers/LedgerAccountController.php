@@ -43,6 +43,7 @@ class LedgerAccountController extends Controller
         return Inertia::render('general-accounting/chart-of-accounts/index', [
             'glAccounts' => $accounts,
             'accountGroups' => $this->accountGroups($request),
+            'parents' => $this->organizationQuery($request)->orderBy('code')->get(['id', 'code', 'name']),
             'filters' => $request->only(['search', 'per_page', 'page', 'view']),
         ]);
     }

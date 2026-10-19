@@ -51,7 +51,7 @@ class AccountGroupController extends Controller
             return back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('account-groups.index')->with('success', 'Account group created successfully.');
+        return back()->with('success', 'Account group created successfully.');
     }
 
     public function edit(Request $request, AccountGroup $accountGroup): Response
@@ -77,7 +77,7 @@ class AccountGroupController extends Controller
             return back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('account-groups.index')->with('success', 'Account group updated successfully.');
+        return back()->with('success', 'Account group updated successfully.');
     }
 
     public function destroy(Request $request, AccountGroup $accountGroup)

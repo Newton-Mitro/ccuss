@@ -8,10 +8,21 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ChevronDown, ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Head, router, usePage } from '@inertiajs/react';
+import {
+    ChevronDown,
+    ChevronRight,
+    Pencil,
+    Plus,
+    ScanEye,
+    Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
+import AccountDetailsDialog from '../account-details-dialog';
+import AccountGroupDialog, {
+    type AccountGroupDialogItem,
+} from '../account-group-dialog';
 
 interface AccountGroup {
     id: number;
@@ -35,12 +46,34 @@ interface Props extends SharedData {
 }
 
 export default function AccountGroupIndex() {
-    const { accountGroups } = usePage<Props>().props;
+    const { accountGroups, auth } = usePage<Props>().props;
     const groups = Array.isArray(accountGroups)
         ? accountGroups
         : (accountGroups.data ?? []);
     const [expanded, setExpanded] = useState<number[]>([]);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [editingGroup, setEditingGroup] =
+        useState<AccountGroupDialogItem | null>(null);
+    const [viewingGroup, setViewingGroup] = useState<AccountGroup | null>(null);
+    const permissions = new Set([
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ]);
+    const canCreate = permissions.has('accounting.coa.create');
+    const canUpdate = permissions.has('accounting.coa.update');
     useFlashToastHandler();
+
+    const openCreate = () => {
+        setEditingGroup(null);
+        setDialogOpen(true);
+    };
+
+    const openEdit = (group: AccountGroup) => {
+        setEditingGroup(group);
+        setDialogOpen(true);
+    };
 
     const childrenByParent = groups.reduce<Record<string, AccountGroup[]>>(
         (result, group) => {
@@ -92,11 +125,15 @@ export default function AccountGroupIndex() {
                     title="Account Groups"
                     description="Organize the chart of accounts by reporting category and keep the structure consistent across all ledger views."
                     action={
-                        <Button asChild size="sm">
-                            <Link href={route('account-groups.create')}>
-                                <Plus className="mr-1 h-4 w-4" /> Add Group
-                            </Link>
-                        </Button>
+                        canCreate ? (
+                            <Button
+                                size="sm"
+                                onClick={openCreate}
+                                className="gap-1"
+                            >
+                                <Plus className="h-4 w-4" /> Add Group
+                            </Button>
+                        ) : undefined
                     }
                 />
 
@@ -115,12 +152,15 @@ export default function AccountGroupIndex() {
                             Create an account group to organize your chart of
                             accounts.
                         </p>
-                        <Link
-                            href={route('account-groups.create')}
-                            className="mt-4 rounded bg-primary px-4 py-2 text-xs text-primary-foreground hover:bg-primary/90"
-                        >
-                            Add Group
-                        </Link>
+                        {canCreate && (
+                            <Button
+                                className="mt-4"
+                                size="sm"
+                                onClick={openCreate}
+                            >
+                                Add Group
+                            </Button>
+                        )}
                     </div>
                 ) : (
                     <ResourceTableCard className="overflow-auto p-3 md:p-5">
@@ -188,20 +228,33 @@ export default function AccountGroupIndex() {
                                                 </div>
                                                 <div className="flex items-center gap-1">
                                                     <Button
-                                                        asChild
+                                                        type="button"
                                                         variant="ghost"
                                                         size="icon"
-                                                        title="Edit account group"
+                                                        title="View account group"
+                                                        aria-label={`View group ${item.code} ${item.name}`}
+                                                        onClick={() =>
+                                                            setViewingGroup(
+                                                                item,
+                                                            )
+                                                        }
                                                     >
-                                                        <Link
-                                                            href={route(
-                                                                'account-groups.edit',
-                                                                item.id,
-                                                            )}
+                                                        <ScanEye className="h-4 w-4 text-info" />
+                                                    </Button>
+                                                    {canUpdate && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            title="Edit account group"
+                                                            aria-label={`Edit group ${item.code} ${item.name}`}
+                                                            onClick={() =>
+                                                                openEdit(item)
+                                                            }
                                                         >
                                                             <Pencil className="h-4 w-4 text-emerald-600" />
-                                                        </Link>
-                                                    </Button>
+                                                        </Button>
+                                                    )}
                                                     <Button
                                                         type="button"
                                                         variant="ghost"
@@ -230,6 +283,70 @@ export default function AccountGroupIndex() {
                         </div>
                     </ResourceTableCard>
                 )}
+                <AccountGroupDialog
+                    open={dialogOpen}
+                    onOpenChange={setDialogOpen}
+                    groups={groups}
+                    group={editingGroup}
+                />
+                <AccountDetailsDialog
+                    open={viewingGroup !== null}
+                    onOpenChange={(open) => {
+                        if (!open) setViewingGroup(null);
+                    }}
+                    kind="group"
+                    title={viewingGroup?.name ?? ''}
+                    description="Account group classification and hierarchy."
+                    details={
+                        viewingGroup
+                            ? [
+                                  {
+                                      label: 'Code',
+                                      value: viewingGroup.code,
+                                  },
+                                  {
+                                      label: 'Name',
+                                      value: viewingGroup.name,
+                                  },
+                                  {
+                                      label: 'Type',
+                                      value: viewingGroup.type,
+                                  },
+                                  {
+                                      label: 'Normal balance',
+                                      value: viewingGroup.normal_balance,
+                                  },
+                                  {
+                                      label: 'Parent group',
+                                      value:
+                                          groups.find(
+                                              (item) =>
+                                                  item.id ===
+                                                  viewingGroup.parent_id,
+                                          )?.name ?? null,
+                                  },
+                                  {
+                                      label: 'Status',
+                                      value: viewingGroup.status
+                                          ? 'Active'
+                                          : 'Inactive',
+                                  },
+                                  {
+                                      label: 'Ledger accounts',
+                                      value: viewingGroup.accounts_count,
+                                  },
+                                  {
+                                      label: 'Child groups',
+                                      value: viewingGroup.children_count,
+                                  },
+                                  {
+                                      label: 'Level',
+                                      value: viewingGroup.level,
+                                  },
+                              ]
+                            : []
+                    }
+                />
             </div>
         </CustomAuthLayout>
     );

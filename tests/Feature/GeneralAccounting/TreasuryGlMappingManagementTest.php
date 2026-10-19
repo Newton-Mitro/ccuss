@@ -52,7 +52,7 @@ it('lists and upserts organization-scoped Treasury GL mappings', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('general-accounting/treasury-gl-mappings/index')
-            ->has('mappings', 0)
+            ->has('mappings.data', 0)
             ->has('accounts', 3));
 
     $payload = [
@@ -77,6 +77,30 @@ it('lists and upserts organization-scoped Treasury GL mappings', function () {
 
     expect(TreasuryGlMapping::query()->count())->toBe(1)
         ->and($mapping->fresh()->debit_account_id)->toBe($replacementDebit->id);
+
+    $this->put(route('treasury-gl-mappings.update', $mapping), array_merge($payload, [
+        'source_code' => 'branch-1',
+        'transaction_type' => 'withdrawal',
+        'debit_account_id' => $debit->id,
+        'credit_account_id' => $replacementDebit->id,
+        'status' => false,
+    ]))->assertRedirect(route('treasury-gl-mappings.index'));
+
+    expect(TreasuryGlMapping::query()->count())->toBe(1)
+        ->and($mapping->fresh()->source_code)->toBe('BRANCH-1')
+        ->and($mapping->fresh()->transaction_type)->toBe('WITHDRAWAL')
+        ->and($mapping->fresh()->credit_account_id)->toBe($replacementDebit->id)
+        ->and($mapping->fresh()->status)->toBeFalse();
+
+    $this->get(route('treasury-gl-mappings.index', [
+        'search' => 'branch-1',
+        'per_page' => 1,
+    ]))->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('mappings.data', 1)
+            ->where('mappings.data.0.source_code', 'BRANCH-1')
+            ->where('mappings.per_page', 1)
+            ->where('filters.search', 'branch-1'));
 });
 
 it('rejects Treasury GL mappings to accounts in another organization', function () {
