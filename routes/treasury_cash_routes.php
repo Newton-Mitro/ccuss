@@ -149,14 +149,54 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/transfers/{transfer}/complete', [CashMovementController::class, 'completeCashTransfer'])
             ->middleware('permission:cash_transfers.complete')
             ->name('transfers.complete');
-        Route::get('/teller-to-teller-transfer', [CashMovementController::class, 'tellerToTellerTransfer'])
+        Route::get('/teller-to-teller', [CashMovementController::class, 'tellerToTellerTransfer'])
             ->defaults('transferType', 'TELLER_TO_TELLER')
             ->middleware('permission:cash_transfers.create')
-            ->name('teller-to-teller-transfer');
-        Route::post('/teller-to-teller-transfer', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->name('teller-to-teller');
+        Route::post('/teller-to-teller', [CashMovementController::class, 'storeTellerToTellerTransfer'])
             ->defaults('transferType', 'TELLER_TO_TELLER')
             ->middleware('permission:cash_transfers.create')
-            ->name('teller-to-teller-transfer.store');
+            ->name('teller-to-teller.store');
+        Route::get('/vault-to-teller', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->defaults('transferType', 'VAULT_TO_TELLER')
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-to-teller');
+        Route::post('/vault-to-teller', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->defaults('transferType', 'VAULT_TO_TELLER')
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-to-teller.store');
+        Route::get('/teller-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->defaults('transferType', 'TELLER_TO_VAULT')
+            ->middleware('permission:cash_transfers.create')
+            ->name('teller-to-vault');
+        Route::post('/teller-to-vault', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->defaults('transferType', 'TELLER_TO_VAULT')
+            ->middleware('permission:cash_transfers.create')
+            ->name('teller-to-vault.store');
+        Route::get('/vault-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->defaults('transferType', 'VAULT_TO_VAULT')
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-to-vault');
+        Route::post('/vault-to-vault', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->defaults('transferType', 'VAULT_TO_VAULT')
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-to-vault.store');
+        Route::get('/bank-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->defaults('transferType', 'BANK_TO_VAULT')
+            ->middleware('permission:cash_transfers.create')
+            ->name('bank-to-vault');
+        Route::post('/bank-to-vault', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->defaults('transferType', 'BANK_TO_VAULT')
+            ->middleware('permission:cash_transfers.create')
+            ->name('bank-to-vault.store');
+        Route::get('/vault-to-bank', [CashMovementController::class, 'tellerToTellerTransfer'])
+            ->defaults('transferType', 'VAULT_TO_BANK')
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-to-bank');
+        Route::post('/vault-to-bank', [CashMovementController::class, 'storeTellerToTellerTransfer'])
+            ->defaults('transferType', 'VAULT_TO_BANK')
+            ->middleware('permission:cash_transfers.create')
+            ->name('vault-to-bank.store');
 
         Route::get('/vault-transfers', [CashMovementController::class, 'cashTransfers'])
             ->middleware('permission:cash_transfers.view')
@@ -167,22 +207,6 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/vault-transfers/{transfer}/complete', [CashMovementController::class, 'completeCashTransfer'])
             ->middleware('permission:cash_transfers.complete')
             ->name('vault-transfers.complete');
-        Route::get('/vault-transfers/vault-to-teller', [CashMovementController::class, 'tellerToTellerTransfer'])
-            ->defaults('transferType', 'VAULT_TO_TELLER')
-            ->middleware('permission:cash_transfers.create')
-            ->name('vault-transfers.vault-to-teller');
-        Route::post('/vault-transfers/vault-to-teller', [CashMovementController::class, 'storeTellerToTellerTransfer'])
-            ->defaults('transferType', 'VAULT_TO_TELLER')
-            ->middleware('permission:cash_transfers.create')
-            ->name('vault-transfers.vault-to-teller.store');
-        Route::get('/vault-transfers/teller-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
-            ->defaults('transferType', 'TELLER_TO_VAULT')
-            ->middleware('permission:cash_transfers.create')
-            ->name('vault-transfers.teller-to-vault');
-        Route::post('/vault-transfers/teller-to-vault', [CashMovementController::class, 'storeTellerToTellerTransfer'])
-            ->defaults('transferType', 'TELLER_TO_VAULT')
-            ->middleware('permission:cash_transfers.create')
-            ->name('vault-transfers.teller-to-vault.store');
     });
 
 Route::middleware(['auth', 'verified', 'organization'])
@@ -220,46 +244,6 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/vault-transfers', [CashMovementController::class, 'cashTransfers'])
         ->middleware('permission:cash_transfers.view')
         ->name('vault-transfers.root.index');
-    Route::get('/vault-transfers/vault-to-teller', [CashMovementController::class, 'tellerToTellerTransfer'])
-        ->defaults('transferType', 'VAULT_TO_TELLER')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.vault-to-teller');
-    Route::post('/vault-transfers/vault-to-teller', [CashMovementController::class, 'storeTellerToTellerTransfer'])
-        ->defaults('transferType', 'VAULT_TO_TELLER')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.vault-to-teller.store');
-    Route::get('/vault-transfers/teller-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
-        ->defaults('transferType', 'TELLER_TO_VAULT')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.teller-to-vault');
-    Route::get('/vault-transfers/vault-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
-        ->defaults('transferType', 'VAULT_TO_VAULT')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.vault-to-vault');
-    Route::post('/vault-transfers/vault-to-vault', [CashMovementController::class, 'storeTellerToTellerTransfer'])
-        ->defaults('transferType', 'VAULT_TO_VAULT')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.vault-to-vault.store');
-    Route::get('/vault-transfers/bank-to-vault', [CashMovementController::class, 'tellerToTellerTransfer'])
-        ->defaults('transferType', 'BANK_TO_VAULT')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.bank-to-vault');
-    Route::post('/vault-transfers/bank-to-vault', [CashMovementController::class, 'storeTellerToTellerTransfer'])
-        ->defaults('transferType', 'BANK_TO_VAULT')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.bank-to-vault.store');
-    Route::get('/vault-transfers/vault-to-bank', [CashMovementController::class, 'tellerToTellerTransfer'])
-        ->defaults('transferType', 'VAULT_TO_BANK')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.vault-to-bank');
-    Route::post('/vault-transfers/vault-to-bank', [CashMovementController::class, 'storeTellerToTellerTransfer'])
-        ->defaults('transferType', 'VAULT_TO_BANK')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.vault-to-bank.store');
-    Route::post('/vault-transfers/teller-to-vault', [CashMovementController::class, 'storeTellerToTellerTransfer'])
-        ->defaults('transferType', 'TELLER_TO_VAULT')
-        ->middleware('permission:cash_transfers.create')
-        ->name('vault-transfers.root.teller-to-vault.store');
     Route::get('/vault-adjustments', [CashMovementController::class, 'cashAdjustments'])
         ->middleware('permission:cash_transactions.view')
         ->name('vault-adjustments.root.index');

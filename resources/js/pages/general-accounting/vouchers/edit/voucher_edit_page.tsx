@@ -9,6 +9,7 @@ import { Label } from '../../../../components/ui/label';
 import { Select } from '../../../../components/ui/select';
 import useFlashToastHandler from '../../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem, SharedData } from '../../../../types';
 
 interface Account {
@@ -380,10 +381,10 @@ export default function VoucherEditPage() {
                                         Totals
                                     </td>
                                     <td className="p-2 text-right">
-                                        {debitTotal.toFixed(2)}
+                                        {formatBDTCurrency(debitTotal, false)}
                                     </td>
                                     <td className="p-2 text-right">
-                                        {creditTotal.toFixed(2)}
+                                        {formatBDTCurrency(creditTotal, false)}
                                     </td>
                                     <td />
                                 </tr>

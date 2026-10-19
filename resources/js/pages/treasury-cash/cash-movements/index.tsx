@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { CashTransferIndexProps } from '@/types/treasury-cash/cash-movements';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -49,17 +50,17 @@ export default function Index() {
         { title: 'Treasury & Cash', href: '' },
         { title: 'Cash Management', href: '' },
         {
-            title: 'Cash Transfer Queue',
+            title: 'Cash Movements',
             href: route('cash-movements.transfers.index'),
         },
     ];
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Cash Transfer Queue" />
+            <Head title="Cash Movements" />
             <div className="space-y-4 text-foreground">
                 <ResourcePageHeader
-                    title="Cash Transfer Queue"
+                    title="Cash Movements"
                     description="Approve and complete cash transfers between active branch locations."
                     action={
                         canCreate ? (
@@ -67,7 +68,7 @@ export default function Index() {
                                 <Button asChild size="sm" variant="outline">
                                     <Link
                                         href={route(
-                                            'cash-movements.teller-to-teller-transfer',
+                                            'cash-movements.teller-to-teller',
                                         )}
                                     >
                                         <i className="fa-solid fa-people-arrows-left-right" />
@@ -77,7 +78,7 @@ export default function Index() {
                                 <Button asChild size="sm" variant="outline">
                                     <Link
                                         href={route(
-                                            'vault-transfers.root.vault-to-teller',
+                                            'cash-movements.vault-to-teller',
                                         )}
                                     >
                                         <i className="fa-solid fa-vault" />
@@ -87,7 +88,7 @@ export default function Index() {
                                 <Button asChild size="sm" variant="outline">
                                     <Link
                                         href={route(
-                                            'vault-transfers.root.teller-to-vault',
+                                            'cash-movements.teller-to-vault',
                                         )}
                                     >
                                         <i className="fa-solid fa-building-columns" />
@@ -97,7 +98,7 @@ export default function Index() {
                                 <Button asChild size="sm" variant="outline">
                                     <Link
                                         href={route(
-                                            'vault-transfers.root.vault-to-vault',
+                                            'cash-movements.vault-to-vault',
                                         )}
                                     >
                                         <i className="fa-solid fa-right-left" />
@@ -107,7 +108,7 @@ export default function Index() {
                                 <Button asChild size="sm" variant="outline">
                                     <Link
                                         href={route(
-                                            'vault-transfers.root.bank-to-vault',
+                                            'cash-movements.bank-to-vault',
                                         )}
                                     >
                                         <i className="fa-solid fa-building-columns" />
@@ -117,7 +118,7 @@ export default function Index() {
                                 <Button asChild size="sm" variant="outline">
                                     <Link
                                         href={route(
-                                            'vault-transfers.root.vault-to-bank',
+                                            'cash-movements.vault-to-bank',
                                         )}
                                     >
                                         <i className="fa-solid fa-money-bill-transfer" />
@@ -208,7 +209,10 @@ export default function Index() {
                                                 ?.business_date ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {transfer.amount}
+                                            {formatBDTCurrency(
+                                                transfer.amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
                                             <StatusBadge
@@ -241,7 +245,7 @@ export default function Index() {
                                                                 appSwal
                                                                     .fire({
                                                                         title: 'Approve this transfer?',
-                                                                        text: `Approve ${transfer.transfer_no} for ${transfer.amount}?`,
+                                                                        text: `Approve ${transfer.transfer_no} for ${formatBDTCurrency(transfer.amount, false)}?`,
                                                                         icon: 'warning',
                                                                         showCancelButton: true,
                                                                         confirmButtonText:

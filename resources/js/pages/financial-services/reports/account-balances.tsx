@@ -3,6 +3,7 @@ import {
     ResourcePageHeader,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { AccountBalancesReportPageProps } from '@/types/financial-services';
 import { Head, router, usePage } from '@inertiajs/react';
@@ -109,14 +110,16 @@ export default function AccountBalancesReport() {
                                                 {account.status}
                                             </td>
                                             <td className="px-2 py-1 text-right tabular-nums">
-                                                {Number(
+                                                {formatBDTCurrency(
                                                     account.balance,
-                                                ).toFixed(4)}
+                                                    false,
+                                                )}
                                             </td>
                                             <td className="px-2 py-1 text-right tabular-nums">
-                                                {Number(
+                                                {formatBDTCurrency(
                                                     account.available_balance,
-                                                ).toFixed(4)}
+                                                    false,
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

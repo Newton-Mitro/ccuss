@@ -4,6 +4,7 @@ import HeadingSmall from '../../../components/heading-small';
 import ReportExportActions from '../../../components/report-export-actions';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface BalanceSheetRow {
@@ -121,7 +122,10 @@ export default function BalanceSheetPage() {
                                             {row.account_name}
                                         </td>
                                         <td className="border px-2 py-1 text-right">
-                                            {Number(row.balance).toFixed(2)}
+                                            {formatBDTCurrency(
+                                                row.balance,
+                                                false,
+                                            )}
                                         </td>
                                     </tr>
                                 ))
@@ -142,7 +146,7 @@ export default function BalanceSheetPage() {
                                     Total
                                 </td>
                                 <td className="border px-2 py-1 text-right">
-                                    {totalBalance.toFixed(2)}
+                                    {formatBDTCurrency(totalBalance, false)}
                                 </td>
                             </tr>
                         </tfoot>
@@ -157,7 +161,9 @@ export default function BalanceSheetPage() {
                                     className="flex justify-between border-b px-2 py-1"
                                 >
                                     <span>{category} Total:</span>
-                                    <span>{total.toFixed(2)}</span>
+                                    <span>
+                                        {formatBDTCurrency(total, false)}
+                                    </span>
                                 </div>
                             ),
                         )}

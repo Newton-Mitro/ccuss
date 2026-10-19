@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
@@ -164,13 +165,19 @@ export default function InterestProvisionsIndex() {
                                             {provision.period_end}
                                         </td>
                                         <td className="p-3 text-right tabular-nums">
-                                            {provision.basis_amount}
+                                            {formatBDTCurrency(
+                                                provision.basis_amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3 text-right tabular-nums">
                                             {provision.annual_rate}%
                                         </td>
                                         <td className="p-3 text-right tabular-nums">
-                                            {provision.provisioned_amount}
+                                            {formatBDTCurrency(
+                                                provision.provisioned_amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3 text-center">
                                             <StatusBadge

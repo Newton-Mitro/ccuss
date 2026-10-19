@@ -1,4 +1,5 @@
 import TreasuryAccountDetails from '@/components/treasury-account-details';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -49,8 +50,14 @@ export default function Show() {
                 { label: 'Custodian', value: fund.custodian?.name },
                 { label: 'Custodian email', value: fund.custodian?.email },
                 { label: 'Funding method', value: fund.method },
-                { label: 'Current balance', value: fund.current_balance },
-                { label: 'Fund limit', value: fund.fund_limit },
+                {
+                    label: 'Current balance',
+                    value: formatBDTCurrency(fund.current_balance, false),
+                },
+                {
+                    label: 'Fund limit',
+                    value: formatBDTCurrency(fund.fund_limit, false),
+                },
                 {
                     label: 'Financial account number',
                     value: fund.cash_location?.financial_account?.account_no,

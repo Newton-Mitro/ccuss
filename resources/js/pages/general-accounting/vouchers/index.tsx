@@ -1,10 +1,11 @@
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type {
     VoucherIndexPageProps,
     VoucherListItem,
@@ -184,10 +185,16 @@ export default function Index() {
                                                 {voucher.branch?.name || '-'}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {totalDebit.toFixed(2)}
+                                                {formatBDTCurrency(
+                                                    totalDebit,
+                                                    false,
+                                                )}
                                             </td>
                                             <td className="px-2 py-1">
-                                                {totalCredit.toFixed(2)}
+                                                {formatBDTCurrency(
+                                                    totalCredit,
+                                                    false,
+                                                )}
                                             </td>
                                             <td className="px-2 py-1">
                                                 <StatusBadge

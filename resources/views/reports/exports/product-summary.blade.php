@@ -58,7 +58,7 @@
                     <td class="product">{{ $row[0] }} · {{ $row[1] }}</td>
                     <td>{{ $row[2] }}</td>
                     <td class="number">{{ number_format((int) $row[3]) }}</td>
-                    <td class="number">{{ number_format((float) $row[4], 4) }}</td>
+                    <td class="number">{{ number_format((float) $row[4], 2) }}</td>
                 </tr>
             @empty
                 <tr><td colspan="4">No products found.</td></tr>

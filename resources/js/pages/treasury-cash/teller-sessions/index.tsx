@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type {
     TellerSessionIndexProps,
@@ -216,13 +217,26 @@ export default function Index() {
                                             </StatusBadge>
                                         </td>
                                         <td className="px-2 py-2">
-                                            {session.opening_cash}
+                                            {formatBDTCurrency(
+                                                session.opening_cash,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {session.closing_cash ?? '-'}
+                                            {session.closing_cash != null
+                                                ? formatBDTCurrency(
+                                                      session.closing_cash,
+                                                      false,
+                                                  )
+                                                : '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {session.cash_difference ?? '-'}
+                                            {session.cash_difference != null
+                                                ? formatBDTCurrency(
+                                                      session.cash_difference,
+                                                      false,
+                                                  )
+                                                : '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             {canClose &&

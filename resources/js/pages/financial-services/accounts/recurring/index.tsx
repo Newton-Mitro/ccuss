@@ -7,10 +7,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 interface Props extends SharedData {
@@ -100,7 +101,7 @@ export default function RecurringDepositAccountIndex() {
                                     </th>
                                     <th className="p-3 text-left">Maturity</th>
                                     <th className="p-3 text-center">Status</th>
-                                    <th className="p-3" />
+                                    <th className="p-3 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -113,10 +114,11 @@ export default function RecurringDepositAccountIndex() {
                                             {account.holder?.name ?? '-'}
                                         </td>
                                         <td className="p-3 text-right">
-                                            {Number(
+                                            {formatBDTCurrency(
                                                 account.recurring_deposit
                                                     ?.installment_amount ?? 0,
-                                            ).toFixed(4)}{' '}
+                                                false,
+                                            )}{' '}
                                             {account.recurring_deposit
                                                 ?.installment_frequency ?? ''}
                                         </td>
@@ -146,16 +148,41 @@ export default function RecurringDepositAccountIndex() {
                                                 {account.status}
                                             </StatusBadge>
                                         </td>
-                                        <td className="p-3 text-right">
-                                            <Link
-                                                className="text-primary underline"
-                                                href={route(
-                                                    'financial-accounts.recurring.show',
-                                                    account.id,
-                                                )}
-                                            >
-                                                View
-                                            </Link>
+                                        <td className="p-3">
+                                            <div className="flex items-center justify-end">
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="View account"
+                                                    aria-label={`View ${account.account_no}`}
+                                                >
+                                                    <Link
+                                                        href={route(
+                                                            'financial-accounts.recurring.show',
+                                                            account.id,
+                                                        )}
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="Edit account"
+                                                    aria-label={`Edit ${account.account_no}`}
+                                                >
+                                                    <Link
+                                                        href={route(
+                                                            'financial-accounts.recurring.edit',
+                                                            account.id,
+                                                        )}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

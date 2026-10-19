@@ -10,7 +10,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 interface Props extends SharedData {
@@ -97,7 +97,7 @@ export default function ShareAccountIndex() {
                                         Membership
                                     </th>
                                     <th className="p-3 text-center">Account</th>
-                                    <th className="p-3" />
+                                    <th className="p-3 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -137,16 +137,41 @@ export default function ShareAccountIndex() {
                                         <td className="p-3 text-center">
                                             {account.status}
                                         </td>
-                                        <td className="p-3 text-right">
-                                            <Link
-                                                className="text-primary underline"
-                                                href={route(
-                                                    'financial-accounts.share.show',
-                                                    account.id,
-                                                )}
-                                            >
-                                                View
-                                            </Link>
+                                        <td className="p-3">
+                                            <div className="flex items-center justify-end">
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="View account"
+                                                    aria-label={`View ${account.account_no}`}
+                                                >
+                                                    <Link
+                                                        href={route(
+                                                            'financial-accounts.share.show',
+                                                            account.id,
+                                                        )}
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="Edit account"
+                                                    aria-label={`Edit ${account.account_no}`}
+                                                >
+                                                    <Link
+                                                        href={route(
+                                                            'financial-accounts.share.edit',
+                                                            account.id,
+                                                        )}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

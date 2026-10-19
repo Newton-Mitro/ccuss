@@ -155,7 +155,12 @@ export default function Index() {
                                                 : '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {vault.maximum_balance ?? '-'}
+                                            {vault.maximum_balance != null
+                                                ? formatBDTCurrency(
+                                                      vault.maximum_balance,
+                                                      false,
+                                                  )
+                                                : '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             <div className="flex items-center">

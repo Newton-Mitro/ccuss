@@ -8,6 +8,7 @@ use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
+use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\ShareAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
@@ -100,6 +101,61 @@ it('serves a product-scoped index and rejects accounts of another category', fun
         ->assertNotFound();
 });
 
+it('activates pending savings, share, fixed, and recurring accounts only with update permission', function () {
+    $fixture = createFinancialAccountProductFixture('SAVINGS');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.accounts.update',
+    ]);
+    $categories = [
+        'savings' => 'SAVINGS',
+        'share' => 'SHARE',
+        'fixed' => 'FIXED_DEPOSIT',
+        'recurring' => 'RECURRING_DEPOSIT',
+    ];
+
+    foreach ($categories as $routeProduct => $category) {
+        $product = DepositProduct::factory()->create([
+            'organization_id' => $fixture['organization']->id,
+            'category' => $category,
+        ]);
+        $account = FinancialAccount::factory()->create([
+            'organization_id' => $fixture['organization']->id,
+            'branch_id' => $fixture['branch']->id,
+            'product_type' => DepositProduct::class,
+            'product_id' => $product->id,
+            'holder_type' => Customer::class,
+            'holder_id' => $fixture['customer']->id,
+            'account_type' => $category,
+            'account_no' => "{$routeProduct}-ACTIVATION-001",
+            'status' => 'PENDING',
+            'opened_at' => null,
+        ]);
+
+        $this->actingAs($fixture['user'])
+            ->withSession(['active_organization_id' => $fixture['organization']->id])
+            ->post(route('financial-accounts.activate', $account))
+            ->assertRedirect();
+
+        expect($account->fresh()->status)->toBe('ACTIVE')
+            ->and($account->fresh()->opened_at->toDateString())->toBe(now()->toDateString());
+
+        $this->post(route('financial-accounts.activate', $account))
+            ->assertSessionHasErrors('status');
+    }
+});
+
+it('does not allow account activation without update permission', function () {
+    $fixture = createFinancialAccountProductFixture('SAVINGS');
+    $fixture['account']->update(['status' => 'PENDING']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('financial-accounts.activate', $fixture['account']))
+        ->assertForbidden();
+
+    expect($fixture['account']->fresh()->status)->toBe('PENDING');
+});
+
 it('updates only the display name through a product route', function () {
     $fixture = createFinancialAccountProductFixture('SAVINGS');
     grantFinancialAccountProductPermissions($fixture['user'], ['financial.accounts.update']);
@@ -126,6 +182,158 @@ it('updates only the display name through a product route', function () {
         ->and((float) $fixture['account']->fresh()->balance)->toBe(125.0)
         ->and($fixture['account']->fresh()->account_type)->toBe('SAVINGS')
         ->and($fixture['account']->fresh()->financial_product_id)->toBe($fixture['product']->id);
+});
+
+it('updates savings rules through the product edit route', function () {
+    $savings = createFinancialAccountProductFixture('SAVINGS');
+    $savings['account']->savingAccount()->create(['minimum_balance' => 25]);
+    grantFinancialAccountProductPermissions($savings['user'], ['financial.accounts.update']);
+
+    $this->actingAs($savings['user'])
+        ->withSession(['active_organization_id' => $savings['organization']->id])
+        ->put(route('financial-accounts.savings.update', $savings['account']), [
+            'name' => 'Updated savings',
+            'minimum_balance' => '75.50',
+        ])
+        ->assertRedirect(route('financial-accounts.savings.show', $savings['account']));
+
+    expect((float) $savings['account']->savingAccount()->value('minimum_balance'))->toBe(75.5);
+});
+
+it('updates share membership details through the product edit route', function () {
+    $share = createFinancialAccountProductFixture('SHARE');
+    $membership = $share['account']->shareAccount()->create([
+        'membership_no' => 'MEM-ORIGINAL',
+        'member_since' => '2020-01-01',
+        'membership_status' => 'PENDING',
+    ]);
+    grantFinancialAccountProductPermissions($share['user'], [
+        'financial.accounts.update',
+        'financial.accounts.membership.manage',
+    ]);
+
+    $this->actingAs($share['user'])
+        ->withSession(['active_organization_id' => $share['organization']->id])
+        ->put(route('financial-accounts.share.update', $share['account']), [
+            'name' => 'Updated member account',
+            'membership_no' => 'MEM-UPDATED',
+            'member_since' => '2021-02-03',
+            'membership_status' => 'ACTIVE',
+        ])
+        ->assertRedirect(route('financial-accounts.share.show', $share['account']));
+
+    expect($membership->fresh()->membership_no)->toBe('MEM-UPDATED')
+        ->and($membership->fresh()->member_since->toDateString())->toBe('2021-02-03')
+        ->and($membership->fresh()->membership_status)->toBe('ACTIVE');
+});
+
+it('requires membership-management permission to edit membership details', function () {
+    $share = createFinancialAccountProductFixture('SHARE');
+    $share['account']->shareAccount()->create([
+        'membership_no' => 'MEM-ORIGINAL',
+        'membership_status' => 'PENDING',
+    ]);
+    grantFinancialAccountProductPermissions($share['user'], ['financial.accounts.update']);
+
+    $this->actingAs($share['user'])
+        ->withSession(['active_organization_id' => $share['organization']->id])
+        ->put(route('financial-accounts.share.update', $share['account']), [
+            'membership_no' => 'MEM-UNAUTHORIZED',
+            'membership_status' => 'ACTIVE',
+        ])
+        ->assertForbidden();
+});
+
+it('updates fixed-deposit contract terms and recalculates maturity values', function () {
+    $fixture = createFinancialAccountProductFixture('FIXED_DEPOSIT');
+    $deposit = $fixture['account']->fixedDeposit()->create([
+        'principal_amount' => 1000,
+        'contractual_rate' => 10,
+        'term_value' => 12,
+        'term_unit' => 'MONTH',
+        'started_at' => '2024-01-01',
+        'maturity_date' => '2025-01-01',
+        'maturity_amount' => 1100,
+        'maturity_instruction' => 'PAYOUT',
+    ]);
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.accounts.update',
+        'financial.accounts.fixed-deposits.manage',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('financial-accounts.fixed.update', $fixture['account']), [
+            'name' => 'Updated fixed deposit',
+            'principal_amount' => '2000',
+            'contractual_rate' => '12',
+            'term_value' => '6',
+            'term_unit' => 'MONTH',
+            'started_at' => '2024-01-01',
+            'maturity_instruction' => 'RENEW_PRINCIPAL',
+        ])
+        ->assertRedirect(route('financial-accounts.fixed.show', $fixture['account']));
+
+    expect((float) $deposit->fresh()->principal_amount)->toBe(2000.0)
+        ->and($deposit->fresh()->maturity_date->toDateString())->toBe('2024-07-01')
+        ->and((float) $deposit->fresh()->maturity_amount)->toBe(2120.0)
+        ->and($deposit->fresh()->maturity_instruction)->toBe('RENEW_PRINCIPAL');
+});
+
+it('updates recurring schedules only before installment history exists', function () {
+    $fixture = createFinancialAccountProductFixture('RECURRING_DEPOSIT');
+    $deposit = $fixture['account']->recurringDeposit()->create([
+        'installment_amount' => 100,
+        'installment_frequency' => 'MONTHLY',
+        'total_installments' => 2,
+        'paid_installments' => 0,
+        'started_at' => '2024-01-01',
+        'maturity_date' => '2024-02-01',
+        'maturity_extension_days' => 0,
+        'grace_days' => 0,
+    ]);
+    $deposit->installments()->createMany([
+        ['installment_no' => 1, 'due_date' => '2024-01-01', 'amount_due' => 100, 'status' => 'PENDING'],
+        ['installment_no' => 2, 'due_date' => '2024-02-01', 'amount_due' => 100, 'status' => 'PENDING'],
+    ]);
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.accounts.update',
+        'financial.accounts.recurring-deposits.manage',
+    ]);
+
+    $payload = [
+        'name' => 'Updated recurring deposit',
+        'installment_amount' => '200',
+        'installment_frequency' => 'WEEKLY',
+        'total_installments' => '3',
+        'started_at' => '2024-01-10',
+        'maturity_extension_days' => '2',
+        'grace_days' => '4',
+    ];
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('financial-accounts.recurring.update', $fixture['account']), $payload)
+        ->assertRedirect(route('financial-accounts.recurring.show', $fixture['account']));
+
+    expect((int) $deposit->fresh()->total_installments)->toBe(3)
+        ->and($deposit->fresh()->maturity_date->toDateString())->toBe('2024-01-26')
+        ->and($deposit->installments()->count())->toBe(3)
+        ->and((float) $deposit->installments()->first()->amount_due)->toBe(200.0);
+
+    $deposit->installments()->first()->update([
+        'status' => 'PAID',
+        'amount_paid' => 200,
+    ]);
+    $payload['installment_amount'] = '250';
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->put(route('financial-accounts.recurring.update', $fixture['account']), $payload)
+        ->assertSessionHasErrors('installment_amount');
+
+    expect((float) $deposit->fresh()->installment_amount)->toBe(200.0)
+        ->and($deposit->installments()->count())->toBe(3);
 });
 
 it('creates an account only when the product route, account type, and product category agree', function () {

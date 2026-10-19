@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -122,9 +123,20 @@ export default function BankReconciliationsIndex() {
                                     </p>
                                     <p className="text-xs text-muted-foreground">
                                         Statement{' '}
-                                        {reconciliation.statement_balance} ·
-                                        Book {reconciliation.book_balance} ·
-                                        Difference {reconciliation.difference}
+                                        {formatBDTCurrency(
+                                            reconciliation.statement_balance,
+                                            false,
+                                        )}{' '}
+                                        · Book{' '}
+                                        {formatBDTCurrency(
+                                            reconciliation.book_balance,
+                                            false,
+                                        )}{' '}
+                                        · Difference{' '}
+                                        {formatBDTCurrency(
+                                            reconciliation.difference,
+                                            false,
+                                        )}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-2">

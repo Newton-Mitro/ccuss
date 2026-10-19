@@ -5,6 +5,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -123,11 +124,15 @@ export default function LoanAccountShow() {
                                         {formatDate(item.due_date)}
                                     </td>
                                     <td className="p-3 text-right">
-                                        {Number(item.total_due ?? 0).toFixed(4)}
+                                        {formatBDTCurrency(
+                                            item.total_due ?? 0,
+                                            false,
+                                        )}
                                     </td>
                                     <td className="p-3 text-right">
-                                        {Number(item.total_paid ?? 0).toFixed(
-                                            4,
+                                        {formatBDTCurrency(
+                                            item.total_paid ?? 0,
+                                            false,
                                         )}
                                     </td>
                                     <td className="p-3 text-center">

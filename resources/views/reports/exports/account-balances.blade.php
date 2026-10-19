@@ -59,8 +59,8 @@
                     <td class="account">{{ $row[0] }}</td>
                     <td>{{ $row[1] }}</td>
                     <td>{{ $row[3] }}</td>
-                    <td class="number">{{ number_format((float) $row[4], 4) }}</td>
-                    <td class="number">{{ number_format((float) $row[5], 4) }}</td>
+                    <td class="number">{{ number_format((float) $row[4], 2) }}</td>
+                    <td class="number">{{ number_format((float) $row[5], 2) }}</td>
                 </tr>
             @empty
                 <tr><td colspan="5">No accounts found.</td></tr>

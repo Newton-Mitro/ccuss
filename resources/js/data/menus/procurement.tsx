@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const procurementMenu: SidebarItem[] = [
+export const procurement: SidebarItem[] = [
     {
         name: 'Procurement & Vendors',
         icon: <i className="fa-solid fa-cart-shopping" />,

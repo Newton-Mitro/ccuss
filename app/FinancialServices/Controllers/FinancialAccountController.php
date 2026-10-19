@@ -24,6 +24,7 @@ use App\FinancialServices\Requests\StoreShareAccountRequest;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -196,14 +197,94 @@ class FinancialAccountController extends Controller
         return Inertia::render("financial-services/accounts/{$request->route('product')}/edit", [
             'account' => $financialAccount->load($relations),
             'product' => $request->route('product'),
+            'canManageProductDetails' => $this->canManageProductDetails($request, $request->route('product')),
         ]);
     }
 
     public function productUpdate(Request $request, FinancialAccount $financialAccount)
     {
         $this->authorizeProductAccount($request, $financialAccount);
-        $data = $request->validate(['name' => ['nullable', 'string', 'max:200']]);
-        $financialAccount->update($data);
+        $product = $request->route('product');
+        $rules = ['name' => ['nullable', 'string', 'max:200']];
+
+        if ($product === 'savings') {
+            $rules['minimum_balance'] = ['sometimes', 'required', 'numeric', 'gte:0'];
+        } elseif ($product === 'share') {
+            $rules += [
+                'membership_no' => [
+                    'sometimes',
+                    'required',
+                    'string',
+                    'max:100',
+                    Rule::unique('share_accounts', 'membership_no')->ignore($financialAccount->shareAccount?->id),
+                ],
+                'member_since' => ['sometimes', 'nullable', 'date'],
+                'membership_status' => ['sometimes', 'required', Rule::in(['PENDING', 'ACTIVE', 'SUSPENDED', 'CLOSED'])],
+            ];
+        } elseif ($product === 'fixed') {
+            $rules += [
+                'principal_amount' => ['sometimes', 'required', 'numeric', 'gt:0'],
+                'contractual_rate' => ['sometimes', 'required', 'numeric', 'gte:0'],
+                'term_value' => ['sometimes', 'required', 'integer', 'min:1', 'max:600'],
+                'term_unit' => ['sometimes', 'required', Rule::in(['DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR'])],
+                'started_at' => ['sometimes', 'required', 'date'],
+                'maturity_instruction' => ['sometimes', 'required', Rule::in(['PAYOUT', 'RENEW_PRINCIPAL', 'RENEW_PRINCIPAL_AND_INTEREST'])],
+            ];
+        } elseif ($product === 'recurring') {
+            $rules += [
+                'installment_amount' => ['sometimes', 'required', 'numeric', 'gt:0'],
+                'installment_frequency' => ['sometimes', 'required', Rule::in(['WEEKLY', 'MONTHLY', 'QUARTERLY'])],
+                'total_installments' => ['sometimes', 'required', 'integer', 'min:1', 'max:600'],
+                'started_at' => ['sometimes', 'required', 'date'],
+                'maturity_extension_days' => ['sometimes', 'nullable', 'integer', 'min:0'],
+                'grace_days' => ['sometimes', 'nullable', 'integer', 'min:0'],
+            ];
+        }
+
+        $data = $request->validate($rules);
+        $accountData = array_intersect_key($data, ['name' => true]);
+        $contractData = array_diff_key($data, $accountData);
+
+        if ($contractData !== []) {
+            abort_unless($this->canManageProductDetails($request, $product), 403);
+
+            if ($product === 'savings') {
+                abort_unless($financialAccount->savingAccount()->exists(), 422, 'Savings details are not available for this account.');
+                $financialAccount->savingAccount()->update($contractData);
+            } elseif ($product === 'share') {
+                $shareAccount = $financialAccount->shareAccount;
+                abort_unless($shareAccount, 422, 'Share membership details are not available for this account.');
+                $shareAccount->update($contractData);
+            } elseif ($product === 'fixed') {
+                $deposit = $financialAccount->fixedDeposit;
+                abort_unless($deposit, 422, 'Fixed-deposit contract details are not available for this account.');
+                abort_if($financialAccount->status === 'CLOSED', 422, 'Closed accounts cannot change deposit contract details.');
+                $this->fixedDepositService->amend($deposit, array_merge([
+                    'principal_amount' => $deposit->principal_amount,
+                    'contractual_rate' => $deposit->contractual_rate,
+                    'term_value' => $deposit->term_value,
+                    'term_unit' => $deposit->term_unit,
+                    'started_at' => $deposit->started_at->toDateString(),
+                    'maturity_instruction' => $deposit->maturity_instruction,
+                ], $contractData));
+            } elseif ($product === 'recurring') {
+                $deposit = $financialAccount->recurringDeposit;
+                abort_unless($deposit, 422, 'Recurring-deposit contract details are not available for this account.');
+                abort_if($financialAccount->status === 'CLOSED', 422, 'Closed accounts cannot change deposit contract details.');
+                $this->recurringDepositService->amend($deposit, array_merge([
+                    'installment_amount' => $deposit->installment_amount,
+                    'installment_frequency' => $deposit->installment_frequency,
+                    'total_installments' => $deposit->total_installments,
+                    'started_at' => $deposit->started_at->toDateString(),
+                    'maturity_extension_days' => $deposit->maturity_extension_days,
+                    'grace_days' => $deposit->grace_days,
+                ], $contractData));
+            }
+        }
+
+        if ($accountData !== []) {
+            $financialAccount->update($accountData);
+        }
 
         return redirect()->route("financial-accounts.{$request->route('product')}.show", $financialAccount)
             ->with('success', 'Account details updated successfully.');
@@ -554,6 +635,18 @@ class FinancialAccountController extends Controller
         abort_unless(isset($categories[$product]), 404);
 
         return $categories[$product];
+    }
+
+    private function canManageProductDetails(Request $request, string $product): bool
+    {
+        $permission = match ($product) {
+            'share' => 'financial.accounts.membership.manage',
+            'fixed' => 'financial.accounts.fixed-deposits.manage',
+            'recurring' => 'financial.accounts.recurring-deposits.manage',
+            default => null,
+        };
+
+        return $permission === null || $request->user()?->hasPermission($permission) === true;
     }
 
     private function authorizeProductAccount(Request $request, FinancialAccount $account): void

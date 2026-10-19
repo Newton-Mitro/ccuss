@@ -1,3 +1,4 @@
+import FinancialAccountActivation from '@/components/financial-account-activation';
 import FinancialAccountPeopleManagement from '@/components/financial-account-people-management';
 import {
     ResourcePageHeader,
@@ -9,7 +10,7 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 interface Props extends SharedData {
     account: {
@@ -40,9 +41,6 @@ export default function ShareAccountShow() {
         (permission) =>
             permission.slug === 'financial.accounts.membership.manage',
     );
-    const canActivateAccount = (auth.user.permissions ?? []).some(
-        (permission) => permission.slug === 'financial.accounts.update',
-    );
     const {
         data: membershipData,
         setData: setMembershipData,
@@ -65,15 +63,6 @@ export default function ShareAccountShow() {
         );
     };
 
-    const activateAccount = () => {
-        router.post(
-            route('financial-accounts.activate', account.id),
-            {},
-            {
-                preserveScroll: true,
-            },
-        );
-    };
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         {
@@ -90,16 +79,22 @@ export default function ShareAccountShow() {
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned'} · ${account.product?.name ?? 'Share membership'}`}
                     action={
-                        <Button asChild>
-                            <Link
-                                href={route(
-                                    'financial-accounts.share.edit',
-                                    account.id,
-                                )}
-                            >
-                                Edit account
-                            </Link>
-                        </Button>
+                        <>
+                            <FinancialAccountActivation
+                                accountId={account.id}
+                                status={account.status}
+                            />
+                            <Button asChild>
+                                <Link
+                                    href={route(
+                                        'financial-accounts.share.edit',
+                                        account.id,
+                                    )}
+                                >
+                                    Edit account
+                                </Link>
+                            </Button>
+                        </>
                     }
                 />
                 <div className="grid gap-3 sm:grid-cols-4">
@@ -175,13 +170,6 @@ export default function ShareAccountShow() {
                                     : 'Update membership'}
                             </Button>
                         </form>
-                    )}
-                    {account.status === 'PENDING' && canActivateAccount && (
-                        <div className="mt-4 border-t pt-4">
-                            <Button type="button" onClick={activateAccount}>
-                                Activate account
-                            </Button>
-                        </div>
                     )}
                 </section>
                 <FinancialAccountPeopleManagement

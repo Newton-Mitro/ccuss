@@ -7,6 +7,7 @@ import {
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { BankAccountIndexProps } from '@/types/treasury-cash/bank-accounts';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -139,10 +140,13 @@ export default function Index() {
                                             {account.account_type}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {`BDT ${Number(account.balance).toLocaleString('en-BD', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                            {formatBDTCurrency(account.balance)}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {account.opening_balance}
+                                            {formatBDTCurrency(
+                                                account.opening_balance,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
                                             {account.is_reconcilable

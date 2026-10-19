@@ -9,6 +9,7 @@ import {
     StatusBadge,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -74,11 +75,7 @@ const links = [
     },
 ] as const;
 
-const money = (amount: number) =>
-    `BDT ${Number(amount || 0).toLocaleString('en-BD', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    })}`;
+const money = (amount: number) => `BDT ${formatBDTCurrency(amount, false)}`;
 
 export default function BranchOperationsDashboard() {
     const {

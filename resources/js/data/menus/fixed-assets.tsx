@@ -1,6 +1,6 @@
 import { SidebarItem } from '../../types';
 
-export const fixedAssetsMenu: SidebarItem[] = [
+export const fixedAssets: SidebarItem[] = [
     {
         name: 'Fixed Assets',
         icon: <i className="fa-solid fa-building" />,

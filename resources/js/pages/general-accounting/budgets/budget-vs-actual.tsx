@@ -1,6 +1,7 @@
 import HeadingSmall from '@/components/heading-small';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -167,12 +168,18 @@ export default function BudgetVsActual() {
 
                                     {/* Budget Amount */}
                                     <td className="px-4 py-3 text-right align-middle font-medium tabular-nums">
-                                        {Number(row.budget_amount).toFixed(2)}
+                                        {formatBDTCurrency(
+                                            row.budget_amount,
+                                            false,
+                                        )}
                                     </td>
 
                                     {/* Actual Amount */}
                                     <td className="px-4 py-3 text-right align-middle tabular-nums">
-                                        {Number(row.actual_amount).toFixed(2)}
+                                        {formatBDTCurrency(
+                                            row.actual_amount,
+                                            false,
+                                        )}
                                     </td>
 
                                     {/* Variance */}
@@ -183,7 +190,7 @@ export default function BudgetVsActual() {
                                                 : 'text-foreground'
                                         }`}
                                     >
-                                        {Number(row.variance).toFixed(2)}
+                                        {formatBDTCurrency(row.variance, false)}
                                     </td>
 
                                     {/* Utilization */}

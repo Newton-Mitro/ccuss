@@ -1,3 +1,4 @@
+import FinancialAccountActivation from '@/components/financial-account-activation';
 import FinancialAccountPeopleManagement from '@/components/financial-account-people-management';
 import {
     ResourcePageHeader,
@@ -6,6 +7,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -15,7 +17,10 @@ interface Props extends SharedData {
         id: number;
         account_no: string;
         status: string;
+        account_type?: string;
+        balance?: string | number;
         holder?: { name?: string } | null;
+        product?: { name?: string } | null;
         recurring_deposit?: {
             installment_amount?: string | number;
             installment_frequency?: string;
@@ -56,21 +61,33 @@ export default function RecurringDepositAccountShow() {
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned'} · Recurring deposit schedule`}
                     action={
-                        <Button asChild>
-                            <Link
-                                href={route(
-                                    'financial-accounts.recurring.edit',
-                                    account.id,
-                                )}
-                            >
-                                Edit account
-                            </Link>
-                        </Button>
+                        <>
+                            <FinancialAccountActivation
+                                accountId={account.id}
+                                status={account.status}
+                            />
+                            <Button asChild>
+                                <Link
+                                    href={route(
+                                        'financial-accounts.recurring.edit',
+                                        account.id,
+                                    )}
+                                >
+                                    Edit account
+                                </Link>
+                            </Button>
+                        </>
                     }
                 />
                 <div className="grid gap-3 sm:grid-cols-4">
                     {[
-                        ['Installment', deposit?.installment_amount ?? '0'],
+                        [
+                            'Installment',
+                            formatBDTCurrency(
+                                deposit?.installment_amount ?? 0,
+                                false,
+                            ),
+                        ],
                         ['Frequency', deposit?.installment_frequency ?? '-'],
                         [
                             'Progress',
@@ -114,8 +131,9 @@ export default function RecurringDepositAccountShow() {
                                         {formatDate(item.due_date)}
                                     </td>
                                     <td className="p-3 text-right">
-                                        {Number(item.amount_due ?? 0).toFixed(
-                                            4,
+                                        {formatBDTCurrency(
+                                            item.amount_due ?? 0,
+                                            false,
                                         )}
                                     </td>
                                     <td className="p-3 text-center">

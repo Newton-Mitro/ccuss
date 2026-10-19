@@ -1,6 +1,7 @@
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Pencil } from 'lucide-react';
@@ -57,7 +58,7 @@ export default function BudgetShow() {
                                         {entry.fiscal_period?.name ?? 'Annual'}
                                     </td>
                                     <td className="p-3">
-                                        {Number(entry.amount).toFixed(2)}
+                                        {formatBDTCurrency(entry.amount, false)}
                                     </td>
                                 </tr>
                             ))}

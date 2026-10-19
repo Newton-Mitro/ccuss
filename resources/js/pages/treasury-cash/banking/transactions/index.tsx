@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { BankTransactionIndexPageProps } from '@/types/treasury-cash/forms';
@@ -205,10 +206,18 @@ export default function Index() {
                                             )}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {transaction.amount}
+                                            {formatBDTCurrency(
+                                                transaction.amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {transaction.balance_after ?? '-'}
+                                            {transaction.balance_after != null
+                                                ? formatBDTCurrency(
+                                                      transaction.balance_after,
+                                                      false,
+                                                  )
+                                                : '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             <StatusBadge
@@ -237,7 +246,7 @@ export default function Index() {
                                                             appSwal
                                                                 .fire({
                                                                     title: 'Post this bank transaction?',
-                                                                    text: `Post ${transaction.transaction_no} for ${transaction.amount}?`,
+                                                                    text: `Post ${transaction.transaction_no} for ${formatBDTCurrency(transaction.amount, false)}?`,
                                                                     icon: 'warning',
                                                                     showCancelButton: true,
                                                                     confirmButtonText:

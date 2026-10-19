@@ -57,4 +57,47 @@ class FixedDepositService
             'maturity_instruction' => $data['maturity_instruction'],
         ]));
     }
+
+    public function amend(FixedDeposit $deposit, array $data): FixedDeposit
+    {
+        $startedAt = CarbonImmutable::parse($data['started_at']);
+        $termValue = (int) $data['term_value'];
+        $termUnit = $data['term_unit'];
+        $maturityDate = match ($termUnit) {
+            'DAY' => $startedAt->addDays($termValue),
+            'WEEK' => $startedAt->addWeeks($termValue),
+            'MONTH' => $startedAt->addMonthsNoOverflow($termValue),
+            'QUARTER' => $startedAt->addMonthsNoOverflow($termValue * 3),
+            'YEAR' => $startedAt->addYearsNoOverflow($termValue),
+        };
+        $termMonths = match ($termUnit) {
+            'DAY' => $termValue / 30,
+            'WEEK' => $termValue / 4,
+            'MONTH' => $termValue,
+            'QUARTER' => $termValue * 3,
+            'YEAR' => $termValue * 12,
+        };
+        $principal = (float) $data['principal_amount'];
+        $rate = (float) $data['contractual_rate'];
+
+        return DB::transaction(function () use ($deposit, $data, $startedAt, $termValue, $termUnit, $maturityDate, $termMonths, $principal, $rate): FixedDeposit {
+            $contract = FixedDeposit::query()->lockForUpdate()->findOrFail($deposit->id);
+            if ($contract->closed_at !== null) {
+                throw new RuntimeException('A closed fixed-deposit contract cannot be amended.');
+            }
+
+            $contract->update([
+                'principal_amount' => $principal,
+                'contractual_rate' => $rate,
+                'term_value' => $termValue,
+                'term_unit' => $termUnit,
+                'started_at' => $startedAt->toDateString(),
+                'maturity_date' => $maturityDate->toDateString(),
+                'maturity_amount' => round($principal * (1 + ($rate * $termMonths / 12 / 100)), 4),
+                'maturity_instruction' => $data['maturity_instruction'],
+            ]);
+
+            return $contract->refresh();
+        });
+    }
 }

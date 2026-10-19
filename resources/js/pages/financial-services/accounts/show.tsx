@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialAccountShowPageProps } from '@/types/financial-services';
@@ -242,7 +243,7 @@ export default function FinancialAccountShow() {
                     <div className="rounded-lg border bg-card p-3">
                         <p className="text-xs text-muted-foreground">Balance</p>
                         <p className="mt-1 text-lg font-semibold tabular-nums">
-                            {Number(account.balance).toFixed(4)}
+                            {formatBDTCurrency(account.balance, false)}
                         </p>
                     </div>
                     <div className="rounded-lg border bg-card p-3">
@@ -250,7 +251,10 @@ export default function FinancialAccountShow() {
                             Available balance
                         </p>
                         <p className="mt-1 text-lg font-semibold tabular-nums">
-                            {Number(account.available_balance).toFixed(4)}
+                            {formatBDTCurrency(
+                                account.available_balance,
+                                false,
+                            )}
                         </p>
                     </div>
                 </div>
@@ -777,8 +781,11 @@ export default function FinancialAccountShow() {
                                     Principal
                                 </p>
                                 <p className="font-medium">
-                                    {account.fixed_deposit.principal_amount ??
-                                        0}
+                                    {formatBDTCurrency(
+                                        account.fixed_deposit
+                                            .principal_amount ?? 0,
+                                        false,
+                                    )}
                                 </p>
                             </div>
                             <div>
@@ -806,8 +813,14 @@ export default function FinancialAccountShow() {
                                     Maturity amount
                                 </p>
                                 <p className="font-medium tabular-nums">
-                                    {account.fixed_deposit.maturity_amount ??
-                                        'Not calculated'}
+                                    {account.fixed_deposit.maturity_amount !=
+                                    null
+                                        ? formatBDTCurrency(
+                                              account.fixed_deposit
+                                                  .maturity_amount,
+                                              false,
+                                          )
+                                        : 'Not calculated'}
                                 </p>
                             </div>
                             <div>
@@ -1306,7 +1319,11 @@ export default function FinancialAccountShow() {
                                     Principal
                                 </p>
                                 <p className="font-medium">
-                                    {account.loan_account.principal_amount ?? 0}
+                                    {formatBDTCurrency(
+                                        account.loan_account.principal_amount ??
+                                            0,
+                                        false,
+                                    )}
                                 </p>
                             </div>
                             <div>
@@ -1363,20 +1380,32 @@ export default function FinancialAccountShow() {
                                                         )}
                                                     </td>
                                                     <td className="p-2">
-                                                        {schedule.scheduled_principal ??
-                                                            0}
+                                                        {formatBDTCurrency(
+                                                            schedule.scheduled_principal ??
+                                                                0,
+                                                            false,
+                                                        )}
                                                     </td>
                                                     <td className="p-2">
-                                                        {schedule.scheduled_interest ??
-                                                            0}
+                                                        {formatBDTCurrency(
+                                                            schedule.scheduled_interest ??
+                                                                0,
+                                                            false,
+                                                        )}
                                                     </td>
                                                     <td className="p-2 font-medium">
-                                                        {schedule.total_due ??
-                                                            0}
+                                                        {formatBDTCurrency(
+                                                            schedule.total_due ??
+                                                                0,
+                                                            false,
+                                                        )}
                                                     </td>
                                                     <td className="p-2">
-                                                        {schedule.total_paid ??
-                                                            0}
+                                                        {formatBDTCurrency(
+                                                            schedule.total_paid ??
+                                                                0,
+                                                            false,
+                                                        )}
                                                     </td>
                                                     <td className="p-2">
                                                         {schedule.status}
@@ -1413,7 +1442,11 @@ export default function FinancialAccountShow() {
                                                 <p className="mt-1 text-muted-foreground">
                                                     {arrear.days_overdue ?? 0}{' '}
                                                     days overdue ·{' '}
-                                                    {arrear.total_overdue ?? 0}{' '}
+                                                    {formatBDTCurrency(
+                                                        arrear.total_overdue ??
+                                                            0,
+                                                        false,
+                                                    )}{' '}
                                                     outstanding
                                                 </p>
                                             </div>

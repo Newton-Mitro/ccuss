@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem } from '@/types';
 import type { PettyCashAccountCreatePageProps } from '@/types/treasury-cash/forms';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -440,13 +441,9 @@ export default function CreatePettyCashAccount() {
                                     </div>
 
                                     <p className="text-2xl font-semibold tracking-tight tabular-nums">
-                                        ৳
-                                        {Number(
+                                        {formatBDTCurrency(
                                             fund?.current_balance ?? 0,
-                                        ).toLocaleString('en-BD', {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        })}
+                                        )}
                                     </p>
                                     <p className="mt-2 text-xs leading-5 text-muted-foreground">
                                         Read-only balance. Use authorized

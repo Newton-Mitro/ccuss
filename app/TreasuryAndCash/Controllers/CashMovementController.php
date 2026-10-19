@@ -310,12 +310,12 @@ class CashMovementController extends Controller
         }
 
         $routeName = match ($transferType) {
-            'VAULT_TO_TELLER' => 'vault-transfers.root.vault-to-teller',
-            'TELLER_TO_VAULT' => 'vault-transfers.root.teller-to-vault',
-            'VAULT_TO_VAULT' => 'vault-transfers.root.vault-to-vault',
-            'BANK_TO_VAULT' => 'vault-transfers.root.bank-to-vault',
-            'VAULT_TO_BANK' => 'vault-transfers.root.vault-to-bank',
-            default => 'cash-movements.teller-to-teller-transfer',
+            'VAULT_TO_TELLER' => 'cash-movements.vault-to-teller',
+            'TELLER_TO_VAULT' => 'cash-movements.teller-to-vault',
+            'VAULT_TO_VAULT' => 'cash-movements.vault-to-vault',
+            'BANK_TO_VAULT' => 'cash-movements.bank-to-vault',
+            'VAULT_TO_BANK' => 'cash-movements.vault-to-bank',
+            default => 'cash-movements.teller-to-teller',
         };
 
         return redirect()

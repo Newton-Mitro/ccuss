@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -141,10 +142,16 @@ export default function DividendsIndex() {
                                             {declaration.dividend_rate}%
                                         </td>
                                         <td className="p-3 text-right tabular-nums">
-                                            {declaration.total_basis_amount}
+                                            {formatBDTCurrency(
+                                                declaration.total_basis_amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3 text-right tabular-nums">
-                                            {declaration.total_dividend_amount}
+                                            {formatBDTCurrency(
+                                                declaration.total_dividend_amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3 text-center">
                                             <StatusBadge
@@ -230,7 +237,7 @@ export default function DividendsIndex() {
                                                                 appSwal
                                                                     .fire({
                                                                         title: 'Post this dividend allocation?',
-                                                                        text: `Post dividend ${allocation.dividend_amount} for this allocation?`,
+                                                                        text: `Post dividend ${formatBDTCurrency(allocation.dividend_amount, false)} for this allocation?`,
                                                                         icon: 'warning',
                                                                         showCancelButton: true,
                                                                         confirmButtonText:
@@ -258,9 +265,10 @@ export default function DividendsIndex() {
                                                             }}
                                                         >
                                                             Post{' '}
-                                                            {
-                                                                allocation.dividend_amount
-                                                            }
+                                                            {formatBDTCurrency(
+                                                                allocation.dividend_amount,
+                                                                false,
+                                                            )}
                                                         </Button>
                                                     ))}
                                         </td>

@@ -1,5 +1,6 @@
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import {
     FinancialAccountSearchInput,
     type FinancialAccountSearchResult,
@@ -420,16 +421,9 @@ export default function SavingsChequeWithdrawalPage() {
                                                     </div>
 
                                                     <div className="mt-0.5 text-sm font-semibold tabular-nums">
-                                                        BDT{' '}
-                                                        {Number(
+                                                        {formatBDTCurrency(
                                                             selectedAccount.available_balance ||
                                                                 0,
-                                                        ).toLocaleString(
-                                                            'en-BD',
-                                                            {
-                                                                minimumFractionDigits: 2,
-                                                                maximumFractionDigits: 2,
-                                                            },
                                                         )}
                                                     </div>
                                                 </div>
@@ -440,16 +434,9 @@ export default function SavingsChequeWithdrawalPage() {
                                                     </div>
 
                                                     <div className="mt-0.5 text-sm font-semibold tabular-nums">
-                                                        BDT{' '}
-                                                        {Number(
+                                                        {formatBDTCurrency(
                                                             selectedAccount.balance ||
                                                                 0,
-                                                        ).toLocaleString(
-                                                            'en-BD',
-                                                            {
-                                                                minimumFractionDigits: 2,
-                                                                maximumFractionDigits: 2,
-                                                            },
                                                         )}
                                                     </div>
                                                 </div>
@@ -689,15 +676,11 @@ export default function SavingsChequeWithdrawalPage() {
                                             Expected cash
                                         </div>
                                         <div className="text-xs font-semibold tabular-nums">
-                                            BDT{' '}
-                                            {Number(
+                                            {formatBDTCurrency(
                                                 selectedTellerSession?.expected_cash ??
                                                     selectedTellerSession?.opening_cash ??
                                                     0,
-                                            ).toLocaleString('en-BD', {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2,
-                                            })}
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -732,7 +715,7 @@ export default function SavingsChequeWithdrawalPage() {
                                             ...relevantCheques.map(
                                                 (cheque) => ({
                                                     value: String(cheque.id),
-                                                    label: `${cheque.cheque_no} · ${cheque.status} · BDT ${Number(cheque.amount || 0).toLocaleString('en-BD', { minimumFractionDigits: 2 })}`,
+                                                    label: `${cheque.cheque_no} · ${cheque.status} · ${formatBDTCurrency(cheque.amount || 0)}`,
                                                 }),
                                             ),
                                         ]}
@@ -891,16 +874,9 @@ export default function SavingsChequeWithdrawalPage() {
                                                     </div>
 
                                                     <div className="mt-1 text-xl font-bold tabular-nums">
-                                                        BDT{' '}
-                                                        {Number(
+                                                        {formatBDTCurrency(
                                                             selectedCheque.amount ||
                                                                 0,
-                                                        ).toLocaleString(
-                                                            'en-BD',
-                                                            {
-                                                                minimumFractionDigits: 2,
-                                                                maximumFractionDigits: 2,
-                                                            },
                                                         )}
                                                     </div>
                                                 </div>

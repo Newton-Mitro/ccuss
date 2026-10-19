@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionPageProps } from '@/types/financial-services';
@@ -59,6 +60,18 @@ export default function FinancialTransactionShow() {
                                                         'financial-transactions.post',
                                                         transaction.id,
                                                     ),
+                                                    {},
+                                                    {
+                                                        onError: (errors) => {
+                                                            void appSwal.fire({
+                                                                title: 'Unable to post transaction',
+                                                                text: Object.values(
+                                                                    errors,
+                                                                ).join(' '),
+                                                                icon: 'error',
+                                                            });
+                                                        },
+                                                    },
                                                 );
                                             });
                                     }}
@@ -122,7 +135,7 @@ export default function FinancialTransactionShow() {
                     <div className="rounded-lg border bg-card p-3">
                         <p className="text-xs text-muted-foreground">Amount</p>
                         <p className="mt-1 font-semibold tabular-nums">
-                            {Number(transaction.amount).toFixed(4)}{' '}
+                            {formatBDTCurrency(transaction.amount, false)}{' '}
                             {transaction.currency}
                         </p>
                     </div>
@@ -170,7 +183,9 @@ export default function FinancialTransactionShow() {
                                 (entry, index) => (
                                     <div key={index}>
                                         {entry.account?.code ?? '-'} · Debit{' '}
-                                        {entry.debit} · Credit {entry.credit}
+                                        {formatBDTCurrency(entry.debit, false)}{' '}
+                                        · Credit{' '}
+                                        {formatBDTCurrency(entry.credit, false)}
                                     </div>
                                 ),
                             )}
@@ -193,7 +208,7 @@ export default function FinancialTransactionShow() {
                                 </span>
                                 <span className="tabular-nums">
                                     {entry.direction}{' '}
-                                    {Number(entry.amount).toFixed(4)}
+                                    {formatBDTCurrency(entry.amount, false)}
                                 </span>
                             </div>
                         ))}

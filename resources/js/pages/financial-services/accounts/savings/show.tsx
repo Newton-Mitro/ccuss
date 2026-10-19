@@ -1,3 +1,4 @@
+import FinancialAccountActivation from '@/components/financial-account-activation';
 import FinancialAccountPeopleManagement from '@/components/financial-account-people-management';
 import {
     ResourcePageHeader,
@@ -5,6 +6,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -45,31 +47,38 @@ export default function SavingsAccountShow() {
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned'} · ${account.product?.name ?? 'Savings'}`}
                     action={
-                        <Button asChild>
-                            <Link
-                                href={route(
-                                    'financial-accounts.savings.edit',
-                                    account.id,
-                                )}
-                            >
-                                Edit account
-                            </Link>
-                        </Button>
+                        <>
+                            <FinancialAccountActivation
+                                accountId={account.id}
+                                status={account.status}
+                            />
+                            <Button asChild>
+                                <Link
+                                    href={route(
+                                        'financial-accounts.savings.edit',
+                                        account.id,
+                                    )}
+                                >
+                                    Edit account
+                                </Link>
+                            </Button>
+                        </>
                     }
                 />
                 <div className="grid gap-3 sm:grid-cols-4">
                     {[
                         ['Status', account.status],
-                        ['Balance', Number(account.balance).toFixed(4)],
+                        ['Balance', formatBDTCurrency(account.balance, false)],
                         [
                             'Available',
-                            Number(account.available_balance).toFixed(4),
+                            formatBDTCurrency(account.available_balance, false),
                         ],
                         [
                             'Minimum',
-                            Number(
+                            formatBDTCurrency(
                                 account.saving_account?.minimum_balance ?? 0,
-                            ).toFixed(4),
+                                false,
+                            ),
                         ],
                     ].map(([label, value]) => (
                         <div

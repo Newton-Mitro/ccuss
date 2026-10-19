@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { CashAdjustmentIndexProps } from '@/types/treasury-cash/cash-adjustments';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -152,7 +153,10 @@ export default function Index() {
                                             {adjustment.type}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {adjustment.amount}
+                                            {formatBDTCurrency(
+                                                adjustment.amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td
                                             className="max-w-72 truncate px-2 py-2"

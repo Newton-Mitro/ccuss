@@ -17,6 +17,7 @@ use App\GeneralAccounting\Application\FinancialTransactionAccountingService;
 use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 class FinancialTransactionService
@@ -484,7 +485,9 @@ class FinancialTransactionService
                     ->findOrFail($entry->financial_account_id);
                 $newBalance = $this->balanceAfterEntry($account, $entry->direction, (float) $entry->amount);
                 if ($newBalance < 0) {
-                    throw new RuntimeException('The account does not have enough available balance.');
+                    throw ValidationException::withMessages([
+                        'transaction' => "Account {$account->account_no} does not have enough available balance for this transaction.",
+                    ]);
                 }
 
                 $account->update([

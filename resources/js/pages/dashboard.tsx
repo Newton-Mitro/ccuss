@@ -71,7 +71,8 @@ const compactNumberFormat = new Intl.NumberFormat('en-BD', {
 const moneyFormat = new Intl.NumberFormat('en-BD', {
     style: 'currency',
     currency: 'BDT',
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
 });
 
 const formatMoney = (amount: number) => moneyFormat.format(amount || 0);

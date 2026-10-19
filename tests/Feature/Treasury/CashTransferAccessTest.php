@@ -243,7 +243,7 @@ it('loads the teller-to-teller transfer form with scoped transfer data', functio
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->get(route('cash-movements.teller-to-teller-transfer'))
+        ->get(route('cash-movements.teller-to-teller'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/cash-movements/teller-to-teller-transfer')
@@ -260,7 +260,7 @@ it('filters vault transfer options to the correct source and destination types',
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->get(route('vault-transfers.root.vault-to-teller'))
+        ->get(route('cash-movements.vault-to-teller'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'VAULT_TO_TELLER')
@@ -271,7 +271,7 @@ it('filters vault transfer options to the correct source and destination types',
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->get(route('vault-transfers.root.teller-to-vault'))
+        ->get(route('cash-movements.teller-to-vault'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'TELLER_TO_VAULT')
@@ -282,7 +282,7 @@ it('filters vault transfer options to the correct source and destination types',
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->get(route('vault-transfers.root.vault-to-vault'))
+        ->get(route('cash-movements.vault-to-vault'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'VAULT_TO_VAULT')
@@ -315,7 +315,7 @@ it('loads active bank accounts as the source for bank-to-vault funding', functio
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->get(route('vault-transfers.root.bank-to-vault'))
+        ->get(route('cash-movements.bank-to-vault'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'BANK_TO_VAULT')
@@ -330,7 +330,7 @@ it('does not expose cash transfer forms without create permission', function () 
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->get(route('cash-movements.teller-to-teller-transfer'))
+        ->get(route('cash-movements.teller-to-teller'))
         ->assertForbidden();
 });
 
@@ -353,13 +353,13 @@ it('creates a pending cash transfer within the users open branch day', function 
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('cash-movements.teller-to-teller-transfer.store'), [
+        ->post(route('cash-movements.teller-to-teller.store'), [
             'from_cash_location_id' => $fixture['source']->id,
             'to_cash_location_id' => $fixture['target']->id,
             'amount' => 1250.50,
             'note' => 'Till replenishment',
         ])
-        ->assertRedirect(route('cash-movements.teller-to-teller-transfer'));
+        ->assertRedirect(route('cash-movements.teller-to-teller'));
 
     $transfer = CashTransfer::query()->firstOrFail();
 
@@ -377,7 +377,7 @@ it('creates vault transfer modes and rejects mismatched location types', functio
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('cash-movements.teller-to-teller-transfer.store'), [
+        ->post(route('cash-movements.teller-to-teller.store'), [
             'from_cash_location_id' => $fixture['vault']->id,
             'to_cash_location_id' => $fixture['target']->id,
             'amount' => 50,
@@ -388,21 +388,21 @@ it('creates vault transfer modes and rejects mismatched location types', functio
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('vault-transfers.root.vault-to-teller.store'), [
+        ->post(route('cash-movements.vault-to-teller.store'), [
             'from_cash_location_id' => $fixture['vault']->id,
             'to_cash_location_id' => $fixture['target']->id,
             'amount' => 100,
         ])
-        ->assertRedirect(route('vault-transfers.root.vault-to-teller'));
+        ->assertRedirect(route('cash-movements.vault-to-teller'));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('vault-transfers.root.teller-to-vault.store'), [
+        ->post(route('cash-movements.teller-to-vault.store'), [
             'from_cash_location_id' => $fixture['source']->id,
             'to_cash_location_id' => $fixture['vault']->id,
             'amount' => 75,
         ])
-        ->assertRedirect(route('vault-transfers.root.teller-to-vault'));
+        ->assertRedirect(route('cash-movements.teller-to-vault'));
 
     expect(CashTransfer::query()->count())->toBe(2);
 });
@@ -444,13 +444,13 @@ it('funds an open vault from a bank and updates both balances on completion', fu
     ]);
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('vault-transfers.root.bank-to-vault.store'), [
+        ->post(route('cash-movements.bank-to-vault.store'), [
             'bank_account_id' => $bankAccount->id,
             'to_cash_location_id' => $fixture['vault']->id,
             'amount' => 250,
             'note' => 'Initial vault funding',
         ])
-        ->assertRedirect(route('vault-transfers.root.bank-to-vault'));
+        ->assertRedirect(route('cash-movements.bank-to-vault'));
 
     $transfer = CashTransfer::query()->firstOrFail();
 
@@ -478,7 +478,7 @@ it('funds an open vault from a bank and updates both balances on completion', fu
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->get(route('vault-transfers.root.vault-to-bank'))
+        ->get(route('cash-movements.vault-to-bank'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->where('transfer_type', 'VAULT_TO_BANK')
@@ -489,13 +489,13 @@ it('funds an open vault from a bank and updates both balances on completion', fu
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('vault-transfers.root.vault-to-bank.store'), [
+        ->post(route('cash-movements.vault-to-bank.store'), [
             'from_cash_location_id' => $fixture['vault']->id,
             'bank_account_id' => $bankAccount->id,
             'amount' => 200,
             'note' => 'Deposit vault excess',
         ])
-        ->assertRedirect(route('vault-transfers.root.vault-to-bank'));
+        ->assertRedirect(route('cash-movements.vault-to-bank'));
 
     $vaultDeposit = CashTransfer::query()->where('transfer_type', 'VAULT_TO_BANK')->firstOrFail();
     $this->actingAs($fixture['user'])
@@ -549,12 +549,12 @@ it('moves cash between open vault sessions on vault-to-vault completion', functi
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
-        ->post(route('vault-transfers.root.vault-to-vault.store'), [
+        ->post(route('cash-movements.vault-to-vault.store'), [
             'from_cash_location_id' => $fixture['vault']->id,
             'to_cash_location_id' => $destinationLocation->id,
             'amount' => 300,
         ])
-        ->assertRedirect(route('vault-transfers.root.vault-to-vault'));
+        ->assertRedirect(route('cash-movements.vault-to-vault'));
 
     $transfer = CashTransfer::query()->firstOrFail();
 

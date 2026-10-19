@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { FinancialAccountSearchInput } from '@/pages/treasury-cash/teller-deposits/components/financial-account-search-input';
 import type { BreadcrumbItem } from '@/types';
@@ -487,7 +488,10 @@ export default function LoanApplicationShow() {
                                     <span className="mr-1 text-lg text-muted-foreground">
                                         ৳
                                     </span>
-                                    {application.requested_amount}
+                                    {formatBDTCurrency(
+                                        application.requested_amount,
+                                        false,
+                                    )}
                                 </p>
                             </div>
                             {application.status === 'DRAFT' && (
@@ -592,7 +596,7 @@ export default function LoanApplicationShow() {
                             empty="No income details provided."
                             items={(application.income_details ?? []).map(
                                 (income) =>
-                                    `${income.source}: ${income.monthly_amount} / month${income.notes ? ` · ${income.notes}` : ''}`,
+                                    `${income.source}: ${formatBDTCurrency(income.monthly_amount, false)} / month${income.notes ? ` · ${income.notes}` : ''}`,
                             )}
                         />
                         <ApplicantDetailGroup
@@ -601,7 +605,7 @@ export default function LoanApplicationShow() {
                             empty="No expense details provided."
                             items={(application.expense_details ?? []).map(
                                 (expense) =>
-                                    `${expense.category}: ${expense.monthly_amount} / month${expense.notes ? ` · ${expense.notes}` : ''}`,
+                                    `${expense.category}: ${formatBDTCurrency(expense.monthly_amount, false)} / month${expense.notes ? ` · ${expense.notes}` : ''}`,
                             )}
                         />
                         <ApplicantDetailGroup
@@ -931,25 +935,31 @@ export default function LoanApplicationShow() {
                                                         )}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {
-                                                            schedule.scheduled_principal
-                                                        }
+                                                        {formatBDTCurrency(
+                                                            schedule.scheduled_principal,
+                                                            false,
+                                                        )}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {
-                                                            schedule.scheduled_interest
-                                                        }
+                                                        {formatBDTCurrency(
+                                                            schedule.scheduled_interest,
+                                                            false,
+                                                        )}
                                                     </TableCell>
                                                     <TableCell align="right">
-                                                        {
-                                                            schedule.scheduled_protection_fee
-                                                        }
+                                                        {formatBDTCurrency(
+                                                            schedule.scheduled_protection_fee,
+                                                            false,
+                                                        )}
                                                     </TableCell>
                                                     <TableCell
                                                         align="right"
                                                         className="font-semibold"
                                                     >
-                                                        {schedule.total_due}
+                                                        {formatBDTCurrency(
+                                                            schedule.total_due,
+                                                            false,
+                                                        )}
                                                     </TableCell>
                                                     <TableCell>
                                                         {schedule.schedule_version ??
@@ -991,7 +1001,10 @@ export default function LoanApplicationShow() {
                                             <div>
                                                 <div className="flex flex-wrap items-center gap-2.5">
                                                     <span className="text-sm font-medium">
-                                                        {arrear.total_overdue}
+                                                        {formatBDTCurrency(
+                                                            arrear.total_overdue,
+                                                            false,
+                                                        )}
                                                     </span>
 
                                                     <StatusBadge tone="danger">
@@ -1067,7 +1080,10 @@ export default function LoanApplicationShow() {
                                         >
                                             <div>
                                                 <p className="font-medium">
-                                                    {disbursement.amount}
+                                                    {formatBDTCurrency(
+                                                        disbursement.amount,
+                                                        false,
+                                                    )}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
                                                     {formatDate(
@@ -1118,7 +1134,10 @@ export default function LoanApplicationShow() {
                                             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                                 <div>
                                                     <p className="text-sm font-medium">
-                                                        {repayment.amount}
+                                                        {formatBDTCurrency(
+                                                            repayment.amount,
+                                                            false,
+                                                        )}
                                                     </p>
                                                     <p className="text-xs text-muted-foreground">
                                                         {formatDate(
@@ -1146,7 +1165,7 @@ export default function LoanApplicationShow() {
                                                 {(repayment.allocations ?? [])
                                                     .map(
                                                         (allocation) =>
-                                                            `${allocation.component?.type ?? 'COMPONENT'}: ${allocation.amount}`,
+                                                            `${allocation.component?.type ?? 'COMPONENT'}: ${formatBDTCurrency(allocation.amount, false)}`,
                                                     )
                                                     .join(' · ') ||
                                                     'No allocation recorded'}
@@ -1586,11 +1605,12 @@ export default function LoanApplicationShow() {
                                 />
                                 <MetricItem
                                     label="Covered principal"
-                                    value={String(
+                                    value={formatBDTCurrency(
                                         protectionPolicy.coverage_amount ??
                                             application.loan_account
                                                 .principal_amount ??
                                             0,
+                                        false,
                                     )}
                                 />
                             </div>
@@ -1733,8 +1753,12 @@ export default function LoanApplicationShow() {
                                         )}
                                         {claim.status === 'APPROVED' && (
                                             <p className="text-sm text-muted-foreground">
-                                                Payout {claim.payout_amount} is
-                                                awaiting transaction posting.
+                                                Payout{' '}
+                                                {formatBDTCurrency(
+                                                    claim.payout_amount,
+                                                    false,
+                                                )}{' '}
+                                                is awaiting transaction posting.
                                                 {claim.financial_transaction_id && (
                                                     <>
                                                         {' '}

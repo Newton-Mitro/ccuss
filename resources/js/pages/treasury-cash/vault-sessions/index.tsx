@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type {
     VaultSessionIndexProps,
@@ -213,22 +214,25 @@ export default function Index() {
                                             </StatusBadge>
                                         </td>
                                         <td className="px-2 py-2">
-                                            {Number(
+                                            {formatBDTCurrency(
                                                 session.opening_cash,
-                                            ).toLocaleString()}
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
                                             {session.closing_cash != null
-                                                ? Number(
+                                                ? formatBDTCurrency(
                                                       session.closing_cash,
-                                                  ).toLocaleString()
+                                                      false,
+                                                  )
                                                 : '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             {session.cash_difference != null
-                                                ? Number(
+                                                ? formatBDTCurrency(
                                                       session.cash_difference,
-                                                  ).toLocaleString()
+                                                      false,
+                                                  )
                                                 : '-'}
                                         </td>
                                         <td className="px-2 py-2">

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { TellerCashTransactionIndexProps } from '@/types/treasury-cash/teller-transactions';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -213,7 +214,10 @@ export default function Index() {
                                             {transaction.type}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {transaction.amount}
+                                            {formatBDTCurrency(
+                                                transaction.amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
                                             <StatusBadge
@@ -316,7 +320,7 @@ export default function Index() {
                                                                 appSwal
                                                                     .fire({
                                                                         title: 'Post this teller transaction?',
-                                                                        text: `Post ${transaction.transaction_no} for ${transaction.amount}?`,
+                                                                        text: `Post ${transaction.transaction_no} for ${formatBDTCurrency(transaction.amount, false)}?`,
                                                                         icon: 'warning',
                                                                         showCancelButton: true,
                                                                         confirmButtonText:
@@ -407,7 +411,10 @@ export default function Index() {
                                         Amount
                                     </dt>
                                     <dd className="font-medium">
-                                        {viewingTransaction.amount}
+                                        {formatBDTCurrency(
+                                            viewingTransaction.amount,
+                                            false,
+                                        )}
                                     </dd>
                                 </div>
                                 <div>
@@ -531,7 +538,10 @@ export default function Index() {
                                                     </span>
                                                     <span className="shrink-0">
                                                         {entry.direction}{' '}
-                                                        {entry.amount}
+                                                        {formatBDTCurrency(
+                                                            entry.amount,
+                                                            false,
+                                                        )}
                                                     </span>
                                                 </div>
                                             ),

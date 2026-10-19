@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { PettyCashIndexProps } from '@/types/treasury-cash/petty-cash-accounts';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -141,10 +142,16 @@ export default function Index() {
                                             {fund.method}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {fund.current_balance}
+                                            {formatBDTCurrency(
+                                                fund.current_balance,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {fund.fund_limit}
+                                            {formatBDTCurrency(
+                                                fund.fund_limit,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
                                             <StatusBadge

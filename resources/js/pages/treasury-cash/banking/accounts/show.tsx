@@ -1,4 +1,5 @@
 import TreasuryAccountDetails from '@/components/treasury-account-details';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import type { BankAccountType } from '@/types/treasury-cash/bank-accounts';
 import { usePage } from '@inertiajs/react';
@@ -56,8 +57,14 @@ export default function Show() {
                     label: 'Branch',
                     value: account.branch?.name ?? 'Organization-wide',
                 },
-                { label: 'Opening balance', value: account.opening_balance },
-                { label: 'Current balance', value: account.balance },
+                {
+                    label: 'Opening balance',
+                    value: formatBDTCurrency(account.opening_balance, false),
+                },
+                {
+                    label: 'Current balance',
+                    value: formatBDTCurrency(account.balance, false),
+                },
                 {
                     label: 'Internal financial account',
                     value: account.financial_account?.account_no,

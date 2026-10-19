@@ -5,6 +5,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye } from 'lucide-react';
@@ -138,9 +139,10 @@ export default function BudgetEntries() {
 
                                                 {/* Amount */}
                                                 <td className="px-4 py-3 text-right align-middle font-medium tabular-nums">
-                                                    {Number(
+                                                    {formatBDTCurrency(
                                                         entry.amount,
-                                                    ).toFixed(2)}
+                                                        false,
+                                                    )}
                                                 </td>
 
                                                 {/* Action */}
@@ -188,7 +190,10 @@ export default function BudgetEntries() {
                                             </p>
                                         </div>
                                         <span className="font-medium">
-                                            {Number(entry.amount).toFixed(2)}
+                                            {formatBDTCurrency(
+                                                entry.amount,
+                                                false,
+                                            )}
                                         </span>
                                     </div>
                                     <p className="text-xs text-muted-foreground">

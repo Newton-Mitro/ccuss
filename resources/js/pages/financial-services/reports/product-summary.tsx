@@ -3,6 +3,7 @@ import {
     ResourceTableCard,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type {
     ProductSummaryItem,
@@ -72,10 +73,11 @@ function ReportTable({
                                         {product.financial_accounts_count}
                                     </td>
                                     <td className="px-3 py-2 text-right tabular-nums">
-                                        {Number(
+                                        {formatBDTCurrency(
                                             product.financial_accounts_sum_balance ??
                                                 0,
-                                        ).toFixed(4)}
+                                            false,
+                                        )}
                                     </td>
                                 </tr>
                             ))}

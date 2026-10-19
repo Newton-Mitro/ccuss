@@ -9,6 +9,7 @@ import AppDatePicker from '@/components/ui/app_date_picker';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { AccountStatementPageProps } from '@/types/financial-services';
@@ -30,10 +31,7 @@ const statementPeriods = [
 ];
 
 const formatAmount = (value: string | number | null | undefined) =>
-    Number(value ?? 0).toLocaleString(undefined, {
-        minimumFractionDigits: 4,
-        maximumFractionDigits: 4,
-    });
+    formatBDTCurrency(value, false);
 
 const statusTone = (status: string) => {
     if (status === 'POSTED') return 'success' as const;

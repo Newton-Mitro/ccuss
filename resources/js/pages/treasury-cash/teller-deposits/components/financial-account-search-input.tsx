@@ -1,4 +1,5 @@
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { Customer } from '@/types/customer_kyc_module';
 import axios from 'axios';
 import { Search, WalletCards, X } from 'lucide-react';
@@ -221,9 +222,10 @@ export function FinancialAccountSearchInput({
                                                         </span>
                                                         <span className="shrink-0 text-muted-foreground tabular-nums">
                                                             Available BDT{' '}
-                                                            {Number(
+                                                            {formatBDTCurrency(
                                                                 account.available_balance,
-                                                            ).toFixed(2)}
+                                                                false,
+                                                            )}
                                                         </span>
                                                     </div>
                                                 </div>

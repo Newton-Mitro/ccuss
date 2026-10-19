@@ -5,6 +5,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionsPageProps } from '@/types/financial-services';
@@ -98,8 +99,9 @@ export default function FinancialTransactionIndex() {
                                             )}
                                         </td>
                                         <td className="px-2 py-1 text-right tabular-nums">
-                                            {Number(transaction.amount).toFixed(
-                                                4,
+                                            {formatBDTCurrency(
+                                                transaction.amount,
+                                                false,
                                             )}
                                         </td>
                                         <td className="px-2 py-1">

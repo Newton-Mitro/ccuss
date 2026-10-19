@@ -15,6 +15,14 @@ export const treasuryAndCash: SidebarItem[] = [
                 permission: ['treasury.view'],
             },
 
+            {
+                name: 'Cash Movements',
+                icon: <i className="fa-solid fa-money-bill-transfer" />,
+                path: '/cash-movements/transfers',
+                match_path: 'cash-movements',
+                permission: ['cash_transfers.view'],
+            },
+
             // Vault Management
             {
                 name: 'Vault Management',
@@ -35,13 +43,6 @@ export const treasuryAndCash: SidebarItem[] = [
                         path: '/vault-sessions',
                         match_path: 'vault-sessions',
                         permission: ['vault_sessions.view'],
-                    },
-                    {
-                        name: 'Transfer Queue',
-                        icon: <i className="fa-solid fa-list-check" />,
-                        path: '/cash-movements/transfers',
-                        match_path: 'cash-movements/transfers',
-                        permission: ['cash_transfers.view'],
                     },
                 ],
             },
@@ -121,33 +122,6 @@ export const treasuryAndCash: SidebarItem[] = [
                         path: '/cheque-payments',
                         match_path: 'cheque-payments',
                         permission: ['cheque_payments.view'],
-                    },
-                ],
-            },
-
-            // ─────────────────────────────────────────────
-            // Transaction Desk
-            // ─────────────────────────────────────────────
-            {
-                name: 'Transaction Desk',
-                icon: <i className="fa-solid fa-money-bill-transfer" />,
-                permission: ['financial.transactions.view'],
-                children_expanded: false,
-
-                children: [
-                    {
-                        name: 'Posting Queue',
-                        icon: <i className="fa-solid fa-list" />,
-                        path: '/financial-transactions',
-                        match_path: 'financial-transactions',
-                        permission: ['financial.transactions.view'],
-                    },
-                    {
-                        name: 'Transfers',
-                        icon: <i className="fa-solid fa-right-left" />,
-                        path: '/financial-transactions/transfer/create',
-                        match_path: 'financial-transactions/transfer',
-                        permission: ['financial.transactions.create'],
                     },
                 ],
             },

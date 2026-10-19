@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { ChequeIndexProps } from '@/types/treasury-cash/cheques';
@@ -160,7 +161,12 @@ export default function Index() {
                                             {cheque.payee ?? '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {cheque.amount ?? '-'}
+                                            {cheque.amount != null
+                                                ? formatBDTCurrency(
+                                                      cheque.amount,
+                                                      false,
+                                                  )
+                                                : '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             <StatusBadge

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Check, Eye, Lock, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -121,9 +122,10 @@ export default function BudgetIndex() {
                                             {budget.entries_count}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {Number(
+                                            {formatBDTCurrency(
                                                 budget.entries_sum_amount ?? 0,
-                                            ).toFixed(2)}
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-1">
                                             <StatusBadge

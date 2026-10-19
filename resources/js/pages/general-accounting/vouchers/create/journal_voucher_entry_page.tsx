@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
@@ -776,15 +777,17 @@ export default function JournalVoucherEntryPage() {
                                                     </td>
 
                                                     <td className="px-2 py-1 text-right tabular-nums">
-                                                        {Number(
+                                                        {formatBDTCurrency(
                                                             entry.debit || 0,
-                                                        ).toFixed(4)}
+                                                            false,
+                                                        )}
                                                     </td>
 
                                                     <td className="px-2 py-1 text-right tabular-nums">
-                                                        {Number(
+                                                        {formatBDTCurrency(
                                                             entry.credit || 0,
-                                                        ).toFixed(4)}
+                                                            false,
+                                                        )}
                                                     </td>
 
                                                     <td className="max-w-48 truncate px-2 py-1 text-muted-foreground">
@@ -834,16 +837,18 @@ export default function JournalVoucherEntryPage() {
                         <div className="flex flex-col gap-2 border-t pt-2 text-sm sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex flex-wrap gap-2">
                                 <StatusBadge tone="info">
-                                    Debit {totalDebit.toFixed(4)}
+                                    Debit {formatBDTCurrency(totalDebit, false)}
                                 </StatusBadge>
 
                                 <StatusBadge tone="info">
-                                    Credit {totalCredit.toFixed(4)}
+                                    Credit{' '}
+                                    {formatBDTCurrency(totalCredit, false)}
                                 </StatusBadge>
 
                                 {!balanced && data.entries.length > 0 && (
                                     <StatusBadge tone="warning">
-                                        Difference {difference.toFixed(4)}
+                                        Difference{' '}
+                                        {formatBDTCurrency(difference, false)}
                                     </StatusBadge>
                                 )}
 

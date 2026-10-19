@@ -9,6 +9,7 @@ import {
     Tooltip,
 } from 'chart.js';
 import { Bar, Line } from 'react-chartjs-2';
+import { formatBDTCurrency } from '../lib/bdtCurrencyFormatter';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
 ChartJS.register(
@@ -35,10 +36,7 @@ interface TreasuryDashboardChartsProps {
     }[];
 }
 
-const currency = (amount: number) =>
-    `BDT ${amount.toLocaleString('en-BD', {
-        maximumFractionDigits: 0,
-    })}`;
+const currency = (amount: number) => `BDT ${formatBDTCurrency(amount, false)}`;
 
 export default function TreasuryDashboardCharts({
     dailyActivity,

@@ -1,4 +1,5 @@
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { Customer } from '@/types/customer_kyc_module';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
@@ -173,7 +174,7 @@ export default function CustomerDepositPage() {
         appSwal
             .fire({
                 title: 'Post this customer deposit?',
-                text: `Post a teller deposit of ${depositAmount || totalSelected.toFixed(2)} for ${selectedCustomer.name}?`,
+                text: `Post a teller deposit of ${formatBDTCurrency(depositAmount || totalSelected, false)} for ${selectedCustomer.name}?`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Post deposit',
@@ -324,14 +325,12 @@ export default function CustomerDepositPage() {
 
                                     <div className="text-sm font-bold text-foreground tabular-nums">
                                         BDT{' '}
-                                        {Number(
+                                        {formatBDTCurrency(
                                             selectedTellerSession?.expected_cash ??
                                                 selectedTellerSession?.opening_cash ??
                                                 0,
-                                        ).toLocaleString('en-BD', {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        })}
+                                            false,
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -343,7 +342,11 @@ export default function CustomerDepositPage() {
                                     Current month
                                 </div>
                                 <div className="mt-0.5 text-sm font-semibold tabular-nums">
-                                    BDT {totals.current_due.toFixed(2)}
+                                    BDT{' '}
+                                    {formatBDTCurrency(
+                                        totals.current_due,
+                                        false,
+                                    )}
                                 </div>
                             </div>
                             <div className="px-3 py-2">
@@ -351,7 +354,11 @@ export default function CustomerDepositPage() {
                                     Previous months
                                 </div>
                                 <div className="mt-0.5 text-sm font-semibold tabular-nums">
-                                    BDT {totals.previous_due.toFixed(2)}
+                                    BDT{' '}
+                                    {formatBDTCurrency(
+                                        totals.previous_due,
+                                        false,
+                                    )}
                                 </div>
                             </div>
                             <div className="bg-primary/4 px-3 py-2">
@@ -359,7 +366,8 @@ export default function CustomerDepositPage() {
                                     Total due
                                 </div>
                                 <div className="mt-0.5 text-sm font-semibold text-primary tabular-nums">
-                                    BDT {totals.total_due.toFixed(2)}
+                                    BDT{' '}
+                                    {formatBDTCurrency(totals.total_due, false)}
                                 </div>
                             </div>
                         </div>
@@ -460,8 +468,9 @@ export default function CustomerDepositPage() {
                                                                 </span>
 
                                                                 <span className="font-medium">
-                                                                    {account.balance.toFixed(
-                                                                        2,
+                                                                    {formatBDTCurrency(
+                                                                        account.balance,
+                                                                        false,
                                                                     )}
                                                                 </span>
                                                             </td>
@@ -472,8 +481,9 @@ export default function CustomerDepositPage() {
                                                                 </span>
 
                                                                 <span className="font-semibold text-primary">
-                                                                    {account.available_balance.toFixed(
-                                                                        2,
+                                                                    {formatBDTCurrency(
+                                                                        account.available_balance,
+                                                                        false,
                                                                     )}
                                                                 </span>
                                                             </td>
@@ -636,8 +646,9 @@ export default function CustomerDepositPage() {
                                                             </span>
 
                                                             <span className="font-semibold">
-                                                                {row.amount.toFixed(
-                                                                    2,
+                                                                {formatBDTCurrency(
+                                                                    row.amount,
+                                                                    false,
                                                                 )}
                                                             </span>
                                                         </td>
@@ -712,7 +723,11 @@ export default function CustomerDepositPage() {
                                                 Selected due
                                             </span>
                                             <span className="mt-0.5 block truncate font-medium tabular-nums">
-                                                BDT {totalSelected.toFixed(2)}
+                                                BDT{' '}
+                                                {formatBDTCurrency(
+                                                    totalSelected,
+                                                    false,
+                                                )}
                                             </span>
                                         </div>
                                         <div className="min-w-0 px-2">
@@ -721,11 +736,12 @@ export default function CustomerDepositPage() {
                                             </span>
                                             <span className="mt-0.5 block truncate font-medium tabular-nums">
                                                 BDT{' '}
-                                                {Number(
+                                                {formatBDTCurrency(
                                                     depositAmount ||
                                                         totalSelected ||
                                                         0,
-                                                ).toFixed(2)}
+                                                    false,
+                                                )}
                                             </span>
                                         </div>
                                         <div className="min-w-0 px-2">
@@ -734,13 +750,16 @@ export default function CustomerDepositPage() {
                                             </span>
                                             <span className="mt-0.5 block truncate font-medium tabular-nums">
                                                 BDT{' '}
-                                                {Math.max(
-                                                    0,
-                                                    Number(
-                                                        depositAmount ||
-                                                            totalSelected,
-                                                    ) - totalSelected,
-                                                ).toFixed(2)}
+                                                {formatBDTCurrency(
+                                                    Math.max(
+                                                        0,
+                                                        Number(
+                                                            depositAmount ||
+                                                                totalSelected,
+                                                        ) - totalSelected,
+                                                    ),
+                                                    false,
+                                                )}
                                             </span>
                                         </div>
                                     </div>

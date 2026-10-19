@@ -6,6 +6,7 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use Carbon\CarbonImmutable;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -64,6 +65,70 @@ class RecurringDepositService
             ])->all());
 
             return $recurringDeposit->load('installments');
+        });
+    }
+
+    public function amend(RecurringDeposit $recurringDeposit, array $data): RecurringDeposit
+    {
+        $startedAt = CarbonImmutable::parse($data['started_at']);
+        $frequency = $data['installment_frequency'];
+        $totalInstallments = (int) $data['total_installments'];
+        $installmentAmount = (float) $data['installment_amount'];
+        $extensionDays = (int) ($data['maturity_extension_days'] ?? 0);
+        $graceDays = (int) ($data['grace_days'] ?? 0);
+
+        return DB::transaction(function () use ($recurringDeposit, $data, $startedAt, $frequency, $totalInstallments, $installmentAmount, $extensionDays, $graceDays): RecurringDeposit {
+            $deposit = RecurringDeposit::query()->lockForUpdate()->findOrFail($recurringDeposit->id);
+            if ($deposit->closed_at !== null) {
+                throw new RuntimeException('A closed recurring-deposit contract cannot be amended.');
+            }
+            $scheduleChanged = $deposit->started_at->toDateString() !== $startedAt->toDateString()
+                || $deposit->installment_frequency !== $frequency
+                || (int) $deposit->total_installments !== $totalInstallments
+                || (float) $deposit->installment_amount !== $installmentAmount;
+
+            if ($scheduleChanged && $deposit->installments()
+                ->where(fn($query) => $query
+                    ->where('status', '!=', 'PENDING')
+                    ->orWhereNotNull('financial_transaction_id')
+                    ->orWhere('amount_paid', '>', 0))
+                ->exists()) {
+                $changedField = match (true) {
+                    $deposit->started_at->toDateString() !== $startedAt->toDateString() => 'started_at',
+                    $deposit->installment_frequency !== $frequency => 'installment_frequency',
+                    (int) $deposit->total_installments !== $totalInstallments => 'total_installments',
+                    default => 'installment_amount',
+                };
+
+                throw ValidationException::withMessages([
+                    $changedField => 'The installment schedule cannot be changed after installment history has been recorded.',
+                ]);
+            }
+
+            $maturityDate = $this->dueDate($startedAt, $frequency, $totalInstallments - 1)
+                ->addDays($extensionDays);
+
+            $deposit->update([
+                'installment_amount' => $installmentAmount,
+                'installment_frequency' => $frequency,
+                'total_installments' => $totalInstallments,
+                'started_at' => $startedAt->toDateString(),
+                'maturity_date' => $maturityDate->toDateString(),
+                'maturity_extension_days' => $extensionDays,
+                'grace_days' => $graceDays,
+            ]);
+
+            if ($scheduleChanged) {
+                $deposit->installments()->delete();
+                $deposit->installments()->createMany(collect(range(1, $totalInstallments))->map(fn(int $number): array => [
+                    'installment_no' => $number,
+                    'due_date' => $this->dueDate($startedAt, $frequency, $number - 1)->toDateString(),
+                    'amount_due' => $installmentAmount,
+                    'status' => 'PENDING',
+                ])->all());
+            }
+
+            return $deposit->refresh()->load('installments');
         });
     }
 

@@ -13,6 +13,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem } from '@/types';
 import type {
     LoanApplication,
@@ -219,7 +220,10 @@ export default function LoanApplicationsIndex() {
                                                     '—'}
                                             </td>
                                             <td className="px-2 py-2 tabular-nums">
-                                                {application.requested_amount}
+                                                {formatBDTCurrency(
+                                                    application.requested_amount,
+                                                    false,
+                                                )}
                                             </td>
                                             <td className="px-2 py-2">
                                                 {application.status}
@@ -265,7 +269,10 @@ export default function LoanApplicationsIndex() {
                                                 '—'}
                                         </span>
                                         <span className="tabular-nums">
-                                            {application.requested_amount}
+                                            {formatBDTCurrency(
+                                                application.requested_amount,
+                                                false,
+                                            )}
                                         </span>
                                     </div>
                                     <div className="flex justify-end">

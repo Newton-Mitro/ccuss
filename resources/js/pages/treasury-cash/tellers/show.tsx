@@ -1,4 +1,5 @@
 import TreasuryAccountDetails from '@/components/treasury-account-details';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
@@ -49,9 +50,22 @@ export default function Show() {
                 },
                 {
                     label: 'Account balance',
-                    value: teller.cash_location?.financial_account?.balance,
+                    value:
+                        teller.cash_location?.financial_account?.balance != null
+                            ? formatBDTCurrency(
+                                  teller.cash_location.financial_account
+                                      .balance,
+                                  false,
+                              )
+                            : undefined,
                 },
-                { label: 'Maximum cash', value: teller.maximum_cash },
+                {
+                    label: 'Maximum cash',
+                    value:
+                        teller.maximum_cash != null
+                            ? formatBDTCurrency(teller.maximum_cash, false)
+                            : undefined,
+                },
             ]}
         />
     );

@@ -1,3 +1,4 @@
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { PettyCashTransactionFormPageProps } from '@/types/treasury-cash/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
@@ -204,7 +205,7 @@ export default function Form() {
                                         },
                                         ...funds.map((fund) => ({
                                             value: String(fund.id),
-                                            label: `${fund.name} (${fund.code}) — Balance ${fund.current_balance}`,
+                                            label: `${fund.name} (${fund.code}) — Balance ${formatBDTCurrency(fund.current_balance, false)}`,
                                         })),
                                     ]}
                                 />

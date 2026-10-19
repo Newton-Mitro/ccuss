@@ -1,13 +1,14 @@
-import { Input } from "@/components/ui/input";
 import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -235,9 +236,7 @@ export default function ChequePaymentReview() {
         appSwal
             .fire({
                 title: 'Post and pay this cheque?',
-                text: `Post ${Number(
-                    payment.amount,
-                ).toLocaleString()} to the teller and debit account ${
+                text: `Post ${formatBDTCurrency(payment.amount, false)} to the teller and debit account ${
                     payment.financial_account.account_no
                 }.`,
                 icon: 'warning',
@@ -277,10 +276,7 @@ export default function ChequePaymentReview() {
         (person) => String(person.id) === data.signatory_customer_id,
     );
 
-    const formattedAmount = Number(payment.amount).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
+    const formattedAmount = formatBDTCurrency(payment.amount, false);
 
     const getCheckResult = (key: string): boolean => {
         return (
@@ -624,7 +620,7 @@ export default function ChequePaymentReview() {
                                                             person.transaction_limit ===
                                                             null
                                                                 ? ''
-                                                                : ` · limit ${person.transaction_limit.toLocaleString()}`
+                                                                : ` · limit ${formatBDTCurrency(person.transaction_limit, false)}`
                                                         }`,
                                                     }),
                                                 ),
@@ -682,7 +678,7 @@ export default function ChequePaymentReview() {
                                                         {selectedSignatory.transaction_limit ===
                                                         null
                                                             ? 'No limit'
-                                                            : `৳ ${selectedSignatory.transaction_limit.toLocaleString()}`}
+                                                            : `৳ ${formatBDTCurrency(selectedSignatory.transaction_limit, false)}`}
                                                     </p>
                                                 </div>
                                             </div>
@@ -888,8 +884,9 @@ export default function ChequePaymentReview() {
                                     </span>{' '}
                                     · Available balance{' '}
                                     <span className="font-medium text-foreground">
-                                        ৳{' '}
-                                        {account_check.available_balance.toLocaleString()}
+                                        {formatBDTCurrency(
+                                            account_check.available_balance,
+                                        )}
                                     </span>
                                 </p>
                             </div>

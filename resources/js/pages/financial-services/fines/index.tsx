@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDateTime } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -107,13 +108,22 @@ export default function FinesIndex() {
                                                 'Default fine'}
                                         </td>
                                         <td className="p-3 text-right tabular-nums">
-                                            {fine.assessed_amount}
+                                            {formatBDTCurrency(
+                                                fine.assessed_amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3 text-right tabular-nums">
-                                            {fine.paid_amount}
+                                            {formatBDTCurrency(
+                                                fine.paid_amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3 text-right tabular-nums">
-                                            {fine.waived_amount}
+                                            {formatBDTCurrency(
+                                                fine.waived_amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3">
                                             {formatDateTime(fine.assessed_at)}

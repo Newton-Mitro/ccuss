@@ -60,7 +60,7 @@
 					<td>{{ $row[1] }}</td>
 					<td>{{ $row[2] }}</td>
 					<td>{{ $row[3] }}</td>
-					<td class="number">{{ number_format((float) $row[4], 4) }}</td>
+					<td class="number">{{ number_format((float) $row[4], 2) }}</td>
 					<td>{{ $row[5] }}</td>
 				</tr>
 			@empty

@@ -5,6 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
@@ -102,8 +103,16 @@ export default function BranchCashSummariesIndex() {
                                         Movement
                                     </p>
                                     <p>
-                                        Received {summary.cash_received} · Paid{' '}
-                                        {summary.cash_paid}
+                                        Received{' '}
+                                        {formatBDTCurrency(
+                                            summary.cash_received,
+                                            false,
+                                        )}{' '}
+                                        · Paid{' '}
+                                        {formatBDTCurrency(
+                                            summary.cash_paid,
+                                            false,
+                                        )}
                                     </p>
                                 </div>
                                 <div>
@@ -111,9 +120,21 @@ export default function BranchCashSummariesIndex() {
                                         Closing cash
                                     </p>
                                     <p>
-                                        Vault {summary.vault_balance} · Teller{' '}
-                                        {summary.teller_balance} · Petty{' '}
-                                        {summary.petty_cash_balance}
+                                        Vault{' '}
+                                        {formatBDTCurrency(
+                                            summary.vault_balance,
+                                            false,
+                                        )}{' '}
+                                        · Teller{' '}
+                                        {formatBDTCurrency(
+                                            summary.teller_balance,
+                                            false,
+                                        )}{' '}
+                                        · Petty{' '}
+                                        {formatBDTCurrency(
+                                            summary.petty_cash_balance,
+                                            false,
+                                        )}
                                     </p>
                                 </div>
                                 <div>
@@ -128,7 +149,10 @@ export default function BranchCashSummariesIndex() {
                                                 : 'neutral'
                                         }
                                     >
-                                        {summary.cash_difference}
+                                        {formatBDTCurrency(
+                                            summary.cash_difference,
+                                            false,
+                                        )}
                                     </StatusBadge>
                                 </div>
                             </div>

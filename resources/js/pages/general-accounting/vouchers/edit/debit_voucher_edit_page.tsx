@@ -2,6 +2,7 @@ import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCheck, Loader2, Plus, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import toast from 'react-hot-toast';
+import { formatBDTCurrency } from '../../../../lib/bdtCurrencyFormatter';
 
 import HeadingSmall from '../../../../components/heading-small';
 import { SubLedgerSearchInput } from '../../../../components/sub-ledger-search-input';
@@ -647,10 +648,10 @@ export default function EditDebitVoucherEntry() {
                                     <td colSpan={2}></td>
                                     <td className="p-2 text-right">Totals</td>
                                     <td className="p-2">
-                                        {debitTotal?.toFixed(2)}
+                                        {formatBDTCurrency(debitTotal, false)}
                                     </td>
                                     <td className="p-2">
-                                        {creditTotal?.toFixed(2)}
+                                        {formatBDTCurrency(creditTotal, false)}
                                     </td>
                                     <td></td>
                                 </tr>

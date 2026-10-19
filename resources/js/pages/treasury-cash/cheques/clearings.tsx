@@ -6,6 +6,7 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -232,7 +233,7 @@ export default function ChequeClearings() {
                                         },
                                         ...cheques.map((cheque) => ({
                                             value: String(cheque.id),
-                                            label: `${cheque.cheque_no} · ${cheque.amount}`,
+                                            label: `${cheque.cheque_no} · ${formatBDTCurrency(cheque.amount, false)}`,
                                         })),
                                     ]}
                                 />

@@ -4,6 +4,7 @@ import HeadingSmall from '../../../components/heading-small';
 import ReportExportActions from '../../../components/report-export-actions';
 import { Select } from '../../../components/ui/select';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { formatBDTCurrency } from '../../../lib/bdtCurrencyFormatter';
 import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface PLRow {
@@ -162,7 +163,10 @@ export default function ProfitAndLossPage() {
                                             {row.account_name}
                                         </td>
                                         <td className="border px-2 py-1 text-right">
-                                            {Number(row.amount).toFixed(2)}
+                                            {formatBDTCurrency(
+                                                row.amount,
+                                                false,
+                                            )}
                                         </td>
                                     </tr>
                                 ))
@@ -183,7 +187,7 @@ export default function ProfitAndLossPage() {
                                     Total Income
                                 </td>
                                 <td className="border px-2 py-1 text-right">
-                                    {totalIncome.toFixed(2)}
+                                    {formatBDTCurrency(totalIncome, false)}
                                 </td>
                             </tr>
                             <tr>
@@ -191,7 +195,7 @@ export default function ProfitAndLossPage() {
                                     Total Expense
                                 </td>
                                 <td className="border px-2 py-1 text-right">
-                                    {totalExpense.toFixed(2)}
+                                    {formatBDTCurrency(totalExpense, false)}
                                 </td>
                             </tr>
                             <tr>
@@ -199,7 +203,7 @@ export default function ProfitAndLossPage() {
                                     Net Profit
                                 </td>
                                 <td className="border px-2 py-1 text-right">
-                                    {netProfit.toFixed(2)}
+                                    {formatBDTCurrency(netProfit, false)}
                                 </td>
                             </tr>
                         </tfoot>

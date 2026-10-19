@@ -177,7 +177,9 @@ class FinancialAccountService
     public function activate(FinancialAccount $account): FinancialAccount
     {
         if ($account->status !== 'PENDING') {
-            throw new RuntimeException('Only pending accounts can be activated.');
+            throw ValidationException::withMessages([
+                'status' => 'Only pending accounts can be activated.',
+            ]);
         }
 
         $account->update(['status' => 'ACTIVE', 'opened_at' => now()->toDateString()]);

@@ -4,6 +4,7 @@ import {
     ResourcePageHeader,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
 import type { TransactionsReportPageProps } from '@/types/financial-services';
@@ -122,9 +123,10 @@ export default function TransactionReport() {
                                                 {transaction.transaction_type}
                                             </td>
                                             <td className="px-2 py-1 text-right tabular-nums">
-                                                {Number(
+                                                {formatBDTCurrency(
                                                     transaction.amount,
-                                                ).toFixed(4)}
+                                                    false,
+                                                )}
                                             </td>
                                             <td className="px-2 py-1">
                                                 {transaction.status}

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
 import type { PettyCashTransactionIndexProps } from '@/types/treasury-cash/petty-cash-transactions';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -175,7 +176,10 @@ export default function Index() {
                                             {transaction.type}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {transaction.amount}
+                                            {formatBDTCurrency(
+                                                transaction.amount,
+                                                false,
+                                            )}
                                         </td>
                                         <td className="px-2 py-2">
                                             {transaction.payee ?? '-'}
@@ -207,7 +211,7 @@ export default function Index() {
                                                             appSwal
                                                                 .fire({
                                                                     title: 'Post this petty cash transaction?',
-                                                                    text: `Post ${transaction.transaction_no} for ${transaction.amount}?`,
+                                                                    text: `Post ${transaction.transaction_no} for ${formatBDTCurrency(transaction.amount, false)}?`,
                                                                     icon: 'warning',
                                                                     showCancelButton: true,
                                                                     confirmButtonText:

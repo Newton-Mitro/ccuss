@@ -16,6 +16,41 @@ use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\CashLocation;
+use Illuminate\Validation\ValidationException;
+
+it('returns a validation error and leaves a transaction pending when the payout account lacks funds', function () {
+    $organization = Organization::factory()->create();
+    $user = User::factory()->create(['organization_id' => $organization->id]);
+    $cashAccount = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $organization->id,
+        'account_type' => 'CASH',
+    ]);
+    $loanAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'account_type' => 'LOAN',
+    ]);
+    $service = app(FinancialTransactionService::class);
+    $transaction = $service->createMultiLine(
+        [
+            'transaction_type' => 'LOAN_DISBURSEMENT',
+            'transaction_date' => now()->toDateString(),
+            'description' => 'Loan disbursement with insufficient cash',
+        ],
+        [
+            ['financial_account_id' => $loanAccount->id, 'direction' => 'DEBIT', 'amount' => 100000],
+            ['financial_account_id' => $cashAccount->id, 'direction' => 'CREDIT', 'amount' => 100000],
+        ],
+        $organization->id,
+        $user->id,
+    );
+
+    expect(fn() => $service->post($transaction, $organization->id, $user->id))
+        ->toThrow(ValidationException::class, 'does not have enough available balance');
+
+    expect($transaction->fresh()->status)->toBe('PENDING')
+        ->and((float) $cashAccount->fresh()->balance)->toBe(500.0)
+        ->and((float) $loanAccount->fresh()->balance)->toBe(0.0);
+});
 
 it('links a mapped posted transaction to one voucher and reverses the link', function () {
     $organization = Organization::factory()->create();

@@ -4,11 +4,14 @@ import {
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Eye, Pencil } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 interface Props extends SharedData {
@@ -88,7 +91,7 @@ export default function LoanAccountIndex() {
                                     <th className="p-3 text-center">
                                         Loan status
                                     </th>
-                                    <th className="p-3" />
+                                    <th className="p-3 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -102,16 +105,18 @@ export default function LoanAccountIndex() {
                                             {account.holder?.name ?? '-'}
                                         </td>
                                         <td className="p-3 text-right">
-                                            {Number(
+                                            {formatBDTCurrency(
                                                 account.loan_account
                                                     ?.principal_amount ?? 0,
-                                            ).toFixed(4)}
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3 text-right">
-                                            {Number(
+                                            {formatBDTCurrency(
                                                 account.loan_account
                                                     ?.disbursed_amount ?? 0,
-                                            ).toFixed(4)}
+                                                false,
+                                            )}
                                         </td>
                                         <td className="p-3">
                                             {formatDate(
@@ -132,16 +137,41 @@ export default function LoanAccountIndex() {
                                                     account.status}
                                             </StatusBadge>
                                         </td>
-                                        <td className="p-3 text-right">
-                                            <Link
-                                                className="text-primary underline"
-                                                href={route(
-                                                    'loan-accounts.show',
-                                                    account.id,
-                                                )}
-                                            >
-                                                View
-                                            </Link>
+                                        <td className="p-3">
+                                            <div className="flex items-center justify-end">
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="View loan account"
+                                                    aria-label={`View ${account.loan_account?.loan_no ?? account.account_no}`}
+                                                >
+                                                    <Link
+                                                        href={route(
+                                                            'loan-accounts.show',
+                                                            account.id,
+                                                        )}
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button
+                                                    asChild
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="Edit loan account"
+                                                    aria-label={`Edit ${account.loan_account?.loan_no ?? account.account_no}`}
+                                                >
+                                                    <Link
+                                                        href={route(
+                                                            'loan-accounts.edit',
+                                                            account.id,
+                                                        )}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Link>
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

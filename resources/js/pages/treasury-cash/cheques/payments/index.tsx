@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowUpRight, Plus } from 'lucide-react';
@@ -106,7 +107,7 @@ export default function ChequePaymentQueue() {
                                     { value: '', label: 'Select cheque' },
                                     ...available_cheques.map((cheque) => ({
                                         value: String(cheque.id),
-                                        label: `${cheque.cheque_no} · ${cheque.account_no ?? 'Unknown account'} · ${Number(cheque.amount).toLocaleString()}`,
+                                        label: `${cheque.cheque_no} · ${cheque.account_no ?? 'Unknown account'} · ${formatBDTCurrency(cheque.amount, false)}`,
                                     })),
                                 ]}
                             />
@@ -216,11 +217,10 @@ export default function ChequePaymentQueue() {
                                                     ?.account_no ?? '-'}
                                             </td>
                                             <td className="px-3 py-3 tabular-nums">
-                                                {Number(
+                                                {formatBDTCurrency(
                                                     payment.amount,
-                                                ).toLocaleString(undefined, {
-                                                    minimumFractionDigits: 2,
-                                                })}
+                                                    false,
+                                                )}
                                             </td>
                                             <td className="px-3 py-3">
                                                 <StatusBadge

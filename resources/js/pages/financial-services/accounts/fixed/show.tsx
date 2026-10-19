@@ -1,3 +1,4 @@
+import FinancialAccountActivation from '@/components/financial-account-activation';
 import FinancialAccountPeopleManagement from '@/components/financial-account-people-management';
 import {
     ResourcePageHeader,
@@ -5,6 +6,7 @@ import {
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -15,7 +17,9 @@ interface Props extends SharedData {
         account_no: string;
         balance: string | number;
         status: string;
+        account_type?: string;
         holder?: { name?: string } | null;
+        product?: { name?: string } | null;
         fixed_deposit?: {
             principal_amount?: string | number;
             contractual_rate?: string | number;
@@ -51,23 +55,41 @@ export default function FixedDepositAccountShow() {
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned'} · Fixed deposit contract`}
                     action={
-                        <Button asChild>
-                            <Link
-                                href={route(
-                                    'financial-accounts.fixed.edit',
-                                    account.id,
-                                )}
-                            >
-                                Edit account
-                            </Link>
-                        </Button>
+                        <>
+                            <FinancialAccountActivation
+                                accountId={account.id}
+                                status={account.status}
+                            />
+                            <Button asChild>
+                                <Link
+                                    href={route(
+                                        'financial-accounts.fixed.edit',
+                                        account.id,
+                                    )}
+                                >
+                                    Edit account
+                                </Link>
+                            </Button>
+                        </>
                     }
                 />
                 <div className="grid gap-3 sm:grid-cols-3">
                     {[
-                        ['Principal', deposit?.principal_amount ?? '0'],
+                        [
+                            'Principal',
+                            formatBDTCurrency(
+                                deposit?.principal_amount ?? 0,
+                                false,
+                            ),
+                        ],
                         ['Rate', `${deposit?.contractual_rate ?? '0'}%`],
-                        ['Maturity value', deposit?.maturity_amount ?? '0'],
+                        [
+                            'Maturity value',
+                            formatBDTCurrency(
+                                deposit?.maturity_amount ?? 0,
+                                false,
+                            ),
+                        ],
                     ].map(([label, value]) => (
                         <div
                             key={label}

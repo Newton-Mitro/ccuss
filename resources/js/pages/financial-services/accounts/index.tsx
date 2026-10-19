@@ -6,6 +6,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Plus } from 'lucide-react';
@@ -169,9 +170,10 @@ export default function FinancialAccountIndex() {
                                             </td>
 
                                             <td className="px-3 py-2.5 text-right align-middle tabular-nums">
-                                                {Number(
+                                                {formatBDTCurrency(
                                                     account.balance,
-                                                ).toFixed(4)}
+                                                    false,
+                                                )}
                                             </td>
 
                                             <td className="px-3 py-2.5 text-center align-middle">

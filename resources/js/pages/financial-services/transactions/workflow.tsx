@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionWorkflowPageProps } from '@/types/financial-services';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -525,13 +526,8 @@ export default function TransactionWorkflow() {
                                                         disbursement
                                                     </p>
                                                     <p className="mt-1 text-lg font-semibold tabular-nums">
-                                                        ৳
-                                                        {remainingAmount.toLocaleString(
-                                                            'en-BD',
-                                                            {
-                                                                minimumFractionDigits: 2,
-                                                                maximumFractionDigits: 2,
-                                                            },
+                                                        {formatBDTCurrency(
+                                                            remainingAmount,
                                                         )}
                                                     </p>
                                                 </div>

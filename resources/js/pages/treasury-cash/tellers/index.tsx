@@ -159,7 +159,12 @@ export default function Index() {
                                                 : '-'}
                                         </td>
                                         <td className="px-2 py-2">
-                                            {teller.maximum_cash ?? '-'}
+                                            {teller.maximum_cash != null
+                                                ? formatBDTCurrency(
+                                                      teller.maximum_cash,
+                                                      false,
+                                                  )
+                                                : '-'}
                                         </td>
                                         <td className="px-2 py-2">
                                             <div className="flex items-center">
