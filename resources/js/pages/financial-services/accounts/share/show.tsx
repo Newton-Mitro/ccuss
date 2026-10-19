@@ -7,6 +7,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
@@ -48,6 +49,8 @@ interface Props extends SharedData {
 }
 
 export default function ShareAccountShow() {
+    useFlashToastHandler();
+
     const { account, customers, auth } = usePage<
         Props & {
             customers: Array<{

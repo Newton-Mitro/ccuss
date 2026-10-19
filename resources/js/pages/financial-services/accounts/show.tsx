@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
@@ -19,6 +20,8 @@ import { useState } from 'react';
 import { route } from 'ziggy-js';
 
 export default function FinancialAccountShow() {
+    useFlashToastHandler();
+
     const { account, customers } =
         usePage<FinancialAccountShowPageProps>().props;
     const canManageHolders = [

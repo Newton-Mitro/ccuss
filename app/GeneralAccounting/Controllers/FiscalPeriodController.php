@@ -131,7 +131,7 @@ class FiscalPeriodController extends Controller
             return back()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal period closed successfully.');
+        return back()->with('success', 'Fiscal period closed successfully.');
     }
 
     public function reopen(Request $request, FiscalPeriod $fiscalPeriod)
@@ -144,7 +144,7 @@ class FiscalPeriodController extends Controller
             return back()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('fiscal-periods.index')->with('success', 'Fiscal period reopened successfully.');
+        return back()->with('success', 'Fiscal period reopened successfully.');
     }
 
     private function organizationFiscalYear(Request $request, int $id): FiscalYear

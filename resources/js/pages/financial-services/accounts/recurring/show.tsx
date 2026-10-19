@@ -6,6 +6,7 @@ import {
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
@@ -110,6 +111,8 @@ function getInstallmentTone(status: string) {
 }
 
 export default function RecurringDepositAccountShow() {
+    useFlashToastHandler();
+
     const { account, customers } = usePage<
         Props & {
             customers: Array<{

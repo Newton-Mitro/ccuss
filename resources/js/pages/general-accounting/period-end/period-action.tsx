@@ -74,7 +74,6 @@ export default function PeriodActionPage() {
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => router.reload({ only: ['fiscalPeriods'] }),
             },
         );
     };

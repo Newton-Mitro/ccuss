@@ -3,6 +3,7 @@ import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -21,6 +22,8 @@ interface Props extends SharedData {
 }
 
 export default function FinancialAccountEdit() {
+    useFlashToastHandler();
+
     const { account, product } = usePage<Props>().props;
     const { data, setData, put, processing, errors } = useForm({
         name: account.name ?? '',
