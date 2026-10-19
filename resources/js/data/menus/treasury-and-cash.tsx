@@ -16,6 +16,14 @@ export const treasuryAndCash: SidebarItem[] = [
             },
 
             {
+                name: 'Cash Denominations',
+                icon: <i className="fa-solid fa-coins" />,
+                path: '/cash-denominations',
+                match_path: 'cash-denominations',
+                permission: ['cash_transactions.view'],
+            },
+
+            {
                 name: 'Cash Movements',
                 icon: <i className="fa-solid fa-money-bill-transfer" />,
                 path: '/cash-movements/transfers',
@@ -140,6 +148,7 @@ export const treasuryAndCash: SidebarItem[] = [
                         match_path: 'cash-counts',
                         permission: ['cash_transactions.view'],
                     },
+
                     {
                         name: 'Bank Transactions',
                         icon: <i className="fa-solid fa-receipt" />,

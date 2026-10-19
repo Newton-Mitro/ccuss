@@ -10,14 +10,13 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     Banknote,
     CalendarDays,
     Check,
     ClipboardList,
     Coins,
-    Plus,
     ShieldCheck,
     Wallet,
 } from 'lucide-react';
@@ -65,13 +64,6 @@ export default function CashCountsIndex() {
             cash_denomination_id: denomination.id,
             quantity: 0,
         })),
-    });
-    const denominationForm = useForm({
-        preset: 'CUSTOM',
-        currency: 'BDT',
-        type: 'NOTE',
-        value: '',
-        name: '',
     });
     const countedUnits = data.denominations.reduce(
         (total, denomination) => total + Number(denomination.quantity || 0),
@@ -348,9 +340,24 @@ export default function CashCountsIndex() {
                                             No active denominations
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            Load the BDT preset or add a custom
-                                            denomination to start a count.
+                                            Configure denominations before
+                                            recording cash counts.
                                         </p>
+                                        <Button
+                                            asChild
+                                            variant="outline"
+                                            size="sm"
+                                            className="mt-3 gap-2"
+                                        >
+                                            <Link
+                                                href={route(
+                                                    'cash-denominations.index',
+                                                )}
+                                            >
+                                                <Coins className="size-4" />
+                                                Manage denominations
+                                            </Link>
+                                        </Button>
                                     </div>
                                 )}
                             </div>
@@ -402,139 +409,33 @@ export default function CashCountsIndex() {
                         <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
                             <div className="flex items-start gap-3 border-b p-4 sm:p-5">
                                 <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                                    <Plus className="size-4" />
+                                    <Coins className="size-4" />
                                 </div>
                                 <div>
                                     <h2 className="text-sm font-semibold">
                                         Denomination setup
                                     </h2>
                                     <p className="mt-1 text-xs text-muted-foreground">
-                                        Load a standard preset or create a
-                                        custom cash value.
+                                        Configure cash notes and coins
+                                        separately from count entry.
                                     </p>
                                 </div>
                             </div>
-                            <form
-                                className="space-y-4 p-4 sm:p-5"
-                                onSubmit={(event) => {
-                                    event.preventDefault();
-                                    denominationForm.post(
-                                        route('cash-denominations.store'),
-                                    );
-                                }}
-                            >
-                                <div className="space-y-1.5">
-                                    <Label>Preset</Label>
-                                    <Select
-                                        className="h-10"
-                                        value={denominationForm.data.preset}
-                                        onChange={(value) =>
-                                            denominationForm.setData(
-                                                'preset',
-                                                value,
-                                            )
-                                        }
-                                        options={[
-                                            {
-                                                value: 'CUSTOM',
-                                                label: 'Custom',
-                                            },
-                                            {
-                                                value: 'BANGLADESH',
-                                                label: 'Bangladesh (BDT)',
-                                            },
-                                        ]}
-                                    />
-                                </div>
-                                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-                                    <div className="space-y-1.5">
-                                        <Label>Type</Label>
-                                        <Select
-                                            className="h-10"
-                                            value={denominationForm.data.type}
-                                            onChange={(value) =>
-                                                denominationForm.setData(
-                                                    'type',
-                                                    value,
-                                                )
-                                            }
-                                            disabled={
-                                                denominationForm.data.preset ===
-                                                'BANGLADESH'
-                                            }
-                                            options={[
-                                                {
-                                                    value: 'NOTE',
-                                                    label: 'NOTE',
-                                                },
-                                                {
-                                                    value: 'COIN',
-                                                    label: 'COIN',
-                                                },
-                                            ]}
-                                        />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label>Value</Label>
-                                        <Input
-                                            type="number"
-                                            min="0.0001"
-                                            step="0.0001"
-                                            value={denominationForm.data.value}
-                                            onChange={(event) =>
-                                                denominationForm.setData(
-                                                    'value',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            disabled={
-                                                denominationForm.data.preset ===
-                                                'BANGLADESH'
-                                            }
-                                            className="h-10"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-1.5">
-                                    <Label htmlFor="denomination-name">
-                                        Display name
-                                    </Label>
-                                    <Input
-                                        id="denomination-name"
-                                        value={denominationForm.data.name}
-                                        onChange={(event) =>
-                                            denominationForm.setData(
-                                                'name',
-                                                event.target.value,
-                                            )
-                                        }
-                                        disabled={
-                                            denominationForm.data.preset ===
-                                            'BANGLADESH'
-                                        }
-                                        placeholder="Optional denomination name"
-                                        className="h-10"
-                                    />
-                                </div>
-                                <Button
-                                    type="submit"
-                                    disabled={denominationForm.processing}
-                                    className="w-full gap-2"
-                                >
-                                    {denominationForm.data.preset ===
-                                    'BANGLADESH' ? (
-                                        <ClipboardList className="size-4" />
-                                    ) : (
-                                        <Plus className="size-4" />
-                                    )}
-                                    {denominationForm.processing
-                                        ? 'Saving...'
-                                        : denominationForm.data.preset ===
-                                            'BANGLADESH'
-                                          ? 'Load Bangladesh denominations'
-                                          : 'Add denomination'}
+                            <div className="space-y-3 p-4 sm:p-5">
+                                <p className="text-sm text-muted-foreground">
+                                    View configured denominations, load a
+                                    standard preset, or add custom denominations
+                                    from the dedicated setup page.
+                                </p>
+                                <Button asChild className="gap-2">
+                                    <Link
+                                        href={route('cash-denominations.index')}
+                                    >
+                                        <Coins className="size-4" />
+                                        Open denomination setup
+                                    </Link>
                                 </Button>
-                            </form>
+                            </div>
                         </section>
                         <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
                             <div className="flex items-center justify-between gap-3 border-b p-4 sm:p-5">

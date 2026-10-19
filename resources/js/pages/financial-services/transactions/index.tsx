@@ -54,19 +54,40 @@ export default function FinancialTransactionIndex() {
                             <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
                                 <tr>
                                     {[
-                                        'Number',
-                                        'Account',
-                                        'Type',
-                                        'Date',
-                                        'Amount',
-                                        'Status',
-                                        '',
-                                    ].map((heading) => (
+                                        {
+                                            label: 'Number',
+                                            className: 'text-left',
+                                        },
+                                        {
+                                            label: 'Account',
+                                            className: 'text-left',
+                                        },
+                                        {
+                                            label: 'Type',
+                                            className: 'text-left',
+                                        },
+                                        {
+                                            label: 'Date',
+                                            className: 'text-left',
+                                        },
+                                        {
+                                            label: 'Amount',
+                                            className: 'text-right',
+                                        },
+                                        {
+                                            label: 'Status',
+                                            className: 'text-left',
+                                        },
+                                        {
+                                            label: 'Actions',
+                                            className: 'text-right',
+                                        },
+                                    ].map(({ label, className }) => (
                                         <th
-                                            key={heading}
-                                            className="border-b p-2 text-left text-sm font-medium"
+                                            key={label}
+                                            className={`border-b p-2 ${className} text-sm font-medium`}
                                         >
-                                            {heading}
+                                            {label}
                                         </th>
                                     ))}
                                 </tr>
@@ -116,16 +137,20 @@ export default function FinancialTransactionIndex() {
                                                 {transaction.status}
                                             </StatusBadge>
                                         </td>
-                                        <td className="px-2 py-1 text-right">
-                                            <Link
-                                                href={route(
-                                                    'financial-transactions.show',
-                                                    transaction.id,
-                                                )}
-                                                title="View transaction"
-                                            >
-                                                <Eye className="ml-auto h-4 w-4" />
-                                            </Link>
+                                        <td className="px-2 py-1">
+                                            <div className="flex justify-end">
+                                                <Link
+                                                    href={route(
+                                                        'financial-transactions.show',
+                                                        transaction.id,
+                                                    )}
+                                                    title="View transaction"
+                                                    aria-label={`View transaction ${transaction.transaction_no}`}
+                                                    className="inline-flex rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Link>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

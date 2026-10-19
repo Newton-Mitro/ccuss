@@ -40,6 +40,80 @@ it('has a bangladesh denomination preset', function () {
         ->and(collect($preset)->pluck('value')->all())->not->toContain(5000);
 });
 
+it('shows denomination setup separately from cash counts', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $role = \App\SystemAdministration\Models\Role::firstOrCreate(
+        ['slug' => 'cash_denomination_view_test'],
+        ['name' => 'Cash Denomination View Test']
+    );
+    $permission = \App\SystemAdministration\Models\Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.view'],
+        ['module' => 'cash_transactions', 'name' => 'View Cash Transactions', 'action' => 'view']
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+    CashDenomination::create([
+        'organization_id' => $organization->id,
+        'currency' => 'BDT',
+        'type' => 'NOTE',
+        'value' => 100,
+        'name' => '100 Taka',
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get(route('cash-denominations.index'))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/cash-denominations/index')
+            ->has('denominations', 1)
+            ->where('denominations.0.name', '100 Taka'));
+});
+
+it('updates a denomination through the organization-scoped edit endpoint', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $role = \App\SystemAdministration\Models\Role::firstOrCreate(
+        ['slug' => 'cash_denomination_update_test'],
+        ['name' => 'Cash Denomination Update Test']
+    );
+    $permission = \App\SystemAdministration\Models\Permission::firstOrCreate(
+        ['slug' => 'cash_transactions.update'],
+        ['module' => 'cash_transactions', 'name' => 'Update Cash Transactions', 'action' => 'update']
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+    $denomination = CashDenomination::create([
+        'organization_id' => $organization->id,
+        'currency' => 'BDT',
+        'type' => 'NOTE',
+        'value' => 100,
+        'name' => 'Old name',
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->from(route('cash-denominations.index'))
+        ->put(route('cash-denominations.update', $denomination), [
+            'currency' => 'BDT',
+            'type' => 'NOTE',
+            'value' => 200,
+            'name' => 'Updated name',
+            'is_active' => false,
+        ])
+        ->assertRedirect(route('cash-denominations.index'));
+
+    expect($denomination->fresh()->currency)->toBe('BDT')
+        ->and($denomination->fresh()->value)->toBe('200.0000')
+        ->and($denomination->fresh()->name)->toBe('Updated name')
+        ->and($denomination->fresh()->is_active)->toBeFalse();
+});
+
 it('can seed the bangladesh denomination preset through the denomination store flow', function () {
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
@@ -69,8 +143,9 @@ it('can seed the bangladesh denomination preset through the denomination store f
 
     $this->actingAs($user)
         ->withSession(['active_organization_id' => $organization->id])
+        ->from(route('cash-denominations.index'))
         ->post(route('cash-denominations.store'), ['preset' => 'BANGLADESH'])
-        ->assertRedirect();
+        ->assertRedirect(route('cash-denominations.index'));
 
     expect(CashDenomination::query()->where('organization_id', $organization->id)->where('currency', 'BDT')->where('type', 'NOTE')->whereIn('value', [2000, 5000])->where('is_active', true)->exists())->toBeFalse()
         ->and(CashDenomination::query()->where('organization_id', $organization->id)->where('currency', 'BDT')->where('is_active', true)->count())->toBe(13);

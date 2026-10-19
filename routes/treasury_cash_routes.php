@@ -48,9 +48,15 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/cash-counts', [CashCountController::class, 'store'])
             ->middleware('permission:cash_transactions.create')
             ->name('cash-counts.store');
+        Route::get('/cash-denominations', [CashCountController::class, 'denominations'])
+            ->middleware('permission:cash_transactions.view')
+            ->name('cash-denominations.index');
         Route::post('/cash-denominations', [CashCountController::class, 'storeDenomination'])
             ->middleware('permission:cash_transactions.create')
             ->name('cash-denominations.store');
+        Route::put('/cash-denominations/{denomination}', [CashCountController::class, 'updateDenomination'])
+            ->middleware('permission:cash_transactions.update')
+            ->name('cash-denominations.update');
         Route::get('/vault-counts', [CashCountController::class, 'index'])
             ->middleware('permission:cash_transactions.view')
             ->name('vault-counts.index');

@@ -261,7 +261,7 @@ export const financialServices: SidebarItem[] = [
                         permission: ['financial.transactions.view'],
                     },
                     {
-                        name: 'Transfers',
+                        name: 'Internal Account Transfers',
                         icon: <i className="fa-solid fa-right-left" />,
                         path: '/financial-transactions/transfer/create',
                         match_path: 'financial-transactions/transfer',

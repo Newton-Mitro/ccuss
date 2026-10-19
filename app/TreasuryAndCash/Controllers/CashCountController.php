@@ -8,8 +8,10 @@ use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashCount;
 use App\TreasuryAndCash\Models\CashDenomination;
 use App\TreasuryAndCash\Models\CashLocation;
-use App\TreasuryAndCash\Requests\StoreCashCountRequest;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use App\TreasuryAndCash\Requests\StoreCashCountRequest;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,8 +19,9 @@ class CashCountController extends Controller
 {
     public function __construct(private readonly CashCountService $service)
     {
-        $this->middleware('permission:cash_transactions.view')->only('index');
+        $this->middleware('permission:cash_transactions.view')->only(['index', 'denominations']);
         $this->middleware('permission:cash_transactions.create')->only(['store', 'storeDenomination']);
+        $this->middleware('permission:cash_transactions.update')->only('updateDenomination');
     }
 
     public function index(Request $request): Response
@@ -44,6 +47,21 @@ class CashCountController extends Controller
         return back()->with('success', 'Cash count recorded successfully.');
     }
 
+    public function denominations(Request $request): Response
+    {
+        $organizationId = (int) $request->attributes->get('active_organization')->id;
+
+        return Inertia::render('treasury-cash/cash-denominations/index', [
+            'denominations' => CashDenomination::query()
+                ->where('organization_id', $organizationId)
+                ->orderBy('currency')
+                ->orderBy('sort_order')
+                ->orderBy('value')
+                ->withCount('countLines')
+                ->get(['id', 'currency', 'type', 'value', 'name', 'is_active']),
+        ]);
+    }
+
     public function storeDenomination(Request $request)
     {
         $data = $request->validate([
@@ -65,12 +83,64 @@ class CashCountController extends Controller
         $data = $request->validate([
             'currency' => ['required', 'string', 'max:10'],
             'type' => ['required', 'in:NOTE,COIN'],
-            'value' => ['required', 'numeric', 'gt:0'],
+            'value' => [
+                'required',
+                'numeric',
+                'gt:0',
+                Rule::unique('cash_denominations', 'value')
+                    ->where('organization_id', $organizationId)
+                    ->where('currency', $request->input('currency'))
+                    ->where('type', $request->input('type')),
+            ],
             'name' => ['nullable', 'string', 'max:50'],
         ]);
 
         $this->service->createDenomination($data, $organizationId);
 
         return back()->with('success', 'Cash denomination created successfully.');
+    }
+
+    public function updateDenomination(Request $request, int $denomination)
+    {
+        $organizationId = (int) $request->attributes->get('active_organization')->id;
+        $cashDenomination = CashDenomination::query()
+            ->where('organization_id', $organizationId)
+            ->withCount('countLines')
+            ->findOrFail($denomination);
+
+        if (
+            $cashDenomination->count_lines_count > 0
+            && (
+                $request->input('currency') !== $cashDenomination->currency
+                || $request->input('type') !== $cashDenomination->type
+                || number_format((float) $request->input('value'), 2, '.', '') !== number_format((float) $cashDenomination->value, 2, '.', '')
+                || ($request->input('name') ?? '') !== ($cashDenomination->name ?? '')
+            )
+        ) {
+            throw ValidationException::withMessages([
+                'value' => 'Currency, type, value, and name cannot be changed after this denomination has been used in a cash count.',
+            ]);
+        }
+
+        $data = $request->validate([
+            'currency' => ['required', 'string', 'max:10'],
+            'type' => ['required', 'in:NOTE,COIN'],
+            'value' => [
+                'required',
+                'numeric',
+                'gt:0',
+                Rule::unique('cash_denominations', 'value')
+                    ->where('organization_id', $organizationId)
+                    ->where('currency', $request->input('currency'))
+                    ->where('type', $request->input('type'))
+                    ->ignore($cashDenomination->id),
+            ],
+            'name' => ['nullable', 'string', 'max:50'],
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $cashDenomination->update($data);
+
+        return back()->with('success', 'Cash denomination updated successfully.');
     }
 }
