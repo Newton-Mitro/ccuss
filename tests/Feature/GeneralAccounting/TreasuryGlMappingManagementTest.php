@@ -92,6 +92,27 @@ it('lists and upserts organization-scoped Treasury GL mappings', function () {
         ->and($mapping->fresh()->credit_account_id)->toBe($replacementDebit->id)
         ->and($mapping->fresh()->status)->toBeFalse();
 
+    $this->get(route('treasury-gl-mappings.create'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('general-accounting/treasury-gl-mappings/form')
+            ->has('accounts', 3)
+            ->has('sourceTypes'));
+
+    $this->get(route('treasury-gl-mappings.edit', $mapping))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('general-accounting/treasury-gl-mappings/form')
+            ->where('mapping.id', $mapping->id)
+            ->where('mapping.source_code', 'BRANCH-1'));
+
+    $this->get(route('treasury-gl-mappings.show', $mapping))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('general-accounting/treasury-gl-mappings/show')
+            ->where('mapping.id', $mapping->id)
+            ->where('mapping.debit_account.id', $debit->id));
+
     $this->get(route('treasury-gl-mappings.index', [
         'search' => 'branch-1',
         'per_page' => 1,

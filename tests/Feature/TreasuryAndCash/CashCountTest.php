@@ -40,6 +40,28 @@ it('has a bangladesh denomination preset', function () {
         ->and(collect($preset)->pluck('value')->all())->not->toContain(5000);
 });
 
+it('seeds the bangladesh denominations for every organization idempotently', function () {
+    $organizations = Organization::factory()->count(2)->create();
+
+    app(\Database\Seeders\CashDenominationSeeder::class)->run();
+
+    foreach ($organizations as $organization) {
+        expect(CashDenomination::query()
+            ->where('organization_id', $organization->id)
+            ->where('currency', 'BDT')
+            ->count())->toBe(count(CashDenomination::bangladeshPreset()));
+    }
+
+    app(\Database\Seeders\CashDenominationSeeder::class)->run();
+
+    foreach ($organizations as $organization) {
+        expect(CashDenomination::query()
+            ->where('organization_id', $organization->id)
+            ->where('currency', 'BDT')
+            ->count())->toBe(count(CashDenomination::bangladeshPreset()));
+    }
+});
+
 it('shows denomination setup separately from cash counts', function () {
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
@@ -71,6 +93,58 @@ it('shows denomination setup separately from cash counts', function () {
             ->component('treasury-cash/cash-denominations/index')
             ->has('denominations', 1)
             ->where('denominations.0.name', '100 Taka'));
+});
+
+it('provides separate organization-scoped create and edit denomination pages', function () {
+    $organization = Organization::factory()->create();
+    $otherOrganization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $role = \App\SystemAdministration\Models\Role::firstOrCreate(
+        ['slug' => 'cash_denomination_pages_test'],
+        ['name' => 'Cash Denomination Pages Test']
+    );
+    $permissions = collect(['cash_transactions.create', 'cash_transactions.update'])
+        ->map(fn ($slug) => \App\SystemAdministration\Models\Permission::firstOrCreate(
+            ['slug' => $slug],
+            ['module' => 'cash_transactions', 'name' => $slug, 'action' => str($slug)->afterLast('.')->toString()]
+        ));
+    $role->permissions()->syncWithoutDetaching($permissions->pluck('id')->all());
+    $user->roles()->syncWithoutDetaching([$role->id]);
+    $denomination = CashDenomination::create([
+        'organization_id' => $organization->id,
+        'currency' => 'BDT',
+        'type' => 'NOTE',
+        'value' => 100,
+        'name' => '100 Taka',
+        'is_active' => true,
+    ]);
+    $otherDenomination = CashDenomination::create([
+        'organization_id' => $otherOrganization->id,
+        'currency' => 'BDT',
+        'type' => 'NOTE',
+        'value' => 200,
+        'name' => '200 Taka',
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get(route('cash-denominations.create'))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/cash-denominations/create')
+            ->missing('denomination'));
+
+    $this->get(route('cash-denominations.edit', $denomination))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/cash-denominations/create')
+            ->where('denomination.id', $denomination->id)
+            ->where('denomination.count_lines_count', 0));
+
+    $this->get(route('cash-denominations.edit', $otherDenomination))
+        ->assertNotFound();
 });
 
 it('updates a denomination through the organization-scoped edit endpoint', function () {

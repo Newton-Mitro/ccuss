@@ -2,8 +2,8 @@
 
 use App\GeneralAccounting\Controllers\AccountGroupController;
 use App\GeneralAccounting\Controllers\AccountingReportController;
-use App\GeneralAccounting\Controllers\CostCenterController;
 use App\GeneralAccounting\Controllers\BudgetController;
+use App\GeneralAccounting\Controllers\CostCenterController;
 use App\GeneralAccounting\Controllers\FiscalPeriodController;
 use App\GeneralAccounting\Controllers\FiscalYearController;
 use App\GeneralAccounting\Controllers\GeneralAccountingDashboardController;
@@ -105,10 +105,16 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
 
     Route::get('/treasury-gl-mappings', [TreasuryGlMappingController::class, 'index'])
         ->name('treasury-gl-mappings.index');
+    Route::get('/treasury-gl-mappings/create', [TreasuryGlMappingController::class, 'create'])
+        ->name('treasury-gl-mappings.create');
     Route::post('/treasury-gl-mappings', [TreasuryGlMappingController::class, 'store'])
         ->name('treasury-gl-mappings.store');
+    Route::get('/treasury-gl-mappings/{mapping}/edit', [TreasuryGlMappingController::class, 'edit'])
+        ->name('treasury-gl-mappings.edit');
     Route::put('/treasury-gl-mappings/{mapping}', [TreasuryGlMappingController::class, 'update'])
         ->name('treasury-gl-mappings.update');
+    Route::get('/treasury-gl-mappings/{mapping}', [TreasuryGlMappingController::class, 'show'])
+        ->name('treasury-gl-mappings.show');
     Route::delete('/treasury-gl-mappings/{mapping}', [TreasuryGlMappingController::class, 'destroy'])
         ->name('treasury-gl-mappings.destroy');
 
@@ -149,6 +155,3 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/opening-balances', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'store'])
         ->name('opening-balances.store');
 });
-
-
-

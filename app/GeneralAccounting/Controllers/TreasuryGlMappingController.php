@@ -68,6 +68,44 @@ class TreasuryGlMappingController extends Controller
         ]);
     }
 
+    public function create(Request $request): Response
+    {
+        $organizationId = (int) $request->attributes->get('active_organization')->id;
+
+        return Inertia::render('general-accounting/treasury-gl-mappings/form', [
+            ...$this->formProps($organizationId),
+        ]);
+    }
+
+    public function edit(Request $request, TreasuryGlMapping $mapping): Response
+    {
+        $organizationId = (int) $request->attributes->get('active_organization')->id;
+        $this->authorizeMapping($mapping, $organizationId);
+
+        return Inertia::render('general-accounting/treasury-gl-mappings/form', [
+            ...$this->formProps($organizationId),
+            'mapping' => $mapping->load([
+                'debitAccount:id,code,name,is_control_account,is_cash_account',
+                'creditAccount:id,code,name,is_control_account,is_cash_account',
+            ]),
+        ]);
+    }
+
+    public function show(Request $request, TreasuryGlMapping $mapping): Response
+    {
+        $this->authorizeMapping(
+            $mapping,
+            (int) $request->attributes->get('active_organization')->id,
+        );
+
+        return Inertia::render('general-accounting/treasury-gl-mappings/show', [
+            'mapping' => $mapping->load([
+                'debitAccount:id,code,name,is_control_account,is_cash_account',
+                'creditAccount:id,code,name,is_control_account,is_cash_account',
+            ]),
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $organizationId = $request->attributes->get('active_organization')->id;
@@ -204,5 +242,17 @@ class TreasuryGlMappingController extends Controller
                 && in_array($mapping->source_type, self::SOURCE_TYPES, true),
             404,
         );
+    }
+
+    private function formProps(int $organizationId): array
+    {
+        return [
+            'accounts' => LedgerAccount::query()
+                ->where('organization_id', $organizationId)
+                ->where('status', true)
+                ->orderBy('code')
+                ->get(['id', 'code', 'name', 'is_control_account', 'is_cash_account']),
+            'sourceTypes' => self::SOURCE_TYPES,
+        ];
     }
 }

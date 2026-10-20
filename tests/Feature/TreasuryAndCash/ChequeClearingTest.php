@@ -1,5 +1,7 @@
 <?php
 
+use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\FinancialProduct;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\User;
@@ -8,8 +10,6 @@ use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\ChequeBook;
-use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialProduct;
 
 it('moves a presented cheque through clearing and settlement', function () {
     $organization = Organization::factory()->create();
@@ -44,8 +44,37 @@ it('records a returned clearing and prevents an invalid transition', function ()
     $service = app(ChequeClearingService::class);
     $clearing = $service->create(['cheque_id' => $cheque->id, 'branch_id' => $branch->id, 'clearing_no' => 'CLR-2'], $organization->id, $user->id);
 
-    expect(fn() => $service->transition($clearing, 'settle', $organization->id, $user->id))->toThrow(RuntimeException::class, 'cannot transition');
+    expect(fn () => $service->transition($clearing, 'settle', $organization->id, $user->id))->toThrow(RuntimeException::class, 'cannot transition');
     expect($service->transition($clearing, 'send', $organization->id, $user->id)->status)->toBe('SENT');
     expect($service->transition($clearing->fresh(), 'present', $organization->id, $user->id)->status)->toBe('PRESENTED');
     expect($service->transition($clearing->fresh(), 'bounce', $organization->id, $user->id, 'Insufficient funds')->status)->toBe('RETURNED');
+});
+
+it('provides a separate cheque clearing creation page with organization branches', function () {
+    $organization = Organization::factory()->create();
+    $otherOrganization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    Branch::factory()->create(['organization_id' => $otherOrganization->id]);
+    $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
+    $role = \App\SystemAdministration\Models\Role::firstOrCreate(
+        ['slug' => 'cheque_clearing_create_page_test'],
+        ['name' => 'Cheque Clearing Create Page Test']
+    );
+    $permission = \App\SystemAdministration\Models\Permission::firstOrCreate(
+        ['slug' => 'cheques.present'],
+        ['module' => 'cheques', 'name' => 'Present Cheques', 'action' => 'present']
+    );
+    $role->permissions()->syncWithoutDetaching([$permission->id]);
+    $user->roles()->syncWithoutDetaching([$role->id]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get(route('cheque-clearings.create'))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/cheques/clearings-create')
+            ->has('branches', 1)
+            ->where('branches.0.id', $branch->id)
+            ->where('default_branch_id', $branch->id)
+            ->has('cheques', 0));
 });

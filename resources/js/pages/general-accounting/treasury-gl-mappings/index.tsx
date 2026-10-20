@@ -11,14 +11,18 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeftRight, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import {
-    MappingDetailsDialog,
-    MappingFormPanel,
-    type TreasuryGlLedgerAccount,
-    type TreasuryGlMapping,
-} from './mapping-dialog';
+
+interface TreasuryGlMapping {
+    id: number;
+    source_type: string;
+    source_code: string;
+    transaction_type: string;
+    status: boolean;
+    debit_account: { code: string; name: string };
+    credit_account: { code: string; name: string };
+}
 
 interface Props extends SharedData {
     mappings: {
@@ -29,24 +33,16 @@ interface Props extends SharedData {
         per_page: number;
         total: number;
     };
-    accounts: TreasuryGlLedgerAccount[];
-    sourceTypes: string[];
     filters: { search?: string; per_page?: string; page?: string };
 }
 
 export default function TreasuryGlMappingsPage() {
-    const { mappings, accounts, sourceTypes, filters } = usePage<Props>().props;
+    const { mappings, filters } = usePage<Props>().props;
     const { data, setData, get } = useForm({
         search: filters.search ?? '',
         per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
-    const [formOpen, setFormOpen] = useState(false);
-    const [editingMapping, setEditingMapping] =
-        useState<TreasuryGlMapping | null>(null);
-    const [viewingMapping, setViewingMapping] =
-        useState<TreasuryGlMapping | null>(null);
-
     useFlashToastHandler();
 
     useEffect(() => {
@@ -84,16 +80,13 @@ export default function TreasuryGlMappingsPage() {
                     description="Map Treasury transaction categories to balanced General Ledger entries."
                     action={
                         <div className="flex flex-wrap gap-2">
-                            <Button
-                                type="button"
-                                onClick={() => {
-                                    setEditingMapping(null);
-                                    setFormOpen(true);
-                                }}
-                                disabled={accounts.length < 2}
-                            >
-                                <Plus className="h-4 w-4" />
-                                Add mapping
+                            <Button asChild>
+                                <Link
+                                    href={route('treasury-gl-mappings.create')}
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Add mapping
+                                </Link>
                             </Button>
                             <Button asChild variant="outline" size="sm">
                                 <Link
@@ -195,29 +188,36 @@ export default function TreasuryGlMappingsPage() {
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <Button
-                                                type="button"
+                                                asChild
                                                 variant="ghost"
                                                 size="icon"
                                                 title="View mapping"
                                                 aria-label="View mapping"
-                                                onClick={() =>
-                                                    setViewingMapping(mapping)
-                                                }
                                             >
-                                                <Eye className="h-4 w-4" />
+                                                <Link
+                                                    href={route(
+                                                        'treasury-gl-mappings.show',
+                                                        mapping.id,
+                                                    )}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Link>
                                             </Button>
                                             <Button
-                                                type="button"
+                                                asChild
                                                 variant="ghost"
                                                 size="icon"
                                                 title="Edit mapping"
                                                 aria-label="Edit mapping"
-                                                onClick={() => {
-                                                    setEditingMapping(mapping);
-                                                    setFormOpen(true);
-                                                }}
                                             >
-                                                <Pencil className="h-4 w-4" />
+                                                <Link
+                                                    href={route(
+                                                        'treasury-gl-mappings.edit',
+                                                        mapping.id,
+                                                    )}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </Link>
                                             </Button>
                                             <Button
                                                 type="button"
@@ -246,19 +246,6 @@ export default function TreasuryGlMappingsPage() {
                         links={mappings.links}
                     />
                 )}
-                <MappingFormPanel
-                    open={formOpen}
-                    onOpenChange={setFormOpen}
-                    sourceTypes={sourceTypes}
-                    accounts={accounts}
-                    mapping={editingMapping}
-                />
-                <MappingDetailsDialog
-                    mapping={viewingMapping}
-                    onOpenChange={(open) => {
-                        if (!open) setViewingMapping(null);
-                    }}
-                />
             </div>
         </CustomAuthLayout>
     );

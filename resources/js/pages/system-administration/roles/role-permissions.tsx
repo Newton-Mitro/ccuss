@@ -50,9 +50,10 @@ const RolePermissionForm = ({
     );
 
     const allRoles = [...systemAdminRole, ...filteredRoles];
+    const hasEditableRoles = allRoles.some((role) => !role.preset);
 
     const [selectedRole, setSelectedRole] = useState<Role | null>(
-        allRoles[0] || null,
+        allRoles.find((role) => !role.preset) || allRoles[0] || null,
     );
 
     const [roleFormOpen, setRoleFormOpen] = useState(false);
@@ -314,7 +315,9 @@ const RolePermissionForm = ({
                                         Roles
                                     </h2>
                                     <p className="mt-0.5 text-xs text-muted-foreground">
-                                        Select a role to configure
+                                        {hasEditableRoles
+                                            ? 'Preset roles are locked. Select a custom role to manage access.'
+                                            : 'All current roles are presets. Create a custom role to manage access.'}
                                     </p>
                                 </div>
                                 <Button
@@ -501,10 +504,27 @@ const RolePermissionForm = ({
                                         </div>
                                     </div>
                                     {selectedRole.preset && (
-                                        <p className="mt-3 flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
-                                            <LockKeyhole className="size-3.5 shrink-0" />
-                                            Preset role permissions are locked.
-                                        </p>
+                                        <div className="mt-3 flex flex-col gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 sm:flex-row sm:items-center sm:justify-between dark:text-amber-300">
+                                            <span className="flex items-center gap-2">
+                                                <LockKeyhole className="size-3.5 shrink-0" />
+                                                Preset role permissions are
+                                                locked.
+                                                {!hasEditableRoles &&
+                                                    ' Create a custom role to assign permissions.'}
+                                            </span>
+                                            {!hasEditableRoles && (
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-7 shrink-0 bg-background px-2 text-xs"
+                                                    onClick={openCreateRole}
+                                                >
+                                                    <Plus className="size-3.5" />
+                                                    Create custom role
+                                                </Button>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
 

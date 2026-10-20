@@ -1,15 +1,11 @@
 import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem } from '@/types';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import type { BreadcrumbItem, SharedData } from '@/types';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     CheckCircle2,
@@ -36,15 +32,10 @@ type Clearing = {
     };
 };
 
-type Props = {
+type Props = SharedData & {
     clearings: {
         data: Clearing[];
     };
-    cheques: {
-        id: number;
-        cheque_no: string;
-        amount: string | number;
-    }[];
 };
 
 const statusConfig: Record<
@@ -96,16 +87,13 @@ const statusConfig: Record<
 export default function ChequeClearings() {
     useFlashToastHandler();
 
-    const { clearings, cheques } = usePage<Props>().props;
-
-    const { data, setData, post, processing } = useForm({
-        cheque_id: '',
-        branch_id: '',
-        clearing_no: '',
-        drawer_bank_name: '',
-        drawer_bank_branch: '',
-        drawer_account_no: '',
-    });
+    const { clearings, auth } = usePage<Props>().props;
+    const canCreate = [
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ].includes('cheques.present');
 
     const confirmAction = (
         title: string,
@@ -166,189 +154,20 @@ export default function ChequeClearings() {
             <Head title="Cheque Clearings" />
 
             <div className="w-full max-w-5xl space-y-5">
-                <ResourcePageHeader
-                    title="Cheque Clearings"
-                    description="Manage cheque presentation, settlement, returns, and clearing status."
-                />
-
-                {/* Create Clearing */}
-                <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <div className="flex items-center justify-between border-b px-4 py-3">
-                        <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <Plus className="h-4 w-4" />
-                            </div>
-
-                            <div className="min-w-0">
-                                <h2 className="text-sm font-semibold">
-                                    New Clearing
-                                </h2>
-
-                                <p className="text-xs text-muted-foreground">
-                                    Create a clearing record for a presented
-                                    cheque.
-                                </p>
-                            </div>
-                        </div>
-
-                        <span className="hidden rounded-full border bg-muted/50 px-2.5 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
-                            Treasury
-                        </span>
-                    </div>
-
-                    <form
-                        className="p-4"
-                        onSubmit={(event) => {
-                            event.preventDefault();
-                            post(route('cheque-clearings.store'));
-                        }}
-                    >
-                        <div className="grid gap-x-4 gap-y-3 md:grid-cols-2 lg:grid-cols-3">
-                            {/* Cheque */}
-                            <div className="space-y-1.5 lg:col-span-2">
-                                <Label htmlFor="cheque_id">
-                                    Presented cheque
-                                </Label>
-
-                                <Select
-                                    id="cheque_id"
-                                    className="h-9"
-                                    value={data.cheque_id}
-                                    onChange={(value) =>
-                                        setData('cheque_id', value)
-                                    }
-                                    placeholder={
-                                        cheques.length > 0
-                                            ? 'Select presented cheque'
-                                            : 'No presented cheques available'
-                                    }
-                                    options={[
-                                        {
-                                            value: '',
-                                            label:
-                                                cheques.length > 0
-                                                    ? 'Select presented cheque'
-                                                    : 'No presented cheques available',
-                                            disabled: cheques.length === 0,
-                                        },
-                                        ...cheques.map((cheque) => ({
-                                            value: String(cheque.id),
-                                            label: `${cheque.cheque_no} · ${formatBDTCurrency(cheque.amount, false)}`,
-                                        })),
-                                    ]}
-                                />
-
-                                {cheques.length === 0 && (
-                                    <p className="text-[11px] text-muted-foreground">
-                                        No presented cheques are currently
-                                        available for clearing.
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Branch */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="branch_id">Branch ID</Label>
-
-                                <Input
-                                    id="branch_id"
-                                    value={data.branch_id}
-                                    onChange={(event) =>
-                                        setData('branch_id', event.target.value)
-                                    }
-                                    placeholder="Branch"
-                                />
-                            </div>
-
-                            {/* Clearing number */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="clearing_no">
-                                    Clearing number
-                                </Label>
-
-                                <Input
-                                    id="clearing_no"
-                                    value={data.clearing_no}
-                                    onChange={(event) =>
-                                        setData(
-                                            'clearing_no',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="e.g. CLR-00001"
-                                />
-                            </div>
-
-                            {/* Bank */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="drawer_bank_name">
-                                    Drawer bank
-                                </Label>
-
-                                <Input
-                                    id="drawer_bank_name"
-                                    value={data.drawer_bank_name}
-                                    onChange={(event) =>
-                                        setData(
-                                            'drawer_bank_name',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="Bank name"
-                                />
-                            </div>
-
-                            {/* Bank branch */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="drawer_bank_branch">
-                                    Bank branch
-                                </Label>
-
-                                <Input
-                                    id="drawer_bank_branch"
-                                    value={data.drawer_bank_branch}
-                                    onChange={(event) =>
-                                        setData(
-                                            'drawer_bank_branch',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="Branch name"
-                                />
-                            </div>
-
-                            {/* Account */}
-                            <div className="space-y-1.5">
-                                <Label htmlFor="drawer_account_no">
-                                    Drawer account
-                                </Label>
-
-                                <Input
-                                    id="drawer_account_no"
-                                    value={data.drawer_account_no}
-                                    onChange={(event) =>
-                                        setData(
-                                            'drawer_account_no',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="Account number"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="mt-4 flex items-center justify-end border-t pt-3">
-                            <Button
-                                type="submit"
-                                disabled={processing || !data.cheque_id}
-                                className="gap-2"
-                            >
-                                <Plus className="h-4 w-4" />
-                                {processing ? 'Creating...' : 'Create Clearing'}
-                            </Button>
-                        </div>
-                    </form>
-                </section>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <ResourcePageHeader
+                        title="Cheque Clearings"
+                        description="Manage cheque presentation, settlement, returns, and clearing status."
+                    />
+                    {canCreate && (
+                        <Button asChild className="shrink-0 gap-2">
+                            <Link href={route('cheque-clearings.create')}>
+                                <Plus className="size-4" />
+                                New clearing
+                            </Link>
+                        </Button>
+                    )}
+                </div>
 
                 {/* Clearing List */}
                 <section className="overflow-hidden rounded-xl border bg-card shadow-sm">

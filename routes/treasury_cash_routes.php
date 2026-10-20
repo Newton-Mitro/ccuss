@@ -51,6 +51,12 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::get('/cash-denominations', [CashCountController::class, 'denominations'])
             ->middleware('permission:cash_transactions.view')
             ->name('cash-denominations.index');
+        Route::get('/cash-denominations/create', [CashCountController::class, 'createDenomination'])
+            ->middleware('permission:cash_transactions.create')
+            ->name('cash-denominations.create');
+        Route::get('/cash-denominations/{denomination}/edit', [CashCountController::class, 'editDenomination'])
+            ->middleware('permission:cash_transactions.update')
+            ->name('cash-denominations.edit');
         Route::post('/cash-denominations', [CashCountController::class, 'storeDenomination'])
             ->middleware('permission:cash_transactions.create')
             ->name('cash-denominations.store');
@@ -73,7 +79,9 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/bank-reconciliations', [BankReconciliationController::class, 'store'])->middleware('permission:bank_transactions.create')->name('bank-reconciliations.store');
         Route::post('/bank-reconciliations/{bank_reconciliation}/finalize', [BankReconciliationController::class, 'finalize'])->middleware('permission:bank_transactions.post')->name('bank-reconciliations.finalize');
         Route::get('/cheque-clearings', [ChequeClearingController::class, 'index'])->middleware('permission:cheques.view')->name('cheque-clearings.index');
+        Route::get('/cheque-clearings/create', [ChequeClearingController::class, 'create'])->middleware('permission:cheques.present')->name('cheque-clearings.create');
         Route::post('/cheque-clearings', [ChequeClearingController::class, 'store'])->middleware('permission:cheques.present')->name('cheque-clearings.store');
+        Route::get('/cheque-clearings/create', [ChequeClearingController::class, 'create'])->middleware('permission:cheques.present')->name('cheque-clearings.create');
         Route::post('/cheque-clearings/{cheque_clearing}/{action}', [ChequeClearingController::class, 'transition'])->name('cheque-clearings.transition');
         Route::get('/vaults', [CashManagementController::class, 'vaults'])
             ->middleware('permission:cash_management.view')

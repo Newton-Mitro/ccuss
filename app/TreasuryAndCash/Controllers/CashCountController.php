@@ -8,10 +8,10 @@ use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\CashCount;
 use App\TreasuryAndCash\Models\CashDenomination;
 use App\TreasuryAndCash\Models\CashLocation;
+use App\TreasuryAndCash\Requests\StoreCashCountRequest;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use App\TreasuryAndCash\Requests\StoreCashCountRequest;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,8 +20,8 @@ class CashCountController extends Controller
     public function __construct(private readonly CashCountService $service)
     {
         $this->middleware('permission:cash_transactions.view')->only(['index', 'denominations']);
-        $this->middleware('permission:cash_transactions.create')->only(['store', 'storeDenomination']);
-        $this->middleware('permission:cash_transactions.update')->only('updateDenomination');
+        $this->middleware('permission:cash_transactions.create')->only(['store', 'createDenomination', 'storeDenomination']);
+        $this->middleware('permission:cash_transactions.update')->only(['editDenomination', 'updateDenomination']);
     }
 
     public function index(Request $request): Response
@@ -62,6 +62,24 @@ class CashCountController extends Controller
         ]);
     }
 
+    public function createDenomination(): Response
+    {
+        return Inertia::render('treasury-cash/cash-denominations/create');
+    }
+
+    public function editDenomination(Request $request, int $denomination): Response
+    {
+        $organizationId = (int) $request->attributes->get('active_organization')->id;
+        $cashDenomination = CashDenomination::query()
+            ->where('organization_id', $organizationId)
+            ->withCount('countLines')
+            ->findOrFail($denomination);
+
+        return Inertia::render('treasury-cash/cash-denominations/create', [
+            'denomination' => $cashDenomination,
+        ]);
+    }
+
     public function storeDenomination(Request $request)
     {
         $data = $request->validate([
@@ -97,7 +115,7 @@ class CashCountController extends Controller
 
         $this->service->createDenomination($data, $organizationId);
 
-        return back()->with('success', 'Cash denomination created successfully.');
+        return redirect()->route('cash-denominations.index')->with('success', 'Cash denomination created successfully.');
     }
 
     public function updateDenomination(Request $request, int $denomination)
@@ -141,6 +159,6 @@ class CashCountController extends Controller
 
         $cashDenomination->update($data);
 
-        return back()->with('success', 'Cash denomination updated successfully.');
+        return redirect()->route('cash-denominations.index')->with('success', 'Cash denomination updated successfully.');
     }
 }
