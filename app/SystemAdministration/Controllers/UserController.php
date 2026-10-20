@@ -175,7 +175,7 @@ class UserController extends Controller
     {
         $this->authorizeOrganization($user, request());
 
-        $user->load(['branch', 'roles.permissions']);
+        $user->load(['branch', 'organization', 'organizations', 'roles.permissions']);
 
         return Inertia::render(
             'system-administration/users/show-user-page',
