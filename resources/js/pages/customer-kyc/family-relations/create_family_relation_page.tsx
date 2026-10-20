@@ -1,5 +1,12 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { CheckCheck, ListFilter, Loader2 } from 'lucide-react';
+import {
+    ArrowLeft,
+    CheckCheck,
+    GitBranch,
+    Loader2,
+    UserRound,
+    UsersRound,
+} from 'lucide-react';
 
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
@@ -11,13 +18,13 @@ import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
-import { Customer } from '../../../types/customer_kyc_module';
+import type { BreadcrumbItem, SharedData } from '../../../types';
+import type { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../customers/components/customer-search-box';
 import { getRelations } from './data/family_and_relative_relations';
 
 const Create = () => {
-    const { customer } = usePage().props as any;
+    const { customer } = usePage<SharedData & { customer: Customer }>().props;
 
     useFlashToastHandler();
 
@@ -27,8 +34,8 @@ const Create = () => {
 
     const { data, setData, post, processing, errors } = useForm({
         customer_id: customer.id,
-        relative_id: null,
-        relation_type: null,
+        relative_id: null as number | null,
+        relation_type: '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -54,111 +61,152 @@ const Create = () => {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Family Relation" />
 
-            <div className="flex justify-between pb-4">
-                <HeadingSmall
-                    title="Create Family Relation"
-                    description="Link customer relatives."
-                />
-
-                <div className="flex items-center gap-2">
-                    <Link
-                        href={route('customers.show', customer.id)}
-                        className="btn-secondary"
-                    >
-                        <ListFilter className="h-4 w-4" />
-                    </Link>
-                </div>
-            </div>
-
-            <form
-                onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
-            >
-                <div className="">
-                    <Label htmlFor="customer_id">Customer</Label>
-                    <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
-                        <div className="flex items-center justify-center">
-                            {/* Avatar */}
-                            <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-                                {customer?.photo?.url ? (
-                                    <img
-                                        src={customer?.photo?.url}
-                                        alt={customer.name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                        {customer.name.charAt(0)}
-                                    </div>
-                                )}
-                            </div>
+            <div className="w-full max-w-6xl space-y-5 pb-8">
+                <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-3">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
+                            <GitBranch className="size-5" />
                         </div>
+                        <div>
+                            <HeadingSmall
+                                title="Add Family Relation"
+                                description="Link a relative to this customer and select their relationship."
+                            />
+                            <p className="mt-2 text-xs text-muted-foreground">
+                                Customer ID: #{customer.id}
+                            </p>
+                        </div>
+                    </div>
+                    <Button variant="outline" asChild>
+                        <Link href={route('customers.show', customer.id)}>
+                            <ArrowLeft className="size-4" />
+                            Back to customer
+                        </Link>
+                    </Button>
+                </div>
 
-                        {/* Info */}
-                        <div className="flex-1 space-y-1">
-                            <div>
-                                <Link
-                                    href={route('customers.show', customer.id)}
-                                    className="cursor-pointer text-sm font-semibold text-info underline"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    {`${customer.name} • ${customer.customer_no}`}
-                                </Link>
-                                <p className="text-xs text-muted-foreground">
-                                    {customer.status} • {customer.type}
-                                </p>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                        <div className="flex items-center gap-2 border-b border-border bg-muted/30 px-4 py-3">
+                            <UserRound className="size-4 text-primary" />
+                            <h2 className="text-sm font-semibold">
+                                Customer Information
+                            </h2>
+                            <span className="ml-auto text-xs text-muted-foreground">
+                                {customer.customer_no}
+                            </span>
+                        </div>
+                        <div className="flex flex-col gap-4 p-4 sm:flex-row">
+                            <div className="flex items-center gap-3 sm:w-64 sm:shrink-0">
+                                <div className="size-14 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
+                                    {customer?.photo?.url ? (
+                                        <img
+                                            src={customer.photo.url}
+                                            alt={customer.name}
+                                            className="size-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex size-full items-center justify-center text-lg font-semibold text-muted-foreground">
+                                            {customer.name.charAt(0)}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="min-w-0">
+                                    <Link
+                                        href={route(
+                                            'customers.show',
+                                            customer.id,
+                                        )}
+                                        className="block truncate text-sm font-semibold hover:text-primary"
+                                    >
+                                        {customer.name}
+                                    </Link>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        {customer.status} · {customer.type}
+                                    </p>
+                                </div>
                             </div>
-
-                            <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
+                            <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 border-t border-border pt-4 text-xs sm:grid-cols-2 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 lg:grid-cols-4">
                                 <BolderLessInfoBox
-                                    label="Primary Phone"
+                                    label="Phone"
                                     value={customer.primary_phone}
                                 />
                                 <BolderLessInfoBox
-                                    label="Primary Email"
+                                    label="Email"
                                     value={customer.primary_email}
                                 />
                                 <BolderLessInfoBox
-                                    label="Identification Type"
+                                    label="ID Type"
                                     value={customer.identification_type}
                                 />
                                 <BolderLessInfoBox
-                                    label="Identification Number"
+                                    label="ID Number"
                                     value={customer.identification_number}
                                 />
                             </div>
                         </div>
+                    </section>
+
+                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                        <div className="border-b border-border bg-muted/20 px-4 py-3">
+                            <h2 className="text-sm font-semibold">
+                                Relative Details
+                            </h2>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Search and choose the customer to link as a
+                                relative.
+                            </p>
+                        </div>
+                        <div className="space-y-2 p-4">
+                            <Label htmlFor="relative">Relative</Label>
+                            <CustomerSearchBox
+                                onSelect={(relative: Customer) => {
+                                    setData('relative_id', relative.id);
+                                    setSelectedRelative(relative);
+                                }}
+                            />
+                            <InputError message={errors.relative_id} />
+                        </div>
+                    </section>
+
+                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                        <div className="flex items-center gap-2 border-b border-border bg-muted/20 px-4 py-3">
+                            <UsersRound className="size-4 text-primary" />
+                            <h2 className="text-sm font-semibold">
+                                Relationship
+                            </h2>
+                        </div>
+                        <div className="space-y-2 p-4">
+                            <Label htmlFor="relation_type">Relation Type</Label>
+                            <Select
+                                id="relation_type"
+                                value={data.relation_type}
+                                onChange={(value) =>
+                                    setData('relation_type', value)
+                                }
+                                options={relations}
+                            />
+                            <InputError message={errors.relation_type} />
+                        </div>
+                    </section>
+
+                    <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
+                        <Button variant="outline" type="button" asChild>
+                            <Link href={route('customers.show', customer.id)}>
+                                Cancel
+                            </Link>
+                        </Button>
+                        <Button disabled={processing}>
+                            {processing ? (
+                                <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                                <CheckCheck className="size-4" />
+                            )}
+                            Save Relation
+                        </Button>
                     </div>
-                </div>
-                <div className="">
-                    <Label className="text-xs">Relative</Label>
-                    <CustomerSearchBox
-                        onSelect={(customer: Customer) => {
-                            setData('relative_id', customer.id);
-                            setSelectedRelative(customer);
-                        }}
-                    />
-                </div>
-                <div>
-                    <Label className="text-xs">Relation Type</Label>
-                    <Select
-                        value={data.relation_type}
-                        onChange={(value) => {
-                            setData('relation_type', value);
-                        }}
-                        options={relations}
-                    />
-
-                    <InputError message={errors.relation_type} />
-                </div>
-
-                <div className="flex justify-end">
-                    <Button disabled={processing}>
-                        {processing ? <Loader2 /> : <CheckCheck />}
-                        Save Relation
-                    </Button>
-                </div>
-            </form>
+                </form>
+            </div>
         </CustomAuthLayout>
     );
 };

@@ -1,384 +1,508 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
-    CheckCheck,
-    Clock,
+    ArrowLeft,
+    ArrowRight,
+    Clock3,
+    FileCheck2,
+    GitBranch,
+    History,
     ShieldCheck,
-    User,
-    UserIcon,
+    UserRound,
+    UsersRound,
     XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
-
 import { route } from 'ziggy-js';
+
 import { BorderInfoBox } from '../../../components/border-info-box';
-import HeadingSmall from '../../../components/heading-small';
-import InputError from '../../../components/input-error';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent } from '../../../components/ui/card';
-import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { appSwal } from '../../../lib/appSwal';
 import { formatDateTime } from '../../../lib/date_util';
-import { BreadcrumbItem, SharedData } from '../../../types';
-import { CustomerIntroducer } from '../../../types/customer_kyc_module';
+import type { BreadcrumbItem, SharedData } from '../../../types';
+import type { CustomerIntroducer } from '../../../types/customer_kyc_module';
+import ApprovalActions from '../components/approval-actions';
 
 export default function ShowIntroducer() {
     const { props } = usePage<
-        SharedData & { introducer_request: CustomerIntroducer; flash?: any }
+        SharedData & {
+            introducer_request: CustomerIntroducer;
+        }
     >();
 
-    const { introducer_request, errors } = props;
-    const [rejection_reason, setReasonForRejection] = useState('');
+    const { introducer_request } = props;
 
     useFlashToastHandler();
+
+    const record = introducer_request;
+    const introducedCustomer = record.introduced_customer;
+    const introducerCustomer = record.introducer_customer;
+
+    const status = record.verification_status?.toUpperCase() ?? 'UNKNOWN';
+
+    const statusConfig: Record<
+        string,
+        { label: string; className: string; icon: typeof ShieldCheck }
+    > = {
+        VERIFIED: {
+            label: 'Verified',
+            className:
+                'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
+            icon: ShieldCheck,
+        },
+        PENDING: {
+            label: 'Pending Review',
+            className:
+                'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400',
+            icon: Clock3,
+        },
+        REJECTED: {
+            label: 'Rejected',
+            className:
+                'border-destructive/30 bg-destructive/10 text-destructive',
+            icon: XCircle,
+        },
+    };
+
+    const currentStatus = statusConfig[status] ?? {
+        label: status.replaceAll('_', ' '),
+        className: 'border-border bg-muted text-muted-foreground',
+        icon: FileCheck2,
+    };
+
+    const StatusIcon = currentStatus.icon;
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
         { title: 'Customers', href: route('customers.index') },
         {
-            title:
-                introducer_request.introduced_customer?.name ||
-                `Introducer #${introducer_request.id}`,
-            href: route(
-                'customers.show',
-                introducer_request.introduced_customer_id,
-            ),
+            title: introducedCustomer?.name || `Introducer #${record.id}`,
+            href: route('customers.show', record.introduced_customer_id),
         },
-        { title: `Introducer #${introducer_request.id}`, href: '' },
+        { title: `Introducer #${record.id}`, href: '' },
     ];
-
-    // 🎯 Status badge mapping
-    const STATUS_MAP = {
-        verified: {
-            label: 'Verified',
-            class: 'bg-success text-success-foreground',
-        },
-        pending: {
-            label: 'Pending',
-            class: 'bg-warning text-warning-foreground',
-        },
-        rejected: {
-            label: 'Rejected',
-            class: 'bg-destructive text-destructive-foreground',
-        },
-    } as const;
-
-    const statusClass =
-        STATUS_MAP[
-            introducer_request.verification_status.toLowerCase() as keyof typeof STATUS_MAP
-        ]?.class ?? 'bg-muted text-muted-foreground';
-
-    const statusLabel =
-        STATUS_MAP[
-            introducer_request.verification_status.toLowerCase() as keyof typeof STATUS_MAP
-        ]?.label ?? 'Unknown';
-
-    // ✅ Actions for pending verification
-    const handleApprove = () => {
-        appSwal
-            .fire({
-                title: 'Approve this introducer?',
-                text: 'This will mark the introducer record as approved.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Approve',
-                cancelButtonText: 'Cancel',
-            })
-            .then((result) => {
-                if (result.isConfirmed) {
-                    router.post(
-                        route('customers.introducers.approve', [
-                            introducer_request.introduced_customer_id,
-                            introducer_request.id,
-                        ]),
-                        {},
-                    );
-                }
-            });
-    };
-
-    const handleReject = () => {
-        appSwal
-            .fire({
-                title: 'Reject this introducer?',
-                text: 'Provide the rejection reason before confirming.',
-                input: 'textarea',
-                inputPlaceholder: 'Rejection reason',
-                inputValue: rejection_reason,
-                inputValidator: (value) =>
-                    value?.trim()
-                        ? undefined
-                        : 'A rejection reason is required.',
-                showCancelButton: true,
-                confirmButtonText: 'Reject',
-                confirmButtonColor: '#dc2626',
-            })
-            .then((result) => {
-                if (result.isConfirmed) {
-                    router.post(
-                        route('customers.introducers.reject', [
-                            introducer_request.introduced_customer_id,
-                            introducer_request.id,
-                        ]),
-                        {
-                            rejection_reason: result.value,
-                        },
-                    );
-                }
-            });
-    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Introducer #${introducer_request.id}`} />
+            <Head title={`Introducer #${record.id}`} />
 
-            {/* HEADER */}
-            <div className="flex flex-col gap-3 pb-4 sm:flex-row sm:items-center sm:justify-between">
-                <HeadingSmall
-                    title={`Introducer #${introducer_request.id}`}
-                    description="View and verify customer introducer."
-                />
-
-                <div className="flex flex-wrap gap-2">
-                    <Link
-                        href={route(
-                            'customers.show',
-                            introducer_request.introduced_customer_id,
-                        )}
-                        className="flex items-center gap-1 rounded border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-all hover:bg-secondary/50"
-                    >
-                        Introducers
-                    </Link>
-
-                    <Link
-                        href={route('customers.introducers.edit', [
-                            introducer_request.introduced_customer_id,
-                            introducer_request.id,
-                        ])}
-                        className="flex items-center gap-1 rounded border border-border bg-accent px-3 py-1.5 text-sm text-accent-foreground transition-all hover:bg-accent/50"
-                    >
-                        <CheckCheck className="h-4 w-4" />
-                        Edit
-                    </Link>
-                </div>
-            </div>
-
-            {/* MAIN CONTENT */}
-            <div className="grid gap-4 lg:grid-cols-3">
-                {/* LEFT COLUMN: Introducer + Introduced Customer Info */}
-                <div className="col-span-2 space-y-4">
-                    {/* Introducer Info */}
-                    <Card className="rounded-md border bg-card p-4">
-                        <CardContent className="space-y-3">
-                            <p className="flex items-center gap-1 text-sm font-medium">
-                                <UserIcon className="h-4 w-4" /> Introducer Info
-                            </p>
-
-                            <div className="flex items-center gap-4">
-                                <Avatar
-                                    name={
-                                        introducer_request.introducer_customer
-                                            ?.name
-                                    }
-                                    photo={
-                                        introducer_request.introducer_customer
-                                            ?.photo?.url
-                                    }
-                                />
-                                <CustomerDetails
-                                    customer={
-                                        introducer_request.introducer_customer
-                                    }
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Introduced Customer Info */}
-                    <Card className="rounded-md border bg-card p-4">
-                        <CardContent className="space-y-3">
-                            <p className="flex items-center gap-1 text-sm font-medium">
-                                <UserIcon className="h-4 w-4" /> Introduced
-                                Customer
-                            </p>
-
-                            <div className="flex items-center gap-4">
-                                <Avatar
-                                    name={
-                                        introducer_request.introduced_customer
-                                            ?.name
-                                    }
-                                    photo={
-                                        introducer_request.introduced_customer
-                                            ?.photo?.url
-                                    }
-                                />
-                                <CustomerDetails
-                                    customer={
-                                        introducer_request.introduced_customer
-                                    }
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Relation Info */}
-                    <Card className="rounded-md border bg-card p-4">
-                        <CardContent className="space-y-2">
-                            <p className="flex items-center gap-1 text-sm font-medium">
-                                <ShieldCheck className="h-4 w-4" /> Relationship
-                                Info
-                            </p>
-                            <BorderInfoBox
-                                label="Relationship Type"
-                                value={introducer_request.relationship_type}
-                            />
-                            <Badge
-                                className={`rounded px-2 py-1 text-xs ${statusClass}`}
-                            >
-                                {statusLabel}
-                            </Badge>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* RIGHT: DETAILS */}
-                <div className="space-y-4">
-                    <div className="rounded-xl border bg-card p-5">
-                        {/* Header */}
-                        <div className="mb-4 flex items-center justify-between">
-                            <p className="text-sm font-semibold">Audit Trail</p>
-                            <span className="text-xs text-muted-foreground">
-                                {introducer_request?.audits?.length || 0}{' '}
-                                records
-                            </span>
+            <div className="w-full max-w-7xl space-y-5 pb-6">
+                {/* Page heading */}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-3">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                            <GitBranch className="size-5" />
                         </div>
 
-                        {/* Content */}
-                        {introducer_request?.audits?.length > 0 ? (
-                            <div className="space-y-4">
-                                {introducer_request.audits.map((audit) => (
-                                    <a
-                                        key={audit.id}
-                                        href={route(
-                                            'audits.batch',
-                                            audit.batch_id,
-                                        )}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="group hover: flex items-center justify-between rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40"
-                                    >
-                                        {/* Left: Event + User */}
-                                        <div className="flex items-center gap-2 overflow-hidden">
-                                            <span className="truncate capitalize">
-                                                {`${audit.event} by`}
-                                            </span>
-
-                                            <span className="flex items-center gap-1">
-                                                <User size={12} />
-                                                <span className="max-w-20 truncate">
-                                                    {audit.user?.name ?? 'SYS'}
-                                                </span>
-                                            </span>
-                                        </div>
-
-                                        {/* Right: Time */}
-                                        <div className="flex shrink-0 items-center gap-1 text-muted-foreground">
-                                            <Clock size={10} />
-                                            <span>
-                                                {formatDateTime(
-                                                    audit.created_at,
-                                                )}
-                                            </span>
-                                        </div>
-                                    </a>
-                                ))}
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                                    Introducer Verification
+                                </h1>
+                                <span className="rounded-md border border-border bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground">
+                                    #{record.id}
+                                </span>
                             </div>
-                        ) : (
-                            <div className="flex items-center justify-center py-6 text-xs text-muted-foreground">
-                                No audit records found.
-                            </div>
-                        )}
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Review the customer relationship and manage its
+                                verification status.
+                            </p>
+                        </div>
                     </div>
 
-                    {/* ACTIONS */}
-                    {introducer_request.verification_status === 'PENDING' && (
-                        <div className="flex gap-2 rounded-md border bg-card p-4">
-                            <div className="">
-                                <Input
-                                    type="text"
-                                    placeholder="Action Reason"
-                                    value={rejection_reason}
-                                    onChange={(e) =>
-                                        setReasonForRejection(e.target.value)
+                    <div className="flex flex-wrap gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                            <Link
+                                href={route(
+                                    'customers.show',
+                                    record.introduced_customer_id,
+                                )}
+                            >
+                                <ArrowLeft className="size-4" />
+                                Customer Profile
+                            </Link>
+                        </Button>
+
+                        <Button size="sm" asChild>
+                            <Link
+                                href={route('customers.introducers.edit', [
+                                    record.introduced_customer_id,
+                                    record.id,
+                                ])}
+                            >
+                                <FileCheck2 className="size-4" />
+                                Edit Record
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Status overview */}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <SummaryTile
+                        icon={<FileCheck2 className="size-4" />}
+                        label="Record Reference"
+                        value={`#${record.id}`}
+                    />
+                    <SummaryTile
+                        icon={<UsersRound className="size-4" />}
+                        label="Relationship"
+                        value={record.relationship_type || 'Not specified'}
+                    />
+                    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                            <StatusIcon className="size-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="text-xs text-muted-foreground">
+                                Verification Status
+                            </p>
+                            <div className="mt-1">
+                                <Badge
+                                    variant="outline"
+                                    className={currentStatus.className}
+                                >
+                                    {currentStatus.label}
+                                </Badge>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main content */}
+                <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
+                    <div className="space-y-5 lg:col-span-2">
+                        {/* Relationship visualization */}
+                        <Card className="overflow-hidden rounded-xl border-border shadow-sm">
+                            <div className="flex items-center gap-2 border-b border-border bg-muted/20 px-4 py-3.5">
+                                <UsersRound className="size-4 text-primary" />
+                                <h2 className="text-sm font-semibold">
+                                    Customer Relationship
+                                </h2>
+                            </div>
+
+                            <CardContent className="space-y-4 p-4 sm:p-5">
+                                <CustomerProfile
+                                    title="Introducer"
+                                    subtitle="Existing customer"
+                                    customer={introducerCustomer}
+                                />
+
+                                <div className="flex items-center gap-3 pl-4 sm:pl-7">
+                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/5 text-primary">
+                                        <ArrowRight className="size-4" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-medium text-muted-foreground">
+                                            Relationship type
+                                        </p>
+                                        <p className="mt-0.5 text-sm font-semibold text-foreground">
+                                            {record.relationship_type ||
+                                                'Not specified'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <CustomerProfile
+                                    title="Introduced Customer"
+                                    subtitle="Customer being introduced"
+                                    customer={introducedCustomer}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Relationship details */}
+                        <Card className="overflow-hidden rounded-xl border-border shadow-sm">
+                            <div className="flex items-center gap-2 border-b border-border bg-muted/20 px-4 py-3.5">
+                                <ShieldCheck className="size-4 text-primary" />
+                                <h2 className="text-sm font-semibold">
+                                    Verification Details
+                                </h2>
+                            </div>
+
+                            <CardContent className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5">
+                                <BorderInfoBox
+                                    label="Relationship Type"
+                                    value={record.relationship_type}
+                                />
+                                <BorderInfoBox
+                                    label="Verification Status"
+                                    value={currentStatus.label}
+                                />
+                                <BorderInfoBox
+                                    label="Introducer Customer No."
+                                    value={
+                                        introducerCustomer?.customer_no || '—'
                                     }
                                 />
-                                <InputError
-                                    message={errors?.rejection_reason}
+                                <BorderInfoBox
+                                    label="Introduced Customer No."
+                                    value={
+                                        introducedCustomer?.customer_no || '—'
+                                    }
                                 />
-                            </div>
-                            <Button
-                                onClick={handleApprove}
-                                className="bg-success text-success-foreground hover:bg-success/90"
-                            >
-                                <CheckCheck className="mr-1 h-4 w-4" />
-                                Approve
-                            </Button>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                            <Button
-                                onClick={handleReject}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            >
-                                <XCircle className="mr-1 h-4 w-4" />
-                                Reject
-                            </Button>
-                        </div>
-                    )}
+                    {/* Right column */}
+                    <div className="space-y-5">
+                        {/* Approval panel */}
+                        {status === 'PENDING' && (
+                            <Card className="overflow-hidden rounded-xl border-amber-500/30 shadow-sm">
+                                <div className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/5 px-4 py-3.5">
+                                    <Clock3 className="size-4 text-amber-600 dark:text-amber-400" />
+                                    <h2 className="text-sm font-semibold">
+                                        Verification Review
+                                    </h2>
+                                </div>
+
+                                <CardContent className="space-y-3 p-4">
+                                    <p className="text-sm leading-relaxed text-muted-foreground">
+                                        Review the relationship details and
+                                        customer information before approving or
+                                        rejecting this record.
+                                    </p>
+
+                                    <div className="pt-1">
+                                        <ApprovalActions
+                                            approveUrl={route(
+                                                'customers.introducers.approve',
+                                                [
+                                                    record.introduced_customer_id,
+                                                    record.id,
+                                                ],
+                                            )}
+                                            rejectUrl={route(
+                                                'customers.introducers.reject',
+                                                [
+                                                    record.introduced_customer_id,
+                                                    record.id,
+                                                ],
+                                            )}
+                                            pending
+                                            maxRejectionLength={500}
+                                        />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {status === 'VERIFIED' && (
+                            <div className="flex gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4">
+                                <ShieldCheck className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                <div>
+                                    <p className="text-sm font-semibold">
+                                        Verification Complete
+                                    </p>
+                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                        This introducer relationship has been
+                                        verified.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {status === 'REJECTED' && (
+                            <div className="flex gap-3 rounded-xl border border-destructive/25 bg-destructive/5 p-4">
+                                <XCircle className="mt-0.5 size-5 shrink-0 text-destructive" />
+                                <div>
+                                    <p className="text-sm font-semibold">
+                                        Record Rejected
+                                    </p>
+                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                        This introducer relationship was
+                                        rejected. Review the audit trail for
+                                        related activity.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Audit trail */}
+                        <Card className="overflow-hidden rounded-xl border-border shadow-sm">
+                            <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/20 px-4 py-3.5">
+                                <div className="flex items-center gap-2">
+                                    <History className="size-4 text-primary" />
+                                    <h2 className="text-sm font-semibold">
+                                        Audit Trail
+                                    </h2>
+                                </div>
+                                <span className="rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground">
+                                    {record.audits?.length || 0} records
+                                </span>
+                            </div>
+
+                            <CardContent className="p-4">
+                                {record.audits?.length > 0 ? (
+                                    <div className="relative space-y-4">
+                                        {record.audits.map((audit, index) => (
+                                            <div
+                                                key={audit.id}
+                                                className="relative flex gap-3"
+                                            >
+                                                <div className="relative flex flex-col items-center">
+                                                    <div className="z-10 flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
+                                                        <Clock3 className="size-3.5" />
+                                                    </div>
+                                                    {index <
+                                                        record.audits.length -
+                                                            1 && (
+                                                        <div className="absolute top-8 h-full w-px bg-border" />
+                                                    )}
+                                                </div>
+
+                                                <div className="min-w-0 flex-1 pb-2">
+                                                    <p className="text-sm font-medium text-foreground capitalize">
+                                                        {audit.event}
+                                                    </p>
+                                                    <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                        <UserRound className="size-3.5" />
+                                                        {audit.user?.name ??
+                                                            'System'}
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {formatDateTime(
+                                                            audit.created_at,
+                                                        )}
+                                                    </p>
+
+                                                    {audit.batch_id && (
+                                                        <a
+                                                            href={route(
+                                                                'audits.batch',
+                                                                audit.batch_id,
+                                                            )}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                                                        >
+                                                            View audit details
+                                                            <ArrowRight className="size-3" />
+                                                        </a>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                                        <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                                            <History className="size-5" />
+                                        </div>
+                                        <p className="mt-3 text-sm font-medium">
+                                            No audit records
+                                        </p>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            Activity for this record will appear
+                                            here.
+                                        </p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
         </CustomAuthLayout>
     );
 }
 
-/* ---------------- Helper Components ---------------- */
-function Avatar({ name, photo }: { name?: string; photo?: string }) {
+function SummaryTile({
+    icon,
+    label,
+    value,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    value: string;
+}) {
     return (
-        <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
-            {photo ? (
-                <img
-                    src={photo}
-                    alt={name}
-                    className="h-full w-full object-cover"
-                />
-            ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                    {name?.charAt(0)}
-                </div>
-            )}
+        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                {icon}
+            </div>
+            <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">{label}</p>
+                <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                    {value}
+                </p>
+            </div>
         </div>
     );
 }
 
-function CustomerDetails({ customer }: { customer?: any }) {
+function CustomerProfile({
+    title,
+    subtitle,
+    customer,
+}: {
+    title: string;
+    subtitle: string;
+    customer?: any;
+}) {
     return (
-        <div className="flex-1 space-y-1">
-            <p className="text-sm font-medium text-info underline">
-                {customer?.id ? (
-                    <Link href={route('customers.show', customer.id)}>
-                        {customer.name}{' '}
-                    </Link>
-                ) : (
-                    customer?.name || '—'
-                )}
-            </p>
-            <p className="text-xs text-muted-foreground">
-                {customer?.type} • {customer?.status}
-            </p>
-            <p className="text-xs text-muted-foreground">
-                {customer?.customer_no} • {customer?.email} • {customer?.phone}
-            </p>
+        <div className="rounded-xl border border-border bg-background/50 p-3 sm:p-4">
+            <div className="flex items-start gap-3">
+                <div className="size-14 shrink-0 overflow-hidden rounded-xl border border-border bg-muted sm:size-16">
+                    {customer?.photo?.url ? (
+                        <img
+                            src={customer.photo.url}
+                            alt={customer.name || title}
+                            className="size-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex size-full items-center justify-center bg-primary/5 text-lg font-semibold text-primary">
+                            {customer?.name?.charAt(0)?.toUpperCase() || 'C'}
+                        </div>
+                    )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-muted-foreground">
+                        {title} · {subtitle}
+                    </p>
+
+                    {customer?.id ? (
+                        <Link
+                            href={route('customers.show', customer.id)}
+                            className="mt-1 inline-block text-sm font-semibold wrap-break-word text-foreground hover:text-primary"
+                        >
+                            {customer.name}
+                        </Link>
+                    ) : (
+                        <p className="mt-1 text-sm font-semibold text-foreground">
+                            {customer?.name ||
+                                'Customer information unavailable'}
+                        </p>
+                    )}
+
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        {customer?.customer_no || 'No customer number'}
+                        {customer?.type ? ` · ${customer.type}` : ''}
+                    </p>
+
+                    <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 border-t border-border pt-3 sm:grid-cols-2">
+                        <BorderInfoBox
+                            label="Phone"
+                            value={
+                                customer?.primary_phone ||
+                                customer?.phone ||
+                                '—'
+                            }
+                        />
+                        <BorderInfoBox
+                            label="Email"
+                            value={
+                                customer?.primary_email ||
+                                customer?.email ||
+                                '—'
+                            }
+                        />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { DismissableLayerBranch } from "@radix-ui/react-dismissable-layer";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import InputError from "../input-error";
@@ -163,17 +164,18 @@ const Select: React.FC<SelectSearchProps> = ({
       {/* Dropdown */}
       {open && !disabled && typeof document !== "undefined" &&
         createPortal(
-        <div
-          ref={dropdownRef}
-          style={{
-            position: "fixed",
-            top: openUpward ? "auto" : dropdownPosition.top,
-            bottom: openUpward ? dropdownPosition.bottom : "auto",
-            left: dropdownPosition.left,
-            width: dropdownPosition.width,
-          }}
-          className="z-[100] rounded-md border border-border bg-card p-1"
-        >
+        <DismissableLayerBranch asChild>
+          <div
+            ref={dropdownRef}
+            style={{
+              position: "fixed",
+              top: openUpward ? "auto" : dropdownPosition.top,
+              bottom: openUpward ? dropdownPosition.bottom : "auto",
+              left: dropdownPosition.left,
+              width: dropdownPosition.width,
+            }}
+            className="z-[100] rounded-md border border-border bg-card p-1"
+          >
           {/* Search */}
           <Input
             type="text"
@@ -206,7 +208,8 @@ const Select: React.FC<SelectSearchProps> = ({
               </li>
             )}
           </ul>
-        </div>,
+          </div>
+        </DismissableLayerBranch>,
         document.body,
       )}
 

@@ -88,7 +88,7 @@ class KycDocumentController extends Controller
         try {
             $this->kycDocumentService->createDocument($file, $data);
         } catch (\InvalidArgumentException $e) {
-            return redirect()->back()->withErrors(['document' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['file' => $e->getMessage()]);
         }
 
         return redirect()
@@ -118,7 +118,7 @@ class KycDocumentController extends Controller
                 $request->file('file'),
             );
         } catch (\InvalidArgumentException $e) {
-            return redirect()->back()->withErrors(['document' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['file' => $e->getMessage()]);
         }
 
         return redirect()

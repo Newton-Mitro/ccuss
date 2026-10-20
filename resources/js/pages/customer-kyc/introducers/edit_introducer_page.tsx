@@ -1,19 +1,27 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { CheckCheck, ListFilter, Loader2 } from 'lucide-react';
-
+import {
+    ArrowLeft,
+    CheckCheck,
+    GitBranch,
+    HeartHandshake,
+    Loader2,
+    Save,
+    UserRound,
+    UsersRound,
+} from 'lucide-react';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { route } from 'ziggy-js';
+
 import BolderLessInfoBox from '../../../components/borderless-info-box';
-import HeadingSmall from '../../../components/heading-small';
 import InputError from '../../../components/input-error';
 import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
-import { BreadcrumbItem } from '../../../types';
-import { Customer } from '../../../types/customer_kyc_module';
+import type { BreadcrumbItem } from '../../../types';
+import type { Customer } from '../../../types/customer_kyc_module';
 import { CustomerSearchBox } from '../customers/components/customer-search-box';
 import { relationshipTypes } from './data/relationship_types';
 
@@ -32,8 +40,18 @@ const Edit = () => {
         relationship_type: introducer?.relationship_type || '',
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
+        if (!data.introducer_customer_id) {
+            toast.error('Please select an introducer.');
+            return;
+        }
+
+        if (data.introducer_customer_id === customer.id) {
+            toast.error('Customer cannot be their own introducer.');
+            return;
+        }
 
         put(
             route('customers.introducers.update', [customer.id, introducer.id]),
@@ -55,62 +73,92 @@ const Edit = () => {
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit Introducer" />
+            <Head title={`Edit Introducer - ${customer.name}`} />
 
-            <div className="flex justify-between pb-4">
-                <HeadingSmall
-                    title="Edit Introducer"
-                    description="Update introducer relationship."
-                />
+            <div className="w-full max-w-7xl space-y-5 pb-24">
+                {/* Page heading */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-start gap-3">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                            <HeartHandshake className="size-5" />
+                        </div>
 
-                <div className="flex gap-2">
-                    <Link
-                        href={route('customers.show', customer.id)}
-                        className="btn-secondary"
-                    >
-                        <ListFilter className="h-4 w-4" />
-                    </Link>
+                        <div>
+                            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                                Edit Introducer
+                            </h1>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Update the customer's introducer and
+                                relationship details.
+                            </p>
+                        </div>
+                    </div>
+
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href={route('customers.show', customer.id)}>
+                            <ArrowLeft className="size-4" />
+                            Back to Customer
+                        </Link>
+                    </Button>
                 </div>
-            </div>
 
-            <form
-                onSubmit={handleSubmit}
-                className="w-full space-y-4 rounded-md border bg-card p-4 sm:p-6"
-            >
-                {/* CUSTOMER */}
-                <div>
-                    <Label>Customer</Label>
+                {/* Introduced customer profile */}
+                <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center gap-2 border-b border-border bg-muted/30 px-4 py-3">
+                        <UserRound className="size-4 text-primary" />
+                        <h2 className="text-sm font-semibold text-foreground">
+                            Customer Information
+                        </h2>
+                        <span className="ml-auto rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground">
+                            {customer.customer_no}
+                        </span>
+                    </div>
 
-                    <div className="flex flex-col gap-4 rounded-md border bg-background/60 p-3 md:flex-row">
-                        <div className="flex items-center justify-center">
-                            <div className="h-20 w-20 overflow-hidden rounded-full border bg-muted">
+                    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start">
+                        <div className="flex items-center gap-3 sm:block">
+                            <div className="size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-muted sm:size-20">
                                 {customer?.photo?.url ? (
                                     <img
                                         src={customer.photo.url}
                                         alt={customer.name}
-                                        className="h-full w-full object-cover"
+                                        className="size-full object-cover"
                                     />
                                 ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                                        {customer.name.charAt(0)}
+                                    <div className="flex size-full items-center justify-center bg-primary/5 text-xl font-semibold text-primary">
+                                        {customer.name
+                                            ?.charAt(0)
+                                            ?.toUpperCase() || 'C'}
                                     </div>
                                 )}
                             </div>
+
+                            <div className="min-w-0 sm:hidden">
+                                <Link
+                                    href={route('customers.show', customer.id)}
+                                    className="text-sm font-semibold text-foreground hover:text-primary"
+                                >
+                                    {customer.name}
+                                </Link>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {customer.status} · {customer.type}
+                                </p>
+                            </div>
                         </div>
 
-                        <div className="flex-1 space-y-1">
-                            <Link
-                                href={route('customers.show', customer.id)}
-                                className="text-sm font-semibold text-info underline"
-                            >
-                                {customer.name} • {customer.customer_no}
-                            </Link>
+                        <div className="min-w-0 flex-1 space-y-3">
+                            <div className="hidden sm:block">
+                                <Link
+                                    href={route('customers.show', customer.id)}
+                                    className="text-base font-semibold text-foreground transition-colors hover:text-primary"
+                                >
+                                    {customer.name}
+                                </Link>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {customer.status} · {customer.type}
+                                </p>
+                            </div>
 
-                            <p className="text-xs text-muted-foreground">
-                                {customer.status} • {customer.type}
-                            </p>
-
-                            <div className="grid grid-cols-1 gap-1 text-xs md:grid-cols-4">
+                            <div className="grid grid-cols-1 gap-x-5 gap-y-3 border-t border-border pt-3 sm:grid-cols-2 lg:grid-cols-4">
                                 <BolderLessInfoBox
                                     label="Primary Phone"
                                     value={customer.primary_phone}
@@ -120,74 +168,216 @@ const Edit = () => {
                                     value={customer.primary_email}
                                 />
                                 <BolderLessInfoBox
-                                    label="ID Type"
+                                    label="Identification Type"
                                     value={customer.identification_type}
                                 />
                                 <BolderLessInfoBox
-                                    label="ID Number"
+                                    label="Identification Number"
                                     value={customer.identification_number}
                                 />
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                {/* INTRODUCER */}
-                <div>
-                    <Label className="text-xs">Introducer</Label>
+                {/* Introducer relationship form */}
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                        <SectionHeading
+                            icon={<UsersRound className="size-4" />}
+                            step="01"
+                            title="Introducer Details"
+                            description="Choose the existing customer who introduced this customer."
+                        />
 
-                    <CustomerSearchBox
-                        selectedCustomer={selectedIntroducer}
-                        onSelect={(c: Customer) => {
-                            if (c.id === customer.id) {
-                                toast.error(
-                                    'Customer cannot be their own introducer',
-                                );
-                                return;
-                            }
+                        <div className="space-y-2 p-4 sm:p-5">
+                            <Label className="text-sm">
+                                Select Introducer
+                                <span className="ml-1 text-destructive">*</span>
+                            </Label>
 
-                            setSelectedIntroducer(c);
-                            setData('introducer_customer_id', c.id);
-                        }}
-                    />
+                            <CustomerSearchBox
+                                selectedCustomer={selectedIntroducer}
+                                onSelect={(c: Customer) => {
+                                    if (String(c.id) === String(customer.id)) {
+                                        toast.error(
+                                            'Customer cannot be their own introducer.',
+                                        );
+                                        return;
+                                    }
 
-                    <InputError message={errors.introducer_customer_id} />
-                </div>
+                                    setSelectedIntroducer(c);
+                                    setData('introducer_customer_id', c.id);
+                                }}
+                            />
 
-                {/* RELATIONSHIP TYPE */}
-                <div>
-                    <Label className="text-xs">Relationship Type</Label>
+                            <p className="text-xs leading-relaxed text-muted-foreground">
+                                Search for a registered customer and select them
+                                as the introducer. The customer cannot introduce
+                                themselves.
+                            </p>
 
-                    <Select
-                        value={data.relationship_type}
-                        onChange={(value) =>
-                            setData('relationship_type', value)
-                        }
-                        options={relationshipTypes}
-                    />
+                            <InputError
+                                message={errors.introducer_customer_id}
+                            />
 
-                    <InputError message={errors.relationship_type} />
-                </div>
+                            {selectedIntroducer && (
+                                <div className="mt-3 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-background text-sm font-semibold text-primary">
+                                        {selectedIntroducer.photo?.url ? (
+                                            <img
+                                                src={
+                                                    selectedIntroducer.photo.url
+                                                }
+                                                alt={selectedIntroducer.name}
+                                                className="size-full object-cover"
+                                            />
+                                        ) : (
+                                            selectedIntroducer.name
+                                                ?.charAt(0)
+                                                ?.toUpperCase() || 'C'
+                                        )}
+                                    </div>
 
-                {/* SUBMIT */}
-                <div className="flex justify-end">
-                    <Button disabled={processing}>
-                        {processing ? (
-                            <>
-                                <Loader2 />
-                                Updating...
-                            </>
-                        ) : (
-                            <>
-                                <CheckCheck />
-                                Update Introducer
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </form>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-semibold text-foreground">
+                                            {selectedIntroducer.name}
+                                        </p>
+                                        <p className="mt-0.5 text-xs text-muted-foreground">
+                                            {selectedIntroducer.customer_no}
+                                            {selectedIntroducer.primary_phone
+                                                ? ` · ${selectedIntroducer.primary_phone}`
+                                                : ''}
+                                        </p>
+                                    </div>
+
+                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 bg-background px-2 py-1 text-xs text-primary">
+                                        <CheckCheck className="size-3.5" />
+                                        Selected
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                        <SectionHeading
+                            icon={<GitBranch className="size-4" />}
+                            step="02"
+                            title="Relationship Details"
+                            description="Specify how the introducer is related to the customer."
+                        />
+
+                        <div className="max-w-xl space-y-2 p-4 sm:p-5">
+                            <Label
+                                htmlFor="relationship_type"
+                                className="text-sm"
+                            >
+                                Relationship Type
+                                <span className="ml-1 text-destructive">*</span>
+                            </Label>
+
+                            <Select
+                                value={data.relationship_type}
+                                onChange={(value) =>
+                                    setData('relationship_type', value)
+                                }
+                                options={relationshipTypes}
+                            />
+
+                            <p className="text-xs text-muted-foreground">
+                                Choose the appropriate relationship from the
+                                available options.
+                            </p>
+
+                            <InputError message={errors.relationship_type} />
+                        </div>
+                    </section>
+
+                    {/* Sticky action bar */}
+                    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-5 sm:py-4 sm:backdrop-blur-none">
+                        <div className="mx-auto flex w-full max-w-7xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="hidden text-xs text-muted-foreground sm:block">
+                                Verify the introducer and relationship before
+                                saving.
+                            </p>
+
+                            <div className="flex w-full gap-2 sm:w-auto">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    disabled={processing}
+                                    className="flex-1 sm:flex-none"
+                                    asChild
+                                >
+                                    <Link
+                                        href={route(
+                                            'customers.show',
+                                            customer.id,
+                                        )}
+                                    >
+                                        Cancel
+                                    </Link>
+                                </Button>
+
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="flex-1 sm:min-w-44 sm:flex-none"
+                                >
+                                    {processing ? (
+                                        <>
+                                            <Loader2 className="size-4 animate-spin" />
+                                            Updating...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="size-4" />
+                                            Update Introducer
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </CustomAuthLayout>
     );
 };
+
+function SectionHeading({
+    icon,
+    step,
+    title,
+    description,
+}: {
+    icon: React.ReactNode;
+    step: string;
+    title: string;
+    description: string;
+}) {
+    return (
+        <div className="flex items-start gap-3 border-b border-border bg-muted/20 px-4 py-3.5">
+            <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+                {icon}
+            </div>
+
+            <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-sm font-semibold text-foreground">
+                        {title}
+                    </h2>
+                    <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {step}
+                    </span>
+                </div>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {description}
+                </p>
+            </div>
+        </div>
+    );
+}
 
 export default Edit;

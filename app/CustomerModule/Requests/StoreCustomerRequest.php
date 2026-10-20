@@ -30,7 +30,7 @@ class StoreCustomerRequest extends FormRequest
             'dob' => [
                 'nullable',
                 'date',
-                'required_if:type,individual',
+                'required_if:type,INDIVIDUAL',
             ],
             'gender' => [
                 'nullable',

@@ -49,7 +49,7 @@ export default function Index() {
             get(route('customers.index'), { preserveState: true });
         }, 400);
         return () => clearTimeout(delay);
-    }, [data.search, data.status, data.per_page, data.page]);
+    }, [data.search, data.status, data.per_page, data.page, get]);
 
     const handleDelete = (id: number, name: string) => {
         appSwal

@@ -24,7 +24,6 @@ import { formatDate, formatDateTime } from '../../../lib/date_util';
 import formatUndersoreString from '../../../lib/formatUnderscoreString';
 import statusConfig, { Status } from '../../../lib/statusConfig';
 import { BreadcrumbItem } from '../../../types';
-
 export default function Show({ customer }: CustomerPageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customer & KYC', href: '' },
@@ -336,22 +335,22 @@ export default function Show({ customer }: CustomerPageProps) {
                     {customer.addresses.map((addr) => (
                         <DataCard
                             key={addr.id}
-                            onShow={() => {
+                            onShow={() =>
                                 router.visit(
                                     route('customers.addresses.show', [
                                         customer.id,
                                         addr.id,
                                     ]),
-                                );
-                            }}
-                            onEdit={() => {
+                                )
+                            }
+                            onEdit={() =>
                                 router.visit(
                                     route('customers.addresses.edit', [
                                         customer.id,
                                         addr.id,
                                     ]),
-                                );
-                            }}
+                                )
+                            }
                             onDelete={() => {
                                 handleDeleteCustomerAddress(addr.id);
                             }}
@@ -394,22 +393,22 @@ export default function Show({ customer }: CustomerPageProps) {
                         {customer.family_relations?.map((rel) => (
                             <DataCard
                                 key={rel.id}
-                                onShow={() => {
+                                onShow={() =>
                                     router.visit(
                                         route(
                                             'customers.family-relations.show',
                                             [customer.id, rel.id],
                                         ),
-                                    );
-                                }}
-                                onEdit={() => {
+                                    )
+                                }
+                                onEdit={() =>
                                     router.visit(
                                         route(
                                             'customers.family-relations.edit',
                                             [customer.id, rel.id],
                                         ),
-                                    );
-                                }}
+                                    )
+                                }
                                 onDelete={() => {
                                     handleDeleteCustomerFamilyRelation(rel.id);
                                 }}
@@ -487,22 +486,22 @@ export default function Show({ customer }: CustomerPageProps) {
                     {customer.introducers.map((intro) => (
                         <DataCard
                             key={intro.id}
-                            onShow={() => {
+                            onShow={() =>
                                 router.visit(
                                     route('customers.introducers.show', [
                                         customer.id,
                                         intro.id,
                                     ]),
-                                );
-                            }}
-                            onEdit={() => {
+                                )
+                            }
+                            onEdit={() =>
                                 router.visit(
                                     route('customers.introducers.edit', [
                                         customer.id,
                                         intro.id,
                                     ]),
-                                );
-                            }}
+                                )
+                            }
                             onDelete={() => {
                                 handleDeleteCustomerIntroducer(intro.id);
                             }}
@@ -583,14 +582,22 @@ export default function Show({ customer }: CustomerPageProps) {
                     {customer.kyc_documents.map((doc) => (
                         <DataCard
                             key={doc.id}
-                            onShow={() => {
+                            onShow={() =>
                                 router.visit(
                                     route('customers.kyc-documents.show', [
                                         customer.id,
                                         doc.id,
                                     ]),
-                                );
-                            }}
+                                )
+                            }
+                            onEdit={() =>
+                                router.visit(
+                                    route('customers.kyc-documents.edit', [
+                                        customer.id,
+                                        doc.id,
+                                    ]),
+                                )
+                            }
                             onDelete={() => {
                                 handleDeleteCustomerKycDocument(doc.id);
                             }}
