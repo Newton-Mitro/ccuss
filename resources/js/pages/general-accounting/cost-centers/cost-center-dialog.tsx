@@ -1,4 +1,3 @@
-import InputError from '@/components/input-error';
 import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,12 +8,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
-import { useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
-import { route } from 'ziggy-js';
 
 export interface CostCenter {
     id: number;
@@ -24,158 +17,6 @@ export interface CostCenter {
     level: number;
     status: boolean;
     parent?: { code: string; name: string } | null;
-}
-
-export interface CostCenterParent {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface CostCenterFormDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    parents: CostCenterParent[];
-    costCenter?: CostCenter | null;
-}
-
-export function CostCenterFormDialog({
-    open,
-    onOpenChange,
-    parents,
-    costCenter,
-}: CostCenterFormDialogProps) {
-    const form = useForm({
-        code: '',
-        name: '',
-        parent_id: '',
-        status: true,
-    });
-
-    useEffect(() => {
-        form.setData({
-            code: costCenter?.code ?? '',
-            name: costCenter?.name ?? '',
-            parent_id: costCenter?.parent_id
-                ? String(costCenter.parent_id)
-                : '',
-            status: costCenter?.status ?? true,
-        });
-        form.clearErrors();
-    }, [costCenter, open]);
-
-    const submit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const options = {
-            preserveScroll: true,
-            onSuccess: () => onOpenChange(false),
-        };
-
-        if (costCenter) {
-            form.put(route('cost-centers.update', costCenter.id), options);
-        } else {
-            form.post(route('cost-centers.store'), options);
-        }
-    };
-
-    return (
-        <Dialog
-            open={open}
-            onOpenChange={(nextOpen) => {
-                if (!form.processing) onOpenChange(nextOpen);
-            }}
-        >
-            <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>
-                        {costCenter ? 'Edit cost center' : 'Create cost center'}
-                    </DialogTitle>
-                    <DialogDescription>
-                        Define an organization unit for expense tracking.
-                    </DialogDescription>
-                </DialogHeader>
-                <form className="space-y-5" onSubmit={submit}>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-1.5">
-                            <Label htmlFor="cost-center-code">Code</Label>
-                            <Input
-                                id="cost-center-code"
-                                value={form.data.code}
-                                onChange={(event) =>
-                                    form.setData('code', event.target.value)
-                                }
-                                required
-                            />
-                            <InputError message={form.errors.code} />
-                        </div>
-                        <div className="space-y-1.5">
-                            <Label htmlFor="cost-center-name">Name</Label>
-                            <Input
-                                id="cost-center-name"
-                                value={form.data.name}
-                                onChange={(event) =>
-                                    form.setData('name', event.target.value)
-                                }
-                                required
-                            />
-                            <InputError message={form.errors.name} />
-                        </div>
-                        <div className="space-y-1.5 sm:col-span-2">
-                            <Label>Parent cost center</Label>
-                            <Select
-                                value={form.data.parent_id}
-                                onChange={(value) =>
-                                    form.setData('parent_id', value)
-                                }
-                                options={[
-                                    { value: '', label: 'None (top level)' },
-                                    ...parents
-                                        .filter(
-                                            (parent) =>
-                                                parent.id !== costCenter?.id,
-                                        )
-                                        .map((parent) => ({
-                                            value: String(parent.id),
-                                            label: `${parent.code} - ${parent.name}`,
-                                        })),
-                                ]}
-                            />
-                            <InputError message={form.errors.parent_id} />
-                        </div>
-                    </div>
-                    {costCenter && (
-                        <label className="flex items-center gap-2 rounded-md border p-3 text-sm">
-                            <Input
-                                type="checkbox"
-                                checked={form.data.status}
-                                onChange={(event) =>
-                                    form.setData('status', event.target.checked)
-                                }
-                            />
-                            Active
-                        </label>
-                    )}
-                    <DialogFooter>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            disabled={form.processing}
-                            onClick={() => onOpenChange(false)}
-                        >
-                            Cancel
-                        </Button>
-                        <Button type="submit" disabled={form.processing}>
-                            {form.processing
-                                ? 'Saving...'
-                                : costCenter
-                                  ? 'Save changes'
-                                  : 'Create cost center'}
-                        </Button>
-                    </DialogFooter>
-                </form>
-            </DialogContent>
-        </Dialog>
-    );
 }
 
 interface CostCenterDetailsDialogProps {

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Authorization\PermissionRegistry;
+use App\SystemAdministration\Application\AuditComplianceCatalog;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use Illuminate\Database\Seeder;
@@ -332,8 +333,8 @@ class DefaultRolePermissionSeeder extends Seeder
         ];
 
         $executiveReadPermissions = collect($definitions)
-            ->filter(fn($definition) => in_array($definition->action, ['view', 'search', 'report'], true)
-                && !$definition->forAdmin)
+            ->filter(fn ($definition) => in_array($definition->action, ['view', 'search', 'report'], true)
+                && ! $definition->forAdmin)
             ->pluck('slug')
             ->all();
 
@@ -402,7 +403,7 @@ class DefaultRolePermissionSeeder extends Seeder
         ]);
 
         $permissionIds = collect($definitions)
-            ->mapWithKeys(fn($definition) => [
+            ->mapWithKeys(fn ($definition) => [
                 $definition->slug => Permission::firstOrCreate(
                     ['slug' => $definition->slug],
                     $definition->toArray(),
@@ -417,15 +418,74 @@ class DefaultRolePermissionSeeder extends Seeder
             ...$executiveReadPermissions,
             'activity_logs.view',
             'database_backups.view',
+            'internal-audit.view',
+            'approval-logs.view',
+            'compliance.view',
+            'risk-management.view',
         ]));
         $rolePermissions['report_officer'] = $executiveReadPermissions;
+
+        $registerPermissions = static function (array $registerNames, array $actions): array {
+            return collect($registerNames)
+                ->flatMap(function (string $registerName) use ($actions): array {
+                    $register = AuditComplianceCatalog::registers()[$registerName];
+                    $prefix = $register['permission'] ?? $registerName;
+
+                    return array_map(
+                        static fn (string $action): string => "{$prefix}.{$action}",
+                        $actions,
+                    );
+                })
+                ->unique()
+                ->values()
+                ->all();
+        };
+
+        $rolePermissions['internal_auditor'] = array_values(array_unique([
+            ...$rolePermissions['internal_auditor'],
+            ...$registerPermissions([
+                'audit-plans',
+                'audit-engagements',
+                'audit-working-papers',
+                'audit-findings',
+                'audit-corrective-actions',
+                'audit-follow-ups',
+            ], ['view', 'create', 'update', 'delete']),
+        ]));
+
+        $rolePermissions['compliance_officer'] = array_values(array_unique([
+            ...$rolePermissions['compliance_officer'],
+            'compliance.view',
+            'risk-management.view',
+            'approval-logs.view',
+            ...$registerPermissions([
+                'compliance-requirements',
+                'compliance-assessments',
+                'compliance-actions',
+            ], ['view', 'create', 'update', 'delete']),
+            ...$registerPermissions([
+                'risks',
+                'risk-assessments',
+                'risk-mitigations',
+            ], ['view']),
+        ]));
+
+        $rolePermissions['report_officer'] = array_values(array_unique([
+            ...$rolePermissions['report_officer'],
+            'approval-logs.view',
+            ...$registerPermissions([
+                'regulatory-reports',
+                'regulatory-reports-generated',
+                'regulatory-report-submissions',
+            ], ['view', 'create', 'update', 'delete']),
+        ]));
 
         foreach ($rolePermissions as $roleSlug => $permissions) {
             $role = Role::query()->where('slug', $roleSlug)->firstOrFail();
             $ids = $permissions === '*'
                 ? array_values($permissionIds)
                 : collect($permissions)
-                    ->map(fn(string $slug) => $permissionIds[$slug]
+                    ->map(fn (string $slug) => $permissionIds[$slug]
                         ?? throw new \LogicException("Unknown permission slug [{$slug}] in the default role matrix."))
                     ->unique()
                     ->values()

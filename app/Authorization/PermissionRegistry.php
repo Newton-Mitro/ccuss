@@ -2,6 +2,7 @@
 
 namespace App\Authorization;
 
+use App\Authorization\Permissions\AuditCompliancePermissions;
 use App\Authorization\Permissions\CustomerPermissions;
 use App\Authorization\Permissions\FinancialServicesPermissions;
 use App\Authorization\Permissions\GeneralAccountingPermissions;
@@ -14,6 +15,7 @@ final class PermissionRegistry
     public static function definitions(): array
     {
         return array_merge(
+            AuditCompliancePermissions::definitions(),
             CustomerPermissions::definitions(),
             FinancialServicesPermissions::definitions(),
             GeneralAccountingPermissions::definitions(),

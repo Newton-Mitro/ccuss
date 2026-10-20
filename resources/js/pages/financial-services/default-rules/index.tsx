@@ -2,13 +2,6 @@ import DataTablePagination from '@/components/data-table-pagination';
 import { ResourcePageHeader } from '@/components/resource-page-shell';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
@@ -168,28 +161,19 @@ export default function DefaultRulesIndex() {
                         }}
                     />
                 </div>
-                <Dialog
-                    open={isFormOpen}
-                    onOpenChange={(open) => {
-                        if (!open) {
-                            cancelEdit();
-                        } else {
-                            setIsFormOpen(true);
-                        }
-                    }}
-                >
-                    <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>
+                {isFormOpen && (
+                    <section className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
+                        <div>
+                            <h2 className="text-lg font-semibold">
                                 {editingRuleId === null
                                     ? 'Create default rule'
                                     : 'Edit default rule'}
-                            </DialogTitle>
-                            <DialogDescription>
+                            </h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
                                 Configure the account scope, fine, and effective
                                 dates for this rule.
-                            </DialogDescription>
-                        </DialogHeader>
+                            </p>
+                        </div>
                         <form
                             className="grid gap-3 sm:grid-cols-3"
                             onSubmit={(event) => {
@@ -398,8 +382,8 @@ export default function DefaultRulesIndex() {
                                 </Button>
                             </div>
                         </form>
-                    </DialogContent>
-                </Dialog>
+                    </section>
+                )}
                 <div className="h-[calc(100vh-360px)] min-h-60 overflow-auto rounded-md border bg-card">
                     <table className="w-full border-collapse text-sm">
                         <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">

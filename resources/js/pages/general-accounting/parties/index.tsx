@@ -10,15 +10,11 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import {
-    PartyDetailsDialog,
-    PartyFormDialog,
-    type Party,
-} from './party-dialog';
+import { PartyDetailsDialog, type Party } from './party-dialog';
 
 interface Props extends SharedData {
     parties: {
@@ -39,8 +35,6 @@ export default function PartyIndex() {
         per_page: Number(filters.per_page) || 18,
         page: Number(filters.page) || 1,
     });
-    const [partyDialogOpen, setPartyDialogOpen] = useState(false);
-    const [editingParty, setEditingParty] = useState<Party | null>(null);
     const [viewingParty, setViewingParty] = useState<Party | null>(null);
     useFlashToastHandler();
 
@@ -86,15 +80,13 @@ export default function PartyIndex() {
                     title="Parties"
                     description="Manage customers, suppliers, employees, and other accounting parties."
                     action={
-                        <Button
-                            type="button"
-                            onClick={() => {
-                                setEditingParty(null);
-                                setPartyDialogOpen(true);
-                            }}
-                        >
-                            <Plus className="h-4 w-4" />
-                            <span className="hidden sm:inline">Add Party</span>
+                        <Button asChild>
+                            <Link href={route('parties.create')}>
+                                <Plus className="h-4 w-4" />
+                                <span className="hidden sm:inline">
+                                    Add Party
+                                </span>
+                            </Link>
                         </Button>
                     }
                 />
@@ -194,21 +186,20 @@ export default function PartyIndex() {
                                                         <Eye className="h-5 w-5" />
                                                     </Button>
                                                     <Button
-                                                        type="button"
+                                                        asChild
                                                         variant="ghost"
                                                         size="icon"
                                                         title="Edit party"
                                                         aria-label="Edit party"
-                                                        onClick={() => {
-                                                            setEditingParty(
-                                                                party,
-                                                            );
-                                                            setPartyDialogOpen(
-                                                                true,
-                                                            );
-                                                        }}
                                                     >
-                                                        <Pencil className="h-5 w-5" />
+                                                        <Link
+                                                            href={route(
+                                                                'parties.edit',
+                                                                party.id,
+                                                            )}
+                                                        >
+                                                            <Pencil className="h-5 w-5" />
+                                                        </Link>
                                                     </Button>
                                                     <Button
                                                         type="button"
@@ -279,17 +270,20 @@ export default function PartyIndex() {
                                             <Eye className="h-5 w-5" />
                                         </Button>
                                         <Button
-                                            type="button"
+                                            asChild
                                             variant="ghost"
                                             size="icon"
                                             title="Edit party"
                                             aria-label="Edit party"
-                                            onClick={() => {
-                                                setEditingParty(party);
-                                                setPartyDialogOpen(true);
-                                            }}
                                         >
-                                            <Pencil className="h-5 w-5" />
+                                            <Link
+                                                href={route(
+                                                    'parties.edit',
+                                                    party.id,
+                                                )}
+                                            >
+                                                <Pencil className="h-5 w-5" />
+                                            </Link>
                                         </Button>
                                         <Button
                                             type="button"
@@ -318,11 +312,6 @@ export default function PartyIndex() {
                         links={parties.links}
                     />
                 )}
-                <PartyFormDialog
-                    open={partyDialogOpen}
-                    onOpenChange={setPartyDialogOpen}
-                    party={editingParty}
-                />
                 <PartyDetailsDialog
                     party={viewingParty}
                     onOpenChange={(open) => {

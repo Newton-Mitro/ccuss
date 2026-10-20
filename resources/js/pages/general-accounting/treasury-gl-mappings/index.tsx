@@ -15,7 +15,7 @@ import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import {
     MappingDetailsDialog,
-    MappingFormDialog,
+    MappingFormPanel,
     type TreasuryGlLedgerAccount,
     type TreasuryGlMapping,
 } from './mapping-dialog';
@@ -246,7 +246,7 @@ export default function TreasuryGlMappingsPage() {
                         links={mappings.links}
                     />
                 )}
-                <MappingFormDialog
+                <MappingFormPanel
                     open={formOpen}
                     onOpenChange={setFormOpen}
                     sourceTypes={sourceTypes}

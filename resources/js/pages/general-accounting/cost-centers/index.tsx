@@ -8,7 +8,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ChevronDown,
     ChevronRight,
@@ -19,12 +19,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
-import {
-    CostCenterDetailsDialog,
-    CostCenterFormDialog,
-    type CostCenter,
-    type CostCenterParent,
-} from './cost-center-dialog';
+import { CostCenterDetailsDialog, type CostCenter } from './cost-center-dialog';
 
 interface Props extends SharedData {
     costCenters: {
@@ -32,17 +27,13 @@ interface Props extends SharedData {
         links: { url: string | null; label: string; active: boolean }[];
         per_page?: number;
     };
-    parents: CostCenterParent[];
     filters: { search?: string; per_page?: string; page?: string };
 }
 
 export default function CostCenterIndex() {
-    const { costCenters, filters, parents } = usePage<Props>().props;
+    const { costCenters, filters } = usePage<Props>().props;
     const [search, setSearch] = useState(filters.search ?? '');
     const [expanded, setExpanded] = useState<number[]>([]);
-    const [costCenterDialogOpen, setCostCenterDialogOpen] = useState(false);
-    const [editingCostCenter, setEditingCostCenter] =
-        useState<CostCenter | null>(null);
     const [viewingCostCenter, setViewingCostCenter] =
         useState<CostCenter | null>(null);
     useFlashToastHandler();
@@ -161,17 +152,20 @@ export default function CostCenterIndex() {
                                 <Eye className="h-4 w-4" />
                             </Button>
                             <Button
-                                type="button"
+                                asChild
                                 variant="ghost"
                                 size="icon"
                                 title="Edit cost center"
                                 aria-label="Edit cost center"
-                                onClick={() => {
-                                    setEditingCostCenter(costCenter);
-                                    setCostCenterDialogOpen(true);
-                                }}
                             >
-                                <Pencil className="h-4 w-4" />
+                                <Link
+                                    href={route(
+                                        'cost-centers.edit',
+                                        costCenter.id,
+                                    )}
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                </Link>
                             </Button>
                             <Button
                                 type="button"
@@ -241,15 +235,11 @@ export default function CostCenterIndex() {
                     title="Cost Centers"
                     description="Track expenses by department, branch, project, or activity."
                     action={
-                        <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => {
-                                setEditingCostCenter(null);
-                                setCostCenterDialogOpen(true);
-                            }}
-                        >
-                            <Plus className="mr-1 h-4 w-4" /> Add Cost Center
+                        <Button asChild size="sm">
+                            <Link href={route('cost-centers.create')}>
+                                <Plus className="mr-1 h-4 w-4" /> Add Cost
+                                Center
+                            </Link>
                         </Button>
                     }
                 />
@@ -375,12 +365,6 @@ export default function CostCenterIndex() {
                         </div>
                     </>
                 )}
-                <CostCenterFormDialog
-                    open={costCenterDialogOpen}
-                    onOpenChange={setCostCenterDialogOpen}
-                    parents={parents}
-                    costCenter={editingCostCenter}
-                />
                 <CostCenterDetailsDialog
                     costCenter={viewingCostCenter}
                     onOpenChange={(open) => {

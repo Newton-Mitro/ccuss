@@ -64,21 +64,31 @@ const Select: React.FC<SelectSearchProps> = ({
     setSearch("");
   };
 
-  // 👉 Detect click outside
+  // Ignore pointer interactions inside the portaled menu so the option click
+  // can reach its handler before the menu closes.
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        ref.current &&
-        !ref.current.contains(event.target as Node) &&
-        !dropdownRef.current?.contains(event.target as Node)
-      ) {
+    const handlePointerDownOutside = (event: PointerEvent) => {
+      const path = event.composedPath();
+      const isInsideSelect =
+        ref.current !== null && path.includes(ref.current);
+      const isInsideDropdown =
+        (dropdownRef.current !== null &&
+          path.includes(dropdownRef.current)) ||
+        path.some(
+          (target) =>
+            target instanceof Element &&
+            target.hasAttribute("data-select-dropdown"),
+        );
+
+      if (!isInsideSelect && !isInsideDropdown) {
         setOpen(false);
         setSearch("");
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("pointerdown", handlePointerDownOutside);
+    return () =>
+      document.removeEventListener("pointerdown", handlePointerDownOutside);
   }, []);
 
   // 👉 Detect dropdown position (flip logic)
@@ -167,6 +177,7 @@ const Select: React.FC<SelectSearchProps> = ({
         <DismissableLayerBranch asChild>
           <div
             ref={dropdownRef}
+            data-select-dropdown
             style={{
               position: "fixed",
               top: openUpward ? "auto" : dropdownPosition.top,

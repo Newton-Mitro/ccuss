@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { useForm } from '@inertiajs/react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { route } from 'ziggy-js';
 
 export interface TreasuryGlLedgerAccount {
@@ -36,7 +36,7 @@ export interface TreasuryGlMapping {
     credit_account_id?: number;
 }
 
-interface MappingFormDialogProps {
+interface MappingFormPanelProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     sourceTypes: string[];
@@ -55,13 +55,14 @@ const transactionTypes: Record<string, string[]> = {
     CASH_LOCATION: ['DEPOSIT', 'WITHDRAWAL'],
 };
 
-export function MappingFormDialog({
+export function MappingFormPanel({
     open,
     onOpenChange,
     sourceTypes,
     accounts,
     mapping,
-}: MappingFormDialogProps) {
+}: MappingFormPanelProps) {
+    const panelRef = useRef<HTMLElement>(null);
     const form = useForm({
         source_type: sourceTypes[0] ?? 'BANK_ACCOUNT',
         source_code: 'DEFAULT',
@@ -87,6 +88,15 @@ export function MappingFormDialog({
         });
         form.clearErrors();
     }, [mapping, open, sourceTypes]);
+
+    useEffect(() => {
+        if (open) {
+            panelRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+            });
+        }
+    }, [open]);
 
     const submit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -117,24 +127,22 @@ export function MappingFormDialog({
             : null;
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={(nextOpen) => {
-                if (!form.processing) onOpenChange(nextOpen);
-            }}
-        >
-            <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>
+        open && (
+            <section
+                ref={panelRef}
+                className="scroll-mt-4 space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
+            >
+                <div>
+                    <h2 className="text-lg font-semibold">
                         {mapping
                             ? 'Edit Treasury GL mapping'
                             : 'Add Treasury GL mapping'}
-                    </DialogTitle>
-                    <DialogDescription>
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
                         Map a Treasury transaction to debit and credit ledger
                         accounts.
-                    </DialogDescription>
-                </DialogHeader>
+                    </p>
+                </div>
                 <form className="space-y-5" onSubmit={submit}>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-1.5">
@@ -266,7 +274,7 @@ export function MappingFormDialog({
                             accounts.
                         </p>
                     )}
-                    <DialogFooter>
+                    <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                         <Button
                             type="button"
                             variant="outline"
@@ -285,10 +293,10 @@ export function MappingFormDialog({
                                   ? 'Save changes'
                                   : 'Save mapping'}
                         </Button>
-                    </DialogFooter>
+                    </div>
                 </form>
-            </DialogContent>
-        </Dialog>
+            </section>
+        )
     );
 }
 

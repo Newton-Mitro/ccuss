@@ -8,7 +8,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ChevronDown,
     ChevronRight,
@@ -20,9 +20,6 @@ import {
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 import AccountDetailsDialog from '../account-details-dialog';
-import AccountGroupDialog, {
-    type AccountGroupDialogItem,
-} from '../account-group-dialog';
 
 interface AccountGroup {
     id: number;
@@ -51,9 +48,6 @@ export default function AccountGroupIndex() {
         ? accountGroups
         : (accountGroups.data ?? []);
     const [expanded, setExpanded] = useState<number[]>([]);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [editingGroup, setEditingGroup] =
-        useState<AccountGroupDialogItem | null>(null);
     const [viewingGroup, setViewingGroup] = useState<AccountGroup | null>(null);
     const permissions = new Set([
         ...(auth.user.permissions ?? []).map((permission) => permission.slug),
@@ -64,16 +58,6 @@ export default function AccountGroupIndex() {
     const canCreate = permissions.has('accounting.coa.create');
     const canUpdate = permissions.has('accounting.coa.update');
     useFlashToastHandler();
-
-    const openCreate = () => {
-        setEditingGroup(null);
-        setDialogOpen(true);
-    };
-
-    const openEdit = (group: AccountGroup) => {
-        setEditingGroup(group);
-        setDialogOpen(true);
-    };
 
     const childrenByParent = groups.reduce<Record<string, AccountGroup[]>>(
         (result, group) => {
@@ -126,12 +110,10 @@ export default function AccountGroupIndex() {
                     description="Organize the chart of accounts by reporting category and keep the structure consistent across all ledger views."
                     action={
                         canCreate ? (
-                            <Button
-                                size="sm"
-                                onClick={openCreate}
-                                className="gap-1"
-                            >
-                                <Plus className="h-4 w-4" /> Add Group
+                            <Button asChild size="sm" className="gap-1">
+                                <Link href={route('account-groups.create')}>
+                                    <Plus className="h-4 w-4" /> Add Group
+                                </Link>
                             </Button>
                         ) : undefined
                     }
@@ -153,12 +135,10 @@ export default function AccountGroupIndex() {
                             accounts.
                         </p>
                         {canCreate && (
-                            <Button
-                                className="mt-4"
-                                size="sm"
-                                onClick={openCreate}
-                            >
-                                Add Group
+                            <Button asChild className="mt-4" size="sm">
+                                <Link href={route('account-groups.create')}>
+                                    Add Group
+                                </Link>
                             </Button>
                         )}
                     </div>
@@ -243,16 +223,20 @@ export default function AccountGroupIndex() {
                                                     </Button>
                                                     {canUpdate && (
                                                         <Button
-                                                            type="button"
+                                                            asChild
                                                             variant="ghost"
                                                             size="icon"
                                                             title="Edit account group"
                                                             aria-label={`Edit group ${item.code} ${item.name}`}
-                                                            onClick={() =>
-                                                                openEdit(item)
-                                                            }
                                                         >
-                                                            <Pencil className="h-4 w-4 text-emerald-600" />
+                                                            <Link
+                                                                href={route(
+                                                                    'account-groups.edit',
+                                                                    item.id,
+                                                                )}
+                                                            >
+                                                                <Pencil className="h-4 w-4 text-emerald-600" />
+                                                            </Link>
                                                         </Button>
                                                     )}
                                                     <Button
@@ -283,12 +267,6 @@ export default function AccountGroupIndex() {
                         </div>
                     </ResourceTableCard>
                 )}
-                <AccountGroupDialog
-                    open={dialogOpen}
-                    onOpenChange={setDialogOpen}
-                    groups={groups}
-                    group={editingGroup}
-                />
                 <AccountDetailsDialog
                     open={viewingGroup !== null}
                     onOpenChange={(open) => {
