@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { formatDate } from '../../../lib/date_util';
 import { BreadcrumbItem, SharedData } from '../../../types';
 
@@ -60,14 +61,19 @@ export default function PeriodActionPage() {
         return () => clearTimeout(timeout);
     }, [data.search, data.per_page, data.page, get, indexRoute]);
 
-    const handleAction = (period: FiscalPeriod) => {
+    const handleAction = async (period: FiscalPeriod) => {
         if (period.draft_vouchers_count > 0) return;
-        if (
-            !window.confirm(
-                `${isClosing ? 'Close' : 'Reopen'} fiscal period "${period.name}"?`,
-            )
-        )
-            return;
+        const action = isClosing ? 'Close' : 'Reopen';
+        const confirmation = await appSwal.fire({
+            title: `${action} fiscal period?`,
+            text: `${action} fiscal period "${period.name}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: `${action} period`,
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        });
+        if (!confirmation.isConfirmed) return;
 
         router.post(
             route(actionRoute, period.id),

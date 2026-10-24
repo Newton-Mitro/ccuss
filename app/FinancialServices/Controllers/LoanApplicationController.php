@@ -4,25 +4,26 @@ namespace App\FinancialServices\Controllers;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\LoanApplicationService;
-use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Application\LoanProtectionClaimService;
+use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Models\LoanApplication;
-use App\FinancialServices\Models\LoanProtectionClaim;
+use App\FinancialServices\Models\LoanApplicationSupportingDocument;
+use App\FinancialServices\Models\LoanArrear;
 use App\FinancialServices\Models\LoanCollateral;
 use App\FinancialServices\Models\LoanGuarantor;
-use App\FinancialServices\Models\LoanArrear;
-use App\FinancialServices\Models\LoanApplicationSupportingDocument;
+use App\FinancialServices\Models\LoanProduct;
+use App\FinancialServices\Models\LoanProtectionClaim;
 use App\FinancialServices\Models\LoanProtectionProduct;
-use App\FinancialServices\Requests\DecideLoanApplicationRequest;
 use App\FinancialServices\Requests\ApproveLoanProtectionClaimRequest;
-use App\FinancialServices\Requests\StoreLoanProtectionClaimRequest;
+use App\FinancialServices\Requests\DecideLoanApplicationRequest;
 use App\FinancialServices\Requests\StoreLoanApplicationRequest;
 use App\FinancialServices\Requests\StoreLoanCollateralRequest;
 use App\FinancialServices\Requests\StoreLoanGuarantorRequest;
+use App\FinancialServices\Requests\StoreLoanProtectionClaimRequest;
 use App\FinancialServices\Requests\StoreLoanProtectionRequest;
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Application\ApprovalNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -34,6 +35,7 @@ class LoanApplicationController extends Controller
         private readonly LoanApplicationService $service,
         private readonly LoanScheduleService $scheduleService,
         private readonly LoanProtectionClaimService $claimService,
+        private readonly ApprovalNotificationService $approvalNotifications,
     ) {
         $this->middleware('permission:financial.loan-applications.view')->only(['index', 'show']);
         $this->middleware('permission:financial.loan-applications.documents.view')->only(['downloadSupportingDocument', 'downloadProtectionClaimDocument']);
@@ -51,15 +53,15 @@ class LoanApplicationController extends Controller
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('application_no', 'like', "%{$search}%")
-                        ->orWhereHas('customer', fn($customerQuery) => $customerQuery
+                        ->orWhereHas('customer', fn ($customerQuery) => $customerQuery
                             ->where('name', 'like', "%{$search}%")
                             ->orWhere('customer_no', 'like', "%{$search}%"))
-                        ->orWhereHas('product', fn($productQuery) => $productQuery
+                        ->orWhereHas('product', fn ($productQuery) => $productQuery
                             ->where('code', 'like', "%{$search}%")
                             ->orWhere('name', 'like', "%{$search}%"));
                 });
             })
-            ->when($status !== '' && $status !== 'ALL', fn($query) => $query->where('status', $status))
+            ->when($status !== '' && $status !== 'ALL', fn ($query) => $query->where('status', $status))
             ->latest('id')
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();
@@ -162,6 +164,15 @@ class LoanApplicationController extends Controller
     {
         $this->authorizeOrganization($request, $loanApplication);
         $this->service->submit($loanApplication);
+        $this->approvalNotifications->notifyOrganizationUsers(
+            $this->organizationId($request),
+            ['financial.loan-applications.view', 'financial.loan-applications.manage'],
+            $request->user()->id,
+            'Loan application submitted for review',
+            "Loan application {$loanApplication->application_no} is ready for review.",
+            route('loan-applications.show', $loanApplication, false),
+            'approval.requested',
+        );
 
         return back()->with('success', 'Loan application submitted for review.');
     }
@@ -184,6 +195,15 @@ class LoanApplicationController extends Controller
     {
         $this->authorizeOrganization($request, $loanApplication);
         $this->claimService->submit($loanApplication, $request->validated(), $request->user()->id);
+        $this->approvalNotifications->notifyOrganizationUsers(
+            $this->organizationId($request),
+            ['financial.loan-applications.view', 'financial.loan-applications.manage'],
+            $request->user()->id,
+            'Credit-life claim awaiting review',
+            "A credit-life claim for loan application {$loanApplication->application_no} is ready for review.",
+            route('loan-applications.show', $loanApplication, false),
+            'approval.requested',
+        );
 
         return back()->with('success', 'Credit-life claim submitted for review.');
     }
@@ -192,6 +212,7 @@ class LoanApplicationController extends Controller
     {
         $this->authorizeOrganization($request, $loanApplication);
         $this->claimService->approve($loanApplication, $claim, $request->validated(), $this->organizationId($request), $request->user()->id);
+        $this->notifyLoanDecision($request, $loanApplication, 'approved');
 
         return back()->with('success', 'Claim approved and a pending loan settlement transaction was created.');
     }
@@ -201,6 +222,7 @@ class LoanApplicationController extends Controller
         $this->authorizeOrganization($request, $loanApplication);
         $validated = $request->validate(['decision_note' => ['required', 'string', 'max:2000']]);
         $this->claimService->reject($loanApplication, $claim, $validated['decision_note'], $request->user()->id);
+        $this->notifyLoanDecision($request, $loanApplication, 'rejected');
 
         return back()->with('success', 'Credit-life claim rejected.');
     }
@@ -231,6 +253,7 @@ class LoanApplicationController extends Controller
     {
         $this->authorizeOrganization($request, $loanApplication);
         $this->service->approve($loanApplication, $request->validated(), $request->user()->id);
+        $this->notifyLoanDecision($request, $loanApplication, 'approved');
 
         return back()->with('success', 'Loan application approved.');
     }
@@ -239,8 +262,22 @@ class LoanApplicationController extends Controller
     {
         $this->authorizeOrganization($request, $loanApplication);
         $this->service->reject($loanApplication, $request->validated());
+        $this->notifyLoanDecision($request, $loanApplication, 'rejected');
 
         return back()->with('success', 'Loan application rejected.');
+    }
+
+    private function notifyLoanDecision(Request $request, LoanApplication $loanApplication, string $decision): void
+    {
+        $this->approvalNotifications->notifyOrganizationUsers(
+            $this->organizationId($request),
+            ['financial.loan-applications.view', 'financial.loan-applications.manage'],
+            $request->user()->id,
+            "Loan application {$decision}",
+            "Loan application {$loanApplication->application_no} was {$decision}.",
+            route('loan-applications.show', $loanApplication, false),
+            "approval.{$decision}",
+        );
     }
 
     public function createLoanAccount(Request $request, LoanApplication $loanApplication)

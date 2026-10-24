@@ -6,6 +6,7 @@ import HeadingSmall from '../../../components/heading-small';
 import { Select } from '../../../components/ui/select';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem, SharedData } from '../../../types';
 
 interface FiscalYear {
@@ -28,14 +29,18 @@ export default function YearEndClosingPage() {
 
     useFlashToastHandler();
 
-    const closeYear = (year: FiscalYear) => {
+    const closeYear = async (year: FiscalYear) => {
         if (!accountId || year.status === 'CLOSED' || !canClose(year)) return;
-        if (
-            !window.confirm(
-                `Create the closing voucher and close fiscal year "${year.name}"?`,
-            )
-        )
-            return;
+        const confirmation = await appSwal.fire({
+            title: 'Close fiscal year?',
+            text: `Create the closing voucher and close fiscal year "${year.name}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Create voucher and close',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        });
+        if (!confirmation.isConfirmed) return;
 
         router.post(
             route('fiscal-years.close-year', year.id),

@@ -10,6 +10,14 @@ final class SystemAdministrationPermissions
     {
         return [
             new PermissionDefinition(
+                module: 'Notifications',
+                name: 'View Notifications',
+                slug: 'notifications.view',
+                action: 'view',
+                description: 'View and manage personal notifications',
+            ),
+
+            new PermissionDefinition(
                 module: 'Users',
                 name: 'View Users',
                 slug: 'users.view',

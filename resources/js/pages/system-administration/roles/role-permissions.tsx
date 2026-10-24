@@ -34,6 +34,7 @@ import {
 } from '../../../components/ui/tooltip';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
+import { appSwal } from '../../../lib/appSwal';
 import { BreadcrumbItem } from '../../../types';
 import type { Permission, Role } from '../../../types/user';
 
@@ -120,11 +121,21 @@ const RolePermissionForm = ({
         }
     };
 
-    const deleteRole = (role: Role | null = selectedRole) => {
+    const deleteRole = async (role: Role | null = selectedRole) => {
         if (!role || role.preset || role.users_count || deleteForm.processing) {
             return;
         }
-        if (!window.confirm(`Delete the ${role.name} role?`)) return;
+
+        const confirmation = await appSwal.fire({
+            title: 'Delete role?',
+            text: `Delete the ${role.name} role? This action cannot be undone.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Delete role',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        });
+        if (!confirmation.isConfirmed) return;
 
         deleteForm.delete(route('roles.destroy', role.id), {
             preserveScroll: true,

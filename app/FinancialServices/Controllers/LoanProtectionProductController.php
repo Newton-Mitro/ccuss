@@ -25,7 +25,7 @@ class LoanProtectionProductController extends Controller
         return Inertia::render('financial-services/loan-protection-products/index', [
             'products' => LoanProtectionProduct::query()
                 ->where('organization_id', $organizationId)
-                ->when($search !== '', fn($query) => $query->where(function ($query) use ($search): void {
+                ->when($search !== '', fn ($query) => $query->where(function ($query) use ($search): void {
                     $query->where('code', 'like', "%{$search}%")
                         ->orWhere('name', 'like', "%{$search}%");
                 }))
@@ -37,10 +37,11 @@ class LoanProtectionProductController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
         return Inertia::render('financial-services/loan-protection-products/form', [
             'product' => null,
+            'can_manage' => $request->user()->hasPermission('financial.loan-protection-products.manage'),
         ]);
     }
 
@@ -50,6 +51,7 @@ class LoanProtectionProductController extends Controller
 
         return Inertia::render('financial-services/loan-protection-products/form', [
             'product' => $loanProtectionProduct,
+            'can_manage' => $request->user()->hasPermission('financial.loan-protection-products.manage'),
         ]);
     }
 

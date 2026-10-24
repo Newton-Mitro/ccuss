@@ -15,8 +15,12 @@ use App\FinancialServices\Models\LoanProtectionPolicy;
 use App\FinancialServices\Models\LoanProtectionProduct;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\Permission;
+use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use App\SystemAdministration\Notifications\ApprovalWorkflowNotification;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 function loanApplicationFixture(): array
@@ -58,6 +62,49 @@ it('creates and transitions a loan application through approval', function () {
         ->and($approved->approved_by)->toBe($fixture['user']->id);
 });
 
+it('notifies organization reviewers when a loan application is submitted', function () {
+    Notification::fake();
+    $fixture = loanApplicationFixture();
+    $reviewer = User::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'status' => User::STATUS_ACTIVE,
+    ]);
+    $createPermission = Permission::updateOrCreate(
+        ['slug' => 'financial.loan-applications.create'],
+        ['module' => 'Loan Applications', 'name' => 'Create', 'action' => 'create'],
+    );
+    $reviewPermission = Permission::updateOrCreate(
+        ['slug' => 'financial.loan-applications.manage'],
+        ['module' => 'Loan Applications', 'name' => 'Manage', 'action' => 'manage'],
+    );
+    $viewPermission = Permission::updateOrCreate(
+        ['slug' => 'financial.loan-applications.view'],
+        ['module' => 'Loan Applications', 'name' => 'View', 'action' => 'view'],
+    );
+    $creatorRole = Role::query()->create(['name' => 'Loan creator', 'slug' => 'loan-creator']);
+    $reviewerRole = Role::query()->create(['name' => 'Loan reviewer', 'slug' => 'loan-reviewer']);
+    $creatorRole->permissions()->attach($createPermission);
+    $reviewerRole->permissions()->attach([$reviewPermission->id, $viewPermission->id]);
+    $fixture['user']->roles()->attach($creatorRole);
+    $reviewer->roles()->attach($reviewerRole);
+
+    $application = app(LoanApplicationService::class)->create([
+        'branch_id' => $fixture['branch']->id,
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 500,
+        'requested_term_months' => 6,
+    ], $fixture['organization']->id);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('loan-applications.submit', $application))
+        ->assertRedirect();
+
+    Notification::assertSentTo($reviewer, ApprovalWorkflowNotification::class);
+    Notification::assertNotSentTo($fixture['user'], ApprovalWorkflowNotification::class);
+});
+
 it('updates draft loan application details and rejects updates after submission', function () {
     $fixture = loanApplicationFixture();
     $service = app(LoanApplicationService::class);
@@ -84,7 +131,7 @@ it('updates draft loan application details and rejects updates after submission'
 
     $service->submit($updated);
 
-    expect(fn() => $service->updateDraft($updated, [
+    expect(fn () => $service->updateDraft($updated, [
         'customer_id' => $fixture['customer']->id,
         'financial_product_id' => $fixture['product']->id,
         'requested_amount' => 900,
@@ -102,7 +149,7 @@ it('rejects excessive approval and enforces the product loan ceiling', function 
     ]);
     $service = app(LoanApplicationService::class);
 
-    expect(fn() => $service->create([
+    expect(fn () => $service->create([
         'customer_id' => $fixture['customer']->id,
         'financial_product_id' => $fixture['product']->id,
         'requested_amount' => 1001,
@@ -118,7 +165,7 @@ it('rejects excessive approval and enforces the product loan ceiling', function 
     ], $fixture['organization']->id);
     $service->submit($application);
 
-    expect(fn() => $service->approve($application, ['approved_amount' => 1001], $fixture['user']->id))
+    expect(fn () => $service->approve($application, ['approved_amount' => 1001], $fixture['user']->id))
         ->toThrow(RuntimeException::class, 'cannot exceed');
 });
 
@@ -155,13 +202,13 @@ it('creates one linked financial and loan account after approval', function () {
     $loan = $service->createLoanAccount($application->fresh());
     $financialAccount = FinancialAccount::query()->whereKey($loan->financial_account_id)->firstOrFail();
 
-    expect($loan->loan_no)->toBe('LN-' . str_pad((string) $application->id, 8, '0', STR_PAD_LEFT))
+    expect($loan->loan_no)->toBe('LN-'.str_pad((string) $application->id, 8, '0', STR_PAD_LEFT))
         ->and($loan->status)->toBe('APPROVED')
         ->and($financialAccount->account_type)->toBe('LOAN')
         ->and($financialAccount->status)->toBe('ACTIVE')
         ->and($financialAccount->opened_at)->not->toBeNull();
 
-    expect(fn() => $service->createLoanAccount($application->fresh()))
+    expect(fn () => $service->createLoanAccount($application->fresh()))
         ->toThrow(RuntimeException::class, 'already has a loan account');
 });
 
@@ -200,7 +247,7 @@ it('registers and verifies loan collateral for the owning application', function
         'requested_term_months' => 6,
     ], $fixture['organization']->id);
 
-    expect(fn() => $service->verifyCollateral($otherApplication, $collateral, false))
+    expect(fn () => $service->verifyCollateral($otherApplication, $collateral, false))
         ->toThrow(RuntimeException::class, 'does not belong');
 
     expect($service->releaseCollateral($application, $collateral)->status)->toBe('RELEASED');
@@ -222,9 +269,9 @@ it('manages guarantor invitations with organization and duplicate checks', funct
 
     $invitation = $service->addGuarantor($application, $guarantor->id);
     expect($service->decideGuarantor($application, $invitation, true)->status)->toBe('ACCEPTED');
-    expect(fn() => $service->addGuarantor($application, $guarantor->id))
+    expect(fn () => $service->addGuarantor($application, $guarantor->id))
         ->toThrow(RuntimeException::class, 'already a guarantor');
-    expect(fn() => $service->addGuarantor($application, $fixture['customer']->id))
+    expect(fn () => $service->addGuarantor($application, $fixture['customer']->id))
         ->toThrow(RuntimeException::class, 'cannot be their own guarantor');
 });
 
@@ -241,7 +288,7 @@ it('configures and activates required loan protection', function () {
     $service->approve($application, [], $fixture['user']->id);
     $service->createLoanAccount($application->fresh());
 
-    expect(fn() => $service->setProtectionStatus($application->fresh(), 'ACTIVE'))
+    expect(fn () => $service->setProtectionStatus($application->fresh(), 'ACTIVE'))
         ->toThrow(RuntimeException::class, 'No protection policy');
 
     $policy = $service->configureProtection($application->fresh(), [
@@ -354,9 +401,9 @@ it('settles a credit-life death claim through the ledger and restores coverage i
         ->and($loan->fresh()->status)->toBe('CLOSED')
         ->and($loan->financialAccount->fresh()->status)->toBe('CLOSED')
         ->and($loan->protectionPolicy()->first()->status)->toBe('CANCELLED');
-    expect(fn() => app(LoanScheduleService::class)->generate($loan->fresh()))
+    expect(fn () => app(LoanScheduleService::class)->generate($loan->fresh()))
         ->toThrow(RuntimeException::class, 'Closed loans cannot generate repayment schedules');
-    expect(fn() => app(LoanScheduleService::class)->assessArrears($loan->fresh()))
+    expect(fn () => app(LoanScheduleService::class)->assessArrears($loan->fresh()))
         ->toThrow(RuntimeException::class, 'Closed loans cannot accrue arrears');
 
     $transactionService->reverse($transaction->fresh(), $fixture['organization']->id);

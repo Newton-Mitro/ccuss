@@ -20,10 +20,11 @@ import { route } from 'ziggy-js';
 
 interface FormPageProps extends SharedData {
     product: LoanProtectionProduct | null;
+    can_manage: boolean;
 }
 
 export default function LoanProtectionProductForm() {
-    const { product } = usePage<FormPageProps>().props;
+    const { product, can_manage: canManage } = usePage<FormPageProps>().props;
     const editing = product !== null;
     const { data, setData, post, put, processing, errors } = useForm({
         code: product?.code ?? '',
@@ -44,6 +45,10 @@ export default function LoanProtectionProductForm() {
 
     const submit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        if (!canManage) {
+            return;
+        }
+
         if (product) {
             put(route('loan-protection-products.update', product.id));
             return;
@@ -122,6 +127,7 @@ export default function LoanProtectionProductForm() {
                                         onChange={(event) =>
                                             setData('code', event.target.value)
                                         }
+                                        disabled={!canManage}
                                         maxLength={60}
                                         placeholder="e.g. CLP-001"
                                         className="h-11"
@@ -144,6 +150,7 @@ export default function LoanProtectionProductForm() {
                                         onChange={(event) =>
                                             setData('name', event.target.value)
                                         }
+                                        disabled={!canManage}
                                         maxLength={180}
                                         placeholder="e.g. Standard Credit Life"
                                         className="h-11"
@@ -174,6 +181,7 @@ export default function LoanProtectionProductForm() {
                                                     event.target.value,
                                                 )
                                             }
+                                            disabled={!canManage}
                                             placeholder="0.00"
                                             className="h-11 pr-12"
                                             required
@@ -207,6 +215,7 @@ export default function LoanProtectionProductForm() {
                                                 event.target.value,
                                             )
                                         }
+                                        disabled={!canManage}
                                         maxLength={2000}
                                         rows={4}
                                         placeholder="Describe the protection and any details staff should know."
@@ -232,6 +241,7 @@ export default function LoanProtectionProductForm() {
                                                 event.target.checked,
                                             )
                                         }
+                                        disabled={!canManage}
                                         className="mt-0.5"
                                     />
                                     <span className="space-y-1">
@@ -258,18 +268,24 @@ export default function LoanProtectionProductForm() {
                                     Back to products
                                 </Link>
                             </Button>
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                className="sm:min-w-40"
-                            >
-                                <Save className="mr-2 size-4" />
-                                {processing
-                                    ? 'Saving...'
-                                    : editing
-                                      ? 'Save changes'
-                                      : 'Create product'}
-                            </Button>
+                            {canManage ? (
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="sm:min-w-40"
+                                >
+                                    <Save className="mr-2 size-4" />
+                                    {processing
+                                        ? 'Saving...'
+                                        : editing
+                                          ? 'Save changes'
+                                          : 'Create product'}
+                                </Button>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">
+                                    You have view-only access to this product.
+                                </p>
+                            )}
                         </footer>
                     </form>
 

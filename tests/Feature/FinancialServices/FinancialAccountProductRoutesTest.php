@@ -3,12 +3,11 @@
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\FinancialTransactionService;
 use App\FinancialServices\Application\LoanApplicationService;
-use App\FinancialServices\Application\LoanProtectionClaimService;
 use App\FinancialServices\Application\LoanScheduleService;
+use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
-use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\ShareAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
@@ -63,7 +62,7 @@ function createFinancialAccountProductFixture(string $category = 'SAVINGS'): arr
         'holder_type' => Customer::class,
         'holder_id' => $customer->id,
         'account_type' => $category,
-        'account_no' => strtoupper($category) . '-TEST-001',
+        'account_no' => strtoupper($category).'-TEST-001',
         'balance' => 125,
     ]);
 
@@ -81,19 +80,19 @@ it('serves a product-scoped index and rejects accounts of another category', fun
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('financial-accounts.savings.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/accounts/savings/index')
             ->where('category', 'SAVINGS'));
 
     $this->get(route('financial-accounts.savings.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/accounts/savings/create')
             ->where('category', 'SAVINGS'));
 
     $this->get(route('financial-accounts.savings.show', $fixture['account']))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/accounts/savings/show')
             ->where('account.id', $fixture['account']->id));
 
@@ -164,7 +163,7 @@ it('updates only the display name through a product route', function () {
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('financial-accounts.savings.edit', $fixture['account']))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/accounts/savings/edit')
             ->where('account.id', $fixture['account']->id));
 
@@ -390,7 +389,7 @@ it('generates account numbers for savings, share, fixed, and recurring deposits'
             'account_type' => $category,
         ], $fixture['organization']->id);
 
-        expect($account->account_no)->toMatch('/^' . $prefix . '-\d{8}$/')
+        expect($account->account_no)->toMatch('/^'.$prefix.'-\d{8}$/')
             ->and($account->financial_product_term_id)->toBe(
                 in_array($category, ['SAVINGS', 'SHARE'], true)
                 ? null
@@ -412,7 +411,7 @@ it('enforces product multiple-account rules and active policy overrides', functi
     $service = app(\App\FinancialServices\Application\FinancialAccountService::class);
 
     $service->create($accountData, $fixture['organization']->id);
-    expect(fn() => $service->create($accountData, $fixture['organization']->id))
+    expect(fn () => $service->create($accountData, $fixture['organization']->id))
         ->toThrow(\Illuminate\Validation\ValidationException::class, 'already has an open account');
 
     FinancialProductPolicy::factory()->create([
@@ -426,7 +425,7 @@ it('enforces product multiple-account rules and active policy overrides', functi
         ->toBeInstanceOf(FinancialAccount::class);
 
     $fixture['product']->policy()->update(['customer_can_open_multiple_account' => false]);
-    expect(fn() => $service->create($accountData, $fixture['organization']->id))
+    expect(fn () => $service->create($accountData, $fixture['organization']->id))
         ->toThrow(\Illuminate\Validation\ValidationException::class, 'already has an open account');
 });
 
@@ -603,16 +602,17 @@ it('creates a credit-life product and allows it to be selected for a loan applic
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->get(route('loan-protection-products.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/loan-protection-products/index')
             ->has('products.data', 0)
             ->where('can_manage', true));
 
     $this->get(route('loan-protection-products.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/loan-protection-products/form')
-            ->where('product', null));
+            ->where('product', null)
+            ->where('can_manage', true));
 
     $this->post(route('loan-protection-products.store'), [
         'code' => 'CL-1PCT',
@@ -625,21 +625,22 @@ it('creates a credit-life product and allows it to be selected for a loan applic
     $protectionProduct = \App\FinancialServices\Models\LoanProtectionProduct::query()->firstOrFail();
     $this->get(route('loan-protection-products.index', ['search' => 'CL-1PCT']))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->has('products.data', 1)
             ->where('products.data.0.code', 'CL-1PCT')
             ->where('filters.search', 'CL-1PCT'));
 
     $this->get(route('loan-protection-products.index', ['search' => 'missing']))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page->has('products.data', 0));
+        ->assertInertia(fn ($page) => $page->has('products.data', 0));
 
     $this->get(route('loan-protection-products.edit', $protectionProduct))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/loan-protection-products/form')
             ->where('product.id', $protectionProduct->id)
-            ->where('product.code', 'CL-1PCT'));
+            ->where('product.code', 'CL-1PCT')
+            ->where('can_manage', true));
 
     $this->put(route('loan-protection-products.update', $protectionProduct), [
         'code' => 'CL-1PCT',
@@ -665,7 +666,7 @@ it('creates a credit-life product and allows it to be selected for a loan applic
 
     $this->get(route('loan-applications.edit', $application))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/loan-applications/form')
             ->where('application.loan_protection_product_id', $protectionProduct->id)
             ->where('protectionProducts.0.id', $protectionProduct->id));
@@ -781,7 +782,7 @@ it('searches loan applications and exposes draft edit access to permitted users'
         'per_page' => 1,
     ]))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/loan-applications/index')
             ->where('can_update', true)
             ->where('filters.search', 'LA-000001')
@@ -813,7 +814,7 @@ it('saves loan application details and private supporting documents with the dra
             [
                 'document_type' => 'INCOME',
                 'file' => UploadedFile::fake()->create('income.pdf', 30, 'application/pdf'),
-            ]
+            ],
         ],
     ];
 
@@ -835,7 +836,7 @@ it('saves loan application details and private supporting documents with the dra
 
     $this->get(route('loan-applications.show', $application))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('financial-services/loan-applications/show')
             ->where('application.income_details.0.source', 'Salary')
             ->where('application.supporting_documents.0.file_name', 'income.pdf'));
@@ -866,7 +867,7 @@ it('saves loan application details and private supporting documents with the dra
         ->get(route('loan-applications.documents.download', [$application, $document]))
         ->assertForbidden();
     $this->get(route('loan-applications.show', $application))
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->where('can_view_supporting_documents', false)
             ->missing('application.supporting_documents'));
 
@@ -877,7 +878,7 @@ it('saves loan application details and private supporting documents with the dra
         [
             'document_type' => 'BANK_STATEMENT',
             'file' => UploadedFile::fake()->create('bank.pdf', 20, 'application/pdf'),
-        ]
+        ],
     ];
     $payload['_method'] = 'put';
     $this->post(route('loan-applications.update', $application), $payload)->assertRedirect();
@@ -920,9 +921,9 @@ it('requires an adult guardian when opening an account for a minor', function ()
         ...$payload,
         'guardian_customer_id' => $guardian->id,
     ])->assertRedirect(route('financial-accounts.savings.show', $account = FinancialAccount::query()
-                    ->where('holder_id', $minor->id)
-                    ->latest('id')
-                    ->firstOrFail()));
+        ->where('holder_id', $minor->id)
+        ->latest('id')
+        ->firstOrFail()));
 
     expect($account->account_no)->toMatch('/^SAV-\d{8}$/');
 });
@@ -978,9 +979,9 @@ it('shows guardian validation and opens a fixed deposit for a minor with an adul
         ...$payload,
         'guardian_customer_id' => $guardian->id,
     ])->assertRedirect(route('financial-accounts.fixed.show', $account = FinancialAccount::query()
-                    ->where('holder_id', $minor->id)
-                    ->latest('id')
-                    ->firstOrFail()));
+        ->where('holder_id', $minor->id)
+        ->latest('id')
+        ->firstOrFail()));
 
     expect($account->account_no)->toMatch('/^FDR-\d{8}$/')
         ->and($account->financial_product_term_id)->toBe($term->id)

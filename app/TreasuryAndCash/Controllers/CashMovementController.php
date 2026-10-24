@@ -5,15 +5,16 @@ namespace App\TreasuryAndCash\Controllers;
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
 use App\Http\Controllers\Controller;
+use App\SystemAdministration\Application\ApprovalNotificationService;
 use App\TreasuryAndCash\Application\CashAdjustmentService;
 use App\TreasuryAndCash\Application\CashMovementDataService;
 use App\TreasuryAndCash\Application\CashTransferService;
 use App\TreasuryAndCash\Application\TellerCashTransactionService;
+use App\TreasuryAndCash\Models\CashAdjustment;
+use App\TreasuryAndCash\Models\CashTransfer;
 use App\TreasuryAndCash\Models\Cheque;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
 use App\TreasuryAndCash\Models\TellerSession;
-use App\TreasuryAndCash\Models\CashTransfer;
-use App\TreasuryAndCash\Models\CashAdjustment;
 use App\TreasuryAndCash\Requests\StoreCashAdjustmentRequest;
 use App\TreasuryAndCash\Requests\StoreCashTransferRequest;
 use App\TreasuryAndCash\Requests\StoreTellerCashTransactionRequest;
@@ -31,6 +32,7 @@ class CashMovementController extends Controller
         private readonly CashTransferService $cashTransferService,
         private readonly CashAdjustmentService $cashAdjustmentService,
         private readonly TellerCashTransactionService $tellerCashTransactionService,
+        private readonly ApprovalNotificationService $approvalNotifications,
     ) {
         $this->middleware('permission:cash_transactions.create')->only([
             'tellerCashAdjustment',
@@ -102,6 +104,13 @@ class CashMovementController extends Controller
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         }
+        $this->approvalNotifications->notifyUser(
+            $adjustment->requestedBy,
+            'Cash adjustment approved',
+            'Your cash adjustment request has been approved.',
+            route('cash-adjustments.index', [], false),
+            'approval.approved',
+        );
 
         return redirect()->route('cash-adjustments.index')
             ->with('success', 'Cash adjustment approved successfully.');
@@ -266,6 +275,13 @@ class CashMovementController extends Controller
         } catch (\RuntimeException $exception) {
             return back()->with('error', $exception->getMessage());
         }
+        $this->approvalNotifications->notifyUser(
+            $transfer->requestedBy,
+            'Cash transfer approved',
+            "Cash transfer {$transfer->transfer_no} has been approved.",
+            route('cash-movements.transfers.index', [], false),
+            'approval.approved',
+        );
 
         return redirect()->route('cash-movements.transfers.index')
             ->with('success', 'Cash transfer approved successfully.');
@@ -308,6 +324,15 @@ class CashMovementController extends Controller
         } catch (\RuntimeException $exception) {
             return back()->withInput()->with('error', $exception->getMessage());
         }
+        $this->approvalNotifications->notifyOrganizationUsers(
+            (int) $organization->id,
+            ['cash_transfers.approve'],
+            $user->id,
+            'Cash transfer awaiting approval',
+            "Cash transfer {$transfer->transfer_no} is ready for approval.",
+            route('cash-movements.transfers.index', [], false),
+            'approval.requested',
+        );
 
         $routeName = match ($transferType) {
             'VAULT_TO_TELLER' => 'cash-movements.vault-to-teller',
@@ -344,7 +369,7 @@ class CashMovementController extends Controller
         abort_unless($user?->branch_id, 422, 'A branch assignment is required for cash adjustments.');
 
         try {
-            $this->cashAdjustmentService->create(
+            $adjustment = $this->cashAdjustmentService->create(
                 $organization->id,
                 $user->branch_id,
                 $user->id,
@@ -353,6 +378,15 @@ class CashMovementController extends Controller
         } catch (\RuntimeException $exception) {
             return back()->withInput()->with('error', $exception->getMessage());
         }
+        $this->approvalNotifications->notifyOrganizationUsers(
+            (int) $organization->id,
+            ['cash_transactions.post'],
+            $user->id,
+            'Cash adjustment awaiting approval',
+            'A teller cash adjustment is ready for approval.',
+            route('cash-adjustments.index', [], false),
+            'approval.requested',
+        );
 
         return redirect()
             ->route('cash-adjustments.teller-cash-adjustment')
@@ -368,7 +402,7 @@ class CashMovementController extends Controller
             return response()->json([]);
         }
 
-        $pattern = '%' . $search . '%';
+        $pattern = '%'.$search.'%';
         $scope = $request->query('scope', 'all');
         $accountTypes = [
             'deposit' => ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'],
@@ -402,10 +436,10 @@ class CashMovementController extends Controller
             ->where(function ($query) use ($pattern): void {
                 $query->where('account_no', 'like', $pattern)
                     ->orWhere('name', 'like', $pattern)
-                    ->orWhereHasMorph('holder', [Customer::class], fn($customer) => $customer
+                    ->orWhereHasMorph('holder', [Customer::class], fn ($customer) => $customer
                         ->where('name', 'like', $pattern)
                         ->orWhere('customer_no', 'like', $pattern))
-                    ->orWhereHas('holders', fn($holder) => $holder
+                    ->orWhereHas('holders', fn ($holder) => $holder
                         ->where('name', 'like', $pattern)
                         ->orWhere('customer_no', 'like', $pattern));
             })
@@ -422,7 +456,7 @@ class CashMovementController extends Controller
         $accounts = $accountsQuery->get();
 
         return response()->json(
-            $accounts->map(fn(FinancialAccount $account) => $this->customerDepositAccountPayload($account))->all(),
+            $accounts->map(fn (FinancialAccount $account) => $this->customerDepositAccountPayload($account))->all(),
         );
     }
 
@@ -476,7 +510,7 @@ class CashMovementController extends Controller
                     ->get();
 
                 $customerAccounts = $customerAccounts
-                    ->filter(fn(FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
+                    ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
                     ->values();
 
                 $selectedAccount ??= $customerAccounts->first();
@@ -496,7 +530,7 @@ class CashMovementController extends Controller
             'selectedAccount' => $selectedAccount
                 ? $this->customerDepositAccountPayload($selectedAccount)
                 : null,
-            'customerAccounts' => $customerAccounts->map(fn(FinancialAccount $account) => [
+            'customerAccounts' => $customerAccounts->map(fn (FinancialAccount $account) => [
                 'id' => $account->id,
                 'account_type' => $account->account_type,
                 'account_no' => $account->account_no,
@@ -543,7 +577,7 @@ class CashMovementController extends Controller
             ->findOrFail($data['customer_id']);
 
         $selectedAccount = null;
-        if (!empty($data['account_id'])) {
+        if (! empty($data['account_id'])) {
             $selectedAccount = FinancialAccount::query()
                 ->where('organization_id', $organization->id)
                 ->where('holder_type', Customer::class)
@@ -579,7 +613,7 @@ class CashMovementController extends Controller
             ->get();
 
         $customerAccounts = $customerAccounts
-            ->filter(fn(FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
+            ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
             ->values();
 
         $selectedObligations = collect($this->buildCustomerDepositObligations($customerAccounts))
@@ -613,7 +647,7 @@ class CashMovementController extends Controller
                 return [
                     'financial_account_id' => (int) $obligation['account_id'],
                     'amount' => (string) number_format($lineAmount, 4, '.', ''),
-                    'description' => $obligation['due_type'] . ' - ' . $obligation['month'],
+                    'description' => $obligation['due_type'].' - '.$obligation['month'],
                 ];
             })
             ->filter()
@@ -628,7 +662,7 @@ class CashMovementController extends Controller
             [
                 'teller_session_id' => $session->id,
                 'amount' => number_format((float) $data['amount'], 4, '.', ''),
-                'reference' => 'CUST-DEP-' . $customer->customer_no,
+                'reference' => 'CUST-DEP-'.$customer->customer_no,
                 'note' => $data['note'] ?? 'Customer deposit',
                 'lines' => $lines,
             ],
@@ -641,7 +675,7 @@ class CashMovementController extends Controller
 
         return redirect()
             ->route('teller-transactions.customer-deposit', $redirectParameters)
-            ->with('success', 'Customer deposit posted for ' . $customer->name . '.');
+            ->with('success', 'Customer deposit posted for '.$customer->name.'.');
     }
 
     public function savingsChequeWithdrawal(Request $request): Response
@@ -679,17 +713,17 @@ class CashMovementController extends Controller
                         'holders.signature',
                         'authorizedPersons' => function ($query) use ($organization) {
                             $query
-                                ->whereHas('customer', fn($customerQuery) => $customerQuery->where('organization_id', $organization->id))
+                                ->whereHas('customer', fn ($customerQuery) => $customerQuery->where('organization_id', $organization->id))
                                 ->with('customer.signature');
                         },
-                        'chequeBooks.cheques' => fn($query) => $query->whereIn('status', ['UNUSED', 'ISSUED'])->orderBy('cheque_no'),
+                        'chequeBooks.cheques' => fn ($query) => $query->whereIn('status', ['UNUSED', 'ISSUED'])->orderBy('cheque_no'),
                     ])
                     ->orderBy('account_no')
                     ->get();
 
                 $availableCheques = $savingsAccounts
-                    ->flatMap(fn(FinancialAccount $account) => $account->chequeBooks
-                        ->flatMap(fn($book) => $book->cheques->map(fn($cheque) => [
+                    ->flatMap(fn (FinancialAccount $account) => $account->chequeBooks
+                        ->flatMap(fn ($book) => $book->cheques->map(fn ($cheque) => [
                             'id' => $cheque->id,
                             'financial_account_id' => $account->id,
                             'cheque_book_id' => $book->id,
@@ -707,7 +741,7 @@ class CashMovementController extends Controller
             'customer' => $selectedCustomer,
             'signature_verified' => $signatureVerified,
             'savings_accounts' => $savingsAccounts->map(function (FinancialAccount $account): array {
-                $accountHolders = $account->holders->map(fn(Customer $holder) => [
+                $accountHolders = $account->holders->map(fn (Customer $holder) => [
                     'id' => $holder->id,
                     'name' => $holder->name,
                     'customer_no' => $holder->customer_no,
@@ -720,7 +754,7 @@ class CashMovementController extends Controller
                     ] : null,
                 ]);
 
-                if ($account->holder instanceof Customer && !$accountHolders->contains('id', $account->holder->id)) {
+                if ($account->holder instanceof Customer && ! $accountHolders->contains('id', $account->holder->id)) {
                     $holder = $account->holder;
                     $accountHolders->prepend([
                         'id' => $holder->id,
@@ -754,7 +788,7 @@ class CashMovementController extends Controller
                         ] : null,
                     ] : null,
                     'account_holders' => $accountHolders->values()->all(),
-                    'authorized_persons' => $account->authorizedPersons->map(fn($authorizedPerson) => [
+                    'authorized_persons' => $account->authorizedPersons->map(fn ($authorizedPerson) => [
                         'id' => $authorizedPerson->id,
                         'customer_id' => $authorizedPerson->customer_id,
                         'customer_name' => $authorizedPerson->customer?->name,
@@ -808,17 +842,17 @@ class CashMovementController extends Controller
             ->where('organization_id', $organization->id)
             ->whereKey($data['financial_account_id'])
             ->where(function ($query) use ($customer): void {
-                $query->where(fn($holder) => $holder
+                $query->where(fn ($holder) => $holder
                     ->where('holder_type', Customer::class)
                     ->where('holder_id', $customer->id))
-                    ->orWhereHas('holders', fn($holders) => $holders->whereKey($customer->id));
+                    ->orWhereHas('holders', fn ($holders) => $holders->whereKey($customer->id));
             })
             ->firstOrFail();
         $cheque = Cheque::query()
             ->whereKey($data['cheque_id'])
             ->where(function ($query) use ($account): void {
                 $query->where('financial_account_id', $account->id)
-                    ->orWhereHas('chequeBook', fn($book) => $book->where('financial_account_id', $account->id));
+                    ->orWhereHas('chequeBook', fn ($book) => $book->where('financial_account_id', $account->id));
             })
             ->firstOrFail();
 
@@ -882,7 +916,7 @@ class CashMovementController extends Controller
             'balance' => (float) $account->balance,
             'available_balance' => (float) $account->available_balance,
             'holder' => $account->holder_type === Customer::class ? $account->customer : null,
-            'holders' => $account->holders->map(fn(Customer $holder) => [
+            'holders' => $account->holders->map(fn (Customer $holder) => [
                 'id' => $holder->id,
                 'name' => $holder->name,
                 'customer_no' => $holder->customer_no,
@@ -918,7 +952,7 @@ class CashMovementController extends Controller
                             'PROTECTION_FEE' => 'Loan protection fee',
                         ];
                         $rows[] = [
-                            'id' => 'loan-' . $component->id,
+                            'id' => 'loan-'.$component->id,
                             'account_id' => $account->id,
                             'account_type' => 'LOAN',
                             'account_name' => $account->name,
@@ -939,7 +973,7 @@ class CashMovementController extends Controller
                     && (float) $protectionPolicy->renewal_fee > 0
                 ) {
                     $rows[] = [
-                        'id' => 'loan-protection-renewal-' . $account->id,
+                        'id' => 'loan-protection-renewal-'.$account->id,
                         'account_id' => $account->id,
                         'account_type' => 'LOAN',
                         'account_name' => $account->name,
@@ -955,7 +989,7 @@ class CashMovementController extends Controller
                 $depositDue = max(0, (float) $account->balance * 0.01);
                 if ($depositDue > 0) {
                     $rows[] = [
-                        'id' => 'deposit-' . $account->id,
+                        'id' => 'deposit-'.$account->id,
                         'account_id' => $account->id,
                         'account_type' => $account->account_type,
                         'account_name' => $account->name,
@@ -980,7 +1014,7 @@ class CashMovementController extends Controller
                     $contribution = max(0, (float) $installment->amount_due - (float) $installment->amount_paid);
                     if ($contribution > 0) {
                         $rows[] = [
-                            'id' => 'deposit-contribution-' . $installment->id,
+                            'id' => 'deposit-contribution-'.$installment->id,
                             'account_id' => $account->id,
                             'account_type' => $account->account_type,
                             'account_name' => $account->name,
@@ -994,7 +1028,7 @@ class CashMovementController extends Controller
                     $fine = (float) $installment->fine_amount;
                     if ($fine > 0) {
                         $rows[] = [
-                            'id' => 'deposit-fine-' . $installment->id,
+                            'id' => 'deposit-fine-'.$installment->id,
                             'account_id' => $account->id,
                             'account_type' => $account->account_type,
                             'account_name' => $account->name,
@@ -1021,7 +1055,7 @@ class CashMovementController extends Controller
                 }
 
                 $rows[] = [
-                    'id' => 'account-fine-' . $fine->id,
+                    'id' => 'account-fine-'.$fine->id,
                     'account_id' => $account->id,
                     'account_type' => $account->account_type,
                     'account_name' => $account->name,
@@ -1059,7 +1093,7 @@ class CashMovementController extends Controller
         }
 
         return redirect()
-            ->route('teller-transactions.' . $routeType)
+            ->route('teller-transactions.'.$routeType)
             ->with('success', "Teller transaction {$transaction->transaction_no} created successfully.");
     }
 }

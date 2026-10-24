@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -7,12 +6,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import { useInitials } from '@/hooks/use-initials';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
+    Bell,
     Building2,
     CheckCircle2,
     ChevronsDown,
@@ -57,7 +58,7 @@ export default function CustomAuthLayout({
 }: CustomAuthLayoutProps) {
     const page = usePage<SharedData>();
 
-    const { auth, organization } = page.props;
+    const { auth, organization, unreadNotificationsCount = 0 } = page.props;
     const cleanup = useMobileNavigation();
 
     /* ------------------------------------------------------------------
@@ -438,6 +439,25 @@ export default function CustomAuthLayout({
                     </div>
 
                     <div className="flex items-center">
+                        {auth?.user?.permissions?.some(
+                            (permission) =>
+                                permission.slug === 'notifications.view',
+                        ) && (
+                            <Link
+                                href={route('notifications.index')}
+                                aria-label={`Notifications${unreadNotificationsCount ? `, ${unreadNotificationsCount} unread` : ''}`}
+                                className="relative mr-3 flex h-9 w-9 items-center justify-center rounded-xl border border-border/80 bg-card/70 transition-colors hover:bg-muted"
+                            >
+                                <Bell size={18} />
+                                {unreadNotificationsCount > 0 && (
+                                    <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                                        {unreadNotificationsCount > 99
+                                            ? '99+'
+                                            : unreadNotificationsCount}
+                                    </span>
+                                )}
+                            </Link>
+                        )}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/80 bg-card/70 px-2 py-1 transition-colors hover:bg-muted">

@@ -5,6 +5,7 @@ use App\SystemAdministration\Controllers\AuditComplianceController;
 use App\SystemAdministration\Controllers\AuditLogController;
 use App\SystemAdministration\Controllers\BranchController;
 use App\SystemAdministration\Controllers\DatabaseBackupController;
+use App\SystemAdministration\Controllers\NotificationController;
 use App\SystemAdministration\Controllers\OrganizationController;
 use App\SystemAdministration\Controllers\RolePermissionController;
 use App\SystemAdministration\Controllers\SystemAdministrationDashboardController;
@@ -14,6 +15,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/admin-dashboard', [SystemAdministrationDashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'organization'])
     ->name('admin-dashboard');
+
+Route::middleware(['auth', 'verified', 'organization', 'permission:notifications.view'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::post('/read-all', [NotificationController::class, 'markAllRead'])->name('read-all');
+    Route::post('/{notificationId}/read', [NotificationController::class, 'markRead'])
+        ->whereUuid('notificationId')
+        ->name('read');
+});
 
 Route::middleware(['auth', 'verified', 'organization'])->prefix('users')->name('users.')->group(function () {
     Route::get('/search', [UserController::class, 'searchUsers'])

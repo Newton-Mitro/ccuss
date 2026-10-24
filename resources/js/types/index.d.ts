@@ -30,6 +30,7 @@ export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
+    unreadNotificationsCount?: number;
     sidebarOpen: boolean;
     organization: {
         activeId: number | null;

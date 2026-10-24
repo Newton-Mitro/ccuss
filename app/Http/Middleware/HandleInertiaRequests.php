@@ -50,21 +50,22 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
             ],
+            'unreadNotificationsCount' => fn () => $request->user()?->unreadNotifications()->count() ?? 0,
             'organization' => [
                 'activeId' => $request->session()->get('active_organization_id'),
-                'active' => fn() => $request->user()?->organizations()
+                'active' => fn () => $request->user()?->organizations()
                     ->whereKey($request->session()->get('active_organization_id'))
                     ->first(),
-                'available' => fn() => $request->user()
+                'available' => fn () => $request->user()
                     ? $request->user()->organizations()->orderBy('name')->get()
                     : [],
             ],
             'flash' => [
-                'success' => fn() => session('success'),
-                'error' => fn() => session('error'),
+                'success' => fn () => session('success'),
+                'error' => fn () => session('error'),
 
             ],
-            'sidebarOpen' => !$request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
 }
