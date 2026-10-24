@@ -54,12 +54,12 @@ class AccountingReportController extends Controller
     {
         $organizationId = $request->attributes->get('active_organization')->id;
         $accountId = $request->integer('account_id');
-        $account = LedgerAccount::query()
+        $accountQuery = LedgerAccount::query()
             ->where('organization_id', $organizationId)
-            ->where('status', true)
-            ->when($accountId > 0, fn ($query) => $query->whereKey($accountId))
-            ->orderBy('code')
-            ->first();
+            ->where('status', true);
+        $account = $accountId > 0
+            ? $accountQuery->findOrFail($accountId)
+            : $accountQuery->orderBy('code')->first();
 
         $accounts = LedgerAccount::query()
             ->where('organization_id', $organizationId)
@@ -87,11 +87,12 @@ class AccountingReportController extends Controller
     public function profitAndLoss(Request $request): Response
     {
         $organizationId = $request->attributes->get('active_organization')->id;
+        $filters = $this->yearAndPeriodFilters($request, $organizationId);
         $profitAndLoss = $this->reportService->profitAndLoss(
             $organizationId,
-            $request->integer('fiscal_period_id') ?: null,
-            $request->input('from'),
-            $request->input('to'),
+            $filters['period']?->id,
+            $filters['from'],
+            $filters['to'],
         );
 
         return Inertia::render('general-accounting/reports/profit-and-loss-page', [
@@ -107,76 +108,135 @@ class AccountingReportController extends Controller
                 'amount' => $row->balance,
             ])),
             'fiscalYears' => $this->fiscalYears($request),
-            'fiscalPeriods' => $this->fiscalPeriods($request),
-            'selectedFiscalYear' => $request->integer('fiscal_year_id') ?: null,
-            'selectedFiscalPeriod' => $request->integer('fiscal_period_id') ?: null,
+            'fiscalPeriods' => $this->fiscalPeriods($request, $filters['year']?->id),
+            'selectedFiscalYear' => $filters['year']?->id,
+            'selectedFiscalPeriod' => $filters['period']?->id,
         ]);
     }
 
     public function balanceSheet(Request $request): Response
     {
         $organizationId = $request->attributes->get('active_organization')->id;
+        $filters = $this->yearAndPeriodFilters($request, $organizationId);
+        $balanceSheet = $filters['year']
+            ? $this->reportService->balanceSheetAsOf(
+                $organizationId,
+                $filters['to'],
+                $filters['from'],
+                $filters['to'],
+            )
+            : $this->reportService->balanceSheet(
+                $organizationId,
+                $filters['period']?->id,
+                $filters['from'],
+                $filters['to'],
+            );
+
+        $balanceSheetRows = collect($balanceSheet)->only(['assets', 'liabilities', 'equity'])->flatMap(fn ($rows, $category) => collect($rows)->map(fn ($row) => [
+            'ledger_account_id' => $row->id,
+            'category' => ucfirst($category),
+            'account_name' => $row->name,
+            'balance' => $row->balance,
+        ]))->values();
+        if (abs((float) $balanceSheet['net_income']) > 0.000001) {
+            $balanceSheetRows->push([
+                'ledger_account_id' => 0,
+                'category' => 'Equity',
+                'account_name' => 'Current Year Net Income',
+                'balance' => $balanceSheet['net_income'],
+            ]);
+        }
 
         return Inertia::render('general-accounting/reports/balance-sheet-page', [
-            'balanceSheet' => collect($this->reportService->balanceSheet(
-                $organizationId,
-                $request->integer('fiscal_period_id') ?: null,
-                $request->input('from'),
-                $request->input('to'),
-            ))->only(['assets', 'liabilities', 'equity'])->flatMap(fn ($rows, $category) => collect($rows)->map(fn ($row) => [
-                'ledger_account_id' => $row->id,
-                'category' => ucfirst($category),
-                'account_name' => $row->name,
-                'balance' => $row->balance,
-            ]))->values(),
+            'balanceSheet' => $balanceSheetRows,
             'fiscalYears' => $this->fiscalYears($request),
-            'fiscalPeriods' => $this->fiscalPeriods($request),
-            'selectedFiscalYear' => $request->integer('fiscal_year_id') ?: null,
+            'selectedFiscalYear' => $filters['year']?->id,
         ]);
     }
 
     public function cashFlow(Request $request): Response
     {
         $organizationId = $request->attributes->get('active_organization')->id;
+        $filters = $this->yearAndPeriodFilters($request, $organizationId);
 
         return Inertia::render('general-accounting/reports/cash-flow-page', [
             'cashFlows' => $this->reportService->cashFlowStatement(
                 $organizationId,
-                $request->integer('fiscal_period_id') ?: null,
-                $request->input('from'),
-                $request->input('to'),
+                $filters['period']?->id,
+                $filters['from'],
+                $filters['to'],
             )->map(fn ($row) => (array) $row),
             'fiscalYears' => $this->fiscalYears($request),
-            'fiscalPeriods' => $this->fiscalPeriods($request),
-            'selectedFiscalYear' => $request->integer('fiscal_year_id') ?: null,
-            'selectedFiscalPeriod' => $request->integer('fiscal_period_id') ?: null,
+            'fiscalPeriods' => $this->fiscalPeriods($request, $filters['year']?->id),
+            'selectedFiscalYear' => $filters['year']?->id,
+            'selectedFiscalPeriod' => $filters['period']?->id,
         ]);
     }
 
     public function shareholdersEquity(Request $request): Response
     {
         $organizationId = $request->attributes->get('active_organization')->id;
+        $filters = $this->yearAndPeriodFilters($request, $organizationId);
 
         return Inertia::render('general-accounting/reports/shareholders-equity-page', [
             'equityStatement' => $this->reportService->shareholdersEquity(
                 $organizationId,
-                $request->integer('fiscal_period_id') ?: null,
-                $request->input('from'),
-                $request->input('to'),
+                $filters['period']?->id,
+                $filters['from'],
+                $filters['to'],
             ),
             'fiscalYears' => $this->fiscalYears($request),
-            'fiscalPeriods' => $this->fiscalPeriods($request),
-            'selectedFiscalYear' => $request->integer('fiscal_year_id') ?: null,
+            'selectedFiscalYear' => $filters['year']?->id,
         ]);
     }
 
-    private function fiscalPeriods(Request $request)
+    private function yearAndPeriodFilters(Request $request, int $organizationId): array
+    {
+        $periodId = $request->integer('fiscal_period_id');
+        $period = $periodId > 0
+            ? FiscalPeriod::query()
+                ->whereHas('fiscalYear', fn ($query) => $query->where('organization_id', $organizationId))
+                ->with('fiscalYear')
+                ->findOrFail($periodId)
+            : null;
+
+        $yearId = $request->integer('fiscal_year_id');
+        $year = $yearId > 0
+            ? FiscalYear::query()->where('organization_id', $organizationId)->findOrFail($yearId)
+            : ($period?->fiscalYear ?? $this->defaultFiscalYear($organizationId));
+
+        abort_if($period && $year && (int) $period->fiscal_year_id !== (int) $year->id, 404);
+
+        return [
+            'year' => $year,
+            'period' => $period,
+            'from' => $period?->start_date?->toDateString()
+                ?? $year?->start_date?->toDateString()
+                ?? $request->input('from'),
+            'to' => $period?->end_date?->toDateString()
+                ?? $year?->end_date?->toDateString()
+                ?? $request->input('to'),
+        ];
+    }
+
+    private function defaultFiscalYear(int $organizationId): ?FiscalYear
+    {
+        $years = FiscalYear::query()
+            ->where('organization_id', $organizationId)
+            ->orderByDesc('start_date')
+            ->get();
+
+        return $years->firstWhere('status', 'OPEN') ?? $years->first();
+    }
+
+    private function fiscalPeriods(Request $request, ?int $fiscalYearId = null)
     {
         return FiscalPeriod::query()
             ->whereHas('fiscalYear', fn ($query) => $query->where(
                 'organization_id',
                 $request->attributes->get('active_organization')->id,
             ))
+            ->when($fiscalYearId, fn ($query) => $query->where('fiscal_year_id', $fiscalYearId))
             ->with('fiscalYear:id,name')
             ->orderByDesc('start_date')
             ->get()

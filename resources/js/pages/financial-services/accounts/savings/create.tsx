@@ -101,7 +101,7 @@ export default function SavingsAccountCreate() {
             <Head title="Open savings account" />
 
             <div className="w-full max-w-6xl space-y-6 pb-24">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Open savings account"
                     description="Create a savings account and configure its minimum-balance requirement."
                 />

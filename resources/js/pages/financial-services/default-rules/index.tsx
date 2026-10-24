@@ -1,14 +1,15 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
-import AppDatePicker from '@/components/ui/app_date_picker';
+import {
+    ResourcePageHeader,
+    ResourceTableCard,
+    StatusBadge,
+} from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Pencil, Plus } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
@@ -32,70 +33,16 @@ type Rule = {
 
 type Props = SharedData & {
     rules: Rule[];
-    products: { id: number; code: string; name: string; category: string }[];
 };
 
 export default function DefaultRulesIndex() {
-    const { rules, products, auth } = usePage<Props>().props;
-    const [editingRuleId, setEditingRuleId] = useState<number | null>(null);
-    const [isFormOpen, setIsFormOpen] = useState(false);
+    const { rules, auth } = usePage<Props>().props;
     const [search, setSearch] = useState('');
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const canUpdate = (auth.user.permissions ?? []).some(
         (permission) => permission.slug === 'financial.products.update',
     );
-    const { data, setData, post, put, reset, processing } = useForm({
-        financial_product_id: '',
-        account_type: 'LOAN',
-        name: '',
-        grace_days: '0',
-        fine_calculation: 'FIXED',
-        fine_amount: '0',
-        fine_rate: '0',
-        maximum_fine: '',
-        extends_maturity: false,
-        maturity_extension_days: '0',
-        effective_from: new Date().toISOString().slice(0, 10),
-        effective_to: '',
-        is_active: true,
-    });
-    const scopedProducts = products.filter((product) =>
-        data.account_type === 'LOAN'
-            ? product.category === 'LOAN'
-            : [
-                  'SAVINGS',
-                  'SHARE',
-                  'FIXED_DEPOSIT',
-                  'RECURRING_DEPOSIT',
-              ].includes(product.category),
-    );
-    const cancelEdit = () => {
-        setIsFormOpen(false);
-        setEditingRuleId(null);
-        reset();
-    };
-    const editRule = (rule: Rule) => {
-        setEditingRuleId(rule.id);
-        setIsFormOpen(true);
-        setData({
-            financial_product_id: rule.financial_product_id
-                ? String(rule.financial_product_id)
-                : '',
-            account_type: rule.account_type,
-            name: rule.name,
-            grace_days: String(rule.grace_days),
-            fine_calculation: rule.fine_calculation,
-            fine_amount: String(rule.fine_amount ?? 0),
-            fine_rate: String(rule.fine_rate ?? 0),
-            maximum_fine: String(rule.maximum_fine ?? ''),
-            extends_maturity: rule.extends_maturity,
-            maturity_extension_days: String(rule.maturity_extension_days),
-            effective_from: rule.effective_from?.slice(0, 10) ?? '',
-            effective_to: rule.effective_to?.slice(0, 10) ?? '',
-            is_active: rule.is_active,
-        });
-    };
     const normalizedSearch = search.trim().toLowerCase();
     const filteredRules = rules.filter((rule) =>
         [
@@ -130,28 +77,35 @@ export default function DefaultRulesIndex() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Default Rules" />
-            <div className="space-y-4">
+            <div className="space-y-5">
                 <ResourcePageHeader
-                    title="Default Rules"
-                    description="Configure effective account and product fine rules."
+                    title="Default rules"
+                    description="Manage effective account and product fine rules."
                     action={
                         canUpdate && (
-                            <Button
-                                onClick={() => {
-                                    setEditingRuleId(null);
-                                    reset();
-                                    setIsFormOpen(true);
-                                }}
-                            >
-                                <Plus className="h-4 w-4" />
-                                Create rule
+                            <Button asChild>
+                                <Link
+                                    href={route('account-default-rules.create')}
+                                >
+                                    <Plus className="mr-2 size-4" />
+                                    Create rule
+                                </Link>
                             </Button>
                         )
                     }
                 />
-                <div className="flex items-center gap-2 sm:max-w-sm">
+                <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 className="text-sm font-semibold">
+                            Rules directory
+                        </h2>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            Search and manage account-wide or product-specific
+                            rules.
+                        </p>
+                    </div>
                     <Input
-                        className="bg-card"
+                        className="w-full bg-background sm:max-w-sm"
                         type="search"
                         placeholder="Search rules..."
                         value={search}
@@ -161,333 +115,136 @@ export default function DefaultRulesIndex() {
                         }}
                     />
                 </div>
-                {isFormOpen && (
-                    <section className="space-y-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
-                        <div>
-                            <h2 className="text-lg font-semibold">
-                                {editingRuleId === null
-                                    ? 'Create default rule'
-                                    : 'Edit default rule'}
-                            </h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Configure the account scope, fine, and effective
-                                dates for this rule.
-                            </p>
-                        </div>
-                        <form
-                            className="grid gap-3 sm:grid-cols-3"
-                            onSubmit={(event) => {
-                                event.preventDefault();
-                                const options = {
-                                    preserveScroll: true,
-                                    onSuccess: () => {
-                                        setIsFormOpen(false);
-                                        setEditingRuleId(null);
-                                        reset();
-                                    },
-                                };
-
-                                if (editingRuleId === null) {
-                                    post(
-                                        route('account-default-rules.store'),
-                                        options,
-                                    );
-                                } else {
-                                    put(
-                                        route(
-                                            'account-default-rules.update',
-                                            editingRuleId,
-                                        ),
-                                        options,
-                                    );
-                                }
-                            }}
-                        >
-                            <div>
-                                <Label>Name</Label>
-                                <Input
-                                    value={data.name}
-                                    onChange={(event) =>
-                                        setData('name', event.target.value)
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <Label>Account type</Label>
-                                <Select
-                                    className="h-9"
-                                    value={data.account_type}
-                                    onChange={(value) =>
-                                        setData((current) => ({
-                                            ...current,
-                                            account_type: value,
-                                            financial_product_id: '',
-                                        }))
-                                    }
-                                    options={[
-                                        'SAVINGS',
-                                        'SHARE',
-                                        'FIXED_DEPOSIT',
-                                        'RECURRING_DEPOSIT',
-                                        'LOAN',
-                                        'OTHER',
-                                    ].map((value) => ({ value, label: value }))}
-                                />
-                            </div>
-                            <div>
-                                <Label>Product scope</Label>
-                                <Select
-                                    className="h-9"
-                                    value={data.financial_product_id}
-                                    onChange={(value) =>
-                                        setData('financial_product_id', value)
-                                    }
-                                    placeholder="All products"
-                                    options={[
-                                        { value: '', label: 'All products' },
-                                        ...scopedProducts.map((product) => ({
-                                            value: String(product.id),
-                                            label: `${product.code} · ${product.name}`,
-                                        })),
-                                    ]}
-                                />
-                            </div>
-                            <div>
-                                <Label>Grace days</Label>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    value={data.grace_days}
-                                    onChange={(event) =>
-                                        setData(
-                                            'grace_days',
-                                            event.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <Label>Fine amount</Label>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    step="0.0001"
-                                    value={data.fine_amount}
-                                    onChange={(event) =>
-                                        setData(
-                                            'fine_amount',
-                                            event.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <Label>Fine rate %</Label>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    step="0.0001"
-                                    value={data.fine_rate}
-                                    onChange={(event) =>
-                                        setData('fine_rate', event.target.value)
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <Label>Maximum fine</Label>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    step="0.0001"
-                                    value={data.maximum_fine}
-                                    onChange={(event) =>
-                                        setData(
-                                            'maximum_fine',
-                                            event.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <Label>Effective from</Label>
-                                <AppDatePicker
-                                    value={data.effective_from}
-                                    onChange={(value) =>
-                                        setData('effective_from', value)
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <Label>Effective to</Label>
-                                <AppDatePicker
-                                    value={data.effective_to}
-                                    onChange={(value) =>
-                                        setData('effective_to', value)
-                                    }
-                                />
-                            </div>
-                            <div>
-                                <Label>Maturity extension days</Label>
-                                <Input
-                                    type="number"
-                                    min="0"
-                                    value={data.maturity_extension_days}
-                                    onChange={(event) =>
-                                        setData(
-                                            'maturity_extension_days',
-                                            event.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-                            <label className="flex items-center gap-2 text-sm">
-                                <Input
-                                    type="checkbox"
-                                    checked={data.extends_maturity}
-                                    onChange={(event) =>
-                                        setData(
-                                            'extends_maturity',
-                                            event.target.checked,
-                                        )
-                                    }
-                                />
-                                Extend maturity
-                            </label>
-                            <label className="flex items-center gap-2 text-sm">
-                                <Input
-                                    type="checkbox"
-                                    checked={data.is_active}
-                                    onChange={(event) =>
-                                        setData(
-                                            'is_active',
-                                            event.target.checked,
-                                        )
-                                    }
-                                />
-                                Active
-                            </label>
-                            <div className="flex items-end gap-2">
-                                <Button type="submit" disabled={processing}>
-                                    {editingRuleId === null
-                                        ? 'Create rule'
-                                        : 'Save changes'}
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={cancelEdit}
-                                    disabled={processing}
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </form>
-                    </section>
-                )}
-                <div className="h-[calc(100vh-360px)] min-h-60 overflow-auto rounded-md border bg-card">
-                    <table className="w-full border-collapse text-sm">
-                        <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
-                            <tr>
-                                {[
-                                    'Name',
-                                    'Product scope',
-                                    'Fine',
-                                    'Grace days',
-                                    'Effective dates',
-                                    'Status',
-                                    'Actions',
-                                ].map((heading) => (
-                                    <th
-                                        key={heading}
-                                        className="border-b p-3 text-left font-medium"
+                <ResourceTableCard className="max-h-[calc(100vh-360px)] min-h-60">
+                    <div className="overflow-auto">
+                        <table className="w-full min-w-[900px] border-collapse text-sm">
+                            <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
+                                <tr>
+                                    {[
+                                        'Name',
+                                        'Product scope',
+                                        'Fine',
+                                        'Grace days',
+                                        'Effective dates',
+                                        'Status',
+                                        'Actions',
+                                    ].map((heading) => (
+                                        <th
+                                            key={heading}
+                                            className="border-b px-4 py-3 text-left font-medium"
+                                        >
+                                            {heading}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {visibleRules.map((rule) => (
+                                    <tr
+                                        key={rule.id}
+                                        className="border-b last:border-0 even:bg-muted/30 hover:bg-accent/20"
                                     >
-                                        {heading}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {visibleRules.map((rule) => (
-                                <tr
-                                    key={rule.id}
-                                    className="border-b even:bg-muted/40 hover:bg-accent/20"
-                                >
-                                    <td className="p-3">
-                                        <p className="font-medium">
-                                            {rule.name}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">
-                                            {rule.account_type}
-                                        </p>
-                                    </td>
-                                    <td className="p-3">
-                                        {rule.product
-                                            ? `${rule.product.code} · ${rule.product.name}`
-                                            : 'All products'}
-                                    </td>
-                                    <td className="p-3">
-                                        {rule.fine_calculation === 'PERCENTAGE'
-                                            ? `${rule.fine_rate}%`
-                                            : rule.fine_amount}
-                                    </td>
-                                    <td className="p-3">{rule.grace_days}</td>
-                                    <td className="p-3">
-                                        {rule.effective_from?.slice(0, 10) ??
-                                            '—'}
-                                        {' – '}
-                                        {rule.effective_to?.slice(0, 10) ??
-                                            'No end date'}
-                                    </td>
-                                    <td className="p-3">
-                                        {rule.is_active ? 'Active' : 'Inactive'}
-                                    </td>
-                                    <td className="p-3">
-                                        <div className="flex items-center gap-2">
-                                            {canUpdate && (
+                                        <td className="px-4 py-3">
+                                            <p className="font-medium text-foreground">
+                                                {rule.name}
+                                            </p>
+                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                                {rule.account_type.replaceAll(
+                                                    '_',
+                                                    ' ',
+                                                )}
+                                            </p>
+                                        </td>
+                                        <td className="px-4 py-3 text-muted-foreground">
+                                            {rule.product
+                                                ? `${rule.product.code} · ${rule.product.name}`
+                                                : 'All products'}
+                                        </td>
+                                        <td className="px-4 py-3 tabular-nums">
+                                            {rule.fine_calculation ===
+                                            'PERCENTAGE'
+                                                ? `${rule.fine_rate}%`
+                                                : rule.fine_amount}
+                                        </td>
+                                        <td className="px-4 py-3 tabular-nums">
+                                            {rule.grace_days} days
+                                        </td>
+                                        <td className="px-4 py-3 text-muted-foreground">
+                                            {rule.effective_from?.slice(
+                                                0,
+                                                10,
+                                            ) ?? '—'}
+                                            {' – '}
+                                            {rule.effective_to?.slice(0, 10) ??
+                                                'No end date'}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <StatusBadge
+                                                tone={
+                                                    rule.is_active
+                                                        ? 'success'
+                                                        : 'neutral'
+                                                }
+                                            >
+                                                {rule.is_active
+                                                    ? 'Active'
+                                                    : 'Inactive'}
+                                            </StatusBadge>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex items-center gap-2">
+                                                {canUpdate && (
+                                                    <Button
+                                                        asChild
+                                                        size="sm"
+                                                        variant="outline"
+                                                    >
+                                                        <Link
+                                                            href={route(
+                                                                'account-default-rules.edit',
+                                                                rule.id,
+                                                            )}
+                                                        >
+                                                            <Pencil className="mr-1.5 size-3.5" />
+                                                            Edit
+                                                        </Link>
+                                                    </Button>
+                                                )}
                                                 <Button
                                                     size="sm"
                                                     variant="outline"
                                                     onClick={() =>
-                                                        editRule(rule)
+                                                        router.delete(
+                                                            route(
+                                                                'account-default-rules.destroy',
+                                                                rule.id,
+                                                            ),
+                                                        )
                                                     }
                                                 >
-                                                    <Pencil className="h-4 w-4" />
-                                                    Edit
+                                                    <Trash2 className="mr-1.5 size-3.5" />
+                                                    Delete
                                                 </Button>
-                                            )}
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={() =>
-                                                    router.delete(
-                                                        route(
-                                                            'account-default-rules.destroy',
-                                                            rule.id,
-                                                        ),
-                                                    )
-                                                }
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {visibleRules.length === 0 && (
-                                <tr>
-                                    <td
-                                        colSpan={7}
-                                        className="p-8 text-center text-muted-foreground"
-                                    >
-                                        {rules.length === 0
-                                            ? 'No default rules found.'
-                                            : 'No rules match your search.'}
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {visibleRules.length === 0 && (
+                                    <tr>
+                                        <td
+                                            colSpan={7}
+                                            className="px-4 py-12 text-center text-sm text-muted-foreground"
+                                        >
+                                            {rules.length === 0
+                                                ? 'No default rules found.'
+                                                : 'No rules match your search.'}
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </ResourceTableCard>
                 {filteredRules.length > 0 && (
                     <DataTablePagination
                         perPage={perPage}

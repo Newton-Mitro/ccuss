@@ -61,7 +61,7 @@ export default function RecurringDepositAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Recurring deposits" />
             <div className="space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Recurring deposits"
                     description="Follow installment commitments, paid progress, and maturity dates."
                     action={

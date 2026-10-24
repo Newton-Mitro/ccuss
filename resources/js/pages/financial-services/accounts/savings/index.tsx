@@ -57,7 +57,7 @@ export default function SavingsAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Savings accounts" />
             <div className="space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Savings accounts"
                     description="Manage transactional savings accounts and their minimum-balance rules."
                     action={

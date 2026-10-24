@@ -1,12 +1,20 @@
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, CalendarPlus } from 'lucide-react';
+import {
+    ArrowLeft,
+    CalendarCheck2,
+    CalendarDays,
+    CalendarPlus,
+    Check,
+    Clock3,
+    FileText,
+    ShieldCheck,
+    Sparkles,
+} from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import { ResourcePageHeader } from '../../../components/resource-page-shell';
 import AppDatePicker from '../../../components/ui/app_date_picker';
 import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
 import useFlashToastHandler from '../../../hooks/use-flash-toast-handler';
 import CustomAuthLayout from '../../../layouts/custom-auth-layout';
 
@@ -43,94 +51,239 @@ export default function CreateBranchDayPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open Branch Day" />
 
-            <div className="max-w-3xl space-y-6">
-                <ResourcePageHeader
-                    title="Open branch day"
-                    description="Create a new opening record for the current branch and business date."
-                />
+            <div className="mx-auto max-w-6xl space-y-6">
+                <header className="relative isolate overflow-hidden rounded-2xl border bg-card px-5 py-6 shadow-sm sm:px-8 sm:py-8">
+                    <div className="absolute -top-20 -right-12 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                            <CalendarCheck2 className="size-7" />
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                    Treasury &amp; cash
+                                </span>
+                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                    Branch operations
+                                </span>
+                            </div>
+                            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                                Open a branch day
+                            </h1>
+                            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                                Start a new business-day record for your branch
+                                and prepare it for daily operations.
+                            </p>
+                        </div>
+                        <Button asChild variant="outline" className="shrink-0">
+                            <a href={route('branch-days.index')}>
+                                <ArrowLeft className="mr-2 size-4" />
+                                Back to branch days
+                            </a>
+                        </Button>
+                    </div>
+                </header>
 
                 {!userHasBranch && (
-                    <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
-                        Assign a branch to your user
+                    <div
+                        role="alert"
+                        className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-900 dark:text-amber-200"
+                    >
+                        <ShieldCheck className="mt-0.5 size-5 shrink-0" />
+                        <div>
+                            <p className="font-semibold">
+                                Branch assignment required
+                            </p>
+                            <p className="mt-1 leading-5 opacity-90">
+                                Assign a branch to your user before opening a
+                                business day.
+                            </p>
+                        </div>
                     </div>
                 )}
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="overflow-hidden rounded-xl border bg-card"
-                >
-                    <section className="p-5 sm:p-6">
-                        <div className="space-y-5">
-                            <div className="space-y-2">
-                                <label
-                                    htmlFor="business_date"
-                                    className="text-sm font-medium"
-                                >
-                                    Business date
-                                </label>
-                                <AppDatePicker
-                                    id="business_date"
-                                    value={data.business_date}
-                                    onChange={(value) =>
-                                        setData('business_date', value)
-                                    }
-                                    disabled={!userHasBranch}
-                                    required
-                                />
-                                {errors.business_date && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.business_date}
+                <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+                    <form
+                        onSubmit={handleSubmit}
+                        className="overflow-hidden rounded-2xl border bg-card shadow-sm"
+                    >
+                        <section className="space-y-6 p-5 sm:p-7">
+                            <div className="flex items-start gap-3 border-b pb-5">
+                                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
+                                    <FileText className="size-5" />
+                                </div>
+                                <div className="space-y-1">
+                                    <h2 className="font-semibold tracking-tight">
+                                        Opening details
+                                    </h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        Choose the business date and add any
+                                        context for the opening record.
                                     </p>
-                                )}
+                                </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label
-                                    htmlFor="opening_note"
-                                    className="text-sm font-medium"
-                                >
-                                    Opening note
-                                </label>
-                                <Input
-                                    id="opening_note"
-                                    value={data.opening_note}
-                                    onChange={(event) =>
-                                        setData(
-                                            'opening_note',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="Optional note"
-                                    disabled={!userHasBranch}
-                                    maxLength={2000}
-                                />
-                                {errors.opening_note && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.opening_note}
+                            <div className="space-y-5">
+                                <div className="space-y-2">
+                                    <label
+                                        htmlFor="business_date"
+                                        className="text-sm font-medium"
+                                    >
+                                        Business date
+                                        <span className="ml-1 text-destructive">
+                                            *
+                                        </span>
+                                    </label>
+                                    <AppDatePicker
+                                        id="business_date"
+                                        value={data.business_date}
+                                        onChange={(value) =>
+                                            setData('business_date', value)
+                                        }
+                                        disabled={!userHasBranch}
+                                        required
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Transactions posted during this session
+                                        will be associated with this date.
                                     </p>
-                                )}
-                            </div>
-                        </div>
-                    </section>
+                                    {errors.business_date && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.business_date}
+                                        </p>
+                                    )}
+                                </div>
 
-                    <div className="flex flex-col-reverse gap-3 border-t bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
-                        <a
-                            href={route('branch-days.index')}
-                            className="inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                            <ArrowLeft className="h-4 w-4" /> Back to branch
-                            days
-                        </a>
-                        <Button
-                            type="submit"
-                            disabled={processing || !userHasBranch}
-                            className="min-w-40"
-                        >
-                            <CalendarPlus className="h-4 w-4" />
-                            {processing ? 'Opening...' : 'Open branch day'}
-                        </Button>
-                    </div>
-                </form>
+                                <div className="space-y-2">
+                                    <label
+                                        htmlFor="opening_note"
+                                        className="text-sm font-medium"
+                                    >
+                                        Opening note{' '}
+                                        <span className="font-normal text-muted-foreground">
+                                            (optional)
+                                        </span>
+                                    </label>
+                                    <textarea
+                                        id="opening_note"
+                                        value={data.opening_note}
+                                        onChange={(event) =>
+                                            setData(
+                                                'opening_note',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Add any opening observations or handover details."
+                                        disabled={!userHasBranch}
+                                        maxLength={2000}
+                                        rows={4}
+                                        className="flex min-h-28 w-full resize-y rounded-xl border border-input bg-background px-3.5 py-3 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                    />
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                        <span>
+                                            Keep notes brief and relevant to
+                                            today’s operations.
+                                        </span>
+                                        <span>
+                                            {data.opening_note.length}/2000
+                                        </span>
+                                    </div>
+                                    {errors.opening_note && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.opening_note}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+
+                        <footer className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
+                            <Button asChild variant="outline">
+                                <a href={route('branch-days.index')}>Cancel</a>
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={processing || !userHasBranch}
+                                className="sm:min-w-44"
+                            >
+                                <CalendarPlus className="mr-2 size-4" />
+                                {processing ? 'Opening...' : 'Open branch day'}
+                            </Button>
+                        </footer>
+                    </form>
+
+                    <aside className="space-y-4">
+                        <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                            <div className="border-b p-5">
+                                <div className="flex items-center gap-2">
+                                    <Sparkles className="size-4 text-primary" />
+                                    <h2 className="text-sm font-semibold">
+                                        Opening overview
+                                    </h2>
+                                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Check the session details before opening.
+                                </p>
+                            </div>
+                            <div className="space-y-4 p-5">
+                                <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                    <CalendarDays className="size-5" />
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-xs text-muted-foreground">
+                                        Business date
+                                    </p>
+                                    <p className="font-semibold">
+                                        {data.business_date || 'Not selected'}
+                                    </p>
+                                </div>
+                                <div
+                                    className={`flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium ${
+                                        userHasBranch
+                                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                            : 'bg-amber-500/10 text-amber-800 dark:text-amber-200'
+                                    }`}
+                                >
+                                    <span
+                                        className={`size-1.5 rounded-full ${
+                                            userHasBranch
+                                                ? 'bg-emerald-500'
+                                                : 'bg-amber-500'
+                                        }`}
+                                    />
+                                    {userHasBranch
+                                        ? 'Branch assigned'
+                                        : 'Branch assignment needed'}
+                                </div>
+                                <div className="flex items-start gap-2 border-t pt-4 text-xs leading-5 text-muted-foreground">
+                                    <Clock3 className="mt-0.5 size-4 shrink-0" />
+                                    Opening the day creates a record for this
+                                    branch and date.
+                                </div>
+                            </div>
+                        </section>
+                        <section className="rounded-2xl border border-primary/15 bg-primary/[0.035] p-5">
+                            <div className="flex items-center gap-2 text-sm font-semibold">
+                                <Check className="size-4 text-primary" />
+                                Before you open
+                            </div>
+                            <ul className="mt-3 space-y-2.5 text-xs leading-5 text-muted-foreground">
+                                <li>
+                                    Confirm the business date is correct for
+                                    your branch.
+                                </li>
+                                <li>
+                                    Check handover notes before starting
+                                    transactions.
+                                </li>
+                                <li>
+                                    Make sure your user is assigned to the
+                                    correct branch.
+                                </li>
+                            </ul>
+                        </section>
+                    </aside>
+                </div>
             </div>
         </CustomAuthLayout>
     );

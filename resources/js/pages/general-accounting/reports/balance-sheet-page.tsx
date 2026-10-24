@@ -50,11 +50,6 @@ export default function BalanceSheetPage() {
         totalsByCategory[row.category] += Number(row.balance);
     });
 
-    const totalBalance = balanceSheet.reduce(
-        (sum, row) => sum + Number(row.balance),
-        0,
-    );
-
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '#' },
@@ -74,7 +69,7 @@ export default function BalanceSheetPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <HeadingSmall
                         title="Balance Sheet Report"
-                        description="Assets = Liabilities + Equity"
+                        description="Financial position as of the selected fiscal year-end"
                     />
                     <div className="flex items-center gap-2">
                         <div className="w-60">
@@ -140,16 +135,6 @@ export default function BalanceSheetPage() {
                                 </tr>
                             )}
                         </tbody>
-                        <tfoot className="bg-muted font-bold">
-                            <tr>
-                                <td colSpan={2} className="border px-2 py-1">
-                                    Total
-                                </td>
-                                <td className="border px-2 py-1 text-right">
-                                    {formatBDTCurrency(totalBalance, false)}
-                                </td>
-                            </tr>
-                        </tfoot>
                     </table>
 
                     {/* Totals per category */}

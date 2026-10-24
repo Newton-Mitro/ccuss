@@ -101,8 +101,8 @@ class AccountingReportService
         $rows = $this->trialBalance($organizationId, $fiscalPeriodId, $from, $to);
         $income = $rows->where('type', 'INCOME')->values();
         $expenses = $rows->where('type', 'EXPENSE')->values();
-        $totalIncome = $income->sum(fn($row) => (float) $row->balance);
-        $totalExpenses = $expenses->sum(fn($row) => (float) $row->balance);
+        $totalIncome = $income->sum(fn ($row) => (float) $row->balance);
+        $totalExpenses = $expenses->sum(fn ($row) => (float) $row->balance);
 
         return [
             'income' => $income,
@@ -123,12 +123,12 @@ class AccountingReportService
         $assets = $rows->where('type', 'ASSET')->values();
         $liabilities = $rows->where('type', 'LIABILITY')->values();
         $equity = $rows->where('type', 'EQUITY')->values();
-        $income = $rows->where('type', 'INCOME')->sum(fn($row) => (float) $row->balance);
-        $expenses = $rows->where('type', 'EXPENSE')->sum(fn($row) => (float) $row->balance);
+        $income = $rows->where('type', 'INCOME')->sum(fn ($row) => (float) $row->balance);
+        $expenses = $rows->where('type', 'EXPENSE')->sum(fn ($row) => (float) $row->balance);
         $netIncome = $income - $expenses;
-        $totalAssets = $assets->sum(fn($row) => (float) $row->balance);
-        $totalLiabilities = $liabilities->sum(fn($row) => (float) $row->balance);
-        $totalEquity = $equity->sum(fn($row) => (float) $row->balance);
+        $totalAssets = $assets->sum(fn ($row) => (float) $row->balance);
+        $totalLiabilities = $liabilities->sum(fn ($row) => (float) $row->balance);
+        $totalEquity = $equity->sum(fn ($row) => (float) $row->balance);
 
         return [
             'assets' => $assets,
@@ -139,6 +139,33 @@ class AccountingReportService
             'total_liabilities' => (float) $totalLiabilities,
             'total_equity' => (float) $totalEquity,
             'total_liabilities_and_equity' => (float) ($totalLiabilities + $totalEquity + $netIncome),
+        ];
+    }
+
+    public function balanceSheetAsOf(
+        int $organizationId,
+        ?string $asOf,
+        ?string $incomeFrom = null,
+        ?string $incomeTo = null,
+    ): array {
+        $rows = $this->trialBalance($organizationId, null, null, $asOf);
+        $income = $this->profitAndLoss($organizationId, null, $incomeFrom, $incomeTo);
+        $assets = $rows->where('type', 'ASSET')->values();
+        $liabilities = $rows->where('type', 'LIABILITY')->values();
+        $equity = $rows->where('type', 'EQUITY')->values();
+        $totalAssets = $assets->sum(fn ($row) => (float) $row->balance);
+        $totalLiabilities = $liabilities->sum(fn ($row) => (float) $row->balance);
+        $totalEquity = $equity->sum(fn ($row) => (float) $row->balance);
+
+        return [
+            'assets' => $assets,
+            'liabilities' => $liabilities,
+            'equity' => $equity,
+            'net_income' => $income['net_income'],
+            'total_assets' => (float) $totalAssets,
+            'total_liabilities' => (float) $totalLiabilities,
+            'total_equity' => (float) $totalEquity,
+            'total_liabilities_and_equity' => (float) ($totalLiabilities + $totalEquity + $income['net_income']),
         ];
     }
 
@@ -161,22 +188,35 @@ class AccountingReportService
 
         $rows = DB::table('voucher_entries as ve')
             ->join('vouchers as v', 'v.id', '=', 've.voucher_id')
-            ->join('accounts as cash_account', 'cash_account.id', '=', 've.account_id')
             ->where('v.organization_id', $organizationId)
             ->where('v.status', 'POSTED')
             ->whereIn('ve.account_id', $cashAccountIds)
-            ->when($fiscalPeriodId, fn($query) => $query->where('v.fiscal_period_id', $fiscalPeriodId))
-            ->when($from, fn($query) => $query->whereDate('v.voucher_date', '>=', $from))
-            ->when($to, fn($query) => $query->whereDate('v.voucher_date', '<=', $to))
+            ->when($fiscalPeriodId, fn ($query) => $query->where('v.fiscal_period_id', $fiscalPeriodId))
+            ->when($from, fn ($query) => $query->whereDate('v.voucher_date', '>=', $from))
+            ->when($to, fn ($query) => $query->whereDate('v.voucher_date', '<=', $to))
+            ->orderBy('v.voucher_date')
+            ->orderBy('v.id')
+            ->orderBy('ve.id')
             ->select(
                 'v.id as voucher_id',
                 'v.voucher_no',
                 'v.voucher_date',
                 'v.fiscal_period_id',
+                've.account_id',
                 've.debit as cash_debit',
                 've.credit as cash_credit',
             )
             ->get();
+
+        $counterpartTypes = DB::table('voucher_entries as ve')
+            ->join('accounts as a', 'a.id', '=', 've.account_id')
+            ->whereIn('ve.voucher_id', $rows->pluck('voucher_id')->unique())
+            ->whereNotIn('ve.account_id', $cashAccountIds)
+            ->select('ve.voucher_id', 'a.type')
+            ->distinct()
+            ->get()
+            ->groupBy('voucher_id')
+            ->map(fn ($entries) => $entries->pluck('type'));
 
         $periods = FiscalPeriod::query()
             ->whereIn('id', $rows->pluck('fiscal_period_id')->unique()->filter())
@@ -187,13 +227,7 @@ class AccountingReportService
         $statement = collect();
 
         foreach ($rows as $row) {
-            $voucherEntries = DB::table('voucher_entries as ve_other')
-                ->join('accounts as a', 'a.id', '=', 've_other.account_id')
-                ->where('ve_other.voucher_id', $row->voucher_id)
-                ->where('ve_other.account_id', '!=', $row->account_id ?? $cashAccountIds->first())
-                ->select('a.type')
-                ->pluck('type');
-
+            $voucherEntries = $counterpartTypes->get($row->voucher_id, collect());
             $category = 'Other';
             if ($voucherEntries->contains('INCOME') || $voucherEntries->contains('EXPENSE')) {
                 $category = 'Operating';
@@ -208,23 +242,29 @@ class AccountingReportService
             $statement->push((object) [
                 'voucher_no' => $row->voucher_no,
                 'period_name' => $periods[$row->fiscal_period_id]->name ?? null,
+                'fiscal_year_code' => $periods[$row->fiscal_period_id]->fiscalYear->name ?? null,
+                'fiscal_period_id' => $row->fiscal_period_id,
                 'cash_category' => $category,
                 'net_cash' => $netCash,
             ]);
         }
 
         $ordered = $statement
-            ->groupBy('cash_category')
-            ->map(fn($items) => (object) [
+            ->groupBy(fn ($item) => implode('|', [
+                $item->cash_category,
+                $item->fiscal_period_id ?? '',
+            ]))
+            ->map(fn ($items) => (object) [
                 'cash_category' => $items->first()->cash_category,
                 'period_name' => $items->first()->period_name,
+                'fiscal_year_code' => $items->first()->fiscal_year_code,
                 'net_cash' => $items->sum('net_cash'),
             ])
             ->values();
 
         $order = ['Operating', 'Investing', 'Financing', 'Other'];
 
-        return $ordered->sortBy(fn($item) => array_search($item->cash_category, $order, true) === false ? 99 : array_search($item->cash_category, $order, true))->values();
+        return $ordered->sortBy(fn ($item) => array_search($item->cash_category, $order, true) === false ? 99 : array_search($item->cash_category, $order, true))->values();
     }
 
     public function shareholdersEquity(
@@ -269,7 +309,7 @@ class AccountingReportService
 
         $accountIds = $rows->pluck('id')->merge($openingBalances->keys())->unique();
 
-        return $accountIds->map(function ($accountId) use ($rows, $openingBalances, $period, $profit) {
+        $statement = $accountIds->map(function ($accountId) use ($rows, $openingBalances, $period, $from, $to) {
             $row = $rows->firstWhere('id', $accountId);
             $openingBalance = (float) ($openingBalances[$accountId]->opening_balance ?? 0);
             $movement = (float) ($row->ending_balance ?? 0);
@@ -277,12 +317,25 @@ class AccountingReportService
             return (object) [
                 'account_code' => $row?->account_code,
                 'account_name' => $row?->account_name,
-                'period_name' => $period?->name,
+                'period_name' => $period?->name ?? ($from && $to ? "{$from} to {$to}" : null),
                 'opening_balance' => $openingBalance,
-                'net_profit' => (float) $profit['net_income'],
+                'net_profit' => 0.0,
                 'ending_balance' => $openingBalance + $movement,
             ];
         })->values();
+
+        if (abs((float) $profit['net_income']) > 0.000001) {
+            $statement->push((object) [
+                'account_code' => null,
+                'account_name' => 'Current Period Profit / (Loss)',
+                'period_name' => $period?->name ?? ($from && $to ? "{$from} to {$to}" : null),
+                'opening_balance' => 0.0,
+                'net_profit' => (float) $profit['net_income'],
+                'ending_balance' => (float) $profit['net_income'],
+            ]);
+        }
+
+        return $statement;
     }
 
     private function postedEntries(int $organizationId, ?int $fiscalPeriodId, ?string $from, ?string $to)
@@ -291,9 +344,9 @@ class AccountingReportService
             ->join('vouchers', 'vouchers.id', '=', 'voucher_entries.voucher_id')
             ->where('vouchers.organization_id', $organizationId)
             ->where('vouchers.status', 'POSTED')
-            ->when($fiscalPeriodId, fn($query) => $query->where('vouchers.fiscal_period_id', $fiscalPeriodId))
-            ->when($from, fn($query) => $query->whereDate('vouchers.voucher_date', '>=', $from))
-            ->when($to, fn($query) => $query->whereDate('vouchers.voucher_date', '<=', $to));
+            ->when($fiscalPeriodId, fn ($query) => $query->where('vouchers.fiscal_period_id', $fiscalPeriodId))
+            ->when($from, fn ($query) => $query->whereDate('vouchers.voucher_date', '>=', $from))
+            ->when($to, fn ($query) => $query->whereDate('vouchers.voucher_date', '<=', $to));
     }
 
     private function validatePeriod(int $organizationId, ?int $fiscalPeriodId): void
@@ -303,9 +356,9 @@ class AccountingReportService
         }
 
         if (
-            !FiscalPeriod::query()
+            ! FiscalPeriod::query()
                 ->whereKey($fiscalPeriodId)
-                ->whereHas('fiscalYear', fn($query) => $query->where('organization_id', $organizationId))
+                ->whereHas('fiscalYear', fn ($query) => $query->where('organization_id', $organizationId))
                 ->exists()
         ) {
             throw new InvalidArgumentException('The fiscal period is invalid for this organization.');

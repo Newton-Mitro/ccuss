@@ -60,7 +60,7 @@ export default function AccountStatement() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Statements" />
             <div className="space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Account statements"
                     description="Follow every movement from opening balance to closing balance."
                 />

@@ -153,7 +153,7 @@ export default function FixedDepositAccountShow() {
             <Head title={`Fixed Deposit - ${account.account_no}`} />
 
             <div className="space-y-5 pb-6">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned'} · Fixed deposit contract`}
                     action={

@@ -59,7 +59,7 @@ export default function FixedDepositAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Fixed deposits" />
             <div className="space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Fixed deposits"
                     description="Monitor term-deposit principal, maturity dates, and contracted maturity values."
                     action={

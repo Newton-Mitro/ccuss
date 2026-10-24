@@ -146,7 +146,7 @@ export default function RecurringDepositAccountShow() {
             <Head title={`Recurring Deposit - ${account.account_no}`} />
 
             <div className="space-y-5 pb-6">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned'} · Recurring deposit account`}
                     action={

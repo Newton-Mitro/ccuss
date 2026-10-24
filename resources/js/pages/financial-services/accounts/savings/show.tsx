@@ -91,7 +91,7 @@ export default function SavingsAccountShow() {
             <Head title={`Savings Account ${account.account_no}`} />
 
             <div className="w-full max-w-screen space-y-5 pb-6">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned account'} · ${account.product?.name ?? 'Savings account'}`}
                     action={

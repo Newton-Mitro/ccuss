@@ -134,7 +134,7 @@ export default function SavingsAccountEdit() {
             <Head title={`Edit ${account.account_no}`} />
 
             <div className="w-full max-w-5xl space-y-6 pb-24">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Edit savings account"
                     description="Review account information and update its display name or minimum-balance requirement."
                 />

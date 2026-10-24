@@ -56,11 +56,11 @@ export default function CashFlowStatementPage() {
     const handleFiscalYearChange = (value) => {
         const year = Number(value);
         setFiscalYear(year);
+        setFiscalPeriod(0);
         router.get(
             '/financial-reports/cash-flow',
             {
                 fiscal_year_id: year || undefined,
-                fiscal_period_id: fiscalPeriod || undefined,
             },
             { preserveState: false, replace: true },
         );
@@ -142,10 +142,16 @@ export default function CashFlowStatementPage() {
                                 onChange={handleFiscalPeriodChange}
                                 options={[
                                     { value: '0', label: 'All Periods' },
-                                    ...fiscalPeriods.map((fp) => ({
-                                        value: fp.id.toString(),
-                                        label: fp.period_name,
-                                    })),
+                                    ...fiscalPeriods
+                                        .filter(
+                                            (period) =>
+                                                period.fiscal_year_id ===
+                                                fiscalYear,
+                                        )
+                                        .map((fp) => ({
+                                            value: fp.id.toString(),
+                                            label: fp.period_name,
+                                        })),
                                 ]}
                             />
                         </div>

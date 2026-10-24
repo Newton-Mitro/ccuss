@@ -61,7 +61,7 @@ export default function LoanAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Loan accounts" />
             <div className="space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Loan accounts"
                     description="Monitor approved loan contracts, disbursement, outstanding balance, and repayment lifecycle."
                 />

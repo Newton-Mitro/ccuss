@@ -157,7 +157,7 @@ export default function ShareAccountEdit() {
             <Head title={`Edit ${account.account_no}`} />
 
             <div className="w-full max-w-5xl space-y-6 pb-24">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Edit share account"
                     description="Update the account display name and manage membership information."
                 />

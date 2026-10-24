@@ -117,7 +117,7 @@ export default function RecurringDepositAccountEdit() {
             <Head title={`Edit ${account.account_no}`} />
 
             <div className="w-full max-w-screen-xl space-y-5 pb-6">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Edit recurring deposit account"
                     description={`${account.holder?.name ?? 'Depositor'} · ${account.product?.name ?? 'Recurring deposit'}`}
                     action={

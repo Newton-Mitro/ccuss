@@ -17,7 +17,7 @@ class AccountDefaultRuleController extends Controller
     public function __construct(private readonly DefaultFineService $service)
     {
         $this->middleware('permission:financial.products.view')->only('index');
-        $this->middleware('permission:financial.products.update')->only(['store', 'update']);
+        $this->middleware('permission:financial.products.update')->only(['create', 'edit', 'store', 'update']);
         $this->middleware('permission:financial.products.delete')->only('destroy');
     }
 
@@ -29,9 +29,25 @@ class AccountDefaultRuleController extends Controller
             'rules' => AccountDefaultRule::query()->where('organization_id', $organizationId)->with('product:id,code,name')->latest('id')->get()->map(function (AccountDefaultRule $rule): array {
                 return [...$rule->toArray(), 'financial_product_id' => $rule->product_id];
             }),
-            'products' => DepositProduct::query()->where('organization_id', $organizationId)->where('status', true)->get(['id', 'code', 'name', 'category'])
-                ->concat(LoanProduct::query()->where('organization_id', $organizationId)->where('status', true)->get(['id', 'code', 'name'])->map(fn(LoanProduct $product) => [...$product->toArray(), 'category' => 'LOAN']))
-                ->sortBy('code')->values(),
+            'products' => $this->productsForOrganization($organizationId),
+        ]);
+    }
+
+    public function create(Request $request): Response
+    {
+        return Inertia::render('financial-services/default-rules/form', [
+            'rule' => null,
+            'products' => $this->productsForOrganization($this->organizationId($request)),
+        ]);
+    }
+
+    public function edit(Request $request, AccountDefaultRule $accountDefaultRule): Response
+    {
+        $this->authorizeOrganization($request, $accountDefaultRule);
+
+        return Inertia::render('financial-services/default-rules/form', [
+            'rule' => [...$accountDefaultRule->toArray(), 'financial_product_id' => $accountDefaultRule->product_id],
+            'products' => $this->productsForOrganization($this->organizationId($request)),
         ]);
     }
 
@@ -71,6 +87,26 @@ class AccountDefaultRuleController extends Controller
     private function organizationId(Request $request): int
     {
         return (int) $request->attributes->get('active_organization')->id;
+    }
+
+    private function productsForOrganization(int $organizationId)
+    {
+        return DepositProduct::query()
+            ->where('organization_id', $organizationId)
+            ->where('status', true)
+            ->get(['id', 'code', 'name', 'category'])
+            ->concat(
+                LoanProduct::query()
+                    ->where('organization_id', $organizationId)
+                    ->where('status', true)
+                    ->get(['id', 'code', 'name'])
+                    ->map(fn (LoanProduct $product) => [
+                        ...$product->toArray(),
+                        'category' => 'LOAN',
+                    ]),
+            )
+            ->sortBy('code')
+            ->values();
     }
 
     private function authorizeOrganization(Request $request, AccountDefaultRule $rule): void

@@ -86,7 +86,7 @@ export default function ShareAccountCreate() {
             <div className="w-full max-w-5xl space-y-5 pb-8 text-foreground">
                 {/* Page header */}
                 <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
-                    <ResourcePageHeader
+                    <ResourcePageHeader variant="account"
                         title="Register Share Membership"
                         description="Register a member, assign a share product, and configure membership details."
                     />

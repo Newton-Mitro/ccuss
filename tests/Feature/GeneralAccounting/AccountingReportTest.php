@@ -122,6 +122,18 @@ it('loads the general ledger report when the organization has no active accounts
         ->assertInertia(fn ($page) => $page->component('general-accounting/reports/general-ledger-page'));
 });
 
+it('does not silently substitute another account for an invalid general ledger filter', function () {
+    $fixture = reportFixture();
+    grantReportPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-reports.general-ledger', [
+            'account_id' => $fixture['cash']->id + 1000,
+        ]))
+        ->assertNotFound();
+});
+
 it('loads every financial report route for an authorized organization user', function () {
     $fixture = reportFixture();
     grantReportPermission($fixture['user']);
@@ -299,6 +311,133 @@ it('builds profit and loss and balance sheet statements from posted entries', fu
         ->and($balanceSheet['total_liabilities_and_equity'])->toBe(500.0);
 });
 
+it('applies the selected fiscal year to profit and loss and reports balance sheet balances as of year end', function () {
+    $fixture = reportFixture();
+    grantReportPermission($fixture['user']);
+    $incomeGroup = app(AccountGroupService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'code' => '4000',
+        'name' => 'Revenue',
+        'type' => 'INCOME',
+        'normal_balance' => 'CREDIT',
+    ]);
+    $income = app(LedgerAccountService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $incomeGroup->id,
+        'code' => '4001',
+        'name' => 'Sales Revenue',
+        'type' => 'INCOME',
+        'normal_balance' => 'CREDIT',
+        'status' => true,
+    ]);
+    $historicIncome = app(LedgerAccountService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $incomeGroup->id,
+        'code' => '4002',
+        'name' => 'Historic Revenue',
+        'type' => 'INCOME',
+        'normal_balance' => 'CREDIT',
+        'status' => true,
+    ]);
+    $expenseGroup = app(AccountGroupService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'code' => '5000',
+        'name' => 'Expenses',
+        'type' => 'EXPENSE',
+        'normal_balance' => 'DEBIT',
+    ]);
+    $historicExpense = app(LedgerAccountService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $expenseGroup->id,
+        'code' => '5001',
+        'name' => 'Historic Expense',
+        'type' => 'EXPENSE',
+        'normal_balance' => 'DEBIT',
+        'status' => true,
+    ]);
+    $equityGroup = app(AccountGroupService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'code' => '3000',
+        'name' => 'Equity',
+        'type' => 'EQUITY',
+        'normal_balance' => 'CREDIT',
+    ]);
+    $equity = app(LedgerAccountService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $equityGroup->id,
+        'code' => '3001',
+        'name' => 'Share Capital',
+        'type' => 'EQUITY',
+        'normal_balance' => 'CREDIT',
+        'status' => true,
+    ]);
+    $priorYear = app(FiscalYearService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'name' => '2024-2025',
+        'start_date' => '2024-07-01',
+        'end_date' => '2025-06-30',
+    ]);
+    $priorPeriod = app(FiscalPeriodService::class)->create($priorYear, [
+        'name' => 'June 2025',
+        'start_date' => '2025-06-01',
+        'end_date' => '2025-06-30',
+        'status' => 'OPEN',
+    ]);
+    $voucherService = app(VoucherService::class);
+
+    foreach ([
+        [$priorPeriod->id, '2025-06-30', $fixture['cash']->id, $equity->id, 100],
+        [$priorPeriod->id, '2025-06-10', $fixture['cash']->id, $historicIncome->id, 20],
+        [$priorPeriod->id, '2025-06-15', $historicExpense->id, $fixture['cash']->id, 20],
+        [$fixture['period']->id, '2025-07-10', $fixture['cash']->id, $income->id, 50],
+    ] as [$periodId, $date, $debitAccountId, $creditAccountId, $amount]) {
+        $voucher = $voucherService->createDraft([
+            'fiscal_period_id' => $periodId,
+            'voucher_type' => 'JOURNAL',
+            'voucher_date' => $date,
+            'entries' => [
+                ['account_id' => $debitAccountId, 'debit' => $amount, 'credit' => 0],
+                ['account_id' => $creditAccountId, 'debit' => 0, 'credit' => $amount],
+            ],
+        ], $fixture['organization']->id, $fixture['user']->id);
+        $voucherService->post($voucher, $fixture['organization']->id, $fixture['user']->id);
+    }
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-reports.profit-loss', [
+            'fiscal_year_id' => $fixture['fiscalYear']->id,
+        ]))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->where('selectedFiscalYear', $fixture['fiscalYear']->id)
+            ->has('fiscalPeriods', 1)
+            ->where('profitAndLoss.0.amount', 50));
+
+    $export = $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('reports.export', [
+            'report' => 'profit-loss',
+            'format' => 'csv',
+            'fiscal_year_id' => $fixture['fiscalYear']->id,
+        ]))
+        ->assertSuccessful();
+    expect($export->streamedContent())
+        ->toContain('Sales Revenue')
+        ->toContain('"Historic Revenue",0')
+        ->toContain('"Historic Expense",0');
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-reports.balance-sheet', [
+            'fiscal_year_id' => $fixture['fiscalYear']->id,
+        ]))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->where('selectedFiscalYear', $fixture['fiscalYear']->id)
+            ->where('balanceSheet.0.balance', 150));
+});
+
 it('builds cash flow and shareholders equity statements from posted cash and equity activity', function () {
     $fixture = reportFixture();
     $voucherService = app(VoucherService::class);
@@ -381,7 +520,36 @@ it('builds cash flow and shareholders equity statements from posted cash and equ
         ->and($cashFlow[1]->cash_category)->toBe('Financing')
         ->and($cashFlow[1]->net_cash)->toBe(250.0)
         ->and($equityStatement[0]->account_name)->toBe('Share Capital')
-        ->and($equityStatement[0]->ending_balance)->toBe(250.0);
+        ->and($equityStatement[0]->ending_balance)->toBe(250.0)
+        ->and($equityStatement[0]->net_profit)->toBe(0.0)
+        ->and($equityStatement[1]->account_name)->toBe('Current Period Profit / (Loss)')
+        ->and($equityStatement[1]->net_profit)->toBe(500.0)
+        ->and($equityStatement[1]->ending_balance)->toBe(500.0);
+});
+
+it('classifies transfers between cash accounts as other cash movement', function () {
+    $fixture = reportFixture();
+    $fixture['cash']->update(['is_cash_account' => true]);
+    $fixture['bank']->update(['is_cash_account' => true]);
+    $voucher = app(VoucherService::class)->createDraft([
+        'fiscal_period_id' => $fixture['period']->id,
+        'voucher_type' => 'JOURNAL',
+        'voucher_date' => '2025-07-10',
+        'entries' => [
+            ['account_id' => $fixture['cash']->id, 'debit' => 100, 'credit' => 0],
+            ['account_id' => $fixture['bank']->id, 'debit' => 0, 'credit' => 100],
+        ],
+    ], $fixture['organization']->id, $fixture['user']->id);
+    app(VoucherService::class)->post($voucher, $fixture['organization']->id, $fixture['user']->id);
+
+    $cashFlow = app(AccountingReportService::class)->cashFlowStatement(
+        $fixture['organization']->id,
+        $fixture['period']->id,
+    );
+
+    expect($cashFlow)->toHaveCount(1)
+        ->and($cashFlow[0]->cash_category)->toBe('Other')
+        ->and($cashFlow[0]->net_cash)->toBe(0.0);
 });
 
 it('carries prior posted equity activity into the selected period opening balance', function () {

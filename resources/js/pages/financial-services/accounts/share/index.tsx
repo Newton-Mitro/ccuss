@@ -57,7 +57,7 @@ export default function ShareAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Share accounts" />
             <div className="space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Share accounts"
                     description="Track cooperative membership, membership numbers, and share-account lifecycle."
                     action={

@@ -3,10 +3,10 @@
 namespace App\Reports\Controllers;
 
 use App\Exports\ReportArrayExport;
-use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\DepositProduct;
-use App\FinancialServices\Models\LoanProduct;
+use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\LoanProduct;
 use App\GeneralAccounting\Application\AccountingReportService;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\FiscalYear;
@@ -21,9 +21,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportExportController extends Controller
 {
-    public function __construct(private readonly AccountingReportService $accountingReports)
-    {
-    }
+    public function __construct(private readonly AccountingReportService $accountingReports) {}
 
     public function export(Request $request, string $report, string $format)
     {
@@ -41,7 +39,7 @@ class ReportExportController extends Controller
         [$title, $headings, $rows] = $this->reportData($request, $report);
         $purpose = $this->purpose($report);
         $summary = $this->summary($report, $rows);
-        $filename = str($report)->slug('_') . '_' . now()->format('Ymd_His');
+        $filename = str($report)->slug('_').'_'.now()->format('Ymd_His');
         $organization = $request->attributes->get('active_organization');
         $organizationAddress = $organization->full_address;
         $organizationContact = collect([$organization->phone, $organization->email])
@@ -76,8 +74,8 @@ class ReportExportController extends Controller
                 'generatedAt' => now()->format('Y-m-d H:i'),
                 'filters' => $this->filterSummary($request, (int) $organization->id),
                 'pageNumberX' => $orientation === 'portrait' ? 540 : 760,
-            ])->setPaper('a4', $orientation)->download($filename . '.pdf'),
-            'xlsx' => Excel::download(new ReportArrayExport($title, $organization->name, $organizationInfo, $headings, $rows), $filename . '.xlsx'),
+            ])->setPaper('a4', $orientation)->download($filename.'.pdf'),
+            'xlsx' => Excel::download(new ReportArrayExport($title, $organization->name, $organizationInfo, $headings, $rows), $filename.'.xlsx'),
             default => $this->csv($filename, $title, $organization->name, $organizationInfo, $headings, $rows),
         };
     }
@@ -85,64 +83,96 @@ class ReportExportController extends Controller
     private function reportData(Request $request, string $report): array
     {
         $organizationId = (int) $request->attributes->get('active_organization')->id;
-        $periodId = $request->integer('fiscal_period_id') ?: null;
-        $from = $request->input('from');
-        $to = $request->input('to');
+        $filters = $this->accountingFilters($request, $organizationId);
+        $periodId = $filters['period']?->id;
+        $from = $filters['from'];
+        $to = $filters['to'];
 
         return match ($report) {
             'trial-balance' => [
                 'Trial Balance',
                 ['Account Code', 'Account', 'Type', 'Debit', 'Credit', 'Balance'],
                 $this->accountingReports->trialBalance($organizationId, $periodId, $from, $to)
-                    ->map(fn($row) => [$row->code, $row->name, $row->type, $row->debit, $row->credit, $row->balance])->all(),
+                    ->map(fn ($row) => [$row->code, $row->name, $row->type, $row->debit, $row->credit, $row->balance])->all(),
             ],
             'general-ledger' => $this->generalLedger($request, $organizationId, $periodId, $from, $to),
             'profit-loss' => $this->profitAndLoss($organizationId, $periodId, $from, $to),
-            'balance-sheet' => $this->balanceSheet($organizationId, $periodId, $from, $to),
+            'balance-sheet' => $filters['year']
+                ? $this->balanceSheetAsOf($organizationId, $from, $to)
+                : $this->balanceSheet($organizationId, $periodId, $from, $to),
             'cash-flow' => [
                 'Cash Flow Statement',
                 ['Category', 'Period', 'Net Cash'],
                 $this->accountingReports->cashFlowStatement($organizationId, $periodId, $from, $to)
-                    ->map(fn($row) => [$row->cash_category, $row->period_name ?? '-', $row->net_cash])->all(),
+                    ->map(fn ($row) => [$row->cash_category, $row->period_name ?? '-', $row->net_cash])->all(),
             ],
             'shareholders-equity' => [
                 "Shareholders' Equity",
                 ['Account Code', 'Account', 'Period', 'Opening Balance', 'Net Profit', 'Ending Balance'],
                 $this->accountingReports->shareholdersEquity($organizationId, $periodId, $from, $to)
-                    ->map(fn($row) => [$row->account_code ?? '-', $row->account_name ?? '-', $row->period_name ?? '-', $row->opening_balance, $row->net_profit, $row->ending_balance])->all(),
+                    ->map(fn ($row) => [$row->account_code ?? '-', $row->account_name ?? '-', $row->period_name ?? '-', $row->opening_balance, $row->net_profit, $row->ending_balance])->all(),
             ],
             'product-summary' => [
                 'Product Summary',
                 ['Code', 'Product', 'Category', 'Accounts', 'Balance'],
                 DepositProduct::where('organization_id', $organizationId)->withCount('financialAccounts')->withSum('financialAccounts', 'balance')->orderBy('category')->get()
                     ->concat(LoanProduct::where('organization_id', $organizationId)->withCount('financialAccounts')->withSum('financialAccounts', 'balance')->orderBy('name')->get())
-                    ->map(fn($row) => [$row->code, $row->name, $row->category, $row->financial_accounts_count, $row->financial_accounts_sum_balance ?? 0])->all(),
+                    ->map(fn ($row) => [$row->code, $row->name, $row->category, $row->financial_accounts_count, $row->financial_accounts_sum_balance ?? 0])->all(),
             ],
             'account-balances' => [
                 'Account Balances',
                 ['Account Name', 'Account Number', 'Product', 'Type', 'Status', 'Balance', 'Available Balance'],
                 FinancialAccount::where('organization_id', $organizationId)
                     ->when($request->filled('product_id'), function ($query) use ($request): void {
-                            [$family, $id] = array_pad(explode(':', $request->string('product_id')->toString(), 2), 2, null);
-                            if (ctype_digit((string) $id)) {
-                                $query->where('product_type', $family === 'loan' ? LoanProduct::class : DepositProduct::class)
+                        [$family, $id] = array_pad(explode(':', $request->string('product_id')->toString(), 2), 2, null);
+                        if (ctype_digit((string) $id)) {
+                            $query->where('product_type', $family === 'loan' ? LoanProduct::class : DepositProduct::class)
                                 ->where('product_id', (int) $id);
-                            }
-                        })
+                        }
+                    })
                     ->with('product')->orderByDesc('balance')->get()
-                        ->map(fn($row) => [$row->name ?? '-', $row->account_no, $row->product?->name ?? $row->account_type, $row->account_type, $row->status, $row->balance, $row->available_balance])->all(),
+                    ->map(fn ($row) => [$row->name ?? '-', $row->account_no, $row->product?->name ?? $row->account_type, $row->account_type, $row->status, $row->balance, $row->available_balance])->all(),
             ],
             'transactions' => [
                 'Financial Transactions',
                 ['Number', 'Account', 'Date', 'Type', 'Amount', 'Status'],
                 FinancialTransaction::where('organization_id', $organizationId)
-                    ->when(in_array($request->string('status')->toString(), ['PENDING', 'POSTED', 'REVERSED', 'CANCELLED'], true), fn($query) => $query->where('status', $request->string('status')->toString()))
+                    ->when(in_array($request->string('status')->toString(), ['PENDING', 'POSTED', 'REVERSED', 'CANCELLED'], true), fn ($query) => $query->where('status', $request->string('status')->toString()))
                     ->with('entries.financialAccount')->latest('transaction_date')->get()
-                    ->map(fn($row) => [$row->transaction_no, $row->entries->pluck('financialAccount.account_no')->filter()->join(', ') ?: '-', $row->transaction_date, $row->transaction_type, $row->amount, $row->status])->all(),
+                    ->map(fn ($row) => [$row->transaction_no, $row->entries->pluck('financialAccount.account_no')->filter()->join(', ') ?: '-', $row->transaction_date, $row->transaction_type, $row->amount, $row->status])->all(),
             ],
             'account-statement' => $this->accountStatement($request, $organizationId),
             default => abort(404),
         };
+    }
+
+    private function accountingFilters(Request $request, int $organizationId): array
+    {
+        $periodId = $request->integer('fiscal_period_id');
+        $period = $periodId > 0
+            ? FiscalPeriod::query()
+                ->whereHas('fiscalYear', fn ($query) => $query->where('organization_id', $organizationId))
+                ->with('fiscalYear')
+                ->findOrFail($periodId)
+            : null;
+
+        $yearId = $request->integer('fiscal_year_id');
+        $year = $yearId > 0
+            ? FiscalYear::query()->where('organization_id', $organizationId)->findOrFail($yearId)
+            : $period?->fiscalYear;
+
+        abort_if($period && $year && (int) $period->fiscal_year_id !== (int) $year->id, 404);
+
+        return [
+            'year' => $year,
+            'period' => $period,
+            'from' => $period?->start_date?->toDateString()
+                ?? $year?->start_date?->toDateString()
+                ?? $request->input('from'),
+            'to' => $period?->end_date?->toDateString()
+                ?? $year?->end_date?->toDateString()
+                ?? $request->input('to'),
+        ];
     }
 
     private function purpose(string $report): string
@@ -164,7 +194,7 @@ class ReportExportController extends Controller
 
     private function summary(string $report, array $rows): array
     {
-        $sum = fn(int $index): float => array_sum(array_map(fn($row) => (float) ($row[$index] ?? 0), $rows));
+        $sum = fn (int $index): float => array_sum(array_map(fn ($row) => (float) ($row[$index] ?? 0), $rows));
 
         return match ($report) {
             'trial-balance' => [
@@ -204,52 +234,73 @@ class ReportExportController extends Controller
     private function categoryTotal(array $rows, string $category, int $valueIndex): float
     {
         return array_sum(array_map(
-            fn($row) => ($row[0] ?? '') === $category ? (float) ($row[$valueIndex] ?? 0) : 0,
+            fn ($row) => ($row[0] ?? '') === $category ? (float) ($row[$valueIndex] ?? 0) : 0,
             $rows,
         ));
     }
+
     private function generalLedger(Request $request, int $organizationId, ?int $periodId, mixed $from, mixed $to): array
     {
-        $account = LedgerAccount::where('organization_id', $organizationId)
-            ->where('status', true)
-            ->when($request->integer('account_id') > 0, fn($query) => $query->whereKey($request->integer('account_id')))
-            ->orderBy('code')
-            ->first();
-        if (!$account) {
+        $accountQuery = LedgerAccount::where('organization_id', $organizationId)
+            ->where('status', true);
+        $accountId = $request->integer('account_id');
+        $account = $accountId > 0
+            ? $accountQuery->findOrFail($accountId)
+            : $accountQuery->orderBy('code')->first();
+        if (! $account) {
             return ['General Ledger', ['Date', 'Voucher', 'Type', 'Description', 'Debit', 'Credit', 'Running Balance'], []];
         }
+
         return [
             "General Ledger: {$account->code} - {$account->name}",
             ['Date', 'Voucher', 'Type', 'Description', 'Debit', 'Credit', 'Running Balance'],
             $this->accountingReports->generalLedger($organizationId, $account->id, $periodId, $from, $to)
-                ->map(fn($row) => [$row->voucher_date, $row->voucher_no, $row->voucher_type, $row->entry_description ?? '-', $row->debit, $row->credit, $row->running_balance])->all(),
+                ->map(fn ($row) => [$row->voucher_date, $row->voucher_no, $row->voucher_type, $row->entry_description ?? '-', $row->debit, $row->credit, $row->running_balance])->all(),
         ];
     }
 
     private function profitAndLoss(int $organizationId, ?int $periodId, mixed $from, mixed $to): array
     {
         $data = $this->accountingReports->profitAndLoss($organizationId, $periodId, $from, $to);
+
         return [
             'Profit & Loss',
             ['Category', 'Account', 'Amount'],
-            collect($data['income'])->concat($data['expenses'])->map(fn($row) => [$row->type, $row->name, $row->balance])->all(),
+            collect($data['income'])->concat($data['expenses'])->map(fn ($row) => [$row->type, $row->name, $row->balance])->all(),
         ];
     }
 
     private function balanceSheet(int $organizationId, ?int $periodId, mixed $from, mixed $to): array
     {
         $data = $this->accountingReports->balanceSheet($organizationId, $periodId, $from, $to);
+
         return [
             'Balance Sheet',
             ['Category', 'Account', 'Balance'],
-            collect($data['assets'])->concat($data['liabilities'])->concat($data['equity'])->map(fn($row) => [$row->type, $row->name, $row->balance])->all(),
+            collect($data['assets'])->concat($data['liabilities'])->concat($data['equity'])->map(fn ($row) => [$row->type, $row->name, $row->balance])->all(),
+        ];
+    }
+
+    private function balanceSheetAsOf(int $organizationId, mixed $from, mixed $to): array
+    {
+        $data = $this->accountingReports->balanceSheetAsOf($organizationId, $to, $from, $to);
+        $rows = collect($data['assets'])->concat($data['liabilities'])->concat($data['equity'])
+            ->map(fn ($row) => [$row->type, $row->name, $row->balance]);
+        if (abs((float) $data['net_income']) > 0.000001) {
+            $rows->push(['EQUITY', 'Current Year Net Income', $data['net_income']]);
+        }
+
+        return [
+            'Balance Sheet',
+            ['Category', 'Account', 'Balance'],
+            $rows->all(),
         ];
     }
 
     private function accountStatement(Request $request, int $organizationId): array
     {
         $account = FinancialAccount::where('organization_id', $organizationId)->find($request->integer('account_id'));
-        if (!$account) {
+        if (! $account) {
             return ['Financial Account Statement', ['Date', 'Transaction', 'Type', 'Debit', 'Credit', 'Status'], []];
         }
 
@@ -269,7 +320,7 @@ class ReportExportController extends Controller
             ->with('entries')
             ->latest('transaction_date')
             ->get()
-            ->map(fn($transaction) => [
+            ->map(fn ($transaction) => [
                 $transaction->transaction_date,
                 $transaction->transaction_no,
                 $transaction->transaction_type,
@@ -312,7 +363,7 @@ class ReportExportController extends Controller
             }
 
             fclose($output);
-        }, $filename . '.csv', [
+        }, $filename.'.csv', [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
@@ -327,7 +378,7 @@ class ReportExportController extends Controller
         $fiscalPeriod = $fiscalPeriodId
             ? FiscalPeriod::query()
                 ->whereKey($fiscalPeriodId)
-                ->whereHas('fiscalYear', fn($query) => $query->where('organization_id', $organizationId))
+                ->whereHas('fiscalYear', fn ($query) => $query->where('organization_id', $organizationId))
                 ->first()
             : null;
         $labels = [
@@ -342,15 +393,15 @@ class ReportExportController extends Controller
         ];
 
         return collect($request->only(['fiscal_year_id', 'fiscal_period_id', 'account_id', 'status', 'period', 'date', 'from', 'to']))
-            ->filter(fn($value) => $value !== null && $value !== '')
-            ->map(function ($value, $key) use ($fiscalYearId, $fiscalPeriodId, $fiscalYear, $fiscalPeriod, $labels) {
+            ->filter(fn ($value) => $value !== null && $value !== '')
+            ->map(function ($value, $key) use ($fiscalYear, $fiscalPeriod, $labels) {
                 $displayValue = match ($key) {
                     'fiscal_year_id' => $fiscalYear?->name ?? $value,
                     'fiscal_period_id' => $fiscalPeriod?->name ?? $value,
                     default => $value,
                 };
 
-                return ($labels[$key] ?? $key) . ': ' . $displayValue;
+                return ($labels[$key] ?? $key).': '.$displayValue;
             })
             ->implode(', ');
     }

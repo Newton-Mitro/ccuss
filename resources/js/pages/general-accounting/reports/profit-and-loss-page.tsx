@@ -46,16 +46,17 @@ export default function ProfitAndLossPage() {
     const [fiscalYear, setFiscalYear] = useState<number | ''>(
         selectedFiscalYear || '',
     );
-    const [fiscalPeriod, setFiscalPeriod] = useState<number | ''>(
-        selectedFiscalPeriod || '',
+    const [fiscalPeriod, setFiscalPeriod] = useState<number>(
+        selectedFiscalPeriod || 0,
     );
 
     const handleFiscalYearChange = (value) => {
         const year = Number(value);
         setFiscalYear(year);
+        setFiscalPeriod(0);
         router.get(
             '/financial-reports/profit-loss',
-            { fiscal_year_id: year, fiscal_period_id: fiscalPeriod },
+            { fiscal_year_id: year },
             { preserveState: true },
         );
     };
@@ -65,7 +66,10 @@ export default function ProfitAndLossPage() {
         setFiscalPeriod(period);
         router.get(
             '/financial-reports/profit-loss',
-            { fiscal_year_id: fiscalYear, fiscal_period_id: period },
+            {
+                fiscal_year_id: fiscalYear,
+                fiscal_period_id: period || undefined,
+            },
             { preserveState: true },
         );
     };
@@ -123,10 +127,13 @@ export default function ProfitAndLossPage() {
                                 className="bg-card"
                                 value={fiscalPeriod.toString()}
                                 onChange={handleFiscalPeriodChange}
-                                options={fiscalPeriods.map((fy) => ({
-                                    value: fy.id.toString(),
-                                    label: fy.period_name,
-                                }))}
+                                options={[
+                                    { value: '0', label: 'All periods' },
+                                    ...fiscalPeriods.map((period) => ({
+                                        value: period.id.toString(),
+                                        label: period.period_name,
+                                    })),
+                                ]}
                             />
                         </div>
                     </div>

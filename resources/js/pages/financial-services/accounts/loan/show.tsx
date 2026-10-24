@@ -174,7 +174,7 @@ export default function LoanAccountShow() {
             <Head title={loanNumber} />
 
             <div className="w-full max-w-7xl space-y-6 pb-8">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title={loanNumber}
                     description="Loan account overview, approved terms and repayment progress."
                     action={

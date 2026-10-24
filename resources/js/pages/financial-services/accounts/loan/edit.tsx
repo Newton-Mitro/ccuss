@@ -158,7 +158,7 @@ export default function LoanAccountEdit() {
             <Head title={`Edit ${loanNumber}`} />
 
             <div className="w-full max-w-7xl space-y-6 pb-8">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Edit loan account"
                     description="Update the account display name and review the approved loan details."
                     action={

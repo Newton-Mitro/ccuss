@@ -65,6 +65,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
             ->defaults('family', $family);
     }
     Route::get('/account-default-rules', [AccountDefaultRuleController::class, 'index'])->name('account-default-rules.index');
+    Route::get('/account-default-rules/create', [AccountDefaultRuleController::class, 'create'])->name('account-default-rules.create');
+    Route::get('/account-default-rules/{account_default_rule}/edit', [AccountDefaultRuleController::class, 'edit'])->name('account-default-rules.edit');
     Route::post('/account-default-rules', [AccountDefaultRuleController::class, 'store'])->name('account-default-rules.store');
     Route::put('/account-default-rules/{account_default_rule}', [AccountDefaultRuleController::class, 'update'])->name('account-default-rules.update');
     Route::delete('/account-default-rules/{account_default_rule}', [AccountDefaultRuleController::class, 'destroy'])->name('account-default-rules.destroy');

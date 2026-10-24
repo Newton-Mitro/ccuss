@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { WalletCards } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 interface ResourcePageHeaderProps {
@@ -6,6 +7,7 @@ interface ResourcePageHeaderProps {
     description?: string;
     action?: ReactNode;
     className?: string;
+    variant?: 'default' | 'account';
 }
 
 export function ResourcePageHeader({
@@ -13,7 +15,44 @@ export function ResourcePageHeader({
     description,
     action,
     className,
+    variant = 'default',
 }: ResourcePageHeaderProps) {
+    if (variant === 'account') {
+        return (
+            <header
+                className={cn(
+                    'relative isolate overflow-hidden rounded-2xl border bg-card px-5 py-5 shadow-sm sm:px-7 sm:py-6',
+                    className,
+                )}
+            >
+                <div className="absolute -top-20 -right-12 -z-10 size-56 rounded-full bg-primary/10 blur-3xl" />
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                    <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                        <WalletCards className="size-6" />
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                        <p className="text-[10px] font-semibold tracking-[0.18em] text-primary uppercase">
+                            Account workspace
+                        </p>
+                        <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                            {title}
+                        </h1>
+                        {description && (
+                            <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+                                {description}
+                            </p>
+                        )}
+                    </div>
+                    {action && (
+                        <div className="flex shrink-0 flex-wrap items-center gap-2">
+                            {action}
+                        </div>
+                    )}
+                </div>
+            </header>
+        );
+    }
+
     return (
         <div
             className={cn(
@@ -70,7 +109,10 @@ export function ResourceTableCard({
     return (
         <div
             data-slot="resource-table-card"
-            className={cn('overflow-auto rounded-md border bg-card', className)}
+            className={cn(
+                'overflow-auto rounded-xl border bg-card shadow-sm',
+                className,
+            )}
         >
             {children}
         </div>

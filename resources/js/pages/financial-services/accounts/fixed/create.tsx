@@ -175,7 +175,7 @@ export default function FixedDepositAccountCreate() {
             <Head title="Open fixed deposit" />
 
             <div className="max-w-4xl space-y-5 pb-8">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Open fixed deposit"
                     description="Set up the depositor, principal, contracted rate, tenure, and maturity instructions."
                 />

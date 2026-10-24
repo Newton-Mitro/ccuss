@@ -49,7 +49,7 @@ export default function FinancialAccountEdit() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit ${account.account_no}`} />
             <div className="max-w-2xl space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Edit account details"
                     description={`${account.account_no} · ${account.holder?.name ?? account.product?.name ?? account.account_type}`}
                 />

@@ -134,7 +134,7 @@ export default function ShareAccountShow() {
             <Head title={`Share Account ${account.account_no}`} />
 
             <div className="w-full max-w-screen space-y-5 pb-6">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned account'} · ${account.product?.name ?? 'Share membership'}`}
                     action={

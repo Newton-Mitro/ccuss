@@ -161,7 +161,7 @@ export default function FixedDepositAccountEdit() {
             <Head title={`Edit ${account.account_no}`} />
 
             <div className="max-w-4xl space-y-5 pb-8">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Edit fixed deposit account"
                     description={`${account.holder?.name ?? 'Depositor'} · Account ${account.account_no}`}
                 />

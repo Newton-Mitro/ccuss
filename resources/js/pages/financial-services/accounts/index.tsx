@@ -74,7 +74,7 @@ export default function FinancialAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`${categoryLabel} Account Management`} />
             <div className="space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title={
                         category
                             ? `${categoryLabel} Management`

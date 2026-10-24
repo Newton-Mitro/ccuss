@@ -226,7 +226,7 @@ export default function FinancialAccountShow() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={account.account_no} />
             <div className="space-y-4">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title={account.account_no}
                     description={`${account.holder?.name ?? account.name ?? 'Unassigned'} · ${account.product?.name ?? account.account_type}`}
                 />

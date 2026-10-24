@@ -96,7 +96,7 @@ export default function RecurringDepositAccountCreate() {
             <Head title="Open recurring deposit" />
 
             <div className="w-full max-w-screen-xl space-y-5 pb-6">
-                <ResourcePageHeader
+                <ResourcePageHeader variant="account"
                     title="Open recurring deposit"
                     description="Configure the savings plan, installment schedule, and maturity settings."
                     action={
