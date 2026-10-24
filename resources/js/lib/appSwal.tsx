@@ -6,9 +6,10 @@ export const appSwal = Swal.mixin({
     customClass: {
         popup: 'rounded-2xl p-6 !bg-card !text-popover-foreground !border !border-warning/30',
         title: 'text-lg font-semibold',
+        actions: 'gap-2',
         confirmButton:
             'bg-primary border border-warning/30 text-primary-foreground px-4 min-w-[80px] py-1 rounded-lg hover:opacity-80',
         cancelButton:
-            'bg-secondary border border-warning/30 text-secondary-foreground px-4 py-1 rounded-lg ml-2',
+            'bg-secondary border border-warning/30 text-secondary-foreground px-4 py-1 rounded-lg',
     },
 });
