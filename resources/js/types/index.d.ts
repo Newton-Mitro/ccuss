@@ -1,9 +1,9 @@
+import type { User } from '@/modules/administration-security/types/user';
+import type { Organization } from '@/modules/organization-settings/types/organization';
 import { InertiaLinkProps } from '@inertiajs/react';
 import { LucideIcon } from 'lucide-react';
-import { Organization } from './organization';
-import { User } from './user';
 
-export type { User } from './user';
+export type { User } from '@/modules/administration-security/types/user';
 
 export interface Auth {
     user: User;

@@ -1,6 +1,6 @@
 // types/organization.ts
 
-import { Branch } from './branch';
+import type { Branch } from '@/modules/branch-operations/types/branch';
 
 export interface Organization {
     id: number;

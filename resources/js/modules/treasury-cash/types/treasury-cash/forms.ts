@@ -1,5 +1,5 @@
-import type { SharedData } from '@/types';
 import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { SharedData } from '@/types';
 
 export interface BankAccountCreatePageProps extends SharedData {
     branches: { id: number; code: string; name: string }[];

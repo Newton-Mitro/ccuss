@@ -1,4 +1,4 @@
-import type { UserFormPageProps } from '@/types/system-administration';
+import type { UserFormPageProps } from '@/modules/administration-security/types/page-props';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { CheckCheck, Key, Loader2 } from 'lucide-react';
 import React, { useState } from 'react';
@@ -17,7 +17,7 @@ import {
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
-import type { Permission } from '@/types/user';
+import type { Permission } from '@/modules/administration-security/types/user';
 
 const UserForm = ({
     user,

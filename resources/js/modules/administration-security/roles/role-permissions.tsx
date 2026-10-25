@@ -1,4 +1,4 @@
-import type { RolePermissionPageProps } from '@/types/system-administration';
+import type { RolePermissionPageProps } from '@/modules/administration-security/types/page-props';
 import { Head, useForm } from '@inertiajs/react';
 import {
     Check,
@@ -36,7 +36,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
-import type { Permission, Role } from '@/types/user';
+import type { Permission, Role } from '@/modules/administration-security/types/user';
 
 const RolePermissionForm = ({
     roles,

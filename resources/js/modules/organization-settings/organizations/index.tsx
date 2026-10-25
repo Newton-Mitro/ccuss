@@ -23,7 +23,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Organization } from '@/types/organization';
+import { Organization } from '@/modules/organization-settings/types/organization';
 
 export default function Index() {
     const { props } = usePage<

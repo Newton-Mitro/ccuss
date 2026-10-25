@@ -1,4 +1,4 @@
-import type { BranchIndexPageProps } from '@/types/system-administration';
+import type { BranchIndexPageProps } from '@/modules/administration-security/types/page-props';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
@@ -11,7 +11,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
-import type { Branch } from '@/types/branch';
+import type { Branch } from '@/modules/branch-operations/types/branch';
 
 export default function Index() {
     const { branches, filters } = usePage<BranchIndexPageProps>().props;

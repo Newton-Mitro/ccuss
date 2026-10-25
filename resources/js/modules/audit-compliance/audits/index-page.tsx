@@ -4,7 +4,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import type { AuditsPageProps } from '@/types/system-administration';
+import type { AuditsPageProps } from '@/modules/audit-compliance/types/page-props';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Archive, ListChecks } from 'lucide-react';
 import { useEffect } from 'react';

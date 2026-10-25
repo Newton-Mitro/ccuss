@@ -1,4 +1,4 @@
-import type { AuditBatchPageProps } from '@/types/system-administration';
+import type { AuditBatchPageProps } from '@/modules/audit-compliance/types/page-props';
 import { Head } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '@/components/heading-small';

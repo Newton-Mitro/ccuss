@@ -1,10 +1,10 @@
-import type { SharedData } from '@/types';
-import type { ListFilters } from '@/types/base_types';
 import type {
     FiscalPeriod,
     FiscalYear,
     LedgerAccount,
 } from '@/modules/general-accounting/types/finance_and_accounting';
+import type { SharedData } from '@/types';
+import type { ListFilters } from '@/types/base_types';
 import type { PaginatedResponse } from '@/types/paginated_response';
 
 export type AccountingPagination<T> = PaginatedResponse<T>;

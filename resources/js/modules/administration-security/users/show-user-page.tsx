@@ -6,7 +6,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import { useInitials } from '@/hooks/use-initials';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
-import type { Permission, User } from '@/types/user';
+import type { Permission, User } from '@/modules/administration-security/types/user';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,

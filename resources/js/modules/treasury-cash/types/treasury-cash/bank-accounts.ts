@@ -1,8 +1,8 @@
-import type { SharedData } from '@/types';
 import type {
     TreasuryListFilters,
     TreasuryListResponse,
 } from '@/modules/treasury-cash/types/treasury-cash/common';
+import type { SharedData } from '@/types';
 
 export type BankAccountType = 'CURRENT' | 'SAVINGS' | 'FDR' | 'OTHER';
 export type BankAccountStatus = 'ACTIVE' | 'INACTIVE' | 'CLOSED';

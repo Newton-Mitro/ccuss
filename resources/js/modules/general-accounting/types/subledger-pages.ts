@@ -1,7 +1,7 @@
+import type { Subledger } from '@/modules/general-accounting/types/subledger_module';
 import type { SharedData } from '@/types';
 import type { ListFilters } from '@/types/base_types';
 import type { PaginatedResponse } from '@/types/paginated_response';
-import type { Subledger } from '@/modules/general-accounting/types/subledger_module';
 
 export type SubledgerPagination<T> = PaginatedResponse<T>;
 

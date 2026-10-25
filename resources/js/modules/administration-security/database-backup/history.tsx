@@ -20,7 +20,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type {
     BackupHistoryPageProps,
     BackupLog,
-} from '@/types/system-administration';
+} from '@/modules/administration-security/types/page-props';
 import DataTablePagination from '@/components/data-table-pagination';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';

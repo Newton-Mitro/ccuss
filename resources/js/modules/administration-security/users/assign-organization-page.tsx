@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem, SharedData } from '@/types';
-import { Organization } from '@/types/organization';
-import { User } from '@/types/user';
+import { Organization } from '@/modules/organization-settings/types/organization';
+import { User } from '@/modules/administration-security/types/user';
 
 interface Props extends SharedData {
     user: User;

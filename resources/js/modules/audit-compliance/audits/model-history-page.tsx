@@ -1,4 +1,4 @@
-import type { ModelHistoryPageProps } from '@/types/system-administration';
+import type { ModelHistoryPageProps } from '@/modules/audit-compliance/types/page-props';
 import { Head, Link } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 import HeadingSmall from '@/components/heading-small';

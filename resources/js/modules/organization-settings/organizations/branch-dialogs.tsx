@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
 import { useEffect, type FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { Branch } from '@/types/branch';
+import type { Branch } from '@/modules/branch-operations/types/branch';
 import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
 import { CustomerSearchBox } from '@/modules/customers-kyc/customers/components/customer-search-box';
 

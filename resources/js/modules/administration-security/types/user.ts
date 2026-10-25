@@ -1,5 +1,5 @@
-import { Branch } from './branch';
-import { Organization } from './organization';
+import type { Branch } from '@/modules/branch-operations/types/branch';
+import type { Organization } from '@/modules/organization-settings/types/organization';
 
 // types/role.ts
 export interface Role {

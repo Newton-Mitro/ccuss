@@ -1,45 +1,21 @@
+import type {
+    Permission,
+    Role,
+    User,
+} from '@/modules/administration-security/types/user';
+import type { Branch } from '@/modules/branch-operations/types/branch';
+import type { Organization } from '@/modules/organization-settings/types/organization';
 import type { SharedData } from '@/types';
-import type { Audit, AuditBatch } from '@/modules/audit-compliance/types/audit_models';
 import type { ListFilters } from '@/types/base_types';
-import type { Branch } from '@/types/branch';
-import type { Organization } from '@/types/organization';
 import type { PaginatedResponse } from '@/types/paginated_response';
-import type { Permission, Role, User } from '@/types/user';
-
-export type AdministrationPagination<T> = PaginatedResponse<T>;
-
-export interface AuditsPageProps extends SharedData {
-    audits: AdministrationPagination<Audit>;
-    filters: ListFilters & {
-        event?: string;
-        user_id?: number;
-    };
-}
-
-export interface AuditBatchPageProps {
-    batch: AuditBatch;
-}
-
-export interface ModelHistoryPageProps extends SharedData {
-    auditableType: string;
-    auditableId: number;
-    batches: AuditBatch[];
-}
 
 export interface BranchIndexPageProps extends SharedData {
-    branches: AdministrationPagination<Branch>;
+    branches: PaginatedResponse<Branch>;
     filters: ListFilters;
 }
 
 export interface BranchShowPageProps extends SharedData {
     branch: Branch;
-}
-
-export interface OrganizationShowPageProps extends Omit<
-    SharedData,
-    'organization'
-> {
-    organization: Organization & { branches: Branch[] };
 }
 
 export interface RolePermissionPageProps extends SharedData {
@@ -75,6 +51,6 @@ export interface BackupLog {
 }
 
 export interface BackupHistoryPageProps extends SharedData {
-    logs: AdministrationPagination<BackupLog>;
+    logs: PaginatedResponse<BackupLog>;
     filters: ListFilters;
 }

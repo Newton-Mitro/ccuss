@@ -1,4 +1,4 @@
-import type { UserFormPageProps } from '@/types/system-administration';
+import type { UserFormPageProps } from '@/modules/administration-security/types/page-props';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,

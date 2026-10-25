@@ -1,4 +1,4 @@
-import type { BranchShowPageProps } from '@/types/system-administration';
+import type { BranchShowPageProps } from '@/modules/administration-security/types/page-props';
 import { Head } from '@inertiajs/react';
 import { Clock, Hash, MapPin } from 'lucide-react';
 import { route } from 'ziggy-js';

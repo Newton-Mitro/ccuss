@@ -254,7 +254,7 @@ export const financialServices: SidebarItem[] = [
 
                 children: [
                     {
-                        name: 'Posting Queue',
+                        name: 'Financial Transactions',
                         icon: <i className="fa-solid fa-list" />,
                         path: '/financial-transactions',
                         match_path: 'financial-transactions',

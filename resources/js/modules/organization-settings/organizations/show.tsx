@@ -14,14 +14,14 @@ import {
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
-import type { OrganizationShowPageProps } from '@/types/system-administration';
+import type { OrganizationShowPageProps } from '@/modules/organization-settings/types/page-props';
 import BolderLessInfoBox from '@/components/borderless-info-box';
 import HeadingSmall from '@/components/heading-small';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import type { BreadcrumbItem } from '@/types';
-import type { Branch } from '@/types/branch';
+import type { Branch } from '@/modules/branch-operations/types/branch';
 import { BranchDetailsDialog, BranchFormDialog } from '@/modules/organization-settings/organizations/branch-dialogs';
 
 function Show() {

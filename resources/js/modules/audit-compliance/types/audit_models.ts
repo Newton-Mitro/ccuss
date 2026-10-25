@@ -1,5 +1,5 @@
+import type { User } from '@/modules/administration-security/types/user';
 import type { Timestamped } from '@/types/base_types';
-import type { User } from '@/types/user';
 
 export type AuditEvent = 'CREATED' | 'UPDATED' | 'DELETED';
 

@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 import { BorderInfoBox } from '@/components/border-info-box';
 import { Label } from '@/components/ui/label';
-import { User } from '@/types/user';
+import { User } from '@/modules/administration-security/types/user';
 
 interface UserSearchBoxProps {
     onSelect: (user: User) => void;
