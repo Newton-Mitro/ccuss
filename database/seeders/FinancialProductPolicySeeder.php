@@ -19,7 +19,9 @@ class FinancialProductPolicySeeder extends Seeder
             $minimumOpeningAmount = (float) ($product->settings['minimum_opening_amount'] ?? 50000);
             $product->policy()->updateOrCreate([], [
                 'minimum_opening_amount' => $minimumOpeningAmount,
-                'minimum_deposit_amount' => $minimumOpeningAmount,
+                'minimum_deposit_amount' => in_array($product->category, ['SAVINGS', 'SHARE'], true)
+                    ? 10
+                    : $minimumOpeningAmount,
                 'eligibility_rules' => ['kyc_level' => 'BASIC', 'organization_customers_allowed' => true],
                 'status' => 'ACTIVE',
                 'version' => '1.0',

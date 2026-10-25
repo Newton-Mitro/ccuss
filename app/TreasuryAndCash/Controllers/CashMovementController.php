@@ -503,6 +503,7 @@ class CashMovementController extends Controller
                     ->with([
                         'product',
                         'product.policy',
+                        'fixedDeposit',
                         'loanAccount' => ['schedules.components', 'protectionPolicy', 'arrears'],
                         'shareAccount',
                         'recurringDeposit.installments',
@@ -512,7 +513,7 @@ class CashMovementController extends Controller
                     ->get();
 
                 $customerAccounts = $customerAccounts
-                    ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
+                    ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN'], true))
                     ->values();
 
                 $selectedAccount ??= $customerAccounts->first();
@@ -571,6 +572,8 @@ class CashMovementController extends Controller
             'amount' => ['required', 'numeric', 'gt:0'],
             'selected' => ['required', 'array', 'min:1'],
             'selected.*' => ['string'],
+            'obligation_amounts' => ['sometimes', 'array'],
+            'obligation_amounts.*' => ['numeric', 'gt:0'],
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -584,7 +587,7 @@ class CashMovementController extends Controller
                 ->where('organization_id', $organization->id)
                 ->where('holder_type', Customer::class)
                 ->where('holder_id', $customer->id)
-                ->whereIn('account_type', ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'])
+                ->whereIn('account_type', ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN'])
                 ->findOrFail($data['account_id']);
         }
 
@@ -607,6 +610,7 @@ class CashMovementController extends Controller
             ->with([
                 'product',
                 'product.policy',
+                'fixedDeposit',
                 'loanAccount' => ['schedules.components', 'protectionPolicy', 'arrears'],
                 'shareAccount',
                 'recurringDeposit.installments',
@@ -616,7 +620,7 @@ class CashMovementController extends Controller
             ->get();
 
         $customerAccounts = $customerAccounts
-            ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'RECURRING_DEPOSIT', 'LOAN'], true))
+            ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN'], true))
             ->values();
 
         $selectedObligations = collect($this->buildCustomerDepositObligations($customerAccounts))
@@ -630,33 +634,70 @@ class CashMovementController extends Controller
             ]);
         }
 
-        $selectedTotal = (float) $selectedObligations->sum('amount');
-        if ((float) $data['amount'] > $selectedTotal + 0.0001) {
-            throw ValidationException::withMessages([
-                'amount' => ['The payment amount cannot exceed the selected obligations total.'],
-            ]);
-        }
+        $obligationAmounts = $data['obligation_amounts'] ?? null;
+        if ($obligationAmounts !== null) {
+            if (array_diff(array_keys($obligationAmounts), $data['selected']) !== []) {
+                throw ValidationException::withMessages([
+                    'obligation_amounts' => ['Amounts may only be set for selected obligations.'],
+                ]);
+            }
 
-        $remainingAmount = round((float) $data['amount'], 4);
-        $lines = $selectedObligations
-            ->map(function (array $obligation) use (&$remainingAmount): ?array {
-                if ($remainingAmount <= 0) {
-                    return null;
+            $selectedTotal = 0.0;
+            foreach ($selectedObligations as $obligation) {
+                $lineAmount = (float) ($obligationAmounts[$obligation['id']] ?? 0);
+                if ($lineAmount <= 0 || $lineAmount > (float) $obligation['amount'] + 0.0001) {
+                    throw ValidationException::withMessages([
+                        'obligation_amounts' => ['Each selected amount must be greater than zero and cannot exceed its outstanding amount.'],
+                    ]);
                 }
 
-                $lineAmount = min(round((float) $obligation['amount'], 4), $remainingAmount);
-                $remainingAmount = round($remainingAmount - $lineAmount, 4);
+                $selectedTotal += $lineAmount;
+            }
 
-                return [
+            if (abs($selectedTotal - (float) $data['amount']) > 0.0001) {
+                throw ValidationException::withMessages([
+                    'amount' => ['The deposit total must match the selected obligation amounts.'],
+                ]);
+            }
+
+            $lines = $selectedObligations
+                ->map(fn (array $obligation): array => [
                     'financial_account_id' => (int) $obligation['account_id'],
                     'recurring_deposit_installment_id' => $obligation['recurring_deposit_installment_id'] ?? null,
-                    'amount' => (string) number_format($lineAmount, 4, '.', ''),
+                    'amount' => (string) number_format((float) $obligationAmounts[$obligation['id']], 4, '.', ''),
                     'description' => $obligation['due_type'].' - '.$obligation['month'],
-                ];
-            })
-            ->filter()
-            ->values()
-            ->all();
+                ])
+                ->values()
+                ->all();
+        } else {
+            $selectedTotal = (float) $selectedObligations->sum('amount');
+            if ((float) $data['amount'] > $selectedTotal + 0.0001) {
+                throw ValidationException::withMessages([
+                    'amount' => ['The payment amount cannot exceed the selected obligations total.'],
+                ]);
+            }
+
+            $remainingAmount = round((float) $data['amount'], 4);
+            $lines = $selectedObligations
+                ->map(function (array $obligation) use (&$remainingAmount): ?array {
+                    if ($remainingAmount <= 0) {
+                        return null;
+                    }
+
+                    $lineAmount = min(round((float) $obligation['amount'], 4), $remainingAmount);
+                    $remainingAmount = round($remainingAmount - $lineAmount, 4);
+
+                    return [
+                        'financial_account_id' => (int) $obligation['account_id'],
+                        'recurring_deposit_installment_id' => $obligation['recurring_deposit_installment_id'] ?? null,
+                        'amount' => (string) number_format($lineAmount, 4, '.', ''),
+                        'description' => $obligation['due_type'].' - '.$obligation['month'],
+                    ];
+                })
+                ->filter()
+                ->values()
+                ->all();
+        }
 
         $this->tellerCashTransactionService->create(
             $organization->id,
@@ -937,6 +978,8 @@ class CashMovementController extends Controller
         $currentMonthStart = $now->copy()->startOfMonth();
         $minimumDepositAccounts = $customerAccounts
             ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE'], true));
+        $fixedDepositAccounts = $customerAccounts
+            ->filter(fn (FinancialAccount $account) => $account->account_type === 'FIXED_DEPOSIT' && $account->fixedDeposit);
         $postedDeposits = collect();
 
         if ($minimumDepositAccounts->isNotEmpty()) {
@@ -955,7 +998,39 @@ class CashMovementController extends Controller
                 ->pluck('total_amount', 'financial_account_id');
         }
 
+        $postedFixedDepositPrincipal = collect();
+        if ($fixedDepositAccounts->isNotEmpty()) {
+            $postedFixedDepositPrincipal = FinancialTransactionEntry::query()
+                ->selectRaw('financial_account_id, SUM(amount) as total_amount')
+                ->whereIn('financial_account_id', $fixedDepositAccounts->pluck('id'))
+                ->where('direction', 'CREDIT')
+                ->whereHas('transaction', fn ($transaction) => $transaction
+                    ->where('transaction_type', 'DEPOSIT')
+                    ->where('status', 'POSTED'))
+                ->groupBy('financial_account_id')
+                ->pluck('total_amount', 'financial_account_id');
+        }
+
         foreach ($customerAccounts as $account) {
+            if ($account->account_type === 'FIXED_DEPOSIT' && $account->fixedDeposit) {
+                $principalAmount = (float) $account->fixedDeposit->principal_amount;
+                $principalDeposits = (float) $postedFixedDepositPrincipal->get($account->id, 0);
+                $principalDue = max(0, $principalAmount - $principalDeposits);
+
+                if ($principalDue > 0) {
+                    $rows[] = [
+                        'id' => 'fixed-deposit-principal-'.$account->id,
+                        'account_id' => $account->id,
+                        'account_type' => $account->account_type,
+                        'account_name' => $account->name,
+                        'account_no' => $account->account_no,
+                        'due_type' => 'Fixed deposit principal amount',
+                        'month' => 'Current month',
+                        'amount' => round($principalDue, 4),
+                    ];
+                }
+            }
+
             if ($account->account_type === 'LOAN' && $account->loanAccount) {
                 foreach ($account->loanAccount->schedules as $schedule) {
                     foreach ($schedule->components as $component) {

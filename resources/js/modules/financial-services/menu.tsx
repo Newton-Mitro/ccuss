@@ -243,6 +243,14 @@ export const financialServices: SidebarItem[] = [
                 ],
             },
 
+            {
+                name: 'Financial Transactions',
+                icon: <i className="fa-solid fa-list" />,
+                path: '/financial-transactions',
+                match_path: 'financial-transactions',
+                permission: ['financial.transactions.view'],
+            },
+
             // ─────────────────────────────────────────────
             // Transaction Desk
             // ─────────────────────────────────────────────
@@ -252,13 +260,6 @@ export const financialServices: SidebarItem[] = [
                 permission: ['financial.transactions.view'],
                 children_expanded: false,
                 children: [
-                    {
-                        name: 'Financial Transactions',
-                        icon: <i className="fa-solid fa-list" />,
-                        path: '/financial-transactions',
-                        match_path: 'financial-transactions',
-                        permission: ['financial.transactions.view'],
-                    },
                     {
                         name: 'Internal Account Transfers',
                         icon: <i className="fa-solid fa-right-left" />,

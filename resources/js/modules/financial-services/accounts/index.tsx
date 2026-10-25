@@ -1,3 +1,4 @@
+import DataTablePagination from '@/components/data-table-pagination';
 import {
     ResourcePageHeader,
     ResourceTableCard,
@@ -12,7 +13,6 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '@/components/data-table-pagination';
 
 interface Account {
     id: number;
@@ -74,7 +74,8 @@ export default function FinancialAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`${categoryLabel} Account Management`} />
             <div className="space-y-4">
-                <ResourcePageHeader variant="account"
+                <ResourcePageHeader
+                    variant="account"
                     title={
                         category
                             ? `${categoryLabel} Management`
@@ -102,7 +103,7 @@ export default function FinancialAccountIndex() {
                     placeholder="Search account number or holder..."
                     className="w-full bg-card sm:w-96"
                 />
-                <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
+                <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-360px)]">
                     <div className="h-full overflow-auto">
                         <table className="w-full min-w-[900px] table-fixed text-sm">
                             <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">

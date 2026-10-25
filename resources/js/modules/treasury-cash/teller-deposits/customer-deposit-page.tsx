@@ -1,10 +1,28 @@
 import {
-    FinancialAccountSearchInput,
-    type FinancialAccountSearchResult,
-} from '@/modules/financial-services/components/financial-account-search-input';
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import {
+    FinancialAccountSearchInput,
+    type FinancialAccountSearchResult,
+} from '@/modules/financial-services/components/financial-account-search-input';
+import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
@@ -16,16 +34,6 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 
 interface CustomerAccount {
     id: number;
@@ -88,11 +96,15 @@ export default function CustomerDepositPage() {
     const [selectedTellerSessionId, setSelectedTellerSessionId] = useState(
         teller_sessions.length === 1 ? String(teller_sessions[0].id) : '',
     );
-    const [depositAmount, setDepositAmount] = useState('');
     const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>(
         {},
     );
+    const [obligationAmounts, setObligationAmounts] = useState<
+        Record<string, string>
+    >({});
+    const [customerGivenAmount, setCustomerGivenAmount] = useState('');
     const [note, setNote] = useState('');
+    const [reviewOpen, setReviewOpen] = useState(false);
 
     const selectedTellerSession = useMemo(
         () =>
@@ -123,9 +135,26 @@ export default function CustomerDepositPage() {
         () =>
             obligations
                 .filter((row) => selectedRows[row.id])
-                .reduce((sum, row) => sum + Number(row.amount || 0), 0),
-        [obligations, selectedRows],
+                .reduce(
+                    (sum, row) =>
+                        sum +
+                        Number(
+                            obligationAmounts[row.id] ??
+                                Number(row.amount).toFixed(2),
+                        ),
+                    0,
+                ),
+        [obligations, obligationAmounts, selectedRows],
     );
+    const parsedCustomerGivenAmount =
+        customerGivenAmount.trim() === ''
+            ? totalSelected
+            : Number(customerGivenAmount);
+    const customerGivenTotal = Number.isFinite(parsedCustomerGivenAmount)
+        ? parsedCustomerGivenAmount
+        : 0;
+    const changeAmount = Math.max(0, customerGivenTotal - totalSelected);
+    const amountDueFromCustomer = customerGivenTotal < totalSelected;
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Treasury & Cash', href: '' },
@@ -143,8 +172,9 @@ export default function CustomerDepositPage() {
         setSelectedTellerSessionId(
             teller_sessions.length === 1 ? String(teller_sessions[0].id) : '',
         );
-        setDepositAmount('');
         setSelectedRows({});
+        setObligationAmounts({});
+        setCustomerGivenAmount('');
         setNote('');
 
         router.get(
@@ -158,15 +188,21 @@ export default function CustomerDepositPage() {
         setSelectedRows((current) => ({ ...current, [id]: !current[id] }));
     };
 
-    const selectedObligationIds = obligations
-        .filter((row) => selectedRows[row.id])
-        .map((row) => row.id);
+    const updateObligationAmount = (id: string, amount: string) => {
+        setObligationAmounts((current) => ({ ...current, [id]: amount }));
+    };
+
+    const selectedObligations = obligations.filter(
+        (row) => selectedRows[row.id],
+    );
+    const selectedObligationIds = selectedObligations.map((row) => row.id);
 
     const submit = () => {
         if (
             !selectedCustomer ||
             !selectedTellerSessionId ||
-            selectedObligationIds.length === 0
+            selectedObligationIds.length === 0 ||
+            amountDueFromCustomer
         ) {
             return;
         }
@@ -174,7 +210,7 @@ export default function CustomerDepositPage() {
         appSwal
             .fire({
                 title: 'Record this customer deposit?',
-                text: `Record a teller deposit of ${formatBDTCurrency(depositAmount || totalSelected, false)} for ${selectedCustomer.name}? It will update the installment schedule after the transaction is posted.`,
+                text: `Record a deposit of ${formatBDTCurrency(totalSelected, false)} for ${selectedCustomer.name}? The customer gives ${formatBDTCurrency(customerGivenTotal, false)} and receives ${formatBDTCurrency(changeAmount, false)} change. The installment schedule updates after the transaction is posted.`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Record deposit',
@@ -189,8 +225,21 @@ export default function CustomerDepositPage() {
                         teller_session_id: selectedTellerSessionId,
                         customer_id: selectedCustomer.id,
                         account_id: selectedAccount?.id,
-                        amount: depositAmount || totalSelected.toFixed(2),
+                        amount: totalSelected.toFixed(2),
                         selected: selectedObligationIds,
+                        obligation_amounts: Object.fromEntries(
+                            selectedObligationIds.map((id) => {
+                                const row = obligations.find(
+                                    (item) => item.id === id,
+                                );
+
+                                return [
+                                    id,
+                                    obligationAmounts[id] ??
+                                        Number(row?.amount ?? 0).toFixed(2),
+                                ];
+                            }),
+                        ),
                         note,
                     },
                     { preserveScroll: true },
@@ -202,7 +251,8 @@ export default function CustomerDepositPage() {
         Boolean(selectedCustomer) &&
         Boolean(selectedTellerSessionId) &&
         selectedObligationIds.length > 0 &&
-        Number(depositAmount || totalSelected || 0) > 0;
+        totalSelected > 0 &&
+        !amountDueFromCustomer;
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -518,9 +568,9 @@ export default function CustomerDepositPage() {
 
                                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
                                                 No eligible savings, share,
-                                                recurring deposit, or loan
-                                                account was found for this
-                                                customer.
+                                                fixed deposit, recurring
+                                                deposit, or loan account was
+                                                found for this customer.
                                             </p>
                                         </div>
                                     </div>
@@ -640,17 +690,43 @@ export default function CustomerDepositPage() {
                                                             {row.month}
                                                         </td>
 
-                                                        <td className="px-4 py-2.5 text-right tabular-nums">
-                                                            <span className="mr-1 text-[10px] text-muted-foreground">
-                                                                BDT
-                                                            </span>
-
-                                                            <span className="font-semibold">
-                                                                {formatBDTCurrency(
-                                                                    row.amount,
-                                                                    false,
-                                                                )}
-                                                            </span>
+                                                        <td className="px-4 py-2.5 text-right">
+                                                            <div className="ml-auto flex max-w-36 items-center gap-1">
+                                                                <span className="text-[10px] text-muted-foreground">
+                                                                    BDT
+                                                                </span>
+                                                                <Input
+                                                                    aria-label={`Amount for ${row.due_type} ${row.account_no}`}
+                                                                    type="number"
+                                                                    min="0.01"
+                                                                    max={
+                                                                        row.amount
+                                                                    }
+                                                                    step="0.01"
+                                                                    value={
+                                                                        obligationAmounts[
+                                                                            row
+                                                                                .id
+                                                                        ] ??
+                                                                        Number(
+                                                                            row.amount,
+                                                                        ).toFixed(
+                                                                            2,
+                                                                        )
+                                                                    }
+                                                                    onChange={(
+                                                                        event,
+                                                                    ) =>
+                                                                        updateObligationAmount(
+                                                                            row.id,
+                                                                            event
+                                                                                .target
+                                                                                .value,
+                                                                        )
+                                                                    }
+                                                                    className="h-8 min-w-0 text-right tabular-nums"
+                                                                />
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -681,27 +757,8 @@ export default function CustomerDepositPage() {
                                 <ShieldCheck className="h-4 w-4 text-primary" />
                                 Deposit summary
                             </div>
-                            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)] md:items-end">
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    <div>
-                                        <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                                            Deposit amount
-                                        </label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={
-                                                depositAmount ||
-                                                totalSelected.toFixed(2)
-                                            }
-                                            onChange={(event) =>
-                                                setDepositAmount(
-                                                    event.target.value,
-                                                )
-                                            }
-                                        />
-                                    </div>
+                            <div className="grid gap-4 md:grid-cols-2 md:items-end">
+                                <div className="grid gap-3">
                                     <div>
                                         <label className="mb-1 block text-xs font-medium text-muted-foreground">
                                             Note
@@ -720,7 +777,7 @@ export default function CustomerDepositPage() {
                                     <div className="grid grid-cols-3 divide-x rounded-md bg-muted/40 py-2 text-xs">
                                         <div className="min-w-0 px-2">
                                             <span className="block truncate text-muted-foreground">
-                                                Selected due
+                                                Deposit amount
                                             </span>
                                             <span className="mt-0.5 block truncate font-medium tabular-nums">
                                                 BDT{' '}
@@ -732,39 +789,45 @@ export default function CustomerDepositPage() {
                                         </div>
                                         <div className="min-w-0 px-2">
                                             <span className="block truncate text-muted-foreground">
-                                                Entered
+                                                Customer given
                                             </span>
-                                            <span className="mt-0.5 block truncate font-medium tabular-nums">
-                                                BDT{' '}
-                                                {formatBDTCurrency(
-                                                    depositAmount ||
-                                                        totalSelected ||
-                                                        0,
-                                                    false,
-                                                )}
-                                            </span>
+                                            <Input
+                                                aria-label="Customer given amount"
+                                                type="number"
+                                                min={totalSelected.toFixed(2)}
+                                                step="0.01"
+                                                value={
+                                                    customerGivenAmount ||
+                                                    totalSelected.toFixed(2)
+                                                }
+                                                onChange={(event) =>
+                                                    setCustomerGivenAmount(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                className="mt-1 h-8 px-1.5 text-right tabular-nums"
+                                            />
                                         </div>
                                         <div className="min-w-0 px-2">
                                             <span className="block truncate text-muted-foreground">
-                                                Difference
+                                                Change
                                             </span>
-                                            <span className="mt-0.5 block truncate font-medium tabular-nums">
+                                            <span className="mt-2 block truncate font-semibold tabular-nums">
                                                 BDT{' '}
                                                 {formatBDTCurrency(
-                                                    Math.max(
-                                                        0,
-                                                        Number(
-                                                            depositAmount ||
-                                                                totalSelected,
-                                                        ) - totalSelected,
-                                                    ),
+                                                    changeAmount,
                                                     false,
                                                 )}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="flex justify-end gap-2">
-                                        <Button variant="outline" type="button">
+                                        <Button
+                                            variant="outline"
+                                            type="button"
+                                            disabled={!canSubmit}
+                                            onClick={() => setReviewOpen(true)}
+                                        >
                                             Review
                                         </Button>
                                         <Button
@@ -776,12 +839,151 @@ export default function CustomerDepositPage() {
                                             Submit deposit
                                         </Button>
                                     </div>
+                                    {amountDueFromCustomer && (
+                                        <p className="text-right text-xs text-destructive">
+                                            Customer given amount must cover the
+                                            selected deposit amount.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
                     </>
                 )}
             </div>
+            <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
+                <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Review customer deposit</DialogTitle>
+                        <DialogDescription>
+                            Verify the selected obligations and cash amounts
+                            before submitting this deposit.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-4">
+                        <div className="grid gap-3 rounded-lg border p-3 sm:grid-cols-2">
+                            <div>
+                                <div className="text-xs text-muted-foreground">
+                                    Customer
+                                </div>
+                                <div className="font-medium">
+                                    {selectedCustomer?.name}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    {selectedCustomer?.customer_no}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="text-xs text-muted-foreground">
+                                    Teller session
+                                </div>
+                                <div className="font-medium">
+                                    {selectedTellerSession?.teller?.name ??
+                                        'Teller'}{' '}
+                                    (
+                                    {selectedTellerSession?.teller?.code ?? '-'}
+                                    )
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                    Business date:{' '}
+                                    {selectedTellerSession?.branch_day
+                                        ?.business_date ?? '-'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-lg border">
+                            <div className="border-b bg-muted/30 px-3 py-2 text-sm font-medium">
+                                Selected obligations (
+                                {selectedObligations.length})
+                            </div>
+                            <div className="divide-y">
+                                {selectedObligations.map((row) => (
+                                    <div
+                                        key={row.id}
+                                        className="flex items-start justify-between gap-3 px-3 py-2.5"
+                                    >
+                                        <div className="min-w-0">
+                                            <div className="truncate text-sm font-medium">
+                                                {row.account_name ??
+                                                    'Unnamed account'}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {row.account_no} ·{' '}
+                                                {row.due_type} · {row.month}
+                                            </div>
+                                        </div>
+                                        <div className="shrink-0 text-right text-sm font-medium tabular-nums">
+                                            BDT{' '}
+                                            {formatBDTCurrency(
+                                                obligationAmounts[row.id] ??
+                                                    Number(row.amount).toFixed(
+                                                        2,
+                                                    ),
+                                                false,
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <dl className="grid gap-2 rounded-lg bg-muted/30 p-3 text-sm sm:grid-cols-3">
+                            <div>
+                                <dt className="text-xs text-muted-foreground">
+                                    Deposit amount
+                                </dt>
+                                <dd className="font-semibold tabular-nums">
+                                    BDT{' '}
+                                    {formatBDTCurrency(totalSelected, false)}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-xs text-muted-foreground">
+                                    Customer given
+                                </dt>
+                                <dd className="font-semibold tabular-nums">
+                                    BDT{' '}
+                                    {formatBDTCurrency(
+                                        customerGivenTotal,
+                                        false,
+                                    )}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-xs text-muted-foreground">
+                                    Change
+                                </dt>
+                                <dd className="font-semibold tabular-nums">
+                                    BDT {formatBDTCurrency(changeAmount, false)}
+                                </dd>
+                            </div>
+                        </dl>
+
+                        {note.trim() && (
+                            <div className="rounded-lg border px-3 py-2">
+                                <div className="text-xs text-muted-foreground">
+                                    Note
+                                </div>
+                                <p className="mt-1 text-sm whitespace-pre-wrap">
+                                    {note}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setReviewOpen(false)}
+                        >
+                            Close review
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </CustomAuthLayout>
     );
 }
