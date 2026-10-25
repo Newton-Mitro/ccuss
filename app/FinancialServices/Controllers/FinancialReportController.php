@@ -2,10 +2,10 @@
 
 namespace App\FinancialServices\Controllers;
 
-use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\DepositProduct;
-use App\FinancialServices\Models\LoanProduct;
+use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\LoanProduct;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,8 +16,24 @@ class FinancialReportController extends Controller
     public function dashboard(Request $request): Response
     {
         $organizationId = $this->organizationId($request);
+        $currentMonth = now()->startOfMonth();
+        $monthlyTransactions = collect(range(5, 0))
+            ->map(function (int $monthsAgo) use ($organizationId, $currentMonth): array {
+                $month = $currentMonth->copy()->subMonths($monthsAgo);
+
+                return [
+                    'label' => $month->format('M Y'),
+                    'count' => FinancialTransaction::query()
+                        ->where('organization_id', $organizationId)
+                        ->where('transaction_date', '>=', $month->toDateString())
+                        ->where('transaction_date', '<', $month->copy()->addMonth()->toDateString())
+                        ->count(),
+                ];
+            })
+            ->values();
 
         return Inertia::render('financial-services/dashboard', [
+            'monthlyTransactions' => $monthlyTransactions,
             'metrics' => [
                 'depositProducts' => DepositProduct::where('organization_id', $organizationId)->where('status', true)->count(),
                 'loanProducts' => LoanProduct::where('organization_id', $organizationId)->where('status', true)->count(),
@@ -53,16 +69,16 @@ class FinancialReportController extends Controller
         [$productFamily, $productId] = array_pad(explode(':', $request->string('product_id')->toString(), 2), 2, null);
         $productType = $productFamily === 'loan' ? LoanProduct::class : DepositProduct::class;
         $accounts = FinancialAccount::where('organization_id', $organizationId)
-            ->when($productId !== null && ctype_digit($productId), fn($query) => $query->where('product_type', $productType)->where('product_id', (int) $productId))
+            ->when($productId !== null && ctype_digit($productId), fn ($query) => $query->where('product_type', $productType)->where('product_id', (int) $productId))
             ->with('product')
             ->orderByDesc('balance')
             ->paginate($request->integer('per_page') ?: 25)
             ->withQueryString();
 
         $products = DepositProduct::where('organization_id', $organizationId)->get(['id', 'code', 'name'])
-            ->map(fn(DepositProduct $product) => ['id' => 'deposit:' . $product->id, 'code' => $product->code, 'name' => $product->name])
+            ->map(fn (DepositProduct $product) => ['id' => 'deposit:'.$product->id, 'code' => $product->code, 'name' => $product->name])
             ->concat(LoanProduct::where('organization_id', $organizationId)->get(['id', 'code', 'name'])
-                ->map(fn(LoanProduct $product) => ['id' => 'loan:' . $product->id, 'code' => $product->code, 'name' => $product->name]))
+                ->map(fn (LoanProduct $product) => ['id' => 'loan:'.$product->id, 'code' => $product->code, 'name' => $product->name]))
             ->values();
 
         return Inertia::render('financial-services/reports/account-balances', [
@@ -78,7 +94,7 @@ class FinancialReportController extends Controller
         $allowedStatuses = ['PENDING', 'POSTED', 'REVERSED', 'CANCELLED'];
 
         $transactions = FinancialTransaction::where('organization_id', $this->organizationId($request))
-            ->when(in_array($status, $allowedStatuses, true), fn($query) => $query->where('status', $status))
+            ->when(in_array($status, $allowedStatuses, true), fn ($query) => $query->where('status', $status))
             ->with('entries.financialAccount')
             ->latest('transaction_date')
             ->paginate($request->integer('per_page') ?: 25)

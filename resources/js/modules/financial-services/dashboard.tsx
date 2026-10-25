@@ -23,6 +23,10 @@ import {
 } from '@/components/dashboard-summary';
 
 interface FinancialServicesDashboardProps extends SharedData {
+    monthlyTransactions: {
+        label: string;
+        count: number;
+    }[];
     metrics: {
         depositProducts: number;
         loanProducts: number;
@@ -74,7 +78,7 @@ const money = (amount: string | number) =>
 const formatTransactionType = (type: string) => type.replaceAll('_', ' ');
 
 export default function FinancialServicesDashboard() {
-    const { metrics, recentTransactions } =
+    const { metrics, recentTransactions, monthlyTransactions } =
         usePage<FinancialServicesDashboardProps>().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -168,6 +172,7 @@ export default function FinancialServicesDashboard() {
                         'Active accounts': metrics.activeAccounts,
                         'Posted transactions': metrics.postedTransactions,
                     }}
+                    monthlyTransactions={monthlyTransactions}
                 />
 
                 {/* Recent activity */}

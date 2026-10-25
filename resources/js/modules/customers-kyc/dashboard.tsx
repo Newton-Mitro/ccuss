@@ -14,15 +14,37 @@ import {
 } from 'lucide-react';
 import { route } from 'ziggy-js';
 
-import DashboardMetricCharts from '@/components/dashboard-metric-charts';
 import {
     ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import CustomerDashboardCharts from '@/modules/customers-kyc/components/customer-dashboard-charts';
 import { BreadcrumbItem, SharedData } from '@/types';
 
 interface CustomerKycDashboardProps extends SharedData {
+    charts: {
+        demographics: {
+            male: number;
+            female: number;
+            other: number;
+            organization: number;
+        };
+        statuses: {
+            active: number;
+            pending: number;
+            inactive: number;
+            suspended: number;
+            closed: number;
+        };
+        pendingApprovals: {
+            customers: number;
+            addresses: number;
+            familyRelations: number;
+            introducers: number;
+            documents: number;
+        };
+    };
     stats: {
         customers: number;
         activeCustomers: number;
@@ -58,7 +80,7 @@ const links = [
 ] as const;
 
 export default function Dashboard() {
-    const { stats } = usePage<CustomerKycDashboardProps>().props;
+    const { stats, charts } = usePage<CustomerKycDashboardProps>().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -141,14 +163,7 @@ export default function Dashboard() {
                 />
 
                 {/* Metrics chart */}
-                <DashboardMetricCharts
-                    metrics={{
-                        Customers: stats.customers,
-                        'Active customers': stats.activeCustomers,
-                        'Pending customers': stats.pendingCustomers,
-                        'Pending documents': stats.pendingDocuments,
-                    }}
-                />
+                <CustomerDashboardCharts charts={charts} />
 
                 {/* Verification queue */}
                 <section className="space-y-3">

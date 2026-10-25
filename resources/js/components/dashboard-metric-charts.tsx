@@ -21,6 +21,10 @@ ChartJS.register(
 
 interface DashboardMetricChartsProps {
     metrics: Record<string, number>;
+    monthlyTransactions?: {
+        label: string;
+        count: number;
+    }[];
 }
 
 const chartColors = [
@@ -46,6 +50,7 @@ const chartOptions = {
 
 export default function DashboardMetricCharts({
     metrics,
+    monthlyTransactions,
 }: DashboardMetricChartsProps) {
     const entries = Object.entries(metrics);
     const labels = entries.map(([label]) => label);
@@ -53,6 +58,33 @@ export default function DashboardMetricCharts({
     const colors = values.map(
         (_, index) => chartColors[index % chartColors.length],
     );
+
+    const activityData = monthlyTransactions
+        ? {
+              labels: monthlyTransactions.map((month) => month.label),
+              datasets: [
+                  {
+                      label: 'Transactions',
+                      data: monthlyTransactions.map((month) => month.count),
+                      backgroundColor: '#0f766e',
+                      borderColor: '#0f766e',
+                      borderWidth: 1,
+                      borderRadius: 6,
+                  },
+              ],
+          }
+        : {
+              labels,
+              datasets: [
+                  {
+                      data: values,
+                      backgroundColor: colors,
+                      borderColor: colors,
+                      borderWidth: 1,
+                      borderRadius: 4,
+                  },
+              ],
+          };
 
     const data = {
         labels,
@@ -72,12 +104,17 @@ export default function DashboardMetricCharts({
             <Card>
                 <CardHeader>
                     <CardTitle className="text-base">
-                        Activity overview
+                        {monthlyTransactions
+                            ? 'Transactions · last 6 months'
+                            : 'Activity overview'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="h-64">
-                        <Bar data={data} options={chartOptions} />
+                        <Bar
+                            data={monthlyTransactions ? activityData : data}
+                            options={chartOptions}
+                        />
                     </div>
                 </CardContent>
             </Card>
