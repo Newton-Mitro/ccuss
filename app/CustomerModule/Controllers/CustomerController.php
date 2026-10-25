@@ -46,7 +46,7 @@ class CustomerController extends Controller
             $request->input('per_page', 18),
         );
 
-        return Inertia::render('customer-kyc/customers/list_customer_page', [
+        return Inertia::render('customers-kyc/customers/list_customer_page', [
             'paginated_data' => $customers,
             'filters' => $request->only(['search', 'status', 'per_page', 'page']),
         ]);
@@ -54,7 +54,7 @@ class CustomerController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('customer-kyc/customers/create_customer_page');
+        return Inertia::render('customers-kyc/customers/create_customer_page');
     }
 
     public function store(StoreCustomerRequest $request): RedirectResponse
@@ -91,7 +91,7 @@ class CustomerController extends Controller
             'audits',
         ]);
 
-        return Inertia::render('customer-kyc/customers/show_customer_page', [
+        return Inertia::render('customers-kyc/customers/show_customer_page', [
             'customer' => $customer,
         ]);
     }
@@ -102,7 +102,7 @@ class CustomerController extends Controller
 
         $customer->load(['photo', 'kycProfile', 'kycDocuments']);
 
-        return Inertia::render('customer-kyc/customers/edit_customer_page', [
+        return Inertia::render('customers-kyc/customers/edit_customer_page', [
             'customer' => $customer,
         ]);
     }

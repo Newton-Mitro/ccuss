@@ -36,7 +36,7 @@ class BranchController extends Controller
                 $request->input('per_page', 18)
             )->withQueryString();
 
-        return Inertia::render('system-administration/branches/index', [
+        return Inertia::render('administration-security/branches/index', [
             'branches' => $branches,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
@@ -44,7 +44,7 @@ class BranchController extends Controller
 
     public function create(Request $request): Response
     {
-        return Inertia::render('system-administration/branches/create', [
+        return Inertia::render('administration-security/branches/create', [
             'organization' => $request->attributes->get('active_organization'),
         ]);
     }
@@ -68,7 +68,7 @@ class BranchController extends Controller
     {
         $this->authorizeOrganization($branch);
 
-        return Inertia::render('system-administration/branches/show', [
+        return Inertia::render('administration-security/branches/show', [
             'branch' => $branch->load(['manager', 'organization']),
         ]);
     }
@@ -77,7 +77,7 @@ class BranchController extends Controller
     {
         $this->authorizeOrganization($branch);
 
-        return Inertia::render('system-administration/branches/edit', [
+        return Inertia::render('administration-security/branches/edit', [
             'branch' => $branch->load(['manager', 'organization']),
         ]);
     }

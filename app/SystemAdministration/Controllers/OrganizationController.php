@@ -57,7 +57,7 @@ class OrganizationController extends Controller
             ->paginate($request->input('per_page', 18))
             ->withQueryString();
 
-        return Inertia::render('system-administration/organizations/index', [
+        return Inertia::render('organization-settings/organizations/index', [
             'organizations' => $organizations,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
@@ -68,7 +68,7 @@ class OrganizationController extends Controller
      */
     public function create()
     {
-        return Inertia::render('system-administration/organizations/create');
+        return Inertia::render('organization-settings/organizations/create');
     }
 
     /**
@@ -102,7 +102,7 @@ class OrganizationController extends Controller
     {
         $this->authorizeAccess(request(), $organization);
 
-        return Inertia::render('system-administration/organizations/show', [
+        return Inertia::render('organization-settings/organizations/show', [
             'organization' => $organization->load('branches.manager'),
         ]);
     }
@@ -114,7 +114,7 @@ class OrganizationController extends Controller
     {
         $this->authorizeAccess(request(), $organization);
 
-        return Inertia::render('system-administration/organizations/edit', [
+        return Inertia::render('organization-settings/organizations/edit', [
             'organization' => $organization,
         ]);
     }

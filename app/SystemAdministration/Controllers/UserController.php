@@ -62,7 +62,7 @@ class UserController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('system-administration/users/user-index', [
+        return Inertia::render('administration-security/users/user-index', [
             'users' => $users,
             'filters' => $filters,
         ]);
@@ -73,7 +73,7 @@ class UserController extends Controller
      * ========================== */
     public function create(Request $request)
     {
-        return Inertia::render('system-administration/users/user-form-page', [
+        return Inertia::render('administration-security/users/user-form-page', [
             'roles' => Role::all(),
             'organizations' => Organization::query()->orderBy('name')->get(),
         ]);
@@ -83,7 +83,7 @@ class UserController extends Controller
     {
         $this->authorizeOrganization($user, $request);
 
-        return Inertia::render('system-administration/users/assign-branch-page', [
+        return Inertia::render('administration-security/users/assign-branch-page', [
             'user' => $user->load(['branch', 'organization']),
             'branches' => $this->organizationBranches($request)->get(),
         ]);
@@ -113,7 +113,7 @@ class UserController extends Controller
     {
         $this->authorizeOrganization($user, $request);
 
-        return Inertia::render('system-administration/users/assign-organization-page', [
+        return Inertia::render('administration-security/users/assign-organization-page', [
             'user' => $user->load(['organization', 'organizations']),
             'organizations' => Organization::query()->orderBy('name')->get(),
         ]);
@@ -178,7 +178,7 @@ class UserController extends Controller
         $user->load(['branch', 'organization', 'organizations', 'roles.permissions']);
 
         return Inertia::render(
-            'system-administration/users/show-user-page',
+            'administration-security/users/show-user-page',
             compact('user')
         );
     }
@@ -196,7 +196,7 @@ class UserController extends Controller
         // Fetch all available permissions
         $permissions = Permission::all();
 
-        return Inertia::render('system-administration/users/user-form-page', [
+        return Inertia::render('administration-security/users/user-form-page', [
             'user' => $user->load(['roles', 'organizations']),
             'roles' => $roles,
             'permissions' => $permissions,

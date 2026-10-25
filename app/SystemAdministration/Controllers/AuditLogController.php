@@ -32,7 +32,7 @@ class AuditLogController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('system-administration/audits/index-page', [
+        return Inertia::render('audit-compliance/audits/index-page', [
             'audits' => $audits,
             'filters' => $request->only(['event', 'user_id', 'page', 'per_page']),
         ]);
@@ -65,7 +65,7 @@ class AuditLogController extends Controller
             ->map(fn($items) => $this->formatBatch($items))
             ->values();
 
-        return Inertia::render('system-administration/audits/model-history-page', [
+        return Inertia::render('audit-compliance/audits/model-history-page', [
             'auditableType' => class_basename($validated['type']),
             'auditableId' => $validated['id'],
             'batches' => $batches,
@@ -85,7 +85,7 @@ class AuditLogController extends Controller
 
         abort_if($audits->isEmpty(), 404);
 
-        return Inertia::render('system-administration/audits/batch-page', [
+        return Inertia::render('audit-compliance/audits/batch-page', [
             'batch' => [
                 'batch_id' => $batchId,
                 'event_at' => $audits->first()->created_at,

@@ -1,5 +1,5 @@
 import type { SharedData } from '@/types';
-import type { Audit, AuditBatch } from '@/types/audit_models';
+import type { Audit, AuditBatch } from '@/modules/audit-compliance/types/audit_models';
 import type { ListFilters } from '@/types/base_types';
 import type { Branch } from '@/types/branch';
 import type { Organization } from '@/types/organization';

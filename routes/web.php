@@ -7,7 +7,7 @@ use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
 Route::get('/', function (Request $request) {
-    return Inertia::render('auth/login', [
+    return Inertia::render('authentication/login', [
         'canResetPassword' => Features::enabled(Features::resetPasswords()),
         'canRegister' => Features::enabled(Features::registration()),
         'status' => $request->session()->get('status'),

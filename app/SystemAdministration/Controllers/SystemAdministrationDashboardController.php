@@ -18,7 +18,7 @@ class SystemAdministrationDashboardController
     {
         $organizationId = $request->attributes->get('active_organization')->id;
 
-        return Inertia::render('system-administration/dashboard', [
+        return Inertia::render('administration-security/dashboard', [
             'stats' => [
                 'users' => User::where('organization_id', $organizationId)->count(),
                 'roles' => Role::count(),

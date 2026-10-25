@@ -73,7 +73,7 @@ class CustomerIntroducerController extends Controller
             ->withQueryString();
 
         return Inertia::render(
-            'customer-kyc/introducers/list_introducer_page',
+            'customers-kyc/introducers/list_introducer_page',
             [
                 'paginated_data' => $introducers,
                 'filters' => $request->only([
@@ -102,7 +102,7 @@ class CustomerIntroducerController extends Controller
         ]);
 
         return Inertia::render(
-            'customer-kyc/introducers/show_introducer_page',
+            'customers-kyc/introducers/show_introducer_page',
             [
                 'introducer_request' => $introducer,
             ]
@@ -111,7 +111,7 @@ class CustomerIntroducerController extends Controller
 
     public function create(Customer $customer): Response
     {
-        return Inertia::render('customer-kyc/introducers/create_introducer_page', [
+        return Inertia::render('customers-kyc/introducers/create_introducer_page', [
             'customer' => $customer->load('photo'),
         ]);
     }
@@ -120,7 +120,7 @@ class CustomerIntroducerController extends Controller
     {
         abort_unless($introducer->introduced_customer_id === $customer->id, 404);
         return Inertia::render(
-            'customer-kyc/introducers/edit_introducer_page',
+            'customers-kyc/introducers/edit_introducer_page',
             [
                 'introducer' => $introducer->load([
                     'introducedCustomer',

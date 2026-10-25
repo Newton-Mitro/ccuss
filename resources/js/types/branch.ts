@@ -1,4 +1,4 @@
-import { Customer } from './customer_kyc_module';
+import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
 
 interface BranchOrganization {
     id: number;

@@ -57,7 +57,7 @@ class CustomerFamilyRelationController extends Controller
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
-        return Inertia::render('customer-kyc/family-relations/list_family_relation_page', [
+        return Inertia::render('customers-kyc/family-relations/list_family_relation_page', [
             'paginated_data' => $relations,
             'filters' => $request->only([
                 'search',
@@ -77,14 +77,14 @@ class CustomerFamilyRelationController extends Controller
         );
         $familyRelation->load(['customer', 'relative', 'audits', 'customer.photo', 'relative.photo']);
 
-        return Inertia::render('customer-kyc/family-relations/show_family_relation_page', [
+        return Inertia::render('customers-kyc/family-relations/show_family_relation_page', [
             'familyRelation' => $familyRelation,
         ]);
     }
 
     public function create(Customer $customer): Response
     {
-        return Inertia::render('customer-kyc/family-relations/create_family_relation_page', [
+        return Inertia::render('customers-kyc/family-relations/create_family_relation_page', [
             'customer' => $customer->load('photo'),
         ]);
     }
@@ -92,7 +92,7 @@ class CustomerFamilyRelationController extends Controller
     public function edit(Customer $customer, CustomerFamilyRelation $familyRelation): Response
     {
         abort_unless($familyRelation->customer_id === $customer->id, 404);
-        return Inertia::render('customer-kyc/family-relations/edit_family_relation_page', [
+        return Inertia::render('customers-kyc/family-relations/edit_family_relation_page', [
             'family_relation' => $familyRelation->load('customer', 'customer.photo', 'relative', 'relative.photo'),
         ]);
     }

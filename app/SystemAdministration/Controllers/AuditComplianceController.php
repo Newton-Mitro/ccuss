@@ -48,7 +48,7 @@ class AuditComplianceController extends Controller
             })
             ->values();
 
-        return Inertia::render('system-administration/audits/overview-page', [
+        return Inertia::render('audit-compliance/audits/overview-page', [
             'dashboard' => [
                 ...$dashboard,
                 'route' => (string) $request->route('dashboard'),
@@ -110,7 +110,7 @@ class AuditComplianceController extends Controller
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
-        return Inertia::render('system-administration/audits/register-page', [
+        return Inertia::render('audit-compliance/audits/register-page', [
             'register' => [
                 ...$register,
                 'route' => $this->registerRouteName($request),
@@ -174,7 +174,7 @@ class AuditComplianceController extends Controller
         $register = $this->register($request);
         $this->authorizeRecord($record, $register, $request);
 
-        return Inertia::render('system-administration/audits/record-show-page', [
+        return Inertia::render('audit-compliance/audits/record-show-page', [
             'register' => [
                 ...$register,
                 'route' => $this->registerRouteName($request),
@@ -266,7 +266,7 @@ class AuditComplianceController extends Controller
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
-        return Inertia::render('system-administration/audits/approval-logs-page', [
+        return Inertia::render('audit-compliance/audits/approval-logs-page', [
             'logs' => $logs,
             'filters' => $request->only(['action', 'search', 'page', 'per_page']),
             'actions' => ['APPROVED', 'REJECTED', 'SUBMITTED', 'ACCEPTED'],
@@ -278,7 +278,7 @@ class AuditComplianceController extends Controller
         $register = $this->register($request);
         $organizationId = $this->organizationId($request);
 
-        return Inertia::render('system-administration/audits/record-form-page', [
+        return Inertia::render('audit-compliance/audits/record-form-page', [
             'register' => [
                 ...$register,
                 'route' => $this->registerRouteName($request),

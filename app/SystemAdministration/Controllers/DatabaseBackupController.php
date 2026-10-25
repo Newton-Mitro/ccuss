@@ -28,7 +28,7 @@ class DatabaseBackupController extends Controller
         $logs = $query->latest()->paginate($perPage)->withQueryString();
 
         // Return Inertia response with filters included
-        return Inertia::render('system-administration/database-backup/history', [
+        return Inertia::render('administration-security/database-backup/history', [
             'logs' => $logs,
             'filters' => [
                 'search' => $search,

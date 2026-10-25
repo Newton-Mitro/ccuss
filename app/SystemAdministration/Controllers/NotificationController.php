@@ -12,7 +12,7 @@ class NotificationController extends Controller
 {
     public function index(Request $request): Response
     {
-        return Inertia::render('system-administration/notifications/index', [
+        return Inertia::render('administration-security/notifications/index', [
             'notifications' => $request->user()->notifications()->latest()->paginate(20),
             'unreadCount' => $request->user()->unreadNotifications()->count(),
         ]);

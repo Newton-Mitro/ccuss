@@ -1,13 +1,13 @@
+import { administrationAndSecurity } from '@/modules/administration-security/menu';
+import { auditAndCompliance } from '@/modules/audit-compliance/menu';
+import { branchOperations } from '@/modules/branch-operations/menu';
+import { customerAndKYC } from '@/modules/customers-kyc/menu';
+import { financialServices } from '@/modules/financial-services/menu';
+import { generalAccounting } from '@/modules/general-accounting/menu';
+import { organizatoins } from '@/modules/organization-settings/menu';
+import { treasuryAndCash } from '@/modules/treasury-cash/menu';
+import type { SidebarItem } from '@/types';
 import { route } from 'ziggy-js';
-import { SidebarItem } from '../../types';
-import { administrationAndSecurity } from './administration-and-security';
-import { auditAndCompliance } from './audit-and-compliance';
-import { branchOperations } from './branch-operations';
-import { customerAndKYC } from './customer-and-kyc';
-import { financialServices } from './finincial-services';
-import { generalAccounting } from './general-accounting';
-import { organizatoins } from './organizations';
-import { treasuryAndCash } from './treasury-and-cash';
 
 export const sidebarMenu: SidebarItem[] = [
     {

@@ -1,0 +1,365 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import {
+    ResourcePageHeader,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import { BreadcrumbItem } from '@/types';
+import type { CashTransferIndexProps } from '@/modules/treasury-cash/types/treasury-cash/cash-movements';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { ArrowRightLeft, CheckCircle2, ClipboardCheck } from 'lucide-react';
+import { useEffect } from 'react';
+import { route } from 'ziggy-js';
+
+export default function Index() {
+    const { transfers, filters, auth } =
+        usePage<CashTransferIndexProps>().props;
+    useFlashToastHandler();
+
+    const { data, setData, get } = useForm({
+        search: filters.search || '',
+        page: Number(filters.page) || 1,
+        per_page: Number(filters.per_page) || 18,
+    });
+    const permissions = new Set([
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ]);
+    const canCreate = permissions.has('cash_transfers.create');
+    const canApprove = permissions.has('cash_transfers.approve');
+    const canComplete = permissions.has('cash_transfers.complete');
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            get(route('cash-movements.transfers.index'), {
+                preserveState: true,
+                replace: true,
+            });
+        }, 400);
+        return () => clearTimeout(timer);
+    }, [data.search, data.page, data.per_page, get]);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Treasury & Cash', href: '' },
+        { title: 'Cash Management', href: '' },
+        {
+            title: 'Cash Movements',
+            href: route('cash-movements.transfers.index'),
+        },
+    ];
+
+    return (
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
+            <Head title="Cash Movements" />
+            <div className="space-y-4 text-foreground">
+                <ResourcePageHeader
+                    title="Cash Movements"
+                    description="Approve and complete cash transfers between active branch locations."
+                    action={
+                        canCreate ? (
+                            <div className="flex flex-wrap justify-end gap-2">
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'cash-movements.teller-to-teller',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-people-arrows-left-right" />
+                                        Teller to teller
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'cash-movements.vault-to-teller',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-vault" />
+                                        Vault to teller
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'cash-movements.teller-to-vault',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-building-columns" />
+                                        Teller to vault
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'cash-movements.vault-to-vault',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-right-left" />
+                                        Vault to vault
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'cash-movements.bank-to-vault',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-building-columns" />
+                                        Bank to vault
+                                    </Link>
+                                </Button>
+                                <Button asChild size="sm" variant="outline">
+                                    <Link
+                                        href={route(
+                                            'cash-movements.vault-to-bank',
+                                        )}
+                                    >
+                                        <i className="fa-solid fa-money-bill-transfer" />
+                                        Vault to bank
+                                    </Link>
+                                </Button>
+                            </div>
+                        ) : undefined
+                    }
+                />
+                <Input
+                    className="w-full bg-card sm:w-80"
+                    placeholder="Search transfer, location, or status..."
+                    value={data.search}
+                    onChange={(event) => {
+                        setData('search', event.target.value);
+                        setData('page', 1);
+                    }}
+                />
+                <div className="h-[calc(100vh-320px)] overflow-auto rounded-md border bg-card">
+                    <table className="w-full min-w-260 border-collapse text-sm">
+                        <thead className="sticky top-0 z-10 bg-muted text-muted-foreground">
+                            <tr>
+                                {[
+                                    '#',
+                                    'Transfer',
+                                    'From',
+                                    'To',
+                                    'Business Date',
+                                    'Amount',
+                                    'Status',
+                                    'Actions',
+                                ].map((header) => (
+                                    <th
+                                        key={header}
+                                        className="border-b p-2 text-left font-medium"
+                                    >
+                                        {header}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {transfers.data.length > 0 ? (
+                                transfers.data.map((transfer, index) => (
+                                    <tr
+                                        key={transfer.id}
+                                        className="border-b even:bg-muted/40 hover:bg-accent/20"
+                                    >
+                                        <td className="px-2 py-2">
+                                            {(transfers.current_page - 1) *
+                                                transfers.per_page +
+                                                index +
+                                                1}
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <div className="flex items-center gap-2">
+                                                <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
+                                                <div>
+                                                    <div className="font-medium">
+                                                        {transfer.transfer_no}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {transfer.transfer_type.replaceAll(
+                                                            '_',
+                                                            ' ',
+                                                        )}
+                                                        {transfer.note
+                                                            ? ` · ${transfer.note}`
+                                                            : ''}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            {transfer.from_cash_location
+                                                ?.name ??
+                                                (transfer.bank_account
+                                                    ? `${transfer.bank_account.account_name} (${transfer.bank_account.account_number})`
+                                                    : '-')}
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            {transfer.to_cash_location?.name ??
+                                                '-'}
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            {transfer.branch_day
+                                                ?.business_date ?? '-'}
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            {formatBDTCurrency(
+                                                transfer.amount,
+                                                false,
+                                            )}
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <StatusBadge
+                                                tone={
+                                                    transfer.status ===
+                                                    'COMPLETED'
+                                                        ? 'success'
+                                                        : transfer.status ===
+                                                            'CANCELLED'
+                                                          ? 'danger'
+                                                          : transfer.status ===
+                                                              'APPROVED'
+                                                            ? 'info'
+                                                            : 'warning'
+                                                }
+                                            >
+                                                {transfer.status}
+                                            </StatusBadge>
+                                        </td>
+                                        <td className="px-2 py-2">
+                                            <div className="flex items-center gap-1">
+                                                {canApprove &&
+                                                    transfer.status ===
+                                                        'PENDING' && (
+                                                        <Button
+                                                            type="button"
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Approve this transfer?',
+                                                                        text: `Approve ${transfer.transfer_no} for ${formatBDTCurrency(transfer.amount, false)}?`,
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Approve transfer',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cash-movements.transfers.approve',
+                                                                                    transfer.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
+                                                            aria-label={`Approve ${transfer.transfer_no}`}
+                                                        >
+                                                            <ClipboardCheck className="h-4 w-4 text-success" />
+                                                        </Button>
+                                                    )}
+                                                {canComplete &&
+                                                    transfer.status ===
+                                                        'APPROVED' && (
+                                                        <Button
+                                                            type="button"
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            onClick={() => {
+                                                                appSwal
+                                                                    .fire({
+                                                                        title: 'Complete this transfer?',
+                                                                        text: 'This will complete the approved cash transfer.',
+                                                                        icon: 'warning',
+                                                                        showCancelButton: true,
+                                                                        confirmButtonText:
+                                                                            'Complete transfer',
+                                                                        cancelButtonText:
+                                                                            'Cancel',
+                                                                    })
+                                                                    .then(
+                                                                        (
+                                                                            result,
+                                                                        ) => {
+                                                                            if (
+                                                                                !result.isConfirmed
+                                                                            )
+                                                                                return;
+
+                                                                            router.post(
+                                                                                route(
+                                                                                    'cash-movements.transfers.complete',
+                                                                                    transfer.id,
+                                                                                ),
+                                                                                {},
+                                                                                {
+                                                                                    preserveScroll: true,
+                                                                                },
+                                                                            );
+                                                                        },
+                                                                    );
+                                                            }}
+                                                            aria-label={`Complete ${transfer.transfer_no}`}
+                                                        >
+                                                            <CheckCircle2 className="h-4 w-4 text-success" />
+                                                        </Button>
+                                                    )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={8} className="p-0">
+                                        <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                                            No cash transfers found. Cash
+                                            transfers between branch locations
+                                            will appear here.
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                <DataTablePagination
+                    perPage={transfers.per_page}
+                    currentPage={transfers.current_page}
+                    totalItems={transfers.total}
+                    totalPages={transfers.last_page}
+                    onPerPageChange={(value) => {
+                        setData('per_page', value);
+                        setData('page', 1);
+                    }}
+                    onPageChange={(value) => setData('page', value)}
+                    onNext={() => setData('page', transfers.current_page + 1)}
+                    onPrevious={() =>
+                        setData('page', Math.max(1, transfers.current_page - 1))
+                    }
+                />
+            </div>
+        </CustomAuthLayout>
+    );
+}

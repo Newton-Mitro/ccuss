@@ -135,7 +135,7 @@ test('audit dashboard summaries are limited to the active organization', functio
         ->get(route('internal-audit.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->component('system-administration/audits/overview-page')
+            ->component('audit-compliance/audits/overview-page')
             ->where('summary.total', 1)
             ->where('summary.open', 1)
             ->has('registers', 6)

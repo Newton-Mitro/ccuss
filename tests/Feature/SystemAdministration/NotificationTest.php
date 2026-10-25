@@ -52,7 +52,7 @@ it('shows personal notifications and supports marking them read', function () {
         ->get(route('notifications.index'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('system-administration/notifications/index')
+            ->component('administration-security/notifications/index')
             ->where('unreadCount', 1)
             ->where('notifications.data.0.data.title', 'Approval needed'));
 

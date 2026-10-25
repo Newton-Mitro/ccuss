@@ -38,7 +38,7 @@ return [
         'ensure_pages_exist' => true,
 
         'page_paths' => [
-            resource_path('js/pages'),
+            resource_path('js/modules'),
         ],
 
         'page_extensions' => [

@@ -20,7 +20,7 @@ class CustomerDashboardController
             ->where('organization_id', $organizationId)
             ->select('id');
 
-        return Inertia::render('customer-kyc/dashboard', [
+        return Inertia::render('customers-kyc/dashboard', [
             'stats' => [
                 'customers' => Customer::where('organization_id', $organizationId)->count(),
                 'activeCustomers' => Customer::where('organization_id', $organizationId)

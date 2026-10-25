@@ -1,0 +1,67 @@
+import { SidebarItem } from '@/types';
+
+export const customerAndKYC: SidebarItem[] = [
+    {
+        name: 'Customers & KYC',
+        icon: <i className="fa-solid fa-user-group" />,
+        children_expanded: false,
+        permission: ['customer.view'],
+        children: [
+            {
+                name: 'Overview',
+                icon: <i className="fa-solid fa-gauge-high" />,
+                path: '/customer-kyc',
+                match_path: 'customer-kyc',
+                permission: ['customer.view'],
+            },
+            {
+                name: 'Customer Directory',
+                icon: <i className="fa-solid fa-users" />,
+                path: '/customers',
+                match_path: 'customers',
+                permission: ['customer.view'],
+            },
+            {
+                name: 'Verification Queues',
+                icon: <i className="fa-solid fa-shield-halved" />,
+                children_expanded: false,
+                permission: [
+                    'customer_address.view',
+                    'customer_family_relation.view',
+                    'customer_introducer.view',
+                    'customer_kyc_document.view',
+                ],
+                children: [
+                    {
+                        name: 'Addresses Approval',
+                        icon: <i className="fa-solid fa-location-dot" />,
+                        path: '/addresses-approval',
+                        match_path: 'addresses-approval',
+                        permission: ['customer_address.view'],
+                    },
+                    {
+                        name: 'Family & Relatives Approval',
+                        icon: <i className="fa-solid fa-people-roof" />,
+                        path: '/family-relations-approval',
+                        match_path: 'family-relations-approval',
+                        permission: ['customer_family_relation.view'],
+                    },
+                    {
+                        name: 'Introducers Approval',
+                        icon: <i className="fa-solid fa-people-arrows" />,
+                        path: '/introducers-approval',
+                        match_path: 'introducers-approval',
+                        permission: ['customer_introducer.view'],
+                    },
+                    {
+                        name: 'KYC Documents Approval',
+                        icon: <i className="fa-solid fa-address-card" />,
+                        path: '/kyc-documents-approval',
+                        match_path: 'kyc-documents-approval',
+                        permission: ['customer_kyc_document.view'],
+                    },
+                ],
+            },
+        ],
+    },
+];

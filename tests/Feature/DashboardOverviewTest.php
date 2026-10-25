@@ -21,7 +21,7 @@ it('shows organization-scoped metrics and weekly activity on the dashboard', fun
         ->get(route('dashboard'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('dashboard')
+            ->component('home/dashboard')
             ->where('stats.branches', 1)
             ->where('organization.activeId', $organization->id)
             ->has('dailyVolume', 7));

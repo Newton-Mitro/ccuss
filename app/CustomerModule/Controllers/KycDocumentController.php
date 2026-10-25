@@ -59,7 +59,7 @@ class KycDocumentController extends Controller
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
-        return Inertia::render('customer-kyc/kyc-documents/list_kyc_documents_page', [
+        return Inertia::render('customers-kyc/kyc-documents/list_kyc_documents_page', [
             'paginated_data' => $documents,
             'filters' => $request->only([
                 'search',
@@ -73,7 +73,7 @@ class KycDocumentController extends Controller
 
     public function create(Customer $customer)
     {
-        return Inertia::render('customer-kyc/kyc-documents/create_kyc_document_page', [
+        return Inertia::render('customers-kyc/kyc-documents/create_kyc_document_page', [
             'customer' => $customer->load(['photo']),
         ]);
     }
@@ -99,7 +99,7 @@ class KycDocumentController extends Controller
     public function edit(Customer $customer, KycDocument $kycDocument)
     {
         abort_unless($kycDocument->customer_id === $customer->id, 404);
-        return Inertia::render('customer-kyc/kyc-documents/edit_kyc_document_page', [
+        return Inertia::render('customers-kyc/kyc-documents/edit_kyc_document_page', [
             'document' => $kycDocument->load('customer', 'customer.photo'),
         ]);
     }
@@ -136,7 +136,7 @@ class KycDocumentController extends Controller
             $customer->organization_id === request()->attributes->get('active_organization')->id,
             404,
         );
-        return Inertia::render('customer-kyc/kyc-documents/show_kyc_document_page', [
+        return Inertia::render('customers-kyc/kyc-documents/show_kyc_document_page', [
             'document' => $kycDocument->load('customer', 'customer.photo', 'audits'),
         ]);
     }

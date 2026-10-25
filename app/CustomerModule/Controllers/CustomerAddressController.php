@@ -49,7 +49,7 @@ class CustomerAddressController extends Controller
             ->paginate($request->integer('per_page', 18))
             ->withQueryString();
 
-        return Inertia::render('customer-kyc/addresses/list_address_page', [
+        return Inertia::render('customers-kyc/addresses/list_address_page', [
             'paginated_data' => $addresses,
             'filters' => $request->only(['search', 'per_page', 'page']),
         ]);
@@ -64,7 +64,7 @@ class CustomerAddressController extends Controller
         );
         $address->load(['customer', 'customer.photo']);
 
-        return Inertia::render('customer-kyc/addresses/show_address_page', [
+        return Inertia::render('customers-kyc/addresses/show_address_page', [
             'address' => $address,
         ]);
     }
@@ -109,7 +109,7 @@ class CustomerAddressController extends Controller
 
     public function create(Customer $customer): Response
     {
-        return Inertia::render('customer-kyc/addresses/create_address_page', [
+        return Inertia::render('customers-kyc/addresses/create_address_page', [
             'customer' => $customer->load('photo'),
         ]);
     }
@@ -117,7 +117,7 @@ class CustomerAddressController extends Controller
     public function edit(Customer $customer, CustomerAddress $address): Response
     {
         abort_unless($address->customer_id === $customer->id, 404);
-        return Inertia::render('customer-kyc/addresses/edit_address_page', [
+        return Inertia::render('customers-kyc/addresses/edit_address_page', [
             'address' => $address->load('customer', 'customer.photo'),
         ]);
     }

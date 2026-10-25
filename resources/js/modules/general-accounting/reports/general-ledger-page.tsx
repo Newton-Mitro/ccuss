@@ -1,0 +1,199 @@
+import { Head, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+import HeadingSmall from '@/components/heading-small';
+import ReportExportActions from '@/components/report-export-actions';
+import { Select } from '@/components/ui/select';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import { formatDate } from '@/lib/date_util';
+import { BreadcrumbItem, SharedData } from '@/types';
+
+interface LedgerEntry {
+    id: number;
+    voucher_no: string;
+    voucher_type: string;
+    voucher_date: string;
+    entry_description?: string;
+    debit: number;
+    credit: number;
+    running_balance: number;
+}
+
+interface FiscalPeriod {
+    id: number;
+    name: string;
+}
+
+interface Props extends SharedData {
+    account: { id: number; code: string; name: string } | null;
+    entries: LedgerEntry[];
+    accounts: { id: number; code: string; name: string }[];
+    fiscalPeriods: FiscalPeriod[];
+    filters: { account_id?: string; fiscal_period_id?: string };
+}
+
+export default function GeneralLedgerPage() {
+    const { account, entries, accounts, fiscalPeriods, filters } =
+        usePage<Props>().props;
+    const [accountId, setAccountId] = useState(
+        account ? String(account.id) : '',
+    );
+    const [periodId, setPeriodId] = useState(filters.fiscal_period_id || '');
+
+    const reloadLedger = (nextAccountId: string, nextPeriodId: string) => {
+        router.get(
+            '/financial-reports/general-ledger',
+            {
+                account_id: nextAccountId,
+                fiscal_period_id: nextPeriodId || undefined,
+            },
+            { preserveState: true },
+        );
+    };
+
+    const changeAccount = (value: string) => {
+        setAccountId(value);
+        reloadLedger(value, periodId);
+    };
+
+    const changePeriod = (value: string) => {
+        setPeriodId(value);
+        reloadLedger(accountId, value);
+    };
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'General Accounting', href: '' },
+        { title: 'Reports', href: '' },
+        { title: 'General Ledger', href: '/financial-reports/general-ledger' },
+    ];
+
+    return (
+        <CustomAuthLayout breadcrumbs={breadcrumbs}>
+            <Head title="General Ledger" />
+            <div className="space-y-4 text-foreground">
+                <ReportExportActions
+                    report="general-ledger"
+                    query={{
+                        account_id: accountId,
+                        fiscal_period_id: periodId,
+                    }}
+                />
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                    <HeadingSmall
+                        title="General Ledger"
+                        description={
+                            account
+                                ? `${account.code} - ${account.name}`
+                                : 'Select an account to view transactions'
+                        }
+                    />
+                    <div className="flex w-full flex-col gap-2 sm:w-[26rem] sm:flex-row sm:items-center">
+                        <Select
+                            value={accountId}
+                            onChange={changeAccount}
+                            className="w-full sm:flex-1"
+                            options={accounts.map((item) => ({
+                                value: String(item.id),
+                                label: `${item.code} - ${item.name}`,
+                            }))}
+                        />
+                        <Select
+                            value={periodId}
+                            onChange={changePeriod}
+                            className="w-full sm:flex-1"
+                            placeholder="All periods"
+                            options={[
+                                { value: '', label: 'All periods' },
+                                ...fiscalPeriods.map((period) => ({
+                                    value: String(period.id),
+                                    label: period.name,
+                                })),
+                            ]}
+                        />
+                    </div>
+                </div>
+                <div className="overflow-auto rounded-md border">
+                    <table className="w-full border-collapse text-sm">
+                        <thead className="bg-muted text-muted-foreground">
+                            <tr>
+                                {[
+                                    {
+                                        label: 'Date',
+                                        align: 'text-left',
+                                    },
+                                    {
+                                        label: 'Voucher',
+                                        align: 'text-left',
+                                    },
+                                    {
+                                        label: 'Description',
+                                        align: 'text-left',
+                                    },
+                                    {
+                                        label: 'Debit',
+                                        align: 'text-right',
+                                    },
+                                    {
+                                        label: 'Credit',
+                                        align: 'text-right',
+                                    },
+                                    {
+                                        label: 'Balance',
+                                        align: 'text-right',
+                                    },
+                                ].map(({ label, align }) => (
+                                    <th
+                                        key={label}
+                                        className={`border-b px-3 py-2 font-medium ${align}`}
+                                    >
+                                        {label}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {entries.length > 0 ? (
+                                entries.map((entry) => (
+                                    <tr
+                                        key={entry.id}
+                                        className="border-b even:bg-muted/50"
+                                    >
+                                        <td className="px-3 py-2 text-left">
+                                            {formatDate(entry.voucher_date)}
+                                        </td>
+                                        <td className="px-3 py-2 text-left">
+                                            {entry.voucher_no}
+                                        </td>
+                                        <td className="px-3 py-2 text-left">
+                                            {entry.entry_description || '-'}
+                                        </td>
+                                        <td className="px-3 py-2 text-right tabular-nums">
+                                            {formatBDTCurrency(entry.debit)}
+                                        </td>
+                                        <td className="px-3 py-2 text-right tabular-nums">
+                                            {formatBDTCurrency(entry.credit)}
+                                        </td>
+                                        <td className="px-3 py-2 text-right tabular-nums">
+                                            {formatBDTCurrency(
+                                                entry.running_balance,
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan={6}
+                                        className="px-3 py-8 text-center text-muted-foreground"
+                                    >
+                                        No ledger entries found.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </CustomAuthLayout>
+    );
+}

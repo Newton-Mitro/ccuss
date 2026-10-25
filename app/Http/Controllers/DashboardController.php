@@ -103,7 +103,7 @@ class DashboardController extends Controller
             ->map(fn (array $link): array => ['label' => $link['label'], 'href' => $link['href']])
             ->values();
 
-        return Inertia::render('dashboard', [
+        return Inertia::render('home/dashboard', [
             'stats' => [
                 'branches' => Branch::query()->where('organization_id', $organizationId)->count(),
                 'members' => Customer::query()
