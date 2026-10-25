@@ -8,6 +8,9 @@ use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
+use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\RecurringDeposit;
+use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
@@ -333,6 +336,53 @@ it('updates recurring schedules only before installment history exists', functio
 
     expect((float) $deposit->fresh()->installment_amount)->toBe(200.0)
         ->and($deposit->installments()->count())->toBe(3);
+});
+
+it('shows financial transaction references on recurring deposit installments', function () {
+    $fixture = createFinancialAccountProductFixture('RECURRING_DEPOSIT');
+    grantFinancialAccountProductPermissions($fixture['user'], ['financial.accounts.view']);
+    $deposit = RecurringDeposit::create([
+        'financial_account_id' => $fixture['account']->id,
+        'installment_amount' => 100,
+        'installment_frequency' => 'MONTHLY',
+        'total_installments' => 1,
+        'paid_installments' => 1,
+        'started_at' => today()->toDateString(),
+        'maturity_date' => today()->addMonth()->toDateString(),
+    ]);
+    $transaction = FinancialTransaction::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'transaction_no' => 'FT-RDP-REFERENCE-001',
+        'reference' => 'TELLER-REFERENCE-001',
+        'status' => 'POSTED',
+    ]);
+    $installment = RecurringDepositInstallment::create([
+        'recurring_deposit_id' => $deposit->id,
+        'financial_transaction_id' => $transaction->id,
+        'installment_no' => 1,
+        'due_date' => today()->toDateString(),
+        'amount_due' => 100,
+        'amount_paid' => 100,
+        'status' => 'PAID',
+        'paid_at' => now(),
+    ]);
+    $transaction->entries()->create([
+        'financial_account_id' => $fixture['account']->id,
+        'recurring_deposit_installment_id' => $installment->id,
+        'direction' => 'CREDIT',
+        'amount' => 100,
+        'line_no' => 2,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-accounts.recurring.show', $fixture['account']))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('financial-services/accounts/recurring/show')
+            ->where('account.recurring_deposit.installments.0.financial_transaction.transaction_no', $transaction->transaction_no)
+            ->where('account.recurring_deposit.installments.0.financial_transaction.reference', $transaction->reference)
+            ->where('account.recurring_deposit.installments.0.transaction_entries.0.transaction.transaction_no', $transaction->transaction_no));
 });
 
 it('creates an account only when the product route, account type, and product category agree', function () {

@@ -5,6 +5,7 @@ namespace App\FinancialServices\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RecurringDepositInstallment extends Model
 {
@@ -38,5 +39,10 @@ class RecurringDepositInstallment extends Model
     public function financialTransaction(): BelongsTo
     {
         return $this->belongsTo(FinancialTransaction::class);
+    }
+
+    public function transactionEntries(): HasMany
+    {
+        return $this->hasMany(FinancialTransactionEntry::class);
     }
 }

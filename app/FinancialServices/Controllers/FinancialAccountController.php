@@ -7,9 +7,9 @@ use App\FinancialServices\Application\FinancialAccountService;
 use App\FinancialServices\Application\FixedDepositService;
 use App\FinancialServices\Application\RecurringDepositService;
 use App\FinancialServices\Models\DepositNominee;
+use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
-use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
@@ -24,8 +24,8 @@ use App\FinancialServices\Requests\StoreShareAccountRequest;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -88,13 +88,13 @@ class FinancialAccountController extends Controller
         $accounts = $this->accountService
             ->queryForOrganization($this->organizationId($request))
             ->with($relations)
-            ->when($category, fn($query) => $query->where('account_type', $category))
+            ->when($category, fn ($query) => $query->where('account_type', $category))
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->string('search')->trim();
-                $query->where(fn($query) => $query
+                $query->where(fn ($query) => $query
                     ->where('account_no', 'like', "%{$search}%")
                     ->orWhere('name', 'like', "%{$search}%")
-                    ->orWhereHasMorph('holder', [Customer::class], fn($holder) => $holder
+                    ->orWhereHasMorph('holder', [Customer::class], fn ($holder) => $holder
                         ->where('name', 'like', "%{$search}%")
                         ->orWhere('customer_no', 'like', "%{$search}%")));
             })
@@ -119,36 +119,36 @@ class FinancialAccountController extends Controller
             'products' => DepositProduct::query()->with([
                 'policy',
                 'baseTerm',
-                'terms' => fn($query) => $query
+                'terms' => fn ($query) => $query
                     ->where('status', true)
-                    ->where(fn($query) => $query->whereNull('effective_from')->orWhereDate('effective_from', '<=', $today))
-                    ->where(fn($query) => $query->whereNull('effective_until')->orWhereDate('effective_until', '>=', $today))
+                    ->where(fn ($query) => $query->whereNull('effective_from')->orWhereDate('effective_from', '<=', $today))
+                    ->where(fn ($query) => $query->whereNull('effective_until')->orWhereDate('effective_until', '>=', $today))
                     ->orderBy('tenure_value'),
-            ])->where('organization_id', $organizationId)->where('status', true)->when($category, fn($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category', 'customer_can_open_multiple_account'])->map(fn(DepositProduct $product) => [
-                    'id' => $product->id,
-                    'code' => $product->code,
-                    'name' => $product->name,
-                    'category' => $product->category,
-                    'customer_can_open_multiple_account' => $product->policy?->status === 'ACTIVE'
-                        && (!$product->policy->effective_from || $product->policy->effective_from->toDateString() <= $today)
-                        && (!$product->policy->effective_until || $product->policy->effective_until->toDateString() >= $today)
-                        ? $product->policy->customer_can_open_multiple_account ?? $product->customer_can_open_multiple_account
-                        : $product->customer_can_open_multiple_account,
-                    'base_interest_rate' => $product->baseTerm?->interest_rate,
-                    'policy' => $product->policy,
-                    'terms' => $product->terms->map(fn($term) => [
-                        'id' => $term->id,
-                        'code' => $term->code,
-                        'name' => $term->name,
-                        'tenure_value' => $term->tenure_value,
-                        'tenure_unit' => $term->tenure_unit,
-                        'interest_rate' => $term->interest_rate,
-                        'interest_calculation' => $term->interest_calculation,
-                        'interest_frequency' => $term->interest_frequency,
-                        'minimum_amount' => $term->minimum_amount,
-                        'maximum_amount' => $term->maximum_amount,
-                    ]),
+            ])->where('organization_id', $organizationId)->where('status', true)->when($category, fn ($query) => $query->where('category', $category))->orderBy('code')->get(['id', 'code', 'name', 'category', 'customer_can_open_multiple_account'])->map(fn (DepositProduct $product) => [
+                'id' => $product->id,
+                'code' => $product->code,
+                'name' => $product->name,
+                'category' => $product->category,
+                'customer_can_open_multiple_account' => $product->policy?->status === 'ACTIVE'
+                    && (! $product->policy->effective_from || $product->policy->effective_from->toDateString() <= $today)
+                    && (! $product->policy->effective_until || $product->policy->effective_until->toDateString() >= $today)
+                    ? $product->policy->customer_can_open_multiple_account ?? $product->customer_can_open_multiple_account
+                    : $product->customer_can_open_multiple_account,
+                'base_interest_rate' => $product->baseTerm?->interest_rate,
+                'policy' => $product->policy,
+                'terms' => $product->terms->map(fn ($term) => [
+                    'id' => $term->id,
+                    'code' => $term->code,
+                    'name' => $term->name,
+                    'tenure_value' => $term->tenure_value,
+                    'tenure_unit' => $term->tenure_unit,
+                    'interest_rate' => $term->interest_rate,
+                    'interest_calculation' => $term->interest_calculation,
+                    'interest_frequency' => $term->interest_frequency,
+                    'minimum_amount' => $term->minimum_amount,
+                    'maximum_amount' => $term->maximum_amount,
                 ]),
+            ]),
             'customers' => Customer::query()->where('organization_id', $organizationId)->orderBy('name')->get(['id', 'customer_no', 'name', 'type', 'dob']),
             'category' => $category,
         ]);
@@ -172,7 +172,7 @@ class FinancialAccountController extends Controller
         if ($category === 'SHARE') {
             $account->shareAccount()->create([
                 'customer_id' => $account->holder_id,
-                'membership_no' => $data['membership_no'] ?? null ?: 'MEM-' . str_pad((string) $account->id, 8, '0', STR_PAD_LEFT),
+                'membership_no' => $data['membership_no'] ?? null ?: 'MEM-'.str_pad((string) $account->id, 8, '0', STR_PAD_LEFT),
                 'member_since' => $data['member_since'] ?? null,
                 'membership_status' => $data['membership_status'] ?? 'PENDING',
             ]);
@@ -305,7 +305,8 @@ class FinancialAccountController extends Controller
             'holder',
             'shareAccount',
             'fixedDeposit',
-            'recurringDeposit.installments',
+            'recurringDeposit.installments.financialTransaction',
+            'recurringDeposit.installments.transactionEntries.transaction',
             'loanAccount.schedules.components',
             'loanAccount.arrears',
             'transactions',
@@ -547,7 +548,7 @@ class FinancialAccountController extends Controller
     {
         $this->authorizeShareAccount($request, $financialAccount);
         abort_if($financialAccount->shareAccount()->exists(), 422, 'This share account already has membership details.');
-        $membershipNo = $request->input('membership_no') ?: 'MEM-' . str_pad((string) $financialAccount->id, 8, '0', STR_PAD_LEFT);
+        $membershipNo = $request->input('membership_no') ?: 'MEM-'.str_pad((string) $financialAccount->id, 8, '0', STR_PAD_LEFT);
         abort_if(ShareAccount::query()->where('membership_no', $membershipNo)->exists(), 422, 'The membership number is already in use.');
 
         $financialAccount->shareAccount()->create([
@@ -670,7 +671,7 @@ class FinancialAccountController extends Controller
     private function validateNomineeAllocation(StoreDepositNomineeRequest $request, FinancialAccount $account, ?DepositNominee $current = null): void
     {
         $existingTotal = (float) $account->nominees()
-            ->when($current, fn($query) => $query->whereKeyNot($current->id))
+            ->when($current, fn ($query) => $query->whereKeyNot($current->id))
             ->sum('share_percent');
 
         abort_if($existingTotal + (float) $request->validated('share_percent') > 100, 422, 'Nominee share percentages cannot exceed 100%.');
@@ -693,7 +694,7 @@ class FinancialAccountController extends Controller
     private function validateHolderAllocation(StoreFinancialAccountHolderRequest $request, FinancialAccount $account, ?Customer $current = null): void
     {
         $existingTotal = (float) $account->holders()
-            ->when($current, fn($query) => $query->whereKeyNot($current->id))
+            ->when($current, fn ($query) => $query->whereKeyNot($current->id))
             ->sum('ownership_percent');
 
         abort_if($existingTotal + (float) $request->input('ownership_percent') > 100, 422, 'Holder ownership percentages cannot exceed 100%.');

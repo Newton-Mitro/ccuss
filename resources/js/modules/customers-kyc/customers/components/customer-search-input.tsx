@@ -1,13 +1,14 @@
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
 import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
-import { Label } from '@/components/ui/label';
-import { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
 
 interface CustomerSearchInputProps {
     onSelect: (customer: Customer) => void;
+    clearSelectedCustomer?: () => void;
     initialCustomer?: Customer;
     label?: string;
     placeholder?: string; // <-- new prop
@@ -15,6 +16,7 @@ interface CustomerSearchInputProps {
 
 export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
     onSelect,
+    clearSelectedCustomer,
     initialCustomer,
     label,
     placeholder = 'Search customer...', // default placeholder
@@ -78,7 +80,10 @@ export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
                 <Input
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={(e) => {
+                        setQuery(e.target.value);
+                        clearSelectedCustomer?.();
+                    }}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder} // <-- set placeholder
                     className="h-8 w-full rounded-md border bg-background px-3 pr-10 text-sm focus:ring-2 focus:ring-primary/50 focus:outline-none"

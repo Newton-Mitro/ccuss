@@ -1,3 +1,4 @@
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
@@ -11,6 +12,7 @@ export interface FinancialAccountSearchResult {
     account_no: string;
     name: string | null;
     account_type: string;
+    status: string;
     balance: number;
     available_balance: number;
     holder: Customer | null;
@@ -36,6 +38,7 @@ interface FinancialAccountSearchInputProps {
     clearSelectedAccount?: () => void;
     initialAccount?: FinancialAccountSearchResult | null;
     scope?: FinancialAccountSearchScope;
+    excludeAccountIds?: number[];
     placeholder?: string;
 }
 
@@ -44,6 +47,7 @@ export function FinancialAccountSearchInput({
     clearSelectedAccount,
     initialAccount,
     scope = 'all',
+    excludeAccountIds = [],
     placeholder = 'Search customer or account',
 }: FinancialAccountSearchInputProps) {
     const [query, setQuery] = useState(() =>
@@ -56,6 +60,7 @@ export function FinancialAccountSearchInput({
     );
     const [showResults, setShowResults] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [searchError, setSearchError] = useState(false);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -89,6 +94,7 @@ export function FinancialAccountSearchInput({
         }
 
         setLoading(true);
+        setSearchError(false);
         try {
             const response = await axios.get<FinancialAccountSearchResult[]>(
                 route('teller-transactions.deposit.accounts.search'),
@@ -99,11 +105,16 @@ export function FinancialAccountSearchInput({
         } catch (error) {
             console.error(error);
             setAccounts([]);
+            setSearchError(true);
             setShowResults(true);
         } finally {
             setLoading(false);
         }
     };
+
+    const visibleAccounts = accounts.filter(
+        (account) => !excludeAccountIds.includes(account.id),
+    );
 
     return (
         <div className="relative w-full" ref={containerRef}>
@@ -114,6 +125,8 @@ export function FinancialAccountSearchInput({
                     onChange={(event) => {
                         setQuery(event.target.value);
                         setShowResults(false);
+                        setSearchError(false);
+                        clearSelectedAccount?.();
                     }}
                     onKeyDown={(event) => {
                         if (event.key === 'Enter') {
@@ -134,15 +147,13 @@ export function FinancialAccountSearchInput({
                                 setQuery('');
                                 setAccounts([]);
                                 setShowResults(false);
-                                onSelect(null as any);
+                                setSearchError(false);
+                                clearSelectedAccount?.();
                             }}
                             aria-label="Clear account search"
                             className="rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         >
-                            <X
-                                className="h-4 w-4"
-                                onClick={clearSelectedAccount}
-                            />
+                            <X className="h-4 w-4" />
                         </button>
                     )}
 
@@ -163,9 +174,13 @@ export function FinancialAccountSearchInput({
             </div>
             {showResults && (
                 <div className="absolute z-30 mt-1 max-h-80 w-full overflow-auto rounded-md border bg-background shadow-lg">
-                    {accounts.length > 0 ? (
+                    {searchError ? (
+                        <div className="px-3 py-2 text-sm text-destructive">
+                            Unable to search accounts. Please try again.
+                        </div>
+                    ) : visibleAccounts.length > 0 ? (
                         <ul className="divide-y">
-                            {accounts.map((account) => {
+                            {visibleAccounts.map((account) => {
                                 const otherHolders = account.holders
                                     .filter(
                                         (holder) =>
@@ -194,12 +209,24 @@ export function FinancialAccountSearchInput({
                                                         <span className="font-medium">
                                                             {account.account_no}
                                                         </span>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {account.account_type.replaceAll(
-                                                                '_',
-                                                                ' ',
-                                                            )}
-                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {account.account_type.replaceAll(
+                                                                    '_',
+                                                                    ' ',
+                                                                )}
+                                                            </span>
+                                                            <StatusBadge
+                                                                tone={
+                                                                    account.status ===
+                                                                    'ACTIVE'
+                                                                        ? 'success'
+                                                                        : 'neutral'
+                                                                }
+                                                            >
+                                                                {account.status}
+                                                            </StatusBadge>
+                                                        </div>
                                                     </div>
                                                     <div className="truncate text-xs text-muted-foreground">
                                                         {account.name ??
@@ -237,7 +264,7 @@ export function FinancialAccountSearchInput({
                         </ul>
                     ) : (
                         <div className="px-3 py-2 text-sm text-muted-foreground">
-                            No matching customer accounts found.
+                            No matching financial accounts found.
                         </div>
                     )}
                 </div>

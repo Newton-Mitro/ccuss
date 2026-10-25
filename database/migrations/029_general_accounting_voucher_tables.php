@@ -13,22 +13,9 @@ return new class extends Migration {
             $table->foreignId('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('fiscal_year_id')->constrained()->restrictOnDelete();
             $table->foreignId('fiscal_period_id')->constrained()->restrictOnDelete();
-            $table->foreignId('financial_transaction_id')
-                ->nullable()
-                ->unique()
-                ->constrained('financial_transactions')
-                ->nullOnDelete();
+            $table->foreignId('financial_transaction_id')->nullable()->unique()->constrained('financial_transactions')->nullOnDelete();
             $table->string('voucher_no', 100);
-            $table->enum('voucher_type', [
-                'JOURNAL',
-                'PAYMENT',
-                'RECEIPT',
-                'CONTRA',
-                'OPENING',
-                'ADJUSTMENT',
-                'CLOSING',
-                'SYSTEM',
-            ]);
+            $table->enum('voucher_type', ['JOURNAL', 'PAYMENT', 'RECEIPT', 'CONTRA', 'OPENING', 'ADJUSTMENT', 'CLOSING', 'SYSTEM']);
             $table->date('voucher_date');
             $table->text('description')->nullable();
             $table->enum('status', ['DRAFT', 'POSTED', 'REVERSED', 'CANCELLED'])->default('DRAFT');

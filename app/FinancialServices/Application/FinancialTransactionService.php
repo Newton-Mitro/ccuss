@@ -9,8 +9,8 @@ use App\FinancialServices\Models\InterestPosting;
 use App\FinancialServices\Models\InterestProvision;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanDisbursement;
-use App\FinancialServices\Models\LoanRepayment;
 use App\FinancialServices\Models\LoanProtectionClaim;
+use App\FinancialServices\Models\LoanRepayment;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareDividendAllocation;
 use App\GeneralAccounting\Application\FinancialTransactionAccountingService;
@@ -25,8 +25,7 @@ class FinancialTransactionService
     public function __construct(
         private readonly FinancialProductPolicyService $policyService,
         private readonly FinancialTransactionAccountingService $accountingService,
-    ) {
-    }
+    ) {}
 
     public function create(array $data, int $organizationId, int $userId): FinancialTransaction
     {
@@ -34,7 +33,7 @@ class FinancialTransactionService
             ->where('organization_id', $organizationId)
             ->findOrFail($data['financial_account_id']);
 
-        if (!empty($data['idempotency_key'])) {
+        if (! empty($data['idempotency_key'])) {
             $existing = FinancialTransaction::query()
                 ->where('organization_id', $organizationId)
                 ->where('idempotency_key', $data['idempotency_key'])
@@ -44,7 +43,7 @@ class FinancialTransactionService
             if ($existing) {
                 $entry = $existing->entries->first();
                 if (
-                    !$entry
+                    ! $entry
                     || $entry->financial_account_id !== $account->id
                     || $existing->transaction_type !== $data['transaction_type']
                     || (float) $existing->amount !== (float) $data['amount']
@@ -56,7 +55,7 @@ class FinancialTransactionService
             }
         }
 
-        if (!in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
+        if (! in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
             throw new RuntimeException('Transactions cannot be created for this account status.');
         }
 
@@ -108,7 +107,7 @@ class FinancialTransactionService
         ?int $branchId = null,
     ): FinancialTransaction {
         return DB::transaction(function () use ($data, $entries, $organizationId, $userId, $branchId) {
-            $total = collect($entries)->sum(fn(array $entry): float => (float) $entry['amount']);
+            $total = collect($entries)->sum(fn (array $entry): float => (float) $entry['amount']);
             $existing = $this->findIdempotentTransaction($data['idempotency_key'] ?? null, $organizationId);
             if ($existing) {
                 $existingEntries = $existing->entries->sortBy('line_no')->values();
@@ -118,11 +117,12 @@ class FinancialTransactionService
 
                         return $existingEntry
                             && $existingEntry->financial_account_id === (int) $entry['financial_account_id']
+                            && $existingEntry->recurring_deposit_installment_id === (isset($entry['recurring_deposit_installment_id']) ? (int) $entry['recurring_deposit_installment_id'] : null)
                             && $existingEntry->direction === $entry['direction']
                             && (float) $existingEntry->amount === (float) $entry['amount'];
                     });
 
-                if ($existing->transaction_type !== $data['transaction_type'] || (float) $existing->amount !== $total || !$sameEntries) {
+                if ($existing->transaction_type !== $data['transaction_type'] || (float) $existing->amount !== $total || ! $sameEntries) {
                     throw new RuntimeException('The idempotency key is already used for a different transaction.');
                 }
 
@@ -140,18 +140,36 @@ class FinancialTransactionService
                 throw new RuntimeException('All transaction accounts must belong to the active organization.');
             }
 
+            foreach ($entries as $entry) {
+                if (empty($entry['recurring_deposit_installment_id'])) {
+                    continue;
+                }
+
+                $installment = RecurringDepositInstallment::query()
+                    ->with('recurringDeposit')
+                    ->findOrFail($entry['recurring_deposit_installment_id']);
+                $account = $accounts->get($entry['financial_account_id']);
+                if (
+                    $entry['direction'] !== 'CREDIT'
+                    || ! $account
+                    || $installment->recurringDeposit?->financial_account_id !== $account->id
+                ) {
+                    throw new RuntimeException('The recurring-deposit installment must belong to the credited account.');
+                }
+            }
+
             foreach ($accounts as $account) {
-                if (!in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
+                if (! in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
                     throw new RuntimeException('Transactions cannot be created for this account status.');
                 }
             }
 
             $debitTotal = collect($entries)
                 ->where('direction', 'DEBIT')
-                ->sum(fn(array $entry): float => (float) $entry['amount']);
+                ->sum(fn (array $entry): float => (float) $entry['amount']);
             $creditTotal = collect($entries)
                 ->where('direction', 'CREDIT')
-                ->sum(fn(array $entry): float => (float) $entry['amount']);
+                ->sum(fn (array $entry): float => (float) $entry['amount']);
 
             if ($total <= 0 || abs($debitTotal - $creditTotal) > 0.0001) {
                 throw new RuntimeException('Financial transaction entries must be balanced and greater than zero.');
@@ -173,8 +191,9 @@ class FinancialTransactionService
             ]);
 
             $transaction->entries()->createMany(
-                collect($entries)->values()->map(fn(array $entry, int $index): array => [
+                collect($entries)->values()->map(fn (array $entry, int $index): array => [
                     'financial_account_id' => $entry['financial_account_id'],
+                    'recurring_deposit_installment_id' => $entry['recurring_deposit_installment_id'] ?? null,
                     'direction' => $entry['direction'],
                     'amount' => $entry['amount'],
                     'description' => $entry['description'] ?? null,
@@ -241,7 +260,7 @@ class FinancialTransactionService
             }
 
             $loan = LoanAccount::query()
-                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+                ->whereHas('financialAccount', fn ($query) => $query->where('organization_id', $organizationId))
                 ->whereIn('status', ['APPROVED', 'PARTIALLY_DISBURSED'])
                 ->with(['financialAccount', 'application.collaterals', 'application.guarantors', 'application.loanAccount.protectionPolicy'])
                 ->lockForUpdate()
@@ -319,7 +338,7 @@ class FinancialTransactionService
             }
 
             $loan = LoanAccount::query()
-                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+                ->whereHas('financialAccount', fn ($query) => $query->where('organization_id', $organizationId))
                 ->whereIn('status', ['ACTIVE', 'PARTIALLY_DISBURSED'])
                 ->with(['financialAccount', 'schedules.components'])
                 ->lockForUpdate()
@@ -383,11 +402,11 @@ class FinancialTransactionService
             }
 
             $loan = LoanAccount::query()
-                ->whereHas('financialAccount', fn($query) => $query->where('organization_id', $organizationId))
+                ->whereHas('financialAccount', fn ($query) => $query->where('organization_id', $organizationId))
                 ->with(['financialAccount', 'schedules.components', 'protectionPolicy'])
                 ->lockForUpdate()
                 ->findOrFail($claim->loan_account_id);
-            if (!$loan->protectionPolicy || $loan->protectionPolicy->status !== 'ACTIVE') {
+            if (! $loan->protectionPolicy || $loan->protectionPolicy->status !== 'ACTIVE') {
                 throw new RuntimeException('The loan does not have active credit-life coverage.');
             }
 
@@ -396,9 +415,9 @@ class FinancialTransactionService
                 ->whereIn('account_type', ['CASH', 'BANK'])
                 ->whereIn('status', ['PENDING', 'ACTIVE'])
                 ->findOrFail($payoutAccountId);
-            $amount = round($loan->schedules->sum(fn($schedule) => $schedule->components
+            $amount = round($loan->schedules->sum(fn ($schedule) => $schedule->components
                 ->where('type', 'PRINCIPAL')
-                ->sum(fn($component) => max(0, (float) $component->amount_due - (float) $component->amount_paid))), 2);
+                ->sum(fn ($component) => max(0, (float) $component->amount_due - (float) $component->amount_paid))), 2);
             if ($amount <= 0) {
                 throw new RuntimeException('There is no outstanding loan principal to settle.');
             }
@@ -414,7 +433,7 @@ class FinancialTransactionService
                     'transaction_date' => now()->toDateString(),
                     'reference' => $claim->claim_no,
                     'description' => 'Credit-life claim settlement',
-                    'idempotency_key' => 'credit-life-claim-' . $claim->id,
+                    'idempotency_key' => 'credit-life-claim-'.$claim->id,
                 ],
                 [
                     ['financial_account_id' => $payoutAccount->id, 'direction' => $this->directionForIncrease($payoutAccount), 'amount' => $amount, 'description' => 'Credit-life insurance payout'],
@@ -454,7 +473,7 @@ class FinancialTransactionService
 
     private function findIdempotentTransaction(?string $idempotencyKey, int $organizationId): ?FinancialTransaction
     {
-        if (!$idempotencyKey) {
+        if (! $idempotencyKey) {
             return null;
         }
 
@@ -548,30 +567,27 @@ class FinancialTransactionService
                 }
                 $allocation->update(['status' => 'POSTED', 'financial_transaction_id' => $transaction->id]);
                 $declaration = $allocation->declaration()->lockForUpdate()->firstOrFail();
-                if (!$declaration->allocations()->where('status', '!=', 'POSTED')->exists()) {
+                if (! $declaration->allocations()->where('status', '!=', 'POSTED')->exists()) {
                     $declaration->update(['status' => 'POSTED']);
                 }
             }
 
             if ($transaction->source instanceof RecurringDepositInstallment) {
                 $installment = RecurringDepositInstallment::query()
-                    ->with('recurringDeposit')
                     ->lockForUpdate()
                     ->findOrFail($transaction->source->id);
-                $amountPaid = (float) $installment->amount_paid + (float) $transaction->amount;
-                if ($amountPaid > (float) $installment->amount_due) {
-                    throw new RuntimeException('The installment payment exceeds the amount due.');
+                $this->applyRecurringInstallmentPayment($installment, (float) $transaction->amount);
+            }
+
+            foreach ($transaction->entries as $entry) {
+                if (! $entry->recurring_deposit_installment_id) {
+                    continue;
                 }
 
-                $isPaid = $amountPaid >= (float) $installment->amount_due;
-                $installment->update([
-                    'amount_paid' => $amountPaid,
-                    'status' => $isPaid ? 'PAID' : 'PARTIAL',
-                    'paid_at' => $isPaid ? now() : null,
-                ]);
-                if ($isPaid) {
-                    $installment->recurringDeposit()->increment('paid_installments');
-                }
+                $installment = RecurringDepositInstallment::query()
+                    ->lockForUpdate()
+                    ->findOrFail($entry->recurring_deposit_installment_id);
+                $this->applyRecurringInstallmentPayment($installment, (float) $entry->amount);
             }
 
             $this->accountingService->post($transaction->fresh(['entries.financialAccount.product']), $userId);
@@ -632,6 +648,25 @@ class FinancialTransactionService
                 $fine->update(['paid_amount' => $paidAmount, 'status' => $paidAmount > 0 ? 'PARTIALLY_PAID' : 'ASSESSED']);
             }
 
+            if ($transaction->source instanceof RecurringDepositInstallment) {
+                $installment = RecurringDepositInstallment::query()
+                    ->lockForUpdate()
+                    ->findOrFail($transaction->source->id);
+                $this->reverseRecurringInstallmentPayment($installment, (float) $transaction->amount);
+                $installment->update(['financial_transaction_id' => null]);
+            }
+
+            foreach ($transaction->entries as $entry) {
+                if (! $entry->recurring_deposit_installment_id) {
+                    continue;
+                }
+
+                $installment = RecurringDepositInstallment::query()
+                    ->lockForUpdate()
+                    ->findOrFail($entry->recurring_deposit_installment_id);
+                $this->reverseRecurringInstallmentPayment($installment, (float) $entry->amount);
+            }
+
             if ($transaction->source instanceof InterestProvision) {
                 $provision = InterestProvision::query()->lockForUpdate()->findOrFail($transaction->source->id);
                 $provision->update(['status' => 'REVERSED', 'financial_transaction_id' => null]);
@@ -660,14 +695,14 @@ class FinancialTransactionService
         $remaining = $amount;
         $allocations = [];
         $schedules = $loan->schedules
-            ->filter(fn($schedule) => !in_array($schedule->status, ['PAID', 'WAIVED'], true))
-            ->filter(fn($schedule) => $allowAdvance || $schedule->due_date->toDateString() <= $repaymentDate)
+            ->filter(fn ($schedule) => ! in_array($schedule->status, ['PAID', 'WAIVED'], true))
+            ->filter(fn ($schedule) => $allowAdvance || $schedule->due_date->toDateString() <= $repaymentDate)
             ->sortBy('due_date');
 
         foreach ($schedules as $schedule) {
             foreach ($principalOnly ? ['PRINCIPAL'] : ['FEE', 'PROTECTION_FEE', 'INTEREST', 'PRINCIPAL'] as $type) {
                 $component = $schedule->components->firstWhere('type', $type);
-                if (!$component) {
+                if (! $component) {
                     continue;
                 }
                 $outstanding = max(0, (float) $component->amount_due - (float) $component->amount_paid);
@@ -697,7 +732,7 @@ class FinancialTransactionService
             $paid = min((float) $component->amount_due, (float) $component->amount_paid + (float) $allocation->amount);
             $component->update(['amount_paid' => $paid, 'status' => $paid >= (float) $component->amount_due ? 'PAID' : 'PARTIAL']);
             $schedule = $allocation->schedule->fresh('components');
-            $totalPaid = $schedule->components->sum(fn($item) => (float) $item->amount_paid);
+            $totalPaid = $schedule->components->sum(fn ($item) => (float) $item->amount_paid);
             $fullyPaid = $totalPaid >= (float) $schedule->total_due;
             $schedule->update(['total_paid' => $totalPaid, 'status' => $fullyPaid ? 'PAID' : 'PARTIAL', 'paid_at' => $fullyPaid ? now() : null]);
         }
@@ -710,7 +745,7 @@ class FinancialTransactionService
             ->where('financial_transaction_id', $transaction->id)
             ->where('status', 'APPROVED')
             ->first();
-        if (!$claim) {
+        if (! $claim) {
             return;
         }
 
@@ -719,12 +754,12 @@ class FinancialTransactionService
         $loan->update([
             'status' => 'CLOSED',
             'closed_at' => $closedAt,
-            'closure_reason' => 'Settled by credit-life claim ' . $claim->claim_no,
+            'closure_reason' => 'Settled by credit-life claim '.$claim->claim_no,
         ]);
         $loan->financialAccount->update([
             'status' => 'CLOSED',
             'closed_at' => $closedAt,
-            'closure_reason' => 'Settled by credit-life claim ' . $claim->claim_no,
+            'closure_reason' => 'Settled by credit-life claim '.$claim->claim_no,
         ]);
         $loan->protectionPolicy?->update(['status' => 'CANCELLED']);
         $claim->update(['status' => 'SETTLED']);
@@ -736,7 +771,7 @@ class FinancialTransactionService
             ->where('financial_transaction_id', $transaction->id)
             ->where('status', 'SETTLED')
             ->first();
-        if (!$claim) {
+        if (! $claim) {
             return;
         }
 
@@ -763,10 +798,58 @@ class FinancialTransactionService
             $paid = max(0, (float) $component->amount_paid - (float) $allocation->amount);
             $component->update(['amount_paid' => $paid, 'status' => $paid <= 0 ? 'PENDING' : 'PARTIAL']);
             $schedule = $allocation->schedule->fresh('components');
-            $totalPaid = $schedule->components->sum(fn($item) => (float) $item->amount_paid);
+            $totalPaid = $schedule->components->sum(fn ($item) => (float) $item->amount_paid);
             $schedule->update(['total_paid' => $totalPaid, 'status' => $totalPaid <= 0 ? 'PENDING' : 'PARTIAL', 'paid_at' => null]);
         }
+
         $repayment->update(['status' => 'REVERSED']);
+    }
+
+    private function applyRecurringInstallmentPayment(RecurringDepositInstallment $installment, float $amount): void
+    {
+        $installment->loadMissing('recurringDeposit');
+        if ($installment->status === 'WAIVED') {
+            throw new RuntimeException('A waived installment cannot receive a payment.');
+        }
+
+        $amountPaid = (float) $installment->amount_paid + $amount;
+        if ($amountPaid > (float) $installment->amount_due) {
+            throw new RuntimeException('The installment payment exceeds the amount due.');
+        }
+
+        $wasPaid = $installment->status === 'PAID';
+        $isPaid = $amountPaid >= (float) $installment->amount_due;
+        $installment->update([
+            'amount_paid' => $amountPaid,
+            'status' => $isPaid ? 'PAID' : 'PARTIAL',
+            'paid_at' => $isPaid ? now() : null,
+        ]);
+
+        if ($isPaid && ! $wasPaid) {
+            $installment->recurringDeposit()->increment('paid_installments');
+        }
+    }
+
+    private function reverseRecurringInstallmentPayment(RecurringDepositInstallment $installment, float $amount): void
+    {
+        $installment->loadMissing('recurringDeposit');
+        $wasPaid = $installment->status === 'PAID';
+        $amountPaid = max(0, (float) $installment->amount_paid - $amount);
+        $isPaid = $amountPaid >= (float) $installment->amount_due;
+        $status = $isPaid
+            ? 'PAID'
+            : ($amountPaid > 0
+                ? 'PARTIAL'
+                : ($installment->due_date->toDateString() < today()->toDateString() ? 'MISSED' : 'PENDING'));
+        $installment->update([
+            'amount_paid' => $amountPaid,
+            'status' => $status,
+            'paid_at' => $isPaid ? $installment->paid_at : null,
+        ]);
+
+        if ($wasPaid && ! $isPaid) {
+            $installment->recurringDeposit()->decrement('paid_installments');
+        }
     }
 
     private function nextNumber(int $organizationId): string
@@ -783,10 +866,10 @@ class FinancialTransactionService
             if ($application->status !== 'APPROVED') {
                 throw new RuntimeException('The loan application must be approved before disbursement.');
             }
-            if ($application->collaterals->contains(fn($collateral) => $collateral->status === 'PENDING')) {
+            if ($application->collaterals->contains(fn ($collateral) => $collateral->status === 'PENDING')) {
                 throw new RuntimeException('All collateral must be verified or rejected before disbursement.');
             }
-            if ($application->guarantors->contains(fn($guarantor) => $guarantor->status === 'PENDING')) {
+            if ($application->guarantors->contains(fn ($guarantor) => $guarantor->status === 'PENDING')) {
                 throw new RuntimeException('All guarantor invitations must be decided before disbursement.');
             }
             $protection = $loan->protectionPolicy;
@@ -796,7 +879,7 @@ class FinancialTransactionService
         }
 
         if (
-            $loan->financialAccount->branch_id && !BranchDay::query()
+            $loan->financialAccount->branch_id && ! BranchDay::query()
                 ->where('branch_id', $loan->financialAccount->branch_id)
                 ->whereDate('business_date', $disbursedAt)
                 ->where('status', BranchDay::STATUS_OPEN)

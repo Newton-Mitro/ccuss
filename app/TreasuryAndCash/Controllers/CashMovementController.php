@@ -4,6 +4,7 @@ namespace App\TreasuryAndCash\Controllers;
 
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\FinancialTransactionEntry;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Application\ApprovalNotificationService;
 use App\TreasuryAndCash\Application\CashAdjustmentService;
@@ -501,6 +502,7 @@ class CashMovementController extends Controller
                     ->where('holder_id', $selectedCustomer->id)
                     ->with([
                         'product',
+                        'product.policy',
                         'loanAccount' => ['schedules.components', 'protectionPolicy', 'arrears'],
                         'shareAccount',
                         'recurringDeposit.installments',
@@ -604,6 +606,7 @@ class CashMovementController extends Controller
             ->where('holder_id', $customer->id)
             ->with([
                 'product',
+                'product.policy',
                 'loanAccount' => ['schedules.components', 'protectionPolicy', 'arrears'],
                 'shareAccount',
                 'recurringDeposit.installments',
@@ -646,6 +649,7 @@ class CashMovementController extends Controller
 
                 return [
                     'financial_account_id' => (int) $obligation['account_id'],
+                    'recurring_deposit_installment_id' => $obligation['recurring_deposit_installment_id'] ?? null,
                     'amount' => (string) number_format($lineAmount, 4, '.', ''),
                     'description' => $obligation['due_type'].' - '.$obligation['month'],
                 ];
@@ -675,7 +679,7 @@ class CashMovementController extends Controller
 
         return redirect()
             ->route('teller-transactions.customer-deposit', $redirectParameters)
-            ->with('success', 'Customer deposit posted for '.$customer->name.'.');
+            ->with('success', 'Customer deposit recorded for '.$customer->name.'. Post it from Teller Transactions to update the installment schedule.');
     }
 
     public function savingsChequeWithdrawal(Request $request): Response
@@ -913,6 +917,7 @@ class CashMovementController extends Controller
             'account_no' => $account->account_no,
             'name' => $account->name,
             'account_type' => $account->account_type,
+            'status' => $account->status,
             'balance' => (float) $account->balance,
             'available_balance' => (float) $account->available_balance,
             'holder' => $account->holder_type === Customer::class ? $account->customer : null,
@@ -930,6 +935,25 @@ class CashMovementController extends Controller
         $rows = [];
         $now = now();
         $currentMonthStart = $now->copy()->startOfMonth();
+        $minimumDepositAccounts = $customerAccounts
+            ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE'], true));
+        $postedDeposits = collect();
+
+        if ($minimumDepositAccounts->isNotEmpty()) {
+            $postedDeposits = FinancialTransactionEntry::query()
+                ->selectRaw('financial_account_id, SUM(amount) as total_amount')
+                ->whereIn('financial_account_id', $minimumDepositAccounts->pluck('id'))
+                ->where('direction', 'CREDIT')
+                ->whereHas('transaction', fn ($transaction) => $transaction
+                    ->where('transaction_type', 'DEPOSIT')
+                    ->where('status', 'POSTED')
+                    ->whereBetween('transaction_date', [
+                        $currentMonthStart,
+                        $now->copy()->endOfMonth(),
+                    ]))
+                ->groupBy('financial_account_id')
+                ->pluck('total_amount', 'financial_account_id');
+        }
 
         foreach ($customerAccounts as $account) {
             if ($account->account_type === 'LOAN' && $account->loanAccount) {
@@ -986,15 +1010,24 @@ class CashMovementController extends Controller
             }
 
             if (in_array($account->account_type, ['SAVINGS', 'SHARE'], true)) {
-                $depositDue = max(0, (float) $account->balance * 0.01);
+                $policy = $account->product?->policy;
+                $minimumDeposit = (float) ($policy?->minimum_deposit_amount ?? 0);
+                $policyIsActive = $policy?->status === 'ACTIVE'
+                    && (! $policy->effective_from || $policy->effective_from->toDateString() <= $now->toDateString())
+                    && (! $policy->effective_until || $policy->effective_until->toDateString() >= $now->toDateString());
+                $monthlyDeposits = (float) $postedDeposits->get($account->id, 0);
+                $depositDue = $policyIsActive
+                    ? max(0, $minimumDeposit - $monthlyDeposits)
+                    : 0;
+
                 if ($depositDue > 0) {
                     $rows[] = [
-                        'id' => 'deposit-'.$account->id,
+                        'id' => 'minimum-deposit-'.$account->id,
                         'account_id' => $account->id,
                         'account_type' => $account->account_type,
                         'account_name' => $account->name,
                         'account_no' => $account->account_no,
-                        'due_type' => 'Customer deposit',
+                        'due_type' => 'Minimum deposit',
                         'month' => 'Current month',
                         'amount' => round($depositDue, 4),
                     ];
@@ -1015,6 +1048,7 @@ class CashMovementController extends Controller
                     if ($contribution > 0) {
                         $rows[] = [
                             'id' => 'deposit-contribution-'.$installment->id,
+                            'recurring_deposit_installment_id' => $installment->id,
                             'account_id' => $account->id,
                             'account_type' => $account->account_type,
                             'account_name' => $account->name,

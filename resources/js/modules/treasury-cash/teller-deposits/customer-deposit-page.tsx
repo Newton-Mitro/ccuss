@@ -173,11 +173,11 @@ export default function CustomerDepositPage() {
 
         appSwal
             .fire({
-                title: 'Post this customer deposit?',
-                text: `Post a teller deposit of ${formatBDTCurrency(depositAmount || totalSelected, false)} for ${selectedCustomer.name}?`,
+                title: 'Record this customer deposit?',
+                text: `Record a teller deposit of ${formatBDTCurrency(depositAmount || totalSelected, false)} for ${selectedCustomer.name}? It will update the installment schedule after the transaction is posted.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Post deposit',
+                confirmButtonText: 'Record deposit',
                 cancelButtonText: 'Cancel',
             })
             .then((result) => {
@@ -210,7 +210,7 @@ export default function CustomerDepositPage() {
             <div className="space-y-3 text-foreground">
                 <ResourcePageHeader
                     title="Customer Deposit"
-                    description="Review accounts and post a teller deposit."
+                    description="Record customer deposits, then post the teller transaction to update account schedules."
                     action={<StatusBadge tone="info">Teller ready</StatusBadge>}
                 />
 

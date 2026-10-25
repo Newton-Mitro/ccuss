@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('audit_compliance_records', function (Blueprint $table): void {
@@ -13,10 +12,7 @@ return new class extends Migration
             $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('related_record_id')
-                ->nullable()
-                ->constrained('audit_compliance_records')
-                ->nullOnDelete();
+            $table->foreignId('related_record_id')->nullable()->constrained('audit_compliance_records')->nullOnDelete();
             $table->string('kind', 60);
             $table->string('reference', 80);
             $table->string('title', 255);
@@ -38,10 +34,7 @@ return new class extends Migration
         Schema::create('audit_compliance_approval_logs', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('record_id')
-                ->nullable()
-                ->constrained('audit_compliance_records')
-                ->nullOnDelete();
+            $table->foreignId('record_id')->nullable()->constrained('audit_compliance_records')->nullOnDelete();
             $table->foreignId('actor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->string('record_kind', 60);
             $table->string('record_reference', 80);

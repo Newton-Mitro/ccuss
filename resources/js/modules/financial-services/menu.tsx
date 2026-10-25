@@ -251,7 +251,6 @@ export const financialServices: SidebarItem[] = [
                 icon: <i className="fa-solid fa-money-bill-transfer" />,
                 permission: ['financial.transactions.view'],
                 children_expanded: false,
-
                 children: [
                     {
                         name: 'Financial Transactions',

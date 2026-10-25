@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import type { BreadcrumbItem } from '@/types';
+import { FinancialAccountSearchInput } from '@/modules/financial-services/components/financial-account-search-input';
 import type { FinancialTransactionWorkflowPageProps } from '@/modules/financial-services/types/financial-services';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -21,7 +22,7 @@ import {
     ShieldCheck,
     Wallet,
 } from 'lucide-react';
-import type { FormEvent, ReactNode } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { route } from 'ziggy-js';
 
 const details: Record<
@@ -130,6 +131,8 @@ function SectionHeading({
 }
 
 export default function TransactionWorkflow() {
+    const [destinationSearchResetKey, setDestinationSearchResetKey] =
+        useState(0);
     const {
         workflow,
         accounts = [],
@@ -180,15 +183,6 @@ export default function TransactionWorkflow() {
             post(route('financial-transactions.loan-repayment.store'));
         }
     };
-
-    const accountOptions = accounts.map((account) => ({
-        value: String(account.id),
-        label: `${account.account_no} - ${account.name ?? account.account_type}`,
-    }));
-
-    const availableDestinationOptions = accountOptions.filter(
-        (account) => account.value !== data.source_account_id,
-    );
 
     const selectedLoan = loan_accounts.find(
         (loan) => String(loan.id) === data.loan_account_id,
@@ -267,8 +261,8 @@ export default function TransactionWorkflow() {
                     {isTransfer ? (
                         <>
                             {/* Transfer accounts */}
-                            <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="border-b bg-muted/20 px-4 py-4 sm:px-5">
+                            <section className="relative z-20 overflow-visible rounded-xl border bg-card">
+                                <div className="rounded-t-xl border-b bg-muted/20 px-4 py-4 sm:px-5">
                                     <SectionHeading
                                         icon={ArrowRightLeft}
                                         title="Transfer accounts"
@@ -283,31 +277,33 @@ export default function TransactionWorkflow() {
                                         error={errors.source_account_id}
                                         hint="Funds will be deducted from this account."
                                     >
-                                        <Select
-                                            value={data.source_account_id}
-                                            onChange={(value) => {
+                                        <FinancialAccountSearchInput
+                                            placeholder="Search source account"
+                                            onSelect={(account) => {
+                                                const sourceAccountId = String(
+                                                    account.id,
+                                                );
                                                 setData(
                                                     'source_account_id',
-                                                    value,
+                                                    sourceAccountId,
                                                 );
 
                                                 if (
-                                                    value ===
+                                                    sourceAccountId ===
                                                     data.destination_account_id
                                                 ) {
                                                     setData(
                                                         'destination_account_id',
                                                         '',
                                                     );
+                                                    setDestinationSearchResetKey(
+                                                        (key) => key + 1,
+                                                    );
                                                 }
                                             }}
-                                            options={[
-                                                {
-                                                    value: '',
-                                                    label: 'Select source account',
-                                                },
-                                                ...accountOptions,
-                                            ]}
+                                            clearSelectedAccount={() =>
+                                                setData('source_account_id', '')
+                                            }
                                         />
                                     </Field>
 
@@ -317,21 +313,30 @@ export default function TransactionWorkflow() {
                                         error={errors.destination_account_id}
                                         hint="Funds will be credited to this account."
                                     >
-                                        <Select
-                                            value={data.destination_account_id}
-                                            onChange={(value) =>
+                                        <FinancialAccountSearchInput
+                                            key={destinationSearchResetKey}
+                                            placeholder="Search destination account"
+                                            excludeAccountIds={
+                                                data.source_account_id
+                                                    ? [
+                                                          Number(
+                                                              data.source_account_id,
+                                                          ),
+                                                      ]
+                                                    : []
+                                            }
+                                            onSelect={(account) =>
                                                 setData(
                                                     'destination_account_id',
-                                                    value,
+                                                    String(account.id),
                                                 )
                                             }
-                                            options={[
-                                                {
-                                                    value: '',
-                                                    label: 'Select destination account',
-                                                },
-                                                ...availableDestinationOptions,
-                                            ]}
+                                            clearSelectedAccount={() =>
+                                                setData(
+                                                    'destination_account_id',
+                                                    '',
+                                                )
+                                            }
                                         />
                                     </Field>
 

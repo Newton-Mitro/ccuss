@@ -1,5 +1,3 @@
-import FinancialAccountActivation from '@/modules/financial-services/components/financial-account-activation';
-import FinancialAccountPeopleManagement from '@/modules/financial-services/components/financial-account-people-management';
 import {
     ResourcePageHeader,
     ResourceTableCard,
@@ -10,6 +8,8 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import FinancialAccountActivation from '@/modules/financial-services/components/financial-account-activation';
+import FinancialAccountPeopleManagement from '@/modules/financial-services/components/financial-account-people-management';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -29,6 +29,17 @@ interface Installment {
     due_date: string;
     status: string;
     amount_due?: string | number;
+    financial_transaction?: TransactionReference | null;
+    transaction_entries?: Array<{
+        transaction?: TransactionReference | null;
+    }>;
+}
+
+interface TransactionReference {
+    id: number;
+    transaction_no: string;
+    reference?: string | null;
+    status: string;
 }
 
 interface Props extends SharedData {
@@ -146,7 +157,8 @@ export default function RecurringDepositAccountShow() {
             <Head title={`Recurring Deposit - ${account.account_no}`} />
 
             <div className="space-y-5 pb-6">
-                <ResourcePageHeader variant="account"
+                <ResourcePageHeader
+                    variant="account"
                     title={account.account_no}
                     description={`${account.holder?.name ?? 'Unassigned'} · Recurring deposit account`}
                     action={
@@ -330,7 +342,7 @@ export default function RecurringDepositAccountShow() {
 
                     {installments.length > 0 ? (
                         <div className="overflow-x-auto">
-                            <table className="w-full min-w-[650px] text-sm">
+                            <table className="w-full min-w-[820px] text-sm">
                                 <thead className="bg-muted/50 text-xs text-muted-foreground">
                                     <tr>
                                         <th className="w-20 px-4 py-3 text-left font-medium">
@@ -342,42 +354,125 @@ export default function RecurringDepositAccountShow() {
                                         <th className="px-4 py-3 text-right font-medium">
                                             Amount due
                                         </th>
+                                        <th className="px-4 py-3 text-left font-medium">
+                                            Transaction reference
+                                        </th>
                                         <th className="px-4 py-3 text-center font-medium">
                                             Status
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {installments.map((item) => (
-                                        <tr
-                                            key={item.id}
-                                            className="border-t transition-colors hover:bg-muted/30"
-                                        >
-                                            <td className="px-4 py-3.5 font-medium tabular-nums">
-                                                {String(
-                                                    item.installment_no,
-                                                ).padStart(2, '0')}
-                                            </td>
-                                            <td className="px-4 py-3.5">
-                                                {formatDate(item.due_date)}
-                                            </td>
-                                            <td className="px-4 py-3.5 text-right font-medium tabular-nums">
-                                                {formatBDTCurrency(
-                                                    item.amount_due ?? 0,
-                                                    false,
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-3.5 text-center">
-                                                <StatusBadge
-                                                    tone={getInstallmentTone(
-                                                        item.status,
+                                    {installments.map((item) => {
+                                        const transactions = [
+                                            ...(item.financial_transaction
+                                                ? [item.financial_transaction]
+                                                : []),
+                                            ...(item.transaction_entries
+                                                ?.map(
+                                                    (entry) =>
+                                                        entry.transaction,
+                                                )
+                                                .filter(
+                                                    (
+                                                        transaction,
+                                                    ): transaction is TransactionReference =>
+                                                        Boolean(transaction),
+                                                ) ?? []),
+                                        ].filter(
+                                            (transaction, index, all) =>
+                                                all.findIndex(
+                                                    (candidate) =>
+                                                        candidate.id ===
+                                                        transaction.id,
+                                                ) === index,
+                                        );
+
+                                        return (
+                                            <tr
+                                                key={item.id}
+                                                className="border-t transition-colors hover:bg-muted/30"
+                                            >
+                                                <td className="px-4 py-3.5 font-medium tabular-nums">
+                                                    {String(
+                                                        item.installment_no,
+                                                    ).padStart(2, '0')}
+                                                </td>
+                                                <td className="px-4 py-3.5">
+                                                    {formatDate(item.due_date)}
+                                                </td>
+                                                <td className="px-4 py-3.5 text-right font-medium tabular-nums">
+                                                    {formatBDTCurrency(
+                                                        item.amount_due ?? 0,
+                                                        false,
                                                     )}
-                                                >
-                                                    {item.status}
-                                                </StatusBadge>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                </td>
+                                                <td className="px-4 py-3.5">
+                                                    {transactions.length > 0 ? (
+                                                        <div className="space-y-1">
+                                                            {transactions.map(
+                                                                (
+                                                                    transaction,
+                                                                ) => (
+                                                                    <div
+                                                                        key={
+                                                                            transaction.id
+                                                                        }
+                                                                        className="flex flex-wrap items-center gap-x-2 gap-y-1"
+                                                                    >
+                                                                        <Link
+                                                                            href={route(
+                                                                                'financial-transactions.show',
+                                                                                transaction.id,
+                                                                            )}
+                                                                            className="font-medium text-primary underline-offset-4 hover:underline"
+                                                                        >
+                                                                            {
+                                                                                transaction.transaction_no
+                                                                            }
+                                                                        </Link>
+                                                                        <StatusBadge
+                                                                            tone={
+                                                                                transaction.status ===
+                                                                                'POSTED'
+                                                                                    ? 'success'
+                                                                                    : 'neutral'
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                transaction.status
+                                                                            }
+                                                                        </StatusBadge>
+                                                                        {transaction.reference && (
+                                                                            <span className="text-xs text-muted-foreground">
+                                                                                Ref:{' '}
+                                                                                {
+                                                                                    transaction.reference
+                                                                                }
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-muted-foreground">
+                                                            —
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3.5 text-center">
+                                                    <StatusBadge
+                                                        tone={getInstallmentTone(
+                                                            item.status,
+                                                        )}
+                                                    >
+                                                        {item.status}
+                                                    </StatusBadge>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

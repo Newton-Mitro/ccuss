@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -31,11 +32,6 @@ interface Props extends SharedData {
         policy?: {
             minimum_opening_amount?: string | number;
         } | null;
-    }>;
-    customers: Array<{
-        id: number;
-        customer_no: string;
-        name: string;
     }>;
 }
 
@@ -66,7 +62,7 @@ function SectionHeading({
 }
 
 export default function SavingsAccountCreate() {
-    const { products, customers } = usePage<Props>().props;
+    const { products } = usePage<Props>().props;
 
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
@@ -101,7 +97,8 @@ export default function SavingsAccountCreate() {
             <Head title="Open savings account" />
 
             <div className="w-full max-w-6xl space-y-6 pb-24">
-                <ResourcePageHeader variant="account"
+                <ResourcePageHeader
+                    variant="account"
                     title="Open savings account"
                     description="Create a savings account and configure its minimum-balance requirement."
                 />
@@ -192,25 +189,17 @@ export default function SavingsAccountCreate() {
                                                 </span>
                                             </Label>
 
-                                            <Select
-                                                value={data.holder_id}
-                                                onChange={(value) =>
-                                                    setData('holder_id', value)
+                                            <CustomerSearchInput
+                                                onSelect={(customer) =>
+                                                    setData(
+                                                        'holder_id',
+                                                        String(customer.id),
+                                                    )
                                                 }
-                                                options={[
-                                                    {
-                                                        value: '',
-                                                        label: 'Select customer',
-                                                    },
-                                                    ...customers.map(
-                                                        (item) => ({
-                                                            value: String(
-                                                                item.id,
-                                                            ),
-                                                            label: `${item.customer_no} - ${item.name}`,
-                                                        }),
-                                                    ),
-                                                ]}
+                                                clearSelectedCustomer={() =>
+                                                    setData('holder_id', '')
+                                                }
+                                                placeholder="Search by customer name or number..."
                                             />
 
                                             <InputError

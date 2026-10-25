@@ -2,10 +2,10 @@
 
 namespace App\TreasuryAndCash\Application;
 
-use App\TreasuryAndCash\Models\BranchDay;
 use App\SystemAdministration\Models\Branch;
-use Illuminate\Support\Facades\DB;
+use App\TreasuryAndCash\Models\BranchDay;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class BranchDayService
 {
@@ -16,7 +16,7 @@ class BranchDayService
             ->with(['branch', 'openedBy', 'closedBy'])
             ->orderByDesc('business_date');
 
-        if (!empty($search)) {
+        if (! empty($search)) {
             $searchTerm = trim($search);
             $query->where(function ($builder) use ($searchTerm) {
                 $builder->where('business_date', 'like', "%{$searchTerm}%")
@@ -37,26 +37,41 @@ class BranchDayService
         string $businessDate,
         ?string $openingNote = null,
     ): BranchDay {
-        $this->ensureBranchBelongsToOrganization($organizationId, $branchId);
+        return DB::transaction(function () use ($organizationId, $branchId, $userId, $businessDate, $openingNote): BranchDay {
+            Branch::query()
+                ->whereKey($branchId)
+                ->where('organization_id', $organizationId)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        if (
-            BranchDay::query()
-                ->where('branch_id', $branchId)
-                ->whereDate('business_date', $businessDate)
-                ->exists()
-        ) {
-            throw new \RuntimeException('A branch day already exists for this branch and date.');
-        }
+            if (
+                BranchDay::query()
+                    ->where('branch_id', $branchId)
+                    ->whereDate('business_date', $businessDate)
+                    ->exists()
+            ) {
+                throw new \RuntimeException('A branch day already exists for this branch and date.');
+            }
 
-        return DB::transaction(fn() => BranchDay::create([
-            'organization_id' => $organizationId,
-            'branch_id' => $branchId,
-            'business_date' => $businessDate,
-            'status' => BranchDay::STATUS_OPEN,
-            'opened_at' => now(),
-            'opened_by' => $userId,
-            'opening_note' => $openingNote,
-        ]));
+            if (
+                BranchDay::query()
+                    ->where('branch_id', $branchId)
+                    ->whereIn('status', [BranchDay::STATUS_OPEN, BranchDay::STATUS_CLOSING])
+                    ->exists()
+            ) {
+                throw new \RuntimeException('A branch day is already open for this branch. Close it before opening another business date.');
+            }
+
+            return BranchDay::create([
+                'organization_id' => $organizationId,
+                'branch_id' => $branchId,
+                'business_date' => $businessDate,
+                'status' => BranchDay::STATUS_OPEN,
+                'opened_at' => now(),
+                'opened_by' => $userId,
+                'opening_note' => $openingNote,
+            ]);
+        });
     }
 
     public function close(BranchDay $branchDay, int $userId, ?string $closingNote = null): BranchDay
@@ -73,16 +88,5 @@ class BranchDayService
         ]);
 
         return $branchDay->fresh();
-    }
-
-    private function ensureBranchBelongsToOrganization(int $organizationId, int $branchId): void
-    {
-        abort_unless(
-            Branch::query()
-                ->whereKey($branchId)
-                ->where('organization_id', $organizationId)
-                ->exists(),
-            404,
-        );
     }
 }

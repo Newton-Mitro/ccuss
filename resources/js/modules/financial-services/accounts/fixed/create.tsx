@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 import type { FinancialProductTermOption } from '@/modules/financial-services/types/financial-services';
+import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -175,7 +176,8 @@ export default function FixedDepositAccountCreate() {
             <Head title="Open fixed deposit" />
 
             <div className="max-w-4xl space-y-5 pb-8">
-                <ResourcePageHeader variant="account"
+                <ResourcePageHeader
+                    variant="account"
                     title="Open fixed deposit"
                     description="Set up the depositor, principal, contracted rate, tenure, and maturity instructions."
                 />
@@ -344,14 +346,16 @@ export default function FixedDepositAccountCreate() {
                                 required
                                 error={errors.holder_id}
                             >
-                                <Select
-                                    value={data.holder_id}
-                                    onChange={(value) => {
-                                        setData('holder_id', value);
-
+                                <CustomerSearchInput
+                                    onSelect={(customer) => {
                                         const selectedCustomer = customers.find(
-                                            (customer) =>
-                                                String(customer.id) === value,
+                                            (item) =>
+                                                String(item.id) ===
+                                                String(customer.id),
+                                        );
+                                        setData(
+                                            'holder_id',
+                                            String(customer.id),
                                         );
 
                                         if (
@@ -361,16 +365,11 @@ export default function FixedDepositAccountCreate() {
                                             setData('guardian_customer_id', '');
                                         }
                                     }}
-                                    options={[
-                                        {
-                                            value: '',
-                                            label: 'Select depositor',
-                                        },
-                                        ...customers.map((item) => ({
-                                            value: String(item.id),
-                                            label: `${item.customer_no} - ${item.name}`,
-                                        })),
-                                    ]}
+                                    clearSelectedCustomer={() => {
+                                        setData('holder_id', '');
+                                        setData('guardian_customer_id', '');
+                                    }}
+                                    placeholder="Search depositor by name or customer number..."
                                 />
                             </Field>
 

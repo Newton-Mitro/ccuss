@@ -1,11 +1,11 @@
 <?php
 
-use App\TreasuryAndCash\Models\BranchDay;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
+use App\TreasuryAndCash\Models\BranchDay;
 
 function grantBranchDayPermission(User $user): void
 {
@@ -37,14 +37,14 @@ function grantBranchDayLifecyclePermissions(User $user): void
     $permissions = collect([
         ['slug' => 'branch_days.open', 'name' => 'Open Branch Day', 'action' => 'open'],
         ['slug' => 'branch_days.close', 'name' => 'Close Branch Day', 'action' => 'close'],
-    ])->map(fn(array $permission) => Permission::firstOrCreate(
-            ['slug' => $permission['slug']],
-            [
-                'module' => 'branch_days',
-                'name' => $permission['name'],
-                'action' => $permission['action'],
-            ],
-        ));
+    ])->map(fn (array $permission) => Permission::firstOrCreate(
+        ['slug' => $permission['slug']],
+        [
+            'module' => 'branch_days',
+            'name' => $permission['name'],
+            'action' => $permission['action'],
+        ],
+    ));
 
     $role->permissions()->syncWithoutDetaching($permissions->pluck('id'));
     $user->roles()->syncWithoutDetaching([$role->id]);
@@ -64,7 +64,7 @@ it('loads the branch day index page for users with branch-day access', function 
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('branch-days.index'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/branch-days/index')
             ->where('auth.user.branch_id', $branch->id)
             ->where('auth.user.branch.name', $branch->name)
@@ -85,7 +85,7 @@ it('loads the dedicated branch day creation page for users with open access', fu
         ->withSession(['active_organization_id' => $organization->id])
         ->get(route('branch-days.create'))
         ->assertSuccessful()
-        ->assertInertia(fn($page) => $page
+        ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/branch-days/create')
             ->where('organization.activeId', $organization->id)
             ->where('auth.user.branch.name', $branch->name));
@@ -177,6 +177,26 @@ it('rejects opening a second branch day for the same branch and date', function 
     $service = app(\App\TreasuryAndCash\Application\BranchDayService::class);
     $service->open($organization->id, $branch->id, $user->id, '2026-09-18');
 
-    expect(fn() => $service->open($organization->id, $branch->id, $user->id, '2026-09-18'))
+    expect(fn () => $service->open($organization->id, $branch->id, $user->id, '2026-09-18'))
         ->toThrow(RuntimeException::class, 'A branch day already exists for this branch and date.');
+});
+
+it('rejects opening another business date while the branch already has an open day', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+
+    $service = app(\App\TreasuryAndCash\Application\BranchDayService::class);
+    $openBranchDay = $service->open($organization->id, $branch->id, $user->id, '2026-09-18');
+
+    expect(fn () => $service->open($organization->id, $branch->id, $user->id, '2026-09-19'))
+        ->toThrow(RuntimeException::class, 'A branch day is already open for this branch. Close it before opening another business date.');
+
+    $service->close($openBranchDay, $user->id);
+
+    expect($service->open($organization->id, $branch->id, $user->id, '2026-09-19')->status)
+        ->toBe(BranchDay::STATUS_OPEN);
 });

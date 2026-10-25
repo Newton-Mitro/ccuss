@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -86,7 +87,8 @@ export default function ShareAccountCreate() {
             <div className="w-full max-w-5xl space-y-5 pb-8 text-foreground">
                 {/* Page header */}
                 <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
-                    <ResourcePageHeader variant="account"
+                    <ResourcePageHeader
+                        variant="account"
                         title="Register Share Membership"
                         description="Register a member, assign a share product, and configure membership details."
                     />
@@ -184,24 +186,17 @@ export default function ShareAccountCreate() {
                                     <RequiredMark />
                                 </Label>
 
-                                <Select
-                                    id="holder_id"
-                                    className="h-10 w-full"
-                                    value={data.holder_id}
-                                    onChange={(value) =>
-                                        setData('holder_id', value)
+                                <CustomerSearchInput
+                                    onSelect={(customer) =>
+                                        setData(
+                                            'holder_id',
+                                            String(customer.id),
+                                        )
                                     }
-                                    options={[
-                                        {
-                                            value: '',
-                                            label: 'Select customer',
-                                        },
-                                        ...customers.map((item) => ({
-                                            value: String(item.id),
-                                            label: `${item.customer_no} — ${item.name}`,
-                                        })),
-                                    ]}
-                                    required
+                                    clearSelectedCustomer={() =>
+                                        setData('holder_id', '')
+                                    }
+                                    placeholder="Search member by name or customer number..."
                                 />
 
                                 <InputError message={errors.holder_id} />

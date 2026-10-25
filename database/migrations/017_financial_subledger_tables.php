@@ -36,157 +36,27 @@ return new class extends Migration {
 
         Schema::create('financial_transactions', function (Blueprint $table): void {
             $table->id();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Organization / Branch
-            |--------------------------------------------------------------------------
-            */
-
-            $table->foreignId('organization_id')
-                ->constrained('organizations')
-                ->cascadeOnDelete();
-
-            $table->foreignId('branch_id')
-                ->nullable()
-                ->constrained('branches')
-                ->nullOnDelete();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Transaction Identification
-            |--------------------------------------------------------------------------
-            */
-
+            $table->foreignId('organization_id')->constrained('organizations')->cascadeOnDelete();
+            $table->foreignId('branch_id')->nullable()->constrained('branches')->nullOnDelete();
             $table->string('transaction_no', 100);
-
-            /*
-            | Prevents duplicate processing when the same transaction request
-            | is submitted more than once.
-            */
-            $table->uuid('idempotency_key')
-                ->nullable();
-
+            $table->uuid('idempotency_key')->nullable();
             $table->string('transaction_type', 50);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Transaction Details
-            |--------------------------------------------------------------------------
-            */
-
             $table->dateTime('transaction_date');
-
             $table->decimal('amount', 20, 2);
-
-            $table->string('currency', 10)
-                ->default('BDT');
-
-            $table->string('reference')
-                ->nullable();
-
-            $table->text('description')
-                ->nullable();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Transaction Status
-            |--------------------------------------------------------------------------
-            */
-
-            $table->enum('status', [
-                'PENDING',
-                'POSTED',
-                'REVERSED',
-                'CANCELLED',
-            ])->default('PENDING');
-
-            /*
-            |--------------------------------------------------------------------------
-            | Source
-            |--------------------------------------------------------------------------
-            |
-            | Examples:
-            | Loan repayment
-            | Loan disbursement
-            | Savings deposit
-            | Savings withdrawal
-            | Fixed deposit
-            | Share purchase
-            | etc.
-            |
-            */
-
+            $table->string('currency', 10)->default('BDT');
+            $table->string('reference')->nullable();
+            $table->text('description')->nullable();
+            $table->enum('status', ['PENDING', 'POSTED', 'REVERSED', 'CANCELLED'])->default('PENDING');
             $table->nullableMorphs('source');
-
-            /*
-            |--------------------------------------------------------------------------
-            | Users
-            |--------------------------------------------------------------------------
-            */
-
-            $table->foreignId('created_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
-            $table->foreignId('posted_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
-            $table->timestamp('posted_at')
-                ->nullable();
-
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('posted_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamp('posted_at')->nullable();
             $table->timestamps();
-
-            /*
-            |--------------------------------------------------------------------------
-            | Constraints
-            |--------------------------------------------------------------------------
-            */
-
-            $table->unique([
-                'organization_id',
-                'transaction_no',
-            ], 'financial_transaction_number_unique');
-
-            /*
-            |--------------------------------------------------------------------------
-            | Idempotency
-            |--------------------------------------------------------------------------
-            |
-            | Same idempotency key cannot create another transaction within
-            | the same organization.
-            |
-            */
-
-            $table->unique([
-                'organization_id',
-                'idempotency_key',
-            ], 'financial_transaction_idempotency_unique');
-
-            /*
-            |--------------------------------------------------------------------------
-            | Indexes
-            |--------------------------------------------------------------------------
-            */
-
-            $table->index([
-                'organization_id',
-                'branch_id',
-                'transaction_date',
-            ], 'fin_tx_org_branch_date_index');
-
-            $table->index([
-                'organization_id',
-                'status',
-            ], 'fin_tx_org_status_index');
-
-            $table->index([
-                'transaction_type',
-                'status',
-            ], 'fin_tx_type_status_index');
+            $table->unique(['organization_id', 'transaction_no'], 'financial_transaction_number_unique');
+            $table->unique(['organization_id', 'idempotency_key'], 'financial_transaction_idempotency_unique');
+            $table->index(['organization_id', 'branch_id', 'transaction_date'], 'fin_tx_org_branch_date_index');
+            $table->index(['organization_id', 'status'], 'fin_tx_org_status_index');
+            $table->index(['transaction_type', 'status'], 'fin_tx_type_status_index');
         });
 
         Schema::create('financial_transaction_entries', function (Blueprint $table): void {

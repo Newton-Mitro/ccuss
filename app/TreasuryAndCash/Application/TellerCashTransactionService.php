@@ -62,6 +62,7 @@ class TellerCashTransactionService
 
                     return [
                         'financial_account_id' => (int) $line['financial_account_id'],
+                        'recurring_deposit_installment_id' => $line['recurring_deposit_installment_id'] ?? null,
                         'direction' => $direction,
                         'amount' => $line['amount'],
                         'description' => $line['description'] ?? null,

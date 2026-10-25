@@ -5,8 +5,6 @@ namespace App\FinancialServices\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\FinancialServices\Models\FinancialAccount;
-use App\FinancialServices\Models\FinancialTransaction;
 
 class FinancialTransactionEntry extends Model
 {
@@ -20,6 +18,7 @@ class FinancialTransactionEntry extends Model
     protected $fillable = [
         'financial_transaction_id',
         'financial_account_id',
+        'recurring_deposit_installment_id',
         'direction',
         'amount',
         'balance_after',
@@ -28,6 +27,8 @@ class FinancialTransactionEntry extends Model
     ];
 
     protected $casts = [
+        'financial_account_id' => 'integer',
+        'recurring_deposit_installment_id' => 'integer',
         'amount' => 'decimal:4',
         'balance_after' => 'decimal:4',
         'line_no' => 'integer',
@@ -41,5 +42,10 @@ class FinancialTransactionEntry extends Model
     public function financialAccount(): BelongsTo
     {
         return $this->belongsTo(FinancialAccount::class);
+    }
+
+    public function recurringDepositInstallment(): BelongsTo
+    {
+        return $this->belongsTo(RecurringDepositInstallment::class);
     }
 }

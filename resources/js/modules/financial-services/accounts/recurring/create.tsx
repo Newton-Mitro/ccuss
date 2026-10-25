@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 import type { FinancialProductTermOption } from '@/modules/financial-services/types/financial-services';
+import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -31,15 +32,10 @@ interface Props extends SharedData {
         name: string;
         terms: FinancialProductTermOption[];
     }>;
-    customers: Array<{
-        id: number;
-        customer_no: string;
-        name: string;
-    }>;
 }
 
 export default function RecurringDepositAccountCreate() {
-    const { products, customers } = usePage<Props>().props;
+    const { products } = usePage<Props>().props;
 
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
@@ -96,7 +92,8 @@ export default function RecurringDepositAccountCreate() {
             <Head title="Open recurring deposit" />
 
             <div className="w-full max-w-screen-xl space-y-5 pb-6">
-                <ResourcePageHeader variant="account"
+                <ResourcePageHeader
+                    variant="account"
                     title="Open recurring deposit"
                     description="Configure the savings plan, installment schedule, and maturity settings."
                     action={
@@ -306,21 +303,17 @@ export default function RecurringDepositAccountCreate() {
                                                 *
                                             </span>
                                         </Label>
-                                        <Select
-                                            value={data.holder_id}
-                                            onChange={(value) =>
-                                                setData('holder_id', value)
+                                        <CustomerSearchInput
+                                            onSelect={(customer) =>
+                                                setData(
+                                                    'holder_id',
+                                                    String(customer.id),
+                                                )
                                             }
-                                            options={[
-                                                {
-                                                    value: '',
-                                                    label: 'Select customer',
-                                                },
-                                                ...customers.map((item) => ({
-                                                    value: String(item.id),
-                                                    label: `${item.customer_no} — ${item.name}`,
-                                                })),
-                                            ]}
+                                            clearSelectedCustomer={() =>
+                                                setData('holder_id', '')
+                                            }
+                                            placeholder="Search depositor by name or customer number..."
                                         />
                                         <InputError
                                             message={errors.holder_id}

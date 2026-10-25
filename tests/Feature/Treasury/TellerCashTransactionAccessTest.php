@@ -2,7 +2,11 @@
 
 use App\CustomerModule\Models\Customer;
 use App\CustomerModule\Models\KycDocument;
+use App\FinancialServices\Models\DepositPolicy;
+use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\FinancialAccount;
+use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\FinancialTransactionEntry;
 use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\LoanProtectionPolicy;
 use App\FinancialServices\Models\LoanSchedule;
@@ -490,8 +494,127 @@ it('restores the selected customer account on the customer deposit page', functi
         ->assertInertia(fn ($page) => $page
             ->where('customer.id', $customer->id)
             ->where('selectedAccount.id', $account->id)
-            ->where('obligations.0.account_name', $account->name)
-            ->where('obligations.0.account_no', $account->account_no));
+            ->where('customerAccounts.0.id', $account->id));
+});
+
+it('shows the remaining monthly minimum deposit after checking posted account transactions', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $product = DepositProduct::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'category' => 'SAVINGS',
+    ]);
+    DepositPolicy::create([
+        'deposit_product_id' => $product->id,
+        'minimum_deposit_amount' => 100,
+        'status' => 'ACTIVE',
+        'effective_from' => now()->subMonth()->toDateString(),
+    ]);
+    $account = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => $product->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SAVINGS',
+        'account_no' => 'SAV-MINIMUM-DEPOSIT-001',
+        'name' => 'Minimum Deposit Savings',
+    ]);
+
+    $postedDeposit = FinancialTransaction::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'transaction_type' => 'DEPOSIT',
+        'transaction_date' => now()->startOfMonth()->addDay(),
+        'status' => 'POSTED',
+    ]);
+    FinancialTransactionEntry::create([
+        'financial_transaction_id' => $postedDeposit->id,
+        'financial_account_id' => $account->id,
+        'direction' => 'CREDIT',
+        'amount' => 40,
+        'line_no' => 2,
+    ]);
+
+    $priorMonthDeposit = FinancialTransaction::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'transaction_type' => 'DEPOSIT',
+        'transaction_date' => now()->subMonth(),
+        'status' => 'POSTED',
+    ]);
+    FinancialTransactionEntry::create([
+        'financial_transaction_id' => $priorMonthDeposit->id,
+        'financial_account_id' => $account->id,
+        'direction' => 'CREDIT',
+        'amount' => 50,
+        'line_no' => 2,
+    ]);
+
+    $pendingDeposit = FinancialTransaction::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'transaction_type' => 'DEPOSIT',
+        'transaction_date' => now(),
+        'status' => 'PENDING',
+    ]);
+    FinancialTransactionEntry::create([
+        'financial_transaction_id' => $pendingDeposit->id,
+        'financial_account_id' => $account->id,
+        'direction' => 'CREDIT',
+        'amount' => 30,
+        'line_no' => 2,
+    ]);
+
+    $fulfilledProduct = DepositProduct::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'category' => 'SHARE',
+    ]);
+    DepositPolicy::create([
+        'deposit_product_id' => $fulfilledProduct->id,
+        'minimum_deposit_amount' => 50,
+        'status' => 'ACTIVE',
+        'effective_from' => now()->subMonth()->toDateString(),
+    ]);
+    $fulfilledAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'financial_product_id' => $fulfilledProduct->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'SHARE',
+        'account_no' => 'SHARE-MINIMUM-DEPOSIT-001',
+        'name' => 'Minimum Deposit Share',
+    ]);
+    $fulfilledDeposit = FinancialTransaction::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'transaction_type' => 'DEPOSIT',
+        'transaction_date' => now()->startOfMonth()->addDays(2),
+        'status' => 'POSTED',
+    ]);
+    FinancialTransactionEntry::create([
+        'financial_transaction_id' => $fulfilledDeposit->id,
+        'financial_account_id' => $fulfilledAccount->id,
+        'direction' => 'CREDIT',
+        'amount' => 50,
+        'line_no' => 2,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('teller-transactions.customer-deposit', [
+            'customer_id' => $customer->id,
+            'account_id' => $account->id,
+        ]))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->where('obligations', fn ($obligations) => collect($obligations)
+                ->contains(fn ($row) => $row['id'] === 'minimum-deposit-'.$account->id
+                    && $row['due_type'] === 'Minimum deposit'
+                    && $row['amount'] === 60)
+                && ! collect($obligations)->contains(fn ($row) => $row['account_id'] === $fulfilledAccount->id)
+                && collect($obligations)->where('due_type', 'Customer deposit')->isEmpty()));
 });
 
 it('lists real customer loan, protection, deposit, and fine obligations', function () {
@@ -656,10 +779,19 @@ it('allows a customer deposit without a verified signature', function () {
         'account_type' => 'CASH',
         'account_no' => 'CASH-TELLER-002',
     ]);
+    $product = DepositProduct::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+    ]);
+    DepositPolicy::create([
+        'deposit_product_id' => $product->id,
+        'minimum_deposit_amount' => 10,
+        'status' => 'ACTIVE',
+        'effective_from' => now()->subMonth()->toDateString(),
+    ]);
     $savingsAccount = FinancialAccount::factory()->active(1000)->create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
-        'financial_product_id' => null,
+        'financial_product_id' => $product->id,
         'holder_type' => Customer::class,
         'holder_id' => $customer->id,
         'account_type' => 'SAVINGS',
@@ -673,10 +805,99 @@ it('allows a customer deposit without a verified signature', function () {
             'teller_session_id' => $fixture['session']->id,
             'customer_id' => $customer->id,
             'amount' => '10.00',
-            'selected' => ['deposit-'.$savingsAccount->id],
+            'selected' => ['minimum-deposit-'.$savingsAccount->id],
             'note' => 'Customer cash deposit',
         ])
         ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
+});
+
+it('settles recurring deposit obligations when a customer deposit is posted and restores them on reversal', function () {
+    $fixture = tellerCashTransactionFixture();
+    grantTellerCashTransactionPermission($fixture['user']);
+    grantTellerCashTransactionPostPermission($fixture['user']);
+    grantTellerCashTransactionReversePermission($fixture['user']);
+    configureTellerSummaryMapping($fixture, 'DEPOSIT');
+    $accountGroup = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $accountGroup->id,
+        'code' => '2300',
+        'name' => 'Recurring Deposits',
+        'type' => 'LIABILITY',
+        'normal_balance' => 'CREDIT',
+    ]);
+
+    $customer = Customer::factory()->individualMale()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+    ]);
+    $account = FinancialAccount::factory()->active()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $customer->id,
+        'account_type' => 'RECURRING_DEPOSIT',
+        'account_no' => 'RDP-TELLER-001',
+    ]);
+    $recurringDeposit = RecurringDeposit::create([
+        'financial_account_id' => $account->id,
+        'installment_amount' => 100,
+        'installment_frequency' => 'MONTHLY',
+        'total_installments' => 1,
+        'paid_installments' => 0,
+        'started_at' => now()->subMonth()->toDateString(),
+        'maturity_date' => now()->addMonth()->toDateString(),
+    ]);
+    $installment = RecurringDepositInstallment::create([
+        'recurring_deposit_id' => $recurringDeposit->id,
+        'installment_no' => 1,
+        'due_date' => today()->toDateString(),
+        'amount_due' => 100,
+        'amount_paid' => 0,
+        'status' => 'PENDING',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.customer-deposit.store'), [
+            'teller_session_id' => $fixture['session']->id,
+            'customer_id' => $customer->id,
+            'amount' => '100.00',
+            'selected' => ['deposit-contribution-'.$installment->id],
+        ])
+        ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
+
+    $tellerTransaction = TellerCashTransaction::query()->with('financialTransaction.entries')->firstOrFail();
+    $entry = $tellerTransaction->financialTransaction->entries
+        ->firstWhere('recurring_deposit_installment_id', $installment->id);
+
+    expect($entry)->not->toBeNull()
+        ->and($installment->fresh()->amount_paid)->toBe('0.0000')
+        ->and($installment->fresh()->status)->toBe('PENDING');
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.post', $tellerTransaction))
+        ->assertRedirect(route('teller-transactions.index'));
+
+    expect($installment->fresh()->amount_paid)->toBe('100.0000')
+        ->and($installment->fresh()->status)->toBe('PAID')
+        ->and($recurringDeposit->fresh()->paid_installments)->toBe(1);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]))
+        ->assertInertia(fn ($page) => $page
+            ->where('obligations', fn ($obligations) => ! collect($obligations)->contains(fn ($row) => $row['id'] === 'deposit-contribution-'.$installment->id)));
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-transactions.reverse', $tellerTransaction), ['reason' => 'Reversing test deposit'])
+        ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
+
+    expect($installment->fresh()->amount_paid)->toBe('0.0000')
+        ->and($installment->fresh()->status)->toBe('PENDING')
+        ->and($recurringDeposit->fresh()->paid_installments)->toBe(0);
 });
 
 it('receives a savings cheque into review without posting it', function () {
@@ -855,10 +1076,19 @@ it('creates a pending customer deposit from selected obligations', function () {
         'account_type' => 'CASH',
         'account_no' => 'CASH-TELLER-002',
     ]);
+    $product = DepositProduct::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+    ]);
+    DepositPolicy::create([
+        'deposit_product_id' => $product->id,
+        'minimum_deposit_amount' => 5,
+        'status' => 'ACTIVE',
+        'effective_from' => now()->subMonth()->toDateString(),
+    ]);
     $savingsAccount = FinancialAccount::factory()->active(1000)->create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
-        'financial_product_id' => null,
+        'financial_product_id' => $product->id,
         'holder_type' => Customer::class,
         'holder_id' => $customer->id,
         'account_type' => 'SAVINGS',
@@ -872,7 +1102,7 @@ it('creates a pending customer deposit from selected obligations', function () {
             'teller_session_id' => $fixture['session']->id,
             'customer_id' => $customer->id,
             'amount' => '5.00',
-            'selected' => ['deposit-'.$savingsAccount->id],
+            'selected' => ['minimum-deposit-'.$savingsAccount->id],
             'note' => 'Customer cash deposit',
         ])
         ->assertRedirect(route('teller-transactions.customer-deposit', ['customer_id' => $customer->id]));
