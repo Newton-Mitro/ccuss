@@ -25,9 +25,16 @@ class AccountingReportController extends Controller
         $fiscalPeriods = $this->fiscalPeriods($request);
         $periodId = $request->integer('fiscal_period_id') ?: null;
         if ($periodId === null) {
-            $periodId = $fiscalPeriods->firstWhere('status', 'OPEN')['id']
-                ?? $fiscalPeriods->first()['id']
-                ?? null;
+            $today = now()->toDateString();
+            $openPeriods = $fiscalPeriods->where('status', 'OPEN');
+            $period = $openPeriods->first(
+                fn (array $period) => $period['start_date'] <= $today
+                    && $period['end_date'] >= $today,
+            ) ?? $openPeriods->first(
+                fn (array $period) => $period['end_date'] < $today,
+            ) ?? $openPeriods->sortBy('start_date')->first()
+                ?? $fiscalPeriods->first();
+            $periodId = $period['id'] ?? null;
         }
 
         return Inertia::render('general-accounting/reports/trial-balance-page', [
@@ -225,8 +232,16 @@ class AccountingReportController extends Controller
             ->where('organization_id', $organizationId)
             ->orderByDesc('start_date')
             ->get();
+        $openYears = $years->where('status', 'OPEN');
+        $today = now()->toDateString();
 
-        return $years->firstWhere('status', 'OPEN') ?? $years->first();
+        return $openYears->first(
+            fn (FiscalYear $year) => $year->start_date->toDateString() <= $today
+                && $year->end_date->toDateString() >= $today,
+        ) ?? $openYears->first(
+            fn (FiscalYear $year) => $year->end_date->toDateString() < $today,
+        ) ?? $openYears->sortBy('start_date')->first()
+            ?? $years->first();
     }
 
     private function fiscalPeriods(Request $request, ?int $fiscalYearId = null)

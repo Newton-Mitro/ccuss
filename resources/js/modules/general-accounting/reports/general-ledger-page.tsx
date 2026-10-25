@@ -1,12 +1,16 @@
-import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import HeadingSmall from '@/components/heading-small';
 import ReportExportActions from '@/components/report-export-actions';
+import {
+    ResourceEmptyState,
+    ResourcePageHeader,
+} from '@/components/resource-page-shell';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem, SharedData } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
+import { ArrowDownLeft, ArrowUpRight, BookOpen, Scale } from 'lucide-react';
+import { useState } from 'react';
 
 interface LedgerEntry {
     id: number;
@@ -61,6 +65,16 @@ export default function GeneralLedgerPage() {
         reloadLedger(accountId, value);
     };
 
+    const totalDebits = entries.reduce(
+        (total, entry) => total + Number(entry.debit),
+        0,
+    );
+    const totalCredits = entries.reduce(
+        (total, entry) => total + Number(entry.credit),
+        0,
+    );
+    const closingBalance = entries.at(-1)?.running_balance ?? 0;
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'General Accounting', href: '' },
         { title: 'Reports', href: '' },
@@ -78,121 +92,203 @@ export default function GeneralLedgerPage() {
                         fiscal_period_id: periodId,
                     }}
                 />
-                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-                    <HeadingSmall
-                        title="General Ledger"
-                        description={
-                            account
-                                ? `${account.code} - ${account.name}`
-                                : 'Select an account to view transactions'
-                        }
-                    />
-                    <div className="flex w-full flex-col gap-2 sm:w-[26rem] sm:flex-row sm:items-center">
-                        <Select
-                            value={accountId}
-                            onChange={changeAccount}
-                            className="w-full sm:flex-1"
-                            options={accounts.map((item) => ({
-                                value: String(item.id),
-                                label: `${item.code} - ${item.name}`,
-                            }))}
-                        />
-                        <Select
-                            value={periodId}
-                            onChange={changePeriod}
-                            className="w-full sm:flex-1"
-                            placeholder="All periods"
-                            options={[
-                                { value: '', label: 'All periods' },
-                                ...fiscalPeriods.map((period) => ({
-                                    value: String(period.id),
-                                    label: period.name,
-                                })),
-                            ]}
-                        />
+                <ResourcePageHeader
+                    title="General Ledger"
+                    description={
+                        account
+                            ? `${account.code} · ${account.name} — review posted activity and its running balance.`
+                            : 'Select a ledger account to review its posted activity and running balance.'
+                    }
+                    action={
+                        account ? (
+                            <span className="inline-flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                                <BookOpen className="size-3.5 text-primary" />
+                                {entries.length} entries
+                            </span>
+                        ) : undefined
+                    }
+                />
+
+                <section className="rounded-xl border bg-card p-4 shadow-sm">
+                    <div className="mb-3">
+                        <h2 className="text-sm font-semibold">
+                            Report filters
+                        </h2>
+                        <p className="text-xs text-muted-foreground">
+                            Choose an account and optionally narrow the report
+                            to one fiscal period.
+                        </p>
                     </div>
-                </div>
-                <div className="overflow-auto rounded-md border">
-                    <table className="w-full border-collapse text-sm">
-                        <thead className="bg-muted text-muted-foreground">
-                            <tr>
-                                {[
-                                    {
-                                        label: 'Date',
-                                        align: 'text-left',
-                                    },
-                                    {
-                                        label: 'Voucher',
-                                        align: 'text-left',
-                                    },
-                                    {
-                                        label: 'Description',
-                                        align: 'text-left',
-                                    },
-                                    {
-                                        label: 'Debit',
-                                        align: 'text-right',
-                                    },
-                                    {
-                                        label: 'Credit',
-                                        align: 'text-right',
-                                    },
-                                    {
-                                        label: 'Balance',
-                                        align: 'text-right',
-                                    },
-                                ].map(({ label, align }) => (
-                                    <th
-                                        key={label}
-                                        className={`border-b px-3 py-2 font-medium ${align}`}
-                                    >
+                    <div className="grid gap-3 md:grid-cols-2">
+                        <label className="grid gap-1.5 text-xs font-medium text-muted-foreground">
+                            Ledger account
+                            <Select
+                                value={accountId}
+                                onChange={changeAccount}
+                                className="w-full bg-background text-sm text-foreground"
+                                placeholder="Select ledger account"
+                                options={accounts.map((item) => ({
+                                    value: String(item.id),
+                                    label: `${item.code} · ${item.name}`,
+                                }))}
+                            />
+                        </label>
+                        <label className="grid gap-1.5 text-xs font-medium text-muted-foreground">
+                            Fiscal period
+                            <Select
+                                value={periodId}
+                                onChange={changePeriod}
+                                className="w-full bg-background text-sm text-foreground"
+                                placeholder="All periods"
+                                options={[
+                                    { value: '', label: 'All periods' },
+                                    ...fiscalPeriods.map((period) => ({
+                                        value: String(period.id),
+                                        label: period.name,
+                                    })),
+                                ]}
+                            />
+                        </label>
+                    </div>
+                </section>
+
+                {account && (
+                    <div className="grid gap-3 sm:grid-cols-3">
+                        {[
+                            {
+                                label: 'Total debits',
+                                amount: totalDebits,
+                                icon: ArrowDownLeft,
+                                color: 'text-sky-600 bg-sky-500/10',
+                            },
+                            {
+                                label: 'Total credits',
+                                amount: totalCredits,
+                                icon: ArrowUpRight,
+                                color: 'text-violet-600 bg-violet-500/10',
+                            },
+                            {
+                                label: 'Closing balance',
+                                amount: closingBalance,
+                                icon: Scale,
+                                color: 'text-primary bg-primary/10',
+                            },
+                        ].map(({ label, amount, icon: Icon, color }) => (
+                            <div
+                                key={label}
+                                className="flex items-center gap-3 rounded-xl border bg-card p-4 shadow-sm"
+                            >
+                                <div
+                                    className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${color}`}
+                                >
+                                    <Icon className="size-5" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-xs text-muted-foreground">
                                         {label}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {entries.length > 0 ? (
-                                entries.map((entry) => (
-                                    <tr
-                                        key={entry.id}
-                                        className="border-b even:bg-muted/50"
-                                    >
-                                        <td className="px-3 py-2 text-left">
-                                            {formatDate(entry.voucher_date)}
-                                        </td>
-                                        <td className="px-3 py-2 text-left">
-                                            {entry.voucher_no}
-                                        </td>
-                                        <td className="px-3 py-2 text-left">
-                                            {entry.entry_description || '-'}
-                                        </td>
-                                        <td className="px-3 py-2 text-right tabular-nums">
-                                            {formatBDTCurrency(entry.debit)}
-                                        </td>
-                                        <td className="px-3 py-2 text-right tabular-nums">
-                                            {formatBDTCurrency(entry.credit)}
-                                        </td>
-                                        <td className="px-3 py-2 text-right tabular-nums">
-                                            {formatBDTCurrency(
-                                                entry.running_balance,
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="px-3 py-8 text-center text-muted-foreground"
-                                    >
-                                        No ledger entries found.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                    </p>
+                                    <p className="truncate text-lg font-semibold tabular-nums">
+                                        {formatBDTCurrency(amount, false)}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {account ? (
+                    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/30 px-4 py-3">
+                            <div>
+                                <h2 className="text-sm font-semibold">
+                                    Ledger activity
+                                </h2>
+                                <p className="text-xs text-muted-foreground">
+                                    {account.code} · {account.name}
+                                </p>
+                            </div>
+                            <span className="rounded-full border bg-background px-2.5 py-1 text-xs text-muted-foreground">
+                                {periodId
+                                    ? fiscalPeriods.find(
+                                          (period) =>
+                                              String(period.id) === periodId,
+                                      )?.name
+                                    : 'All periods'}
+                            </span>
+                        </div>
+                        {entries.length > 0 ? (
+                            <div className="max-h-[calc(100vh-430px)] min-h-64 overflow-auto">
+                                <table className="w-full min-w-[850px] border-collapse text-sm">
+                                    <thead className="sticky top-0 z-10 bg-muted/95 text-xs text-muted-foreground backdrop-blur">
+                                        <tr>
+                                            {[
+                                                ['Date', 'text-left'],
+                                                ['Voucher', 'text-left'],
+                                                ['Description', 'text-left'],
+                                                ['Debit', 'text-right'],
+                                                ['Credit', 'text-right'],
+                                                ['Balance', 'text-right'],
+                                            ].map(([label, align]) => (
+                                                <th
+                                                    key={label}
+                                                    className={`border-b px-4 py-3 font-semibold ${align}`}
+                                                >
+                                                    {label}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/70">
+                                        {entries.map((entry) => (
+                                            <tr
+                                                key={entry.id}
+                                                className="transition-colors hover:bg-muted/30"
+                                            >
+                                                <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
+                                                    {formatDate(
+                                                        entry.voucher_date,
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 font-mono text-xs font-medium text-primary">
+                                                    {entry.voucher_no}
+                                                </td>
+                                                <td className="max-w-sm truncate px-4 py-3">
+                                                    {entry.entry_description ||
+                                                        '-'}
+                                                </td>
+                                                <td className="px-4 py-3 text-right tabular-nums">
+                                                    {formatBDTCurrency(
+                                                        entry.debit,
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-right tabular-nums">
+                                                    {formatBDTCurrency(
+                                                        entry.credit,
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-semibold tabular-nums">
+                                                    {formatBDTCurrency(
+                                                        entry.running_balance,
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <ResourceEmptyState
+                                title="No ledger activity"
+                                description="There are no posted voucher entries for this account and period."
+                            />
+                        )}
+                    </div>
+                ) : (
+                    <ResourceEmptyState
+                        title="No ledger accounts available"
+                        description="Create or activate a ledger account before viewing its general ledger."
+                    />
+                )}
             </div>
         </CustomAuthLayout>
     );

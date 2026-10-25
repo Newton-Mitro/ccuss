@@ -176,6 +176,82 @@ it('uses one fiscal period selector for trial balance and defaults to an open pe
             ->missing('selectedFiscalYear'));
 });
 
+it('defaults trial balance to the open period containing today instead of a future open period', function () {
+    $fixture = reportFixture();
+    $today = now();
+    $fiscalYearStart = $today->month >= 7
+        ? $today->copy()->month(7)->startOfMonth()
+        : $today->copy()->subYear()->month(7)->startOfMonth();
+    $fiscalYearEnd = $fiscalYearStart->copy()->addYear()->subDay();
+    $fiscalYear = app(FiscalYearService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'name' => $fiscalYearStart->format('Y').'-'.$fiscalYearEnd->format('Y'),
+        'start_date' => $fiscalYearStart->toDateString(),
+        'end_date' => $fiscalYearEnd->toDateString(),
+    ]);
+    $currentPeriod = app(FiscalPeriodService::class)->create($fiscalYear, [
+        'name' => $today->format('F Y'),
+        'start_date' => $today->copy()->startOfMonth()->toDateString(),
+        'end_date' => $today->copy()->endOfMonth()->toDateString(),
+        'status' => 'OPEN',
+    ]);
+    $futurePeriodStart = $today->copy()->addMonth()->startOfMonth();
+    app(FiscalPeriodService::class)->create($fiscalYear, [
+        'name' => $futurePeriodStart->format('F Y'),
+        'start_date' => $futurePeriodStart->toDateString(),
+        'end_date' => $futurePeriodStart->copy()->endOfMonth()->toDateString(),
+        'status' => 'OPEN',
+    ]);
+    grantReportPermission($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-reports.trial-balance'))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->where('selectedFiscalPeriod', $currentPeriod->id));
+});
+
+it('defaults other accounting reports to the open fiscal year containing today', function () {
+    $fixture = reportFixture();
+    $today = now();
+    $currentYearStart = $today->month >= 7
+        ? $today->copy()->month(7)->startOfMonth()
+        : $today->copy()->subYear()->month(7)->startOfMonth();
+    $currentYearEnd = $currentYearStart->copy()->addYear()->subDay();
+    $currentYear = app(FiscalYearService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'name' => $currentYearStart->format('Y').'-'.$currentYearEnd->format('Y'),
+        'start_date' => $currentYearStart->toDateString(),
+        'end_date' => $currentYearEnd->toDateString(),
+        'status' => 'OPEN',
+    ]);
+    $futureYearStart = $currentYearEnd->copy()->addDay();
+    $futureYearEnd = $futureYearStart->copy()->addYear()->subDay();
+    app(FiscalYearService::class)->create([
+        'organization_id' => $fixture['organization']->id,
+        'name' => $futureYearStart->format('Y').'-'.$futureYearEnd->format('Y'),
+        'start_date' => $futureYearStart->toDateString(),
+        'end_date' => $futureYearEnd->toDateString(),
+        'status' => 'OPEN',
+    ]);
+    grantReportPermission($fixture['user']);
+
+    foreach ([
+        'financial-reports.profit-loss',
+        'financial-reports.balance-sheet',
+        'financial-reports.cash-flow',
+        'financial-reports.shareholders-equity',
+    ] as $routeName) {
+        $this->actingAs($fixture['user'])
+            ->withSession(['active_organization_id' => $fixture['organization']->id])
+            ->get(route($routeName))
+            ->assertSuccessful()
+            ->assertInertia(fn ($page) => $page
+                ->where('selectedFiscalYear', $currentYear->id));
+    }
+});
+
 it('builds trial balance from posted vouchers and excludes drafts', function () {
     $fixture = reportFixture();
     $voucherService = app(VoucherService::class);

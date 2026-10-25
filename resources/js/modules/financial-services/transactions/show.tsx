@@ -7,8 +7,8 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Check, RotateCcw } from 'lucide-react';
 import { route } from 'ziggy-js';
@@ -181,11 +181,24 @@ export default function FinancialTransactionShow() {
                         <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                             {transaction.voucher.entries?.map(
                                 (entry, index) => (
-                                    <div key={index}>
-                                        {entry.account?.code ?? '-'} · Debit{' '}
-                                        {formatBDTCurrency(entry.debit, false)}{' '}
-                                        · Credit{' '}
-                                        {formatBDTCurrency(entry.credit, false)}
+                                    <div
+                                        key={index}
+                                        className="flex flex-wrap justify-between gap-x-4"
+                                    >
+                                        <span>
+                                            {entry.account?.code ?? '-'} ·{' '}
+                                            {Number(entry.debit) > 0
+                                                ? 'Debit'
+                                                : 'Credit'}
+                                        </span>
+                                        <span className="tabular-nums">
+                                            {formatBDTCurrency(
+                                                Number(entry.debit) > 0
+                                                    ? entry.debit
+                                                    : entry.credit,
+                                                false,
+                                            )}
+                                        </span>
                                     </div>
                                 ),
                             )}

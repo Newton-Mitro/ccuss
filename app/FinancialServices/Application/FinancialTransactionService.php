@@ -107,7 +107,13 @@ class FinancialTransactionService
         ?int $branchId = null,
     ): FinancialTransaction {
         return DB::transaction(function () use ($data, $entries, $organizationId, $userId, $branchId) {
-            $total = collect($entries)->sum(fn (array $entry): float => (float) $entry['amount']);
+            $debitTotal = collect($entries)
+                ->where('direction', 'DEBIT')
+                ->sum(fn (array $entry): float => (float) $entry['amount']);
+            $creditTotal = collect($entries)
+                ->where('direction', 'CREDIT')
+                ->sum(fn (array $entry): float => (float) $entry['amount']);
+            $total = $debitTotal;
             $existing = $this->findIdempotentTransaction($data['idempotency_key'] ?? null, $organizationId);
             if ($existing) {
                 $existingEntries = $existing->entries->sortBy('line_no')->values();
@@ -163,13 +169,6 @@ class FinancialTransactionService
                     throw new RuntimeException('Transactions cannot be created for this account status.');
                 }
             }
-
-            $debitTotal = collect($entries)
-                ->where('direction', 'DEBIT')
-                ->sum(fn (array $entry): float => (float) $entry['amount']);
-            $creditTotal = collect($entries)
-                ->where('direction', 'CREDIT')
-                ->sum(fn (array $entry): float => (float) $entry['amount']);
 
             if ($total <= 0 || abs($debitTotal - $creditTotal) > 0.0001) {
                 throw new RuntimeException('Financial transaction entries must be balanced and greater than zero.');

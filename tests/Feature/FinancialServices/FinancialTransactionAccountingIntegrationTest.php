@@ -1,9 +1,9 @@
 <?php
 
 use App\FinancialServices\Application\FinancialTransactionService;
+use App\FinancialServices\Models\DepositProductAccountMapping;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
-use App\FinancialServices\Models\DepositProductAccountMapping;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\GeneralAccounting\Models\AccountGroup;
 use App\GeneralAccounting\Models\FiscalPeriod;
@@ -44,7 +44,7 @@ it('returns a validation error and leaves a transaction pending when the payout 
         $user->id,
     );
 
-    expect(fn() => $service->post($transaction, $organization->id, $user->id))
+    expect(fn () => $service->post($transaction, $organization->id, $user->id))
         ->toThrow(ValidationException::class, 'does not have enough available balance');
 
     expect($transaction->fresh()->status)->toBe('PENDING')
@@ -74,14 +74,14 @@ it('links a mapped posted transaction to one voucher and reverses the link', fun
     expect(AuditLog::query()->where('auditable_type', FinancialTransaction::class)->where('auditable_id', $transaction->id)->where('organization_id', $organization->id)->exists())->toBeTrue()
         ->and(AuditLog::query()->where('auditable_type', Voucher::class)->where('auditable_id', $voucher->id)->where('organization_id', $organization->id)->exists())->toBeTrue();
 
-    expect(fn() => $service->post($transaction->fresh(), $organization->id, $user->id))
+    expect(fn () => $service->post($transaction->fresh(), $organization->id, $user->id))
         ->toThrow(RuntimeException::class, 'Only pending');
 
     $service->reverse($transaction->fresh(), $organization->id);
     expect($voucher->fresh()->status)->toBe('REVERSED');
 });
 
-it('summarizes a teller cash transaction using its balanced line total', function () {
+it('summarizes a teller cash transaction using one side of its balanced entries', function () {
     $organization = Organization::factory()->create();
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create([
@@ -179,7 +179,7 @@ it('summarizes a teller cash transaction using its balanced line total', functio
     $service->post($transaction, $organization->id, $user->id);
     $voucher = $transaction->fresh()->voucher;
 
-    expect($transaction->amount)->toBe('500.0000')
+    expect($transaction->amount)->toBe('250.0000')
         ->and($voucher)->not->toBeNull()
         ->and((float) $voucher->entries->sum('debit'))->toBe(250.0)
         ->and((float) $voucher->entries->sum('credit'))->toBe(250.0)
