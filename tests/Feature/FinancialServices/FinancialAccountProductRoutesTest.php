@@ -840,6 +840,50 @@ it('searches loan applications and exposes draft edit access to permitted users'
             ->where('applications.data.0.application_no', 'LA-000001'));
 });
 
+it('calculates account statements using posted transactions only', function () {
+    $fixture = createFinancialAccountProductFixture('SAVINGS');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.accounts.view',
+    ]);
+
+    foreach ([
+        ['status' => 'POSTED', 'amount' => 100],
+        ['status' => 'PENDING', 'amount' => 50],
+    ] as $transactionData) {
+        $transaction = \App\FinancialServices\Models\FinancialTransaction::factory()
+            ->create([
+                'organization_id' => $fixture['organization']->id,
+                'transaction_date' => now()->toDateString(),
+                'transaction_type' => 'DEPOSIT',
+                'status' => $transactionData['status'],
+                'amount' => $transactionData['amount'],
+            ]);
+        $transaction->entries()->create([
+            'financial_account_id' => $fixture['account']->id,
+            'direction' => 'CREDIT',
+            'amount' => $transactionData['amount'],
+            'line_no' => 2,
+        ]);
+    }
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('financial-account-statements.index', [
+            'account_id' => $fixture['account']->id,
+            'date' => now()->toDateString(),
+            'period' => 'monthly',
+        ]))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('financial-services/accounts/statement')
+            ->has('account.transactions', 1)
+            ->where('account.transactions.0.status', 'POSTED')
+            ->where('totals.credit', 100)
+            ->where('totals.count', 1)
+            ->where('openingBalance', 0)
+            ->where('closingBalance', 100));
+});
+
 it('saves loan application details and private supporting documents with the draft', function () {
     $fixture = createFinancialAccountProductFixture('LOAN');
     grantFinancialAccountProductPermissions($fixture['user'], [

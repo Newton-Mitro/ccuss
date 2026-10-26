@@ -52,6 +52,43 @@ it('returns a validation error and leaves a transaction pending when the payout 
         ->and((float) $loanAccount->fresh()->balance)->toBe(0.0);
 });
 
+it('cancels pending transactions and releases their idempotency key', function () {
+    $organization = Organization::factory()->create();
+    $user = User::factory()->create(['organization_id' => $organization->id]);
+    $debitAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'account_type' => 'CASH',
+    ]);
+    $creditAccount = FinancialAccount::factory()->active()->create([
+        'organization_id' => $organization->id,
+        'account_type' => 'SAVINGS',
+    ]);
+    $service = app(FinancialTransactionService::class);
+    $transaction = $service->createMultiLine(
+        [
+            'transaction_type' => 'TRANSFER',
+            'transaction_date' => now()->toDateString(),
+            'idempotency_key' => 'cancel-pending-transaction-test',
+        ],
+        [
+            ['financial_account_id' => $debitAccount->id, 'direction' => 'DEBIT', 'amount' => 100],
+            ['financial_account_id' => $creditAccount->id, 'direction' => 'CREDIT', 'amount' => 100],
+        ],
+        $organization->id,
+        $user->id,
+    );
+
+    $service->cancel($transaction, $organization->id);
+
+    expect($transaction->fresh()->status)->toBe('CANCELLED')
+        ->and($transaction->fresh()->idempotency_key)->toBeNull()
+        ->and((float) $debitAccount->fresh()->balance)->toBe(0.0)
+        ->and((float) $creditAccount->fresh()->balance)->toBe(0.0);
+
+    expect(fn () => $service->cancel($transaction->fresh(), $organization->id))
+        ->toThrow(RuntimeException::class, 'Only pending');
+});
+
 it('links a mapped posted transaction to one voucher and reverses the link', function () {
     $organization = Organization::factory()->create();
     $user = User::factory()->create(['organization_id' => $organization->id]);

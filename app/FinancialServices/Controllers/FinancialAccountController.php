@@ -382,12 +382,14 @@ class FinancialAccountController extends Controller
                     return $increases ? $amount : -$amount;
                 };
                 $openingBalance = $account->transactions()
+                    ->where('financial_transactions.status', 'POSTED')
                     ->where('transaction_date', '<', $periodStart)
                     ->with('entries')
                     ->get()
                     ->flatMap->entries
                     ->sum($entryDelta);
                 $transactions = $account->transactions()
+                    ->where('financial_transactions.status', 'POSTED')
                     ->whereBetween('transaction_date', [$periodStart, $periodEnd])
                     ->with('entries')
                     ->orderBy('transaction_date')

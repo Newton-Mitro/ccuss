@@ -1,6 +1,6 @@
-import { FinancialAccountSearchInput } from '@/modules/financial-services/components/financial-account-search-input';
 import InputError from '@/components/input-error';
 import { StatusBadge } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,11 +9,13 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem } from '@/types';
+import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
+import { FinancialAccountSearchInput } from '@/modules/financial-services/components/financial-account-search-input';
 import type {
     LoanApplicationShowPageProps,
     LoanCollateral,
 } from '@/modules/financial-services/types/financial-services';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
@@ -41,7 +43,15 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
-import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
+
+function getLocalDate() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
 
 export default function LoanApplicationShow() {
     const {
@@ -49,6 +59,7 @@ export default function LoanApplicationShow() {
         can_view_supporting_documents: canViewSupportingDocuments,
         can_submit_protection_claim: canSubmitProtectionClaim,
         can_manage_protection_claims: canManageProtectionClaims,
+        can_create_disbursement: canCreateDisbursement,
         payout_accounts,
     } = usePage<LoanApplicationShowPageProps>().props;
 
@@ -119,6 +130,22 @@ export default function LoanApplicationShow() {
     } = useForm({
         payout_account_id: '',
         decision_note: '',
+    });
+
+    const {
+        data: disbursementData,
+        setData: setDisbursementData,
+        post: postDisbursement,
+        processing: disbursementProcessing,
+        errors: disbursementErrors,
+    } = useForm({
+        idempotency_key: crypto.randomUUID(),
+        loan_account_id: String(application.loan_account?.id ?? ''),
+        payout_account_id: '',
+        amount: '',
+        disbursed_at: getLocalDate(),
+        reference: '',
+        note: '',
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -451,6 +478,28 @@ export default function LoanApplicationShow() {
     const hasOpenProtectionClaim = protectionClaims.some((claim) =>
         ['SUBMITTED', 'APPROVED'].includes(claim.status),
     );
+    const remainingDisbursementAmount = Math.max(
+        0,
+        Number(application.loan_account?.principal_amount ?? 0) -
+            Number(application.loan_account?.disbursed_amount ?? 0),
+    );
+    const canDisburse =
+        canCreateDisbursement &&
+        application.status === 'APPROVED' &&
+        application.loan_account !== null &&
+        application.loan_account !== undefined &&
+        ['APPROVED', 'PARTIALLY_DISBURSED'].includes(
+            application.loan_account.status,
+        ) &&
+        remainingDisbursementAmount > 0;
+
+    const submitDisbursement = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        postDisbursement(
+            route('financial-transactions.loan-disbursement.store'),
+            { preserveScroll: true },
+        );
+    };
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -1107,6 +1156,208 @@ export default function LoanApplicationShow() {
                                             </div>
                                         </div>
                                     ))}
+                                </div>
+                            )}
+
+                            {canDisburse && (
+                                <div className="border-t bg-muted/10 p-4 sm:p-5">
+                                    <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                                        <div>
+                                            <h3 className="text-sm font-semibold">
+                                                Record a disbursement
+                                            </h3>
+                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                                Create a draft disbursement for
+                                                this loan account.
+                                            </p>
+                                        </div>
+                                        <p className="text-xs font-medium text-muted-foreground">
+                                            Remaining:{' '}
+                                            <span className="text-foreground tabular-nums">
+                                                {formatBDTCurrency(
+                                                    remainingDisbursementAmount,
+                                                    false,
+                                                )}
+                                            </span>
+                                        </p>
+                                    </div>
+
+                                    {payout_accounts.length > 0 ? (
+                                        <form
+                                            onSubmit={submitDisbursement}
+                                            className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                                        >
+                                            <div className="min-w-0 space-y-1.5">
+                                                <Label htmlFor="disbursement-amount">
+                                                    Amount
+                                                    <span className="ml-1 text-destructive">
+                                                        *
+                                                    </span>
+                                                </Label>
+                                                <Input
+                                                    id="disbursement-amount"
+                                                    type="number"
+                                                    min="0.0001"
+                                                    max={
+                                                        remainingDisbursementAmount
+                                                    }
+                                                    step="0.0001"
+                                                    required
+                                                    className="tabular-nums"
+                                                    value={
+                                                        disbursementData.amount
+                                                    }
+                                                    onChange={(event) =>
+                                                        setDisbursementData(
+                                                            'amount',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <InputError
+                                                    message={
+                                                        disbursementErrors.amount
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="min-w-0 space-y-1.5">
+                                                <Label htmlFor="disbursement-payout-account">
+                                                    Payout account
+                                                    <span className="ml-1 text-destructive">
+                                                        *
+                                                    </span>
+                                                </Label>
+                                                <Select
+                                                    value={
+                                                        disbursementData.payout_account_id
+                                                    }
+                                                    onChange={(value) =>
+                                                        setDisbursementData(
+                                                            'payout_account_id',
+                                                            value,
+                                                        )
+                                                    }
+                                                    options={[
+                                                        {
+                                                            value: '',
+                                                            label: 'Select cash or bank account',
+                                                        },
+                                                        ...payout_accounts.map(
+                                                            (account) => ({
+                                                                value: String(
+                                                                    account.id,
+                                                                ),
+                                                                label: `${account.account_no} - ${account.name ?? account.account_type}`,
+                                                            }),
+                                                        ),
+                                                    ]}
+                                                />
+                                                <InputError
+                                                    message={
+                                                        disbursementErrors.payout_account_id
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="min-w-0 space-y-1.5">
+                                                <Label htmlFor="disbursement-date">
+                                                    Disbursement date
+                                                    <span className="ml-1 text-destructive">
+                                                        *
+                                                    </span>
+                                                </Label>
+                                                <AppDatePicker
+                                                    id="disbursement-date"
+                                                    value={
+                                                        disbursementData.disbursed_at
+                                                    }
+                                                    required
+                                                    onChange={(value) =>
+                                                        setDisbursementData(
+                                                            'disbursed_at',
+                                                            value,
+                                                        )
+                                                    }
+                                                />
+                                                <InputError
+                                                    message={
+                                                        disbursementErrors.disbursed_at
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="min-w-0 space-y-1.5">
+                                                <Label htmlFor="disbursement-reference">
+                                                    Reference
+                                                </Label>
+                                                <Input
+                                                    id="disbursement-reference"
+                                                    value={
+                                                        disbursementData.reference
+                                                    }
+                                                    maxLength={100}
+                                                    placeholder="Optional reference"
+                                                    onChange={(event) =>
+                                                        setDisbursementData(
+                                                            'reference',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <InputError
+                                                    message={
+                                                        disbursementErrors.reference
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="min-w-0 space-y-1.5">
+                                                <Label htmlFor="disbursement-note">
+                                                    Note
+                                                </Label>
+                                                <Input
+                                                    id="disbursement-note"
+                                                    value={
+                                                        disbursementData.note
+                                                    }
+                                                    maxLength={1000}
+                                                    placeholder="Optional note"
+                                                    onChange={(event) =>
+                                                        setDisbursementData(
+                                                            'note',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                />
+                                                <InputError
+                                                    message={
+                                                        disbursementErrors.note
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="flex justify-end sm:col-span-2 lg:col-span-1">
+                                                <Button
+                                                    type="submit"
+                                                    disabled={
+                                                        disbursementProcessing
+                                                    }
+                                                >
+                                                    <ArrowDownToLine className="mr-1.5 size-4" />
+                                                    {disbursementProcessing
+                                                        ? 'Creating...'
+                                                        : 'Create disbursement'}
+                                                </Button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <p className="rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-muted-foreground">
+                                            No active cash or bank payout
+                                            account is available for
+                                            disbursement.
+                                        </p>
+                                    )}
                                 </div>
                             )}
                         </div>

@@ -684,6 +684,67 @@ class FinancialTransactionService
         });
     }
 
+    public function cancel(FinancialTransaction $transaction, int $organizationId): FinancialTransaction
+    {
+        return DB::transaction(function () use ($transaction, $organizationId) {
+            $transaction = FinancialTransaction::query()
+                ->lockForUpdate()
+                ->findOrFail($transaction->id);
+
+            if ($transaction->organization_id !== $organizationId) {
+                abort(404);
+            }
+
+            if ($transaction->status !== 'PENDING') {
+                throw new RuntimeException('Only pending transactions can be cancelled.');
+            }
+
+            $transaction->load('source');
+
+            if ($transaction->source instanceof LoanDisbursement) {
+                $transaction->source->update(['status' => 'CANCELLED']);
+            }
+
+            if ($transaction->source instanceof LoanRepayment) {
+                $transaction->source->update(['status' => 'CANCELLED']);
+
+                $claim = LoanProtectionClaim::query()
+                    ->where('financial_transaction_id', $transaction->id)
+                    ->where('status', 'APPROVED')
+                    ->lockForUpdate()
+                    ->first();
+                $claim?->update([
+                    'status' => 'SUBMITTED',
+                    'payout_amount' => null,
+                    'payout_account_id' => null,
+                    'financial_transaction_id' => null,
+                    'reviewed_by' => null,
+                    'reviewed_at' => null,
+                    'decision_note' => null,
+                ]);
+            }
+
+            if ($transaction->source instanceof RecurringDepositInstallment) {
+                $transaction->source->update(['financial_transaction_id' => null]);
+            }
+
+            if ($transaction->source instanceof InterestProvision) {
+                $transaction->source->update(['financial_transaction_id' => null]);
+            }
+
+            if ($transaction->source instanceof ShareDividendAllocation) {
+                $transaction->source->update(['financial_transaction_id' => null]);
+            }
+
+            $transaction->update([
+                'status' => 'CANCELLED',
+                'idempotency_key' => null,
+            ]);
+
+            return $transaction->fresh(['entries.financialAccount']);
+        });
+    }
+
     public function queryForOrganization(int $organizationId): Builder
     {
         return FinancialTransaction::query()->where('organization_id', $organizationId);

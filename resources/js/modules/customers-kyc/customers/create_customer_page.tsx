@@ -162,7 +162,7 @@ const Create = () => {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Customer" />
 
-            <div className="mx-auto w-full max-w-400 space-y-5 pb-24">
+            <div className="mx-auto w-full max-w-400 space-y-5 pb-28">
                 {/* Page header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-start gap-3">
@@ -654,7 +654,7 @@ const Create = () => {
                     </section>
 
                     {/* Sticky form actions */}
-                    <div className="fixed right-0 bottom-0 left-0 z-30 border-t border-border bg-background/95 shadow-lg backdrop-blur-md">
+                    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background shadow-lg md:left-[var(--app-sidebar-offset,0px)]">
                         <div className="mx-auto flex w-full max-w-400 flex-col-reverse gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                             <p className="hidden text-xs text-muted-foreground md:block">
                                 Review the customer details before submitting.

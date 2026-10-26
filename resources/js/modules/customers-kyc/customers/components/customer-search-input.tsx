@@ -9,7 +9,7 @@ import { route } from 'ziggy-js';
 interface CustomerSearchInputProps {
     onSelect: (customer: Customer) => void;
     clearSelectedCustomer?: () => void;
-    initialCustomer?: Customer;
+    initialCustomer?: Pick<Customer, 'id' | 'name'>;
     label?: string;
     placeholder?: string; // <-- new prop
 }

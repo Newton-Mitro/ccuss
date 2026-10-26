@@ -467,7 +467,7 @@ it('searches customer deposit accounts by account and holder details', function 
         ->assertJsonCount(1);
 });
 
-it('restores the selected customer account on the customer deposit page', function () {
+it('shows the last posted deposit date for customer accounts', function () {
     $fixture = tellerCashTransactionFixture();
     grantTellerCashTransactionPermission($fixture['user']);
     $customer = Customer::factory()->individualMale()->create([
@@ -483,6 +483,20 @@ it('restores the selected customer account on the customer deposit page', functi
         'account_no' => 'SAV-RESTORE-001',
         'name' => 'Customer Deposit Account',
     ]);
+    $latestDepositDate = now()->subDays(2)->setTime(12, 0);
+    $deposit = FinancialTransaction::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'transaction_type' => 'DEPOSIT',
+        'transaction_date' => $latestDepositDate,
+        'status' => 'POSTED',
+    ]);
+    FinancialTransactionEntry::create([
+        'financial_transaction_id' => $deposit->id,
+        'financial_account_id' => $account->id,
+        'direction' => 'CREDIT',
+        'amount' => 50,
+        'line_no' => 1,
+    ]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -494,7 +508,8 @@ it('restores the selected customer account on the customer deposit page', functi
         ->assertInertia(fn ($page) => $page
             ->where('customer.id', $customer->id)
             ->where('selectedAccount.id', $account->id)
-            ->where('customerAccounts.0.id', $account->id));
+            ->where('customerAccounts.0.id', $account->id)
+            ->where('customerAccounts.0.last_deposit_date', $latestDepositDate->toDateTimeString()));
 });
 
 it('shows the remaining monthly minimum deposit after checking posted account transactions', function () {
@@ -786,7 +801,7 @@ it('lists real customer loan, protection, deposit, and fine obligations', functi
         'loan_account_id' => $loan->id,
         'schedule_version' => 1,
         'installment_no' => 1,
-        'due_date' => now()->toDateString(),
+        'due_date' => now()->subMonth()->toDateString(),
         'opening_principal' => 1000,
         'scheduled_principal' => 100,
         'scheduled_interest' => 20,
@@ -872,10 +887,13 @@ it('lists real customer loan, protection, deposit, and fine obligations', functi
             ->where('obligations', fn ($obligations) => collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan repayment' && $row['amount'] === 100)
                 && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan interest' && $row['amount'] === 20)
                 && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan fine' && $row['amount'] === 10)
-                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan protection fee' && $row['amount'] === 5)
+                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan protection scheme fee' && $row['amount'] === 5)
                 && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Loan protection renew fee' && $row['amount'] === 50)
                 && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Deposit contribution' && $row['amount'] === 100)
-                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Deposit fine' && $row['amount'] === 25)));
+                && collect($obligations)->contains(fn ($row) => $row['due_type'] === 'Deposit fine' && $row['amount'] === 25))
+            ->where('totals.current_due', 50)
+            ->where('totals.previous_due', 260)
+            ->where('totals.total_due', 310));
 });
 
 it('creates a pending teller cash deposit for an open session', function () {

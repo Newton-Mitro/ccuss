@@ -1,23 +1,29 @@
+import DataTablePagination from '@/components/data-table-pagination';
 import {
     ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionsPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Eye } from 'lucide-react';
+import { Check, Eye, RotateCcw, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '@/components/data-table-pagination';
 
 export default function FinancialTransactionIndex() {
-    const { transactions, filters } =
-        usePage<FinancialTransactionsPageProps>().props;
+    const {
+        transactions,
+        filters,
+        can_post: canPost,
+        can_reverse: canReverse,
+    } = usePage<FinancialTransactionsPageProps>().props;
     const [search, setSearch] = useState(filters.search ?? '');
 
     useEffect(() => {
@@ -30,6 +36,65 @@ export default function FinancialTransactionIndex() {
         }, 350);
         return () => clearTimeout(timeout);
     }, [search]);
+
+    const handleAction = async (
+        transaction: FinancialTransactionsPageProps['transactions']['data'][number],
+        action: 'post' | 'cancel' | 'reverse',
+    ) => {
+        const actionDetails = {
+            post: {
+                title: 'Post this transaction?',
+                text: `Post ${transaction.transaction_no}? This will move it to the ledger.`,
+                confirmButtonText: 'Post transaction',
+                route: 'financial-transactions.post',
+            },
+            cancel: {
+                title: 'Cancel this transaction?',
+                text: `Cancel pending transaction ${transaction.transaction_no}?`,
+                confirmButtonText: 'Cancel transaction',
+                route: 'financial-transactions.cancel',
+            },
+            reverse: {
+                title: 'Reverse this transaction?',
+                text: `Reverse ${transaction.transaction_no}? This action affects the posted ledger.`,
+                confirmButtonText: 'Reverse transaction',
+                route: 'financial-transactions.reverse',
+            },
+        }[action];
+        const result = await appSwal.fire({
+            title: actionDetails.title,
+            text: actionDetails.text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: actionDetails.confirmButtonText,
+            cancelButtonText: 'Keep transaction',
+        });
+
+        if (!result.isConfirmed) return;
+
+        router.post(
+            route(actionDetails.route, transaction.id),
+            {},
+            {
+                preserveScroll: true,
+                onError: (errors) => {
+                    const messages = Object.values(errors)
+                        .flatMap((error) =>
+                            Array.isArray(error) ? error : [error],
+                        )
+                        .filter(Boolean);
+                    void appSwal.fire({
+                        title: `Unable to ${action} transaction`,
+                        text:
+                            messages.join(' ') ||
+                            'Please review the transaction and try again.',
+                        icon: 'error',
+                    });
+                },
+            },
+        );
+    };
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Transactions', href: route('financial-transactions.index') },
@@ -138,7 +203,67 @@ export default function FinancialTransactionIndex() {
                                             </StatusBadge>
                                         </td>
                                         <td className="px-2 py-1">
-                                            <div className="flex justify-end">
+                                            <div className="flex justify-end gap-1 whitespace-nowrap">
+                                                {transaction.status ===
+                                                    'PENDING' &&
+                                                    canPost && (
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() =>
+                                                                handleAction(
+                                                                    transaction,
+                                                                    'post',
+                                                                )
+                                                            }
+                                                            title="Post transaction"
+                                                            aria-label={`Post transaction ${transaction.transaction_no}`}
+                                                        >
+                                                            <Check className="size-4" />
+                                                            Post
+                                                        </Button>
+                                                    )}
+                                                {transaction.status ===
+                                                    'PENDING' &&
+                                                    canReverse && (
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() =>
+                                                                handleAction(
+                                                                    transaction,
+                                                                    'cancel',
+                                                                )
+                                                            }
+                                                            title="Cancel transaction"
+                                                            aria-label={`Cancel transaction ${transaction.transaction_no}`}
+                                                        >
+                                                            <X className="size-4" />
+                                                            Cancel
+                                                        </Button>
+                                                    )}
+                                                {transaction.status ===
+                                                    'POSTED' &&
+                                                    canReverse && (
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() =>
+                                                                handleAction(
+                                                                    transaction,
+                                                                    'reverse',
+                                                                )
+                                                            }
+                                                            title="Reverse transaction"
+                                                            aria-label={`Reverse transaction ${transaction.transaction_no}`}
+                                                        >
+                                                            <RotateCcw className="size-4" />
+                                                            Reverse
+                                                        </Button>
+                                                    )}
                                                 <Link
                                                     href={route(
                                                         'financial-transactions.show',

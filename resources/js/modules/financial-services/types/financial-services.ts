@@ -142,6 +142,7 @@ export interface LoanApplication {
         id: number;
         loan_no: string;
         principal_amount?: string | number;
+        disbursed_amount?: string | number;
         status: string;
         protection_policy?: LoanProtectionPolicy | null;
         protection_claims?: LoanProtectionClaim[];
@@ -381,6 +382,7 @@ export interface LoanApplicationShowPageProps extends SharedData {
     can_view_supporting_documents: boolean;
     can_submit_protection_claim: boolean;
     can_manage_protection_claims: boolean;
+    can_create_disbursement: boolean;
     payout_accounts: {
         id: number;
         account_no: string;
@@ -439,6 +441,8 @@ export interface FinancialTransactionsPageProps extends SharedData {
         per_page: number;
     };
     filters: ListFilters;
+    can_post: boolean;
+    can_reverse: boolean;
 }
 
 export interface FinancialTransactionPageProps extends SharedData {

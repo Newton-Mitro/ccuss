@@ -2,8 +2,9 @@ import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
-import type { LoanApplicationFormPageProps } from '@/modules/financial-services/types/financial-services';
+import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 import { FormErrors } from '@/modules/financial-services/loan-applications/types';
+import type { LoanApplicationFormPageProps } from '@/modules/financial-services/types/financial-services';
 
 type Props = {
     customers: LoanApplicationFormPageProps['customers'];
@@ -63,16 +64,15 @@ export default function LoanBasicDetails(props: Props) {
                     <Label>
                         Customer <span className="text-destructive">*</span>
                     </Label>
-                    <Select
-                        value={customerId}
-                        onChange={onCustomerChange}
-                        options={[
-                            { value: '', label: 'Select customer' },
-                            ...customers.map((customer) => ({
-                                value: String(customer.id),
-                                label: `${customer.customer_no} - ${customer.name}`,
-                            })),
-                        ]}
+                    <CustomerSearchInput
+                        initialCustomer={customers.find(
+                            (customer) => String(customer.id) === customerId,
+                        )}
+                        onSelect={(customer) =>
+                            onCustomerChange(String(customer.id))
+                        }
+                        clearSelectedCustomer={() => onCustomerChange('')}
+                        placeholder="Search customer..."
                     />
                     <InputError message={errors.customer_id} />
                 </div>

@@ -481,6 +481,7 @@ class CashMovementController extends Controller
 
         $selectedCustomer = $selectedAccount?->customer;
         $customerAccounts = collect([]);
+        $lastDepositDates = collect([]);
         $obligations = [];
         $totals = [
             'current_due' => 0,
@@ -516,6 +517,19 @@ class CashMovementController extends Controller
                     ->filter(fn (FinancialAccount $account) => in_array($account->account_type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN'], true))
                     ->values();
 
+                if ($customerAccounts->isNotEmpty()) {
+                    $lastDepositDates = FinancialTransactionEntry::query()
+                        ->join('financial_transactions', 'financial_transactions.id', '=', 'financial_transaction_entries.financial_transaction_id')
+                        ->whereIn('financial_transaction_entries.financial_account_id', $customerAccounts->pluck('id'))
+                        ->where('financial_transaction_entries.direction', 'CREDIT')
+                        ->where('financial_transactions.organization_id', $organization->id)
+                        ->where('financial_transactions.transaction_type', 'DEPOSIT')
+                        ->where('financial_transactions.status', 'POSTED')
+                        ->groupBy('financial_transaction_entries.financial_account_id')
+                        ->selectRaw('financial_transaction_entries.financial_account_id, MAX(financial_transactions.transaction_date) as last_deposit_date')
+                        ->pluck('last_deposit_date', 'financial_account_id');
+                }
+
                 $selectedAccount ??= $customerAccounts->first();
                 $selectedAccount?->loadMissing(['customer.photo', 'holders']);
 
@@ -540,6 +554,7 @@ class CashMovementController extends Controller
                 'name' => $account->name,
                 'balance' => (float) $account->balance,
                 'available_balance' => (float) $account->available_balance,
+                'last_deposit_date' => $lastDepositDates->get($account->id),
             ])->all(),
             'obligations' => $obligations,
             'totals' => $totals,
@@ -1048,7 +1063,7 @@ class CashMovementController extends Controller
                             'PRINCIPAL' => 'Loan repayment',
                             'INTEREST' => 'Loan interest',
                             'FEE' => 'Loan fine',
-                            'PROTECTION_FEE' => 'Loan protection fee',
+                            'PROTECTION_FEE' => 'Loan protection scheme fee',
                         ];
                         $rows[] = [
                             'id' => 'loan-'.$component->id,

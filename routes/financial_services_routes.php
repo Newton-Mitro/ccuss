@@ -159,6 +159,7 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/financial-transactions', [FinancialTransactionController::class, 'store'])->name('financial-transactions.store');
     Route::get('/financial-transactions/{financial_transaction}', [FinancialTransactionController::class, 'show'])->name('financial-transactions.show');
     Route::post('/financial-transactions/{financial_transaction}/post', [FinancialTransactionController::class, 'post'])->name('financial-transactions.post');
+    Route::post('/financial-transactions/{financial_transaction}/cancel', [FinancialTransactionController::class, 'cancel'])->name('financial-transactions.cancel');
     Route::post('/financial-transactions/{financial_transaction}/reverse', [FinancialTransactionController::class, 'reverse'])->name('financial-transactions.reverse');
 
     Route::get('/financial-services', [FinancialReportController::class, 'dashboard'])->name('financial-services.dashboard');

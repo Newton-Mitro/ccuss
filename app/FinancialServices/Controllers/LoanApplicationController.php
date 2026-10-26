@@ -144,7 +144,9 @@ class LoanApplicationController extends Controller
             'can_view_supporting_documents' => $canViewSupportingDocuments,
             'can_submit_protection_claim' => $request->user()->hasPermission('financial.loan-applications.create'),
             'can_manage_protection_claims' => $request->user()->hasPermission('financial.loan-applications.manage'),
-            'payout_accounts' => $request->user()->hasPermission('financial.loan-applications.manage')
+            'can_create_disbursement' => $request->user()->hasPermission('financial.transactions.create'),
+            'payout_accounts' => $request->user()->hasPermission('financial.transactions.create')
+                || $request->user()->hasPermission('financial.loan-applications.manage')
                 ? FinancialAccount::query()
                     ->where('organization_id', $this->organizationId($request))
                     ->whereIn('account_type', ['CASH', 'BANK'])

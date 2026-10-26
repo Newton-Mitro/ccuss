@@ -7,31 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type {
     TellerSessionIndexProps,
     TellerSessionListItem,
 } from '@/modules/treasury-cash/types/treasury-cash/teller-sessions';
+import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Clock3, LockKeyhole, Plus } from 'lucide-react';
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import { appSwal } from '@/lib/appSwal';
 
 export default function Index() {
     const { teller_sessions, branch_day, filters, auth } =
         usePage<TellerSessionIndexProps>().props;
-    const [closingSession, setClosingSession] =
-        useState<TellerSessionListItem | null>(null);
+    const [isClosing, setIsClosing] = useState(false);
     useFlashToastHandler();
 
     const { data, setData, get } = useForm({
@@ -39,11 +30,6 @@ export default function Index() {
         page: Number(filters.page) || 1,
         per_page: Number(filters.per_page) || 18,
     });
-    const closeForm = useForm({
-        closing_cash: '',
-        closing_note: '',
-    });
-
     const permissions = new Set([
         ...(auth.user.permissions ?? []).map((permission) => permission.slug),
         ...auth.user.roles.flatMap((role) =>
@@ -69,33 +55,105 @@ export default function Index() {
         { title: 'Teller Sessions', href: route('teller-sessions.index') },
     ];
 
-    const handleClose = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!closingSession) return;
+    const handleClose = async (session: TellerSessionListItem) => {
+        const result = await appSwal.fire({
+            titleText: 'Close teller session?',
+            icon: 'warning',
+            iconColor: 'var(--warning)',
+            width: '30rem',
+            html: `
+                <div class="mt-2 space-y-5 text-left">
+                    <div class="flex items-start gap-3 rounded-xl border border-border bg-muted/50 p-3">
+                        <div class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning">
+                            <span aria-hidden="true">৳</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-foreground">End-of-session cash count</p>
+                            <p id="closing_prompt" class="mt-0.5 text-xs leading-5 text-muted-foreground"></p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-foreground" for="closing_cash">Closing cash <span class="text-destructive">*</span></label>
+                        <div class="relative">
+                            <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-muted-foreground">৳</span>
+                            <input id="closing_cash" type="number" min="0" step="0.0001" required inputmode="decimal" autocomplete="off" aria-describedby="closing_cash_hint" class="swal2-input m-0! h-11! w-full! rounded-lg! border-border! bg-background! pl-8! pr-3! text-sm! text-foreground! shadow-none! focus:border-primary! focus:ring-2! focus:ring-primary/20!" />
+                        </div>
+                        <p id="closing_cash_hint" class="text-xs text-muted-foreground">Enter the counted amount. This is used to calculate the cash difference.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-foreground" for="closing_note">Closing note <span class="font-normal text-muted-foreground">Optional</span></label>
+                        <textarea id="closing_note" maxlength="2000" rows="3" placeholder="Add a note about the cash count, if needed" class="swal2-textarea m-0! min-h-20! w-full! resize-y! rounded-lg! border-border! bg-background! px-3! py-2! text-sm! text-foreground! shadow-none! placeholder:text-muted-foreground! focus:border-primary! focus:ring-2! focus:ring-primary/20!"></textarea>
+                    </div>
+                </div>
+            `,
+            didOpen: () => {
+                const prompt = appSwal
+                    .getPopup()
+                    ?.querySelector<HTMLParagraphElement>('#closing_prompt');
+                if (prompt) {
+                    prompt.textContent = `Enter the counted closing cash for ${session.teller?.name ?? 'this teller'}.`;
+                }
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Close session',
+            cancelButtonText: 'Cancel',
+            focusConfirm: false,
+            didOpen: () => {
+                const popup = appSwal.getPopup();
+                const prompt =
+                    popup?.querySelector<HTMLParagraphElement>(
+                        '#closing_prompt',
+                    );
+                const cashInput =
+                    popup?.querySelector<HTMLInputElement>('#closing_cash');
+                if (prompt) {
+                    prompt.textContent = `Counted cash for ${session.teller?.name ?? 'this teller'}`;
+                }
+                cashInput?.focus();
+            },
+            preConfirm: () => {
+                const popup = appSwal.getPopup();
+                const cashInput =
+                    popup?.querySelector<HTMLInputElement>('#closing_cash');
+                const noteInput =
+                    popup?.querySelector<HTMLTextAreaElement>('#closing_note');
+                const closingCash = cashInput?.value.trim() ?? '';
+                const closingNote = noteInput?.value.trim() ?? '';
 
-        appSwal
-            .fire({
-                title: 'Close teller session?',
-                text: `Close the session for ${closingSession.teller?.name ?? 'this teller'}?`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Close session',
-                cancelButtonText: 'Cancel',
-            })
-            .then((result) => {
-                if (!result.isConfirmed) return;
+                if (
+                    !closingCash ||
+                    !Number.isFinite(Number(closingCash)) ||
+                    Number(closingCash) < 0
+                ) {
+                    appSwal.showValidationMessage(
+                        'Please enter a valid closing cash amount of zero or more.',
+                    );
+                    return;
+                }
 
-                closeForm.post(
-                    route('teller-sessions.close', closingSession.id),
-                    {
-                        preserveScroll: true,
-                        onSuccess: () => {
-                            setClosingSession(null);
-                            closeForm.reset();
-                        },
-                    },
-                );
-            });
+                return {
+                    closing_cash: closingCash,
+                    closing_note: closingNote,
+                };
+            },
+        });
+
+        if (!result.isConfirmed || !result.value || isClosing) return;
+
+        setIsClosing(true);
+        router.post(route('teller-sessions.close', session.id), result.value, {
+            preserveScroll: true,
+            onError: (errors) => {
+                appSwal.fire({
+                    icon: 'error',
+                    title: 'Unable to close teller session',
+                    text:
+                        Object.values(errors).flat().join(' ') ||
+                        'Please review the closing details and try again.',
+                });
+            },
+            onFinish: () => setIsClosing(false),
+        });
     };
 
     return (
@@ -245,12 +303,10 @@ export default function Index() {
                                                         type="button"
                                                         size="icon"
                                                         variant="ghost"
-                                                        onClick={() => {
-                                                            closeForm.reset();
-                                                            setClosingSession(
-                                                                session,
-                                                            );
-                                                        }}
+                                                        disabled={isClosing}
+                                                        onClick={() =>
+                                                            handleClose(session)
+                                                        }
                                                         aria-label={`Close ${session.teller?.name ?? 'teller session'}`}
                                                     >
                                                         <LockKeyhole className="h-4 w-4 text-warning" />
@@ -293,77 +349,6 @@ export default function Index() {
                         )
                     }
                 />
-                <Dialog
-                    open={closingSession !== null}
-                    onOpenChange={(open) => !open && setClosingSession(null)}
-                >
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Close teller session</DialogTitle>
-                            <DialogDescription>
-                                Enter the counted closing cash for{' '}
-                                {closingSession?.teller?.name ?? 'this teller'}.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handleClose} className="space-y-4">
-                            <div className="space-y-2">
-                                <label
-                                    htmlFor="closing_cash"
-                                    className="text-sm font-medium"
-                                >
-                                    Closing cash
-                                </label>
-                                <Input
-                                    id="closing_cash"
-                                    type="number"
-                                    min="0"
-                                    step="0.0001"
-                                    value={closeForm.data.closing_cash}
-                                    onChange={(event) =>
-                                        closeForm.setData(
-                                            'closing_cash',
-                                            event.target.value,
-                                        )
-                                    }
-                                    required
-                                />
-                                {closeForm.errors.closing_cash && (
-                                    <p className="text-sm text-destructive">
-                                        {closeForm.errors.closing_cash}
-                                    </p>
-                                )}
-                            </div>
-                            <div className="space-y-2">
-                                <label
-                                    htmlFor="closing_note"
-                                    className="text-sm font-medium"
-                                >
-                                    Closing note
-                                </label>
-                                <Input
-                                    id="closing_note"
-                                    value={closeForm.data.closing_note}
-                                    onChange={(event) =>
-                                        closeForm.setData(
-                                            'closing_note',
-                                            event.target.value,
-                                        )
-                                    }
-                                    maxLength={2000}
-                                />
-                            </div>
-                            <DialogFooter>
-                                <Button
-                                    type="submit"
-                                    disabled={closeForm.processing}
-                                >
-                                    <LockKeyhole className="h-4 w-4" />
-                                    Close session
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
             </div>
         </CustomAuthLayout>
     );

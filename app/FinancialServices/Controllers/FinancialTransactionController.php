@@ -22,7 +22,7 @@ class FinancialTransactionController extends Controller
         $this->middleware('permission:financial.transactions.view')->only(['index', 'show']);
         $this->middleware('permission:financial.transactions.create')->only(['store', 'storeTransfer', 'storeLoanDisbursement', 'storeLoanRepayment']);
         $this->middleware('permission:financial.transactions.post')->only('post');
-        $this->middleware('permission:financial.transactions.reverse')->only('reverse');
+        $this->middleware('permission:financial.transactions.reverse')->only(['cancel', 'reverse']);
     }
 
     public function index(Request $request): Response
@@ -43,6 +43,8 @@ class FinancialTransactionController extends Controller
         return Inertia::render('financial-services/transactions/index', [
             'transactions' => $transactions,
             'filters' => $request->only(['search', 'per_page', 'page']),
+            'can_post' => $request->user()->hasPermission('financial.transactions.post'),
+            'can_reverse' => $request->user()->hasPermission('financial.transactions.reverse'),
         ]);
     }
 
@@ -137,6 +139,14 @@ class FinancialTransactionController extends Controller
         $this->transactionService->post($financialTransaction, $this->organizationId($request), $request->user()->id);
 
         return back()->with('success', 'Financial transaction posted successfully.');
+    }
+
+    public function cancel(Request $request, FinancialTransaction $financialTransaction)
+    {
+        $this->authorizeOrganization($request, $financialTransaction);
+        $this->transactionService->cancel($financialTransaction, $this->organizationId($request));
+
+        return back()->with('success', 'Financial transaction cancelled successfully.');
     }
 
     public function reverse(Request $request, FinancialTransaction $financialTransaction)
