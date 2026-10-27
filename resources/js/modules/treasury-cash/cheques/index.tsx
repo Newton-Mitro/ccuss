@@ -11,7 +11,7 @@ import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
-import type { ChequeIndexProps } from '@/modules/treasury-cash/types/treasury-cash/cheques';
+import type { ChequeIndexProps } from '@/modules/treasury-cash/types/cheques';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';

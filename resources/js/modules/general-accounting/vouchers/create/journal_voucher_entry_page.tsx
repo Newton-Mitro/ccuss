@@ -16,44 +16,14 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
+import type {
+    Account,
+    CostCenter,
+    Entry,
+    FiscalPeriod,
+    Party,
+} from '@/modules/general-accounting/types/vouchers/create/journal_voucher_entry_page.interfaces';
 
-interface Account {
-    id: number;
-    code: string;
-    name: string;
-    type?: string;
-    is_control_account?: boolean;
-}
-
-interface CostCenter {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface Party {
-    id: number;
-    code: string;
-    name: string;
-    party_type: string;
-}
-
-interface FiscalPeriod {
-    id: number;
-    name: string;
-    fiscal_year?: {
-        name: string;
-    };
-}
-
-interface Entry {
-    account_id: string;
-    party_id: string;
-    debit: string;
-    credit: string;
-    description: string;
-    cost_center_id: string;
-}
 
 const emptyEntry = (): Entry => ({
     account_id: '',

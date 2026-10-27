@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import { useInitials } from '@/hooks/use-initials';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type { Permission, User } from '@/modules/administration-security/types/user';
+import type { BreadcrumbItem } from '@/types';
+import type { Permission } from '@/modules/administration-security/types/user';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -29,10 +29,8 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/administration-security/types/users/show-user-page.interfaces';
 
-interface Props extends SharedData {
-    user: User;
-}
 
 function formatDate(value?: string | null, withTime = false): string {
     if (!value) return '—';

@@ -11,6 +11,10 @@ import {
 import { Bar, Line } from 'react-chartjs-2';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type {
+    TreasuryDashboardChartsProps,
+} from '@/modules/treasury-cash/types/components/treasury-dashboard-charts.interfaces';
+
 
 ChartJS.register(
     BarElement,
@@ -21,20 +25,6 @@ ChartJS.register(
     PointElement,
     Tooltip,
 );
-
-interface TreasuryDashboardChartsProps {
-    dailyActivity: {
-        date: string;
-        label: string;
-        teller_cash: number;
-        bank: number;
-    }[];
-    cashLocationBalances: {
-        type: string;
-        locations: number;
-        balance: number;
-    }[];
-}
 
 const currency = (amount: number) => `BDT ${formatBDTCurrency(amount, false)}`;
 

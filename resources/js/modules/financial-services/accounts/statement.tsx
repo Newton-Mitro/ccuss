@@ -11,8 +11,12 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
+import {
+    FinancialAccountSearchInput,
+    type FinancialAccountSearchResult,
+} from '@/modules/financial-services/components/financial-account-search-input';
 import type { AccountStatementPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ArrowDownLeft,
@@ -21,6 +25,7 @@ import {
     FileText,
     WalletCards,
 } from 'lucide-react';
+import { useMemo } from 'react';
 import { route } from 'ziggy-js';
 
 const statementPeriods = [
@@ -42,7 +47,6 @@ const statusTone = (status: string) => {
 
 export default function AccountStatement() {
     const {
-        accounts,
         account,
         period,
         statementDate,
@@ -52,6 +56,23 @@ export default function AccountStatement() {
         openingBalance,
         closingBalance,
     } = usePage<AccountStatementPageProps>().props;
+    const initialAccount = useMemo<FinancialAccountSearchResult | null>(
+        () =>
+            account
+                ? {
+                      id: account.id,
+                      account_no: account.account_no,
+                      name: account.name ?? null,
+                      account_type: account.account_type,
+                      status: account.status ?? 'ACTIVE',
+                      balance: Number(account.balance ?? 0),
+                      available_balance: Number(account.balance ?? 0),
+                      holder: null,
+                      holders: [],
+                  }
+                : null,
+        [account],
+    );
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Account Statements', href: '' },
@@ -59,33 +80,39 @@ export default function AccountStatement() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Statements" />
-            <div className="space-y-4">
-                <ResourcePageHeader variant="account"
+            <div className="space-y-3">
+                <ResourcePageHeader
+                    variant="account"
+                    className="py-3 sm:py-3"
                     title="Account statements"
-                    description="Follow every movement from opening balance to closing balance."
+                    description="Review account movements and balances for a selected period."
+                    action={
+                        account ? (
+                            <ReportExportActions
+                                report="account-statement"
+                                query={{
+                                    account_id: account.id,
+                                    period,
+                                    date: statementDate,
+                                }}
+                            />
+                        ) : undefined
+                    }
                 />
-                {account && (
-                    <ReportExportActions
-                        report="account-statement"
-                        query={{
-                            account_id: account.id,
-                            period,
-                            date: statementDate,
-                        }}
-                    />
-                )}
-                <div className="grid gap-3 rounded-lg border bg-card p-4 shadow-sm sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
-                    <div>
-                        <Label className="text-xs font-medium text-muted-foreground">
+                <section className="grid gap-3 rounded-xl border bg-card p-3 shadow-sm sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] sm:items-end">
+                    <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground">
                             Financial account
-                        </Label>
-                        <Select
-                            value={account ? String(account.id) : ''}
-                            onChange={(value) =>
+                        </p>
+                        <FinancialAccountSearchInput
+                            scope="statement"
+                            initialAccount={initialAccount}
+                            placeholder="Search account number, name, or holder"
+                            onSelect={(selectedAccount) =>
                                 router.get(
                                     route('financial-account-statements.index'),
                                     {
-                                        account_id: value,
+                                        account_id: selectedAccount.id,
                                         period,
                                         date: statementDate,
                                     },
@@ -95,20 +122,27 @@ export default function AccountStatement() {
                                     },
                                 )
                             }
-                            options={[
-                                { value: '', label: 'Select account' },
-                                ...accounts.map((item) => ({
-                                    value: String(item.id),
-                                    label: `${item.account_no} - ${item.name ?? item.account_type}`,
-                                })),
-                            ]}
+                            clearSelectedAccount={() =>
+                                router.get(
+                                    route('financial-account-statements.index'),
+                                    {
+                                        period,
+                                        date: statementDate,
+                                    },
+                                    {
+                                        preserveState: true,
+                                        preserveScroll: true,
+                                    },
+                                )
+                            }
                         />
                     </div>
-                    <div>
+                    <div className="space-y-1">
                         <Label className="text-xs font-medium text-muted-foreground">
                             Statement period
                         </Label>
                         <Select
+                            className="h-9"
                             value={period}
                             onChange={(value) =>
                                 router.get(
@@ -127,7 +161,7 @@ export default function AccountStatement() {
                             options={statementPeriods}
                         />
                     </div>
-                    <div>
+                    <div className="space-y-1">
                         <Label className="text-xs font-medium text-muted-foreground">
                             Reference date
                         </Label>
@@ -147,117 +181,138 @@ export default function AccountStatement() {
                                     },
                                 )
                             }
-                            className="bg-background"
+                            className="h-9 bg-background"
                         />
                     </div>
-                </div>
+                </section>
                 {account ? (
                     <>
-                        <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                    <WalletCards className="h-5 w-5" />
+                        <section className="flex flex-col gap-2 rounded-xl border bg-muted/20 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="flex min-w-0 items-center gap-2.5">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <WalletCards className="size-4" />
                                 </div>
-                                <div>
-                                    <p className="font-mono text-sm font-semibold">
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold">
                                         {account.account_no}
                                     </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        {account.name ?? account.account_type}
+                                    <p className="truncate text-xs text-muted-foreground">
+                                        {account.name &&
+                                        account.name !== account.account_type
+                                            ? `${account.name} · `
+                                            : ''}
+                                        {account.account_type}
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <CalendarDays className="h-4 w-4" />
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground sm:justify-end">
+                                <CalendarDays className="size-3.5 shrink-0" />
                                 <span>{formatDate(periodStart)}</span>
-                                <span aria-hidden="true">to</span>
+                                <span aria-hidden="true">–</span>
                                 <span>{formatDate(periodEnd)}</span>
                             </div>
-                        </div>
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            <div className="rounded-lg border border-sky-500/20 bg-sky-500/5 p-4">
-                                <div className="flex items-center gap-2 text-xs font-medium text-sky-700 dark:text-sky-300">
-                                    <WalletCards className="h-4 w-4" />
-                                    Opening balance
+                        </section>
+                        <section className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                            <div className="flex items-center justify-between gap-3 rounded-xl border bg-card px-3 py-2.5 shadow-sm">
+                                <div className="min-w-0">
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        Opening balance
+                                    </p>
+                                    <p className="mt-1 truncate text-base font-semibold tabular-nums">
+                                        {formatAmount(openingBalance)}
+                                    </p>
                                 </div>
-                                <p className="mt-2 text-xl font-semibold tabular-nums">
-                                    {formatAmount(openingBalance)}
-                                </p>
+                                <WalletCards className="size-4 shrink-0 text-sky-600 dark:text-sky-400" />
                             </div>
-                            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
-                                <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                                    <ArrowDownLeft className="h-4 w-4" />
-                                    Total credits
+                            <div className="flex items-center justify-between gap-3 rounded-xl border bg-card px-3 py-2.5 shadow-sm">
+                                <div className="min-w-0">
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        Total debits
+                                    </p>
+                                    <p className="mt-1 truncate text-base font-semibold tabular-nums">
+                                        {formatAmount(totals.debit)}
+                                    </p>
                                 </div>
-                                <p className="mt-2 text-xl font-semibold tabular-nums">
-                                    {formatAmount(totals.credit)}
-                                </p>
+                                <ArrowUpRight className="size-4 shrink-0 text-rose-600 dark:text-rose-400" />
                             </div>
-                            <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-4">
-                                <div className="flex items-center gap-2 text-xs font-medium text-violet-700 dark:text-violet-300">
-                                    <ArrowUpRight className="h-4 w-4" />
-                                    Closing balance
+                            <div className="flex items-center justify-between gap-3 rounded-xl border bg-card px-3 py-2.5 shadow-sm">
+                                <div className="min-w-0">
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        Total credits
+                                    </p>
+                                    <p className="mt-1 truncate text-base font-semibold tabular-nums">
+                                        {formatAmount(totals.credit)}
+                                    </p>
                                 </div>
-                                <p className="mt-2 text-xl font-semibold tabular-nums">
-                                    {formatAmount(closingBalance)}
-                                </p>
+                                <ArrowDownLeft className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
                             </div>
-                        </div>
-                        <ResourceTableCard>
-                            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+                            <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5 shadow-sm">
+                                <div className="min-w-0">
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        Closing balance
+                                    </p>
+                                    <p className="mt-1 truncate text-base font-semibold tabular-nums">
+                                        {formatAmount(closingBalance)}
+                                    </p>
+                                </div>
+                                <WalletCards className="size-4 shrink-0 text-primary" />
+                            </div>
+                        </section>
+                        <ResourceTableCard className="shadow-sm">
+                            <div className="flex items-center justify-between border-b bg-muted/30 px-3 py-2">
                                 <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-primary" />
+                                    <FileText className="size-4 text-primary" />
                                     <p className="text-sm font-semibold">
                                         Account activity
                                     </p>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-muted-foreground tabular-nums">
                                     {totals.count} movement
                                     {totals.count === 1 ? '' : 's'}
                                 </p>
                             </div>
-                            <div className="max-h-[calc(100vh-530px)] overflow-auto">
-                                <table className="w-full min-w-190 text-sm">
-                                    <thead className="sticky top-0 z-10 bg-muted text-xs text-muted-foreground">
+                            <div className="max-h-[calc(100vh-390px)] overflow-auto">
+                                <table className="w-full min-w-180 text-sm">
+                                    <thead className="sticky top-0 z-10 bg-muted/95 text-xs text-muted-foreground backdrop-blur">
                                         <tr>
-                                            <th className="border-b p-3 text-left font-medium">
+                                            <th className="border-b px-3 py-2 text-left font-medium">
                                                 Date
                                             </th>
-                                            <th className="border-b p-3 text-left font-medium">
+                                            <th className="border-b px-3 py-2 text-left font-medium">
                                                 Description
                                             </th>
-                                            <th className="border-b p-3 text-right font-medium">
+                                            <th className="border-b px-3 py-2 text-right font-medium">
                                                 Debit
                                             </th>
-                                            <th className="border-b p-3 text-right font-medium">
+                                            <th className="border-b px-3 py-2 text-right font-medium">
                                                 Credit
                                             </th>
-                                            <th className="border-b p-3 text-right font-medium">
+                                            <th className="border-b px-3 py-2 text-right font-medium">
                                                 Balance
                                             </th>
-                                            <th className="border-b p-3 text-left font-medium">
+                                            <th className="border-b px-3 py-2 text-left font-medium">
                                                 Status
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr className="border-b bg-muted/20">
-                                            <td className="p-3 text-muted-foreground">
+                                        <tr className="border-b bg-sky-500/5">
+                                            <td className="px-3 py-2 text-xs whitespace-nowrap text-muted-foreground">
                                                 {formatDate(periodStart)}
                                             </td>
-                                            <td className="p-3 font-medium">
+                                            <td className="px-3 py-2 font-medium">
                                                 Opening balance
                                             </td>
-                                            <td className="p-3 text-right text-muted-foreground tabular-nums">
+                                            <td className="px-3 py-2 text-right text-muted-foreground tabular-nums">
                                                 -
                                             </td>
-                                            <td className="p-3 text-right text-muted-foreground tabular-nums">
+                                            <td className="px-3 py-2 text-right text-muted-foreground tabular-nums">
                                                 -
                                             </td>
-                                            <td className="p-3 text-right font-medium tabular-nums">
+                                            <td className="px-3 py-2 text-right font-medium tabular-nums">
                                                 {formatAmount(openingBalance)}
                                             </td>
-                                            <td className="p-3">
+                                            <td className="px-3 py-2">
                                                 <StatusBadge>
                                                     Opening
                                                 </StatusBadge>
@@ -267,49 +322,57 @@ export default function AccountStatement() {
                                             (movement) => (
                                                 <tr
                                                     key={movement.id}
-                                                    className="border-b even:bg-muted/30 hover:bg-accent/20"
+                                                    className="border-b even:bg-muted/20 hover:bg-accent/20"
                                                 >
-                                                    <td className="p-3 whitespace-nowrap text-muted-foreground">
+                                                    <td className="px-3 py-2 text-xs whitespace-nowrap text-muted-foreground">
                                                         {formatDate(
                                                             movement.transaction_date,
                                                         )}
                                                     </td>
-                                                    <td className="p-3">
+                                                    <td className="px-3 py-2">
                                                         <p className="font-mono text-xs font-medium">
                                                             {
                                                                 movement.transaction_no
                                                             }
                                                         </p>
-                                                        <p className="text-xs text-muted-foreground">
+                                                        <p className="text-[11px] text-muted-foreground">
                                                             {
                                                                 movement.transaction_type
                                                             }
                                                         </p>
                                                     </td>
-                                                    <td className="p-3 text-right tabular-nums">
+                                                    <td className="px-3 py-2 text-right tabular-nums">
                                                         {Number(
                                                             movement.debit,
-                                                        ) > 0
-                                                            ? formatAmount(
-                                                                  movement.debit,
-                                                              )
-                                                            : '-'}
+                                                        ) > 0 ? (
+                                                            <span className="text-rose-600 dark:text-rose-400">
+                                                                {formatAmount(
+                                                                    movement.debit,
+                                                                )}
+                                                            </span>
+                                                        ) : (
+                                                            '-'
+                                                        )}
                                                     </td>
-                                                    <td className="p-3 text-right tabular-nums">
+                                                    <td className="px-3 py-2 text-right tabular-nums">
                                                         {Number(
                                                             movement.credit,
-                                                        ) > 0
-                                                            ? formatAmount(
-                                                                  movement.credit,
-                                                              )
-                                                            : '-'}
+                                                        ) > 0 ? (
+                                                            <span className="text-emerald-600 dark:text-emerald-400">
+                                                                {formatAmount(
+                                                                    movement.credit,
+                                                                )}
+                                                            </span>
+                                                        ) : (
+                                                            '-'
+                                                        )}
                                                     </td>
-                                                    <td className="p-3 text-right font-medium tabular-nums">
+                                                    <td className="px-3 py-2 text-right font-medium tabular-nums">
                                                         {formatAmount(
                                                             movement.running_balance,
                                                         )}
                                                     </td>
-                                                    <td className="p-3">
+                                                    <td className="px-3 py-2">
                                                         <StatusBadge
                                                             tone={statusTone(
                                                                 movement.status,

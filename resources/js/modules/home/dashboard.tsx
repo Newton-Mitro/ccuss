@@ -8,7 +8,7 @@ import {
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDateTime } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Activity,
@@ -25,43 +25,8 @@ import {
     WalletCards,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { DashboardProps } from '@/modules/home/types/dashboard.interfaces';
 
-interface DashboardProps extends SharedData {
-    stats: {
-        branches: number;
-        members: number;
-        activeAccounts: number;
-        loanPortfolio: number;
-        pendingApplications: number;
-        pendingTransactions: number;
-        monthTransactionVolume: number;
-        openBranchDays: number;
-        openTellerSessions: number;
-        openVaultSessions: number;
-    };
-    dailyVolume: { date: string; label: string; amount: number }[];
-    accountMix: { type: string; count: number; balance: number }[];
-    recentTransactions: {
-        id: number;
-        number: string;
-        type: string;
-        date: string | null;
-        amount: number;
-        status: string;
-        branch: string | null;
-        accounts: string[];
-    }[];
-    pendingApplicationsList: {
-        id: number;
-        number: string;
-        applicant: string;
-        amount: number;
-        status: string;
-        created_at: string | null;
-    }[];
-    quickLinks: { label: string; href: string }[];
-    today: string;
-}
 
 const numberFormat = new Intl.NumberFormat('en-BD');
 const compactNumberFormat = new Intl.NumberFormat('en-BD', {

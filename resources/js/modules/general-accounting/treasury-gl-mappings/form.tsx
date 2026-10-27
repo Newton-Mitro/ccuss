@@ -21,32 +21,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/general-accounting/types/treasury-gl-mappings/form.types';
 
-type LedgerAccount = {
-    id: number;
-    code: string;
-    name: string;
-    is_control_account: boolean;
-    is_cash_account: boolean;
-};
-
-type Mapping = {
-    id: number;
-    source_type: string;
-    source_code: string;
-    transaction_type: string;
-    status: boolean;
-    debit_account_id?: number;
-    credit_account_id?: number;
-    debit_account: LedgerAccount;
-    credit_account: LedgerAccount;
-};
-
-type Props = {
-    accounts: LedgerAccount[];
-    sourceTypes: string[];
-    mapping?: Mapping | null;
-};
 
 const transactionTypes: Record<string, string[]> = {
     PETTY_CASH_TRANSACTION: [

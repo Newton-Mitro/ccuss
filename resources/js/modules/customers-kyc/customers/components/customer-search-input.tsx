@@ -5,14 +5,10 @@ import axios from 'axios';
 import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
+import type {
+    CustomerSearchInputProps,
+} from '@/modules/customers-kyc/types/customers/components/customer-search-input.interfaces';
 
-interface CustomerSearchInputProps {
-    onSelect: (customer: Customer) => void;
-    clearSelectedCustomer?: () => void;
-    initialCustomer?: Pick<Customer, 'id' | 'name'>;
-    label?: string;
-    placeholder?: string; // <-- new prop
-}
 
 export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
     onSelect,

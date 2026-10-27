@@ -1,6 +1,6 @@
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import type { PettyCashTransactionFormPageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { PettyCashTransactionFormPageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowRight,

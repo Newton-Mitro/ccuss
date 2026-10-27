@@ -3,21 +3,8 @@ import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import type { VaultDetails } from '@/modules/treasury-cash/types/vaults/show.interfaces';
 
-interface VaultDetails {
-    id: number;
-    code: string;
-    name: string;
-    status: string;
-    maximum_balance: string | number | null;
-    cash_location?: {
-        branch?: { name: string } | null;
-        financial_account?: {
-            account_no: string;
-            balance: string | number;
-        } | null;
-    } | null;
-}
 
 export default function Show() {
     const { vault } = usePage<SharedData & { vault: VaultDetails }>().props;

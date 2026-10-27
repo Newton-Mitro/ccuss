@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ChevronDown,
@@ -20,27 +20,8 @@ import {
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 import AccountDetailsDialog from '@/modules/general-accounting/chart-of-accounts/account-details-dialog';
+import type { AccountGroup, Props } from '@/modules/general-accounting/types/chart-of-accounts/groups/index.interfaces';
 
-interface AccountGroup {
-    id: number;
-    code: string;
-    name: string;
-    type: string;
-    normal_balance: string;
-    status: boolean;
-    parent_id?: number | null;
-    level: number;
-    children_count: number;
-    accounts_count: number;
-}
-
-interface Props extends SharedData {
-    accountGroups:
-        | {
-              data?: AccountGroup[];
-          }
-        | AccountGroup[];
-}
 
 export default function AccountGroupIndex() {
     const { accountGroups, auth } = usePage<Props>().props;

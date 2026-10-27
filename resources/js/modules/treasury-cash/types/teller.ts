@@ -1,7 +1,7 @@
 import type {
     TreasuryListFilters,
     TreasuryListResponse,
-} from '@/modules/treasury-cash/types/treasury-cash/common';
+} from '@/modules/treasury-cash/types/common';
 import type { SharedData } from '@/types';
 
 export type TellerStatus = 'ACTIVE' | 'INACTIVE' | 'CLOSED';

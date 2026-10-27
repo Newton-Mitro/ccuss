@@ -14,14 +14,11 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
-import { Branch } from '@/modules/branch-operations/types/branch';
-import { User } from '@/modules/administration-security/types/user';
+import { BreadcrumbItem } from '@/types';
 
-interface Props extends SharedData {
-    user: User;
-    branches: Branch[];
-}
+
+import type { Props } from '@/modules/administration-security/types/users/assign-branch-page.interfaces';
+
 
 export default function AssignBranchPage() {
     const { user, branches } = usePage<Props>().props;

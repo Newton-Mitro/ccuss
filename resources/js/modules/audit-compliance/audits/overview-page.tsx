@@ -5,7 +5,7 @@ import {
 import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Activity,
@@ -17,47 +17,8 @@ import {
     ShieldCheck,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/audit-compliance/types/audits/overview-page.interfaces';
 
-interface Dashboard {
-    route: string;
-    title: string;
-    description: string;
-    area: string;
-}
-
-interface Register {
-    route: string;
-    title: string;
-    singular: string;
-    description: string;
-    count: number;
-    open_count: number;
-}
-
-interface RecentRecord {
-    id: number;
-    reference: string;
-    title: string;
-    kind: string;
-    status: string;
-    priority: string;
-    due_date: string | null;
-    register_route: string;
-}
-
-interface Props extends SharedData {
-    dashboard: Dashboard;
-    summary: {
-        total: number;
-        open: number;
-        overdue: number;
-        approved: number;
-        rejected: number;
-    };
-    registers: Register[];
-    statusCounts: Record<string, number>;
-    recentRecords: RecentRecord[];
-}
 
 export default function AuditComplianceOverview() {
     const { dashboard, summary, registers, statusCounts, recentRecords, auth } =

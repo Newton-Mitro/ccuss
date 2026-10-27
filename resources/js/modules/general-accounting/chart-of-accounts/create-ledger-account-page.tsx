@@ -23,23 +23,8 @@ import {
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 import { accountTypes } from '@/modules/general-accounting/chart-of-accounts/data/account-type';
+import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/create-ledger-account-page.interfaces';
 
-interface AccountGroupOption {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface ParentAccountOption {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface Props {
-    accountGroups?: AccountGroupOption[];
-    parents?: ParentAccountOption[];
-}
 
 const settingOptions = [
     {

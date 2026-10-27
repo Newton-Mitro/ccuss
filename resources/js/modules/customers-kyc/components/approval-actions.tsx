@@ -2,14 +2,8 @@ import { router } from '@inertiajs/react';
 import { CheckCheck, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { appSwal } from '@/lib/appSwal';
+import type { ApprovalActionsProps } from '@/modules/customers-kyc/types/components/approval-actions.interfaces';
 
-interface ApprovalActionsProps {
-    approveUrl: string;
-    rejectUrl: string;
-    pending: boolean;
-    onSuccess?: () => void;
-    maxRejectionLength?: number;
-}
 
 export default function ApprovalActions({
     approveUrl,

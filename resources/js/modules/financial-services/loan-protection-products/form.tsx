@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type { LoanProtectionProduct } from '@/modules/financial-services/types/financial-services';
+import type { BreadcrumbItem } from '@/types';
+
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -17,11 +17,8 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { FormPageProps } from '@/modules/financial-services/types/loan-protection-products/form.interfaces';
 
-interface FormPageProps extends SharedData {
-    product: LoanProtectionProduct | null;
-    can_manage: boolean;
-}
 
 export default function LoanProtectionProductForm() {
     const { product, can_manage: canManage } = usePage<FormPageProps>().props;

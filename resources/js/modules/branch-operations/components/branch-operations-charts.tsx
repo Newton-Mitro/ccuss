@@ -12,6 +12,10 @@ import {
 import { Bar } from 'react-chartjs-2';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type {
+    BranchOperationsChartsProps,
+} from '@/modules/branch-operations/types/components/branch-operations-charts.interfaces';
+
 
 ChartJS.register(
     ArcElement,
@@ -23,11 +27,6 @@ ChartJS.register(
     PointElement,
     Tooltip,
 );
-
-interface BranchOperationsChartsProps {
-    dailyPostedAmounts: { date: string; label: string; amount: number }[];
-    transactionTypes: { type: string; count: number }[];
-}
 
 const currency = (amount: number) => `BDT ${formatBDTCurrency(amount, false)}`;
 

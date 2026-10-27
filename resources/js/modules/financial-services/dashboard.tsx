@@ -5,7 +5,7 @@ import {
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
@@ -21,33 +21,8 @@ import {
     DashboardMetricGrid,
     DashboardQuickLinks,
 } from '@/components/dashboard-summary';
+import type { FinancialServicesDashboardProps } from '@/modules/financial-services/types/dashboard.interfaces';
 
-interface FinancialServicesDashboardProps extends SharedData {
-    monthlyTransactions: {
-        label: string;
-        count: number;
-    }[];
-    metrics: {
-        depositProducts: number;
-        loanProducts: number;
-        accounts: number;
-        activeAccounts: number;
-        postedTransactions: number;
-    };
-
-    recentTransactions: {
-        id: number;
-        transaction_no: string;
-        transaction_type: string;
-        amount: string | number;
-        status: string;
-        entries?: {
-            financial_account?: {
-                account_no?: string;
-            } | null;
-        }[];
-    }[];
-}
 
 const links = [
     {

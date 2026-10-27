@@ -9,6 +9,10 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type {
+    GeneralAccountingDashboardChartsProps,
+} from '@/modules/general-accounting/types/components/general-accounting-dashboard-charts.interfaces';
+
 
 ChartJS.register(
     ArcElement,
@@ -18,11 +22,6 @@ ChartJS.register(
     LinearScale,
     Tooltip,
 );
-
-interface GeneralAccountingDashboardChartsProps {
-    dailyVoucherActivity: { date: string; label: string; posted: number }[];
-    voucherStatusBreakdown: { status: string; count: number }[];
-}
 
 const colors = ['#d97706', '#0f766e', '#7c3aed', '#64748b'];
 

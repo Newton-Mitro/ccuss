@@ -20,12 +20,8 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { route } from 'ziggy-js';
+import type { Entry } from '@/modules/general-accounting/types/opening-balances/create.interfaces';
 
-interface Entry {
-    account_id: string;
-    amount: string;
-    description: string;
-}
 
 export default function OpeningBalancesCreate() {
     const { fiscalPeriods, accounts } = usePage().props as any;

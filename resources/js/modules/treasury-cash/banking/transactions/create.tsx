@@ -18,20 +18,9 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { Props } from '@/modules/treasury-cash/types/banking/transactions/create.interfaces';
 
-interface Props extends SharedData {
-    bank_accounts: {
-        id: number;
-        account_name: string;
-        account_number: string;
-    }[];
-    ledger_accounts: {
-        id: number;
-        code: string;
-        name: string;
-    }[];
-}
 
 export default function Create() {
     const { bank_accounts, ledger_accounts } = usePage<Props>().props;

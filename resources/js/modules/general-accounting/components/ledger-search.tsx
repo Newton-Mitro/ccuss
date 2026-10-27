@@ -2,22 +2,8 @@ import { Input } from '@/components/ui/input'; // <-- using your component
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
+import type { LedgerItem, LedgerSearchProps } from '@/modules/general-accounting/types/components/ledger-search.interfaces';
 
-interface LedgerItem {
-    id: number;
-    name: string;
-    code?: string;
-    full_display?: string;
-}
-
-interface LedgerSearchProps {
-    query: string;
-    onQueryChange: (value: string) => void;
-    onSelect: (ledger: LedgerItem) => void;
-    api?: string;
-    error?: string;
-    placeholder?: string;
-}
 
 export const LedgerSearch: React.FC<LedgerSearchProps> = ({
     query,

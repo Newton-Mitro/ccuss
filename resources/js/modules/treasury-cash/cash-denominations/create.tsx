@@ -18,20 +18,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/treasury-cash/types/cash-denominations/create.types';
 
-type Denomination = {
-    id: number;
-    currency: string;
-    type: 'NOTE' | 'COIN';
-    value: string | number;
-    name?: string | null;
-    is_active: boolean;
-    count_lines_count: number;
-};
-
-type Props = {
-    denomination?: Denomination | null;
-};
 
 export default function CashDenominationForm({ denomination }: Props) {
     const editing = Boolean(denomination);

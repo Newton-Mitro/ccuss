@@ -11,20 +11,8 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Banknote, Building2, Plus, RefreshCw } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/treasury-cash/types/cheques/clearings-create.types';
 
-type Props = {
-    cheques: {
-        id: number;
-        cheque_no: string;
-        amount: string | number;
-    }[];
-    branches: {
-        id: number;
-        code: string;
-        name: string;
-    }[];
-    default_branch_id?: number | null;
-};
 
 export default function CreateChequeClearing({
     cheques,

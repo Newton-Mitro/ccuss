@@ -9,6 +9,10 @@ import {
     Tooltip,
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
+import type {
+    CustomerDashboardChartsProps,
+} from '@/modules/customers-kyc/types/components/customer-dashboard-charts.interfaces';
+
 
 ChartJS.register(
     ArcElement,
@@ -18,31 +22,6 @@ ChartJS.register(
     LinearScale,
     Tooltip,
 );
-
-interface CustomerDashboardChartsProps {
-    charts: {
-        demographics: {
-            male: number;
-            female: number;
-            other: number;
-            organization: number;
-        };
-        statuses: {
-            active: number;
-            pending: number;
-            inactive: number;
-            suspended: number;
-            closed: number;
-        };
-        pendingApprovals: {
-            customers: number;
-            addresses: number;
-            familyRelations: number;
-            introducers: number;
-            documents: number;
-        };
-    };
-}
 
 const chartOptions = {
     responsive: true,

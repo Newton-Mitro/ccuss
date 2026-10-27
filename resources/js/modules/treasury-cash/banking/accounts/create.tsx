@@ -5,7 +5,7 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem } from '@/types';
-import type { BankAccountCreatePageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { BankAccountCreatePageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,

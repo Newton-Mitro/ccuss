@@ -1,14 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
-import type { ReactNode } from 'react';
 
-type RepeatableRowProps = {
-    index: number;
-    title: string;
-    children: ReactNode;
-    onRemove: () => void;
-    columns?: string;
-};
+import type { RepeatableRowProps } from '@/modules/financial-services/types/loan-applications/components/repeatable-row.types';
+
 
 export default function RepeatableRow({
     index,

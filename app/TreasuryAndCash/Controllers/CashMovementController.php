@@ -413,7 +413,10 @@ class CashMovementController extends Controller
 
         $accountsQuery = FinancialAccount::query()
             ->where('organization_id', $organization->id)
-            ->whereIn('status', ['PENDING', 'ACTIVE'])
+            ->when(
+                $scope !== 'statement',
+                fn ($query) => $query->whereIn('status', ['PENDING', 'ACTIVE']),
+            )
             ->where(function ($query) use ($scope, $accountTypes): void {
                 if (isset($accountTypes[$scope]) && $accountTypes[$scope] !== null) {
                     $query->whereIn('account_type', $accountTypes[$scope]);

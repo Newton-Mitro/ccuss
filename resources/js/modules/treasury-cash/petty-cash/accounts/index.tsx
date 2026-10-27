@@ -10,7 +10,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
-import type { PettyCashIndexProps } from '@/modules/treasury-cash/types/treasury-cash/petty-cash-accounts';
+import type { PettyCashIndexProps } from '@/modules/treasury-cash/types/petty-cash-accounts';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, WalletCards } from 'lucide-react';
 import { useEffect } from 'react';

@@ -3,24 +3,12 @@ import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type {
+    SubLedger,
+    SubLedgerSearchInputProps,
+} from '@/modules/general-accounting/types/components/sub-ledger-search-input.interfaces';
+export type { SubLedger } from '@/modules/general-accounting/types/components/sub-ledger-search-input.interfaces';
 
-export interface SubLedger {
-    id: number;
-    name: string;
-    ledger_code?: string;
-    ledger_type?: string;
-    status?: string;
-}
-
-interface SubLedgerSearchInputProps {
-    onSelect?: (ledger: SubLedger) => void;
-    label?: string;
-    placeholder?: string;
-    disabled?: boolean;
-    value?: string;
-    error?: string;
-    showErrorText?: boolean;
-}
 
 export const SubLedgerSearchInput: React.FC<SubLedgerSearchInputProps> = ({
     onSelect,

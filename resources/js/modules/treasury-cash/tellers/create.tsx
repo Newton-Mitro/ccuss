@@ -1,4 +1,4 @@
-import type { TellerCreatePageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { TellerCreatePageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     Banknote,
@@ -20,23 +20,8 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem } from '@/types';
+import type { Props } from '@/modules/treasury-cash/types/tellers/create.types';
 
-type Teller = {
-    id: number;
-    user_id: string;
-    code: string;
-    name: string;
-    maximum_cash: string | number;
-    status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
-    cash_location?: {
-        branch_id?: number | string;
-    };
-};
-
-type Props = {
-    teller?: Teller | null;
-    branch_locked?: boolean;
-};
 
 export default function Create({ teller, branch_locked = false }: Props) {
     const editing = Boolean(teller);

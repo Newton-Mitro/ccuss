@@ -19,25 +19,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/general-accounting/types/cost-centers/form.interfaces';
 
-interface CostCenter {
-    id: number;
-    code: string;
-    name: string;
-    parent_id: number | null;
-    status: boolean;
-}
-
-interface CostCenterParent {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface Props {
-    costCenter?: CostCenter;
-    parents?: CostCenterParent[];
-}
 
 export default function CostCenterForm({ costCenter, parents = [] }: Props) {
     const editing = Boolean(costCenter);

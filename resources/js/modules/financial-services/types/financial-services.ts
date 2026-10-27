@@ -348,6 +348,7 @@ export interface LoanRepayment {
     } | null;
     allocations?: {
         amount: string | number;
+        loan_schedule_id?: number;
         component?: { type: string } | null;
     }[];
 }
@@ -382,6 +383,7 @@ export interface LoanApplicationShowPageProps extends SharedData {
     can_view_supporting_documents: boolean;
     can_submit_protection_claim: boolean;
     can_manage_protection_claims: boolean;
+    can_manage_schedule: boolean;
     can_create_disbursement: boolean;
     payout_accounts: {
         id: number;
@@ -628,6 +630,7 @@ export interface AccountStatementMovement {
 }
 
 export interface SelectedFinancialAccount extends FinancialAccountOption {
+    status?: string;
     transactions?: AccountStatementMovement[];
     balance?: string | number;
 }

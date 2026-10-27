@@ -8,13 +8,8 @@ import { route } from 'ziggy-js';
 import { BorderInfoBox } from '@/components/border-info-box';
 import { Label } from '@/components/ui/label';
 import { User } from '@/modules/administration-security/types/user';
+import type { UserSearchBoxProps } from '@/modules/administration-security/types/users/components/user-search-box.interfaces';
 
-interface UserSearchBoxProps {
-    onSelect: (user: User) => void;
-    label?: string;
-    selectedUser?: User;
-    placeholder?: string;
-}
 
 export const UserSearchBox: React.FC<UserSearchBoxProps> = ({
     onSelect,

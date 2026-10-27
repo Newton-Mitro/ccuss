@@ -2,6 +2,14 @@ import InputError from '@/components/input-error';
 import { StatusBadge } from '@/components/resource-page-shell';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
@@ -14,6 +22,7 @@ import { FinancialAccountSearchInput } from '@/modules/financial-services/compon
 import type {
     LoanApplicationShowPageProps,
     LoanCollateral,
+    LoanSchedule,
 } from '@/modules/financial-services/types/financial-services';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
@@ -56,14 +65,36 @@ function getLocalDate() {
 export default function LoanApplicationShow() {
     const {
         application,
+        can_manage_schedule: canManageSchedule,
         can_view_supporting_documents: canViewSupportingDocuments,
         can_submit_protection_claim: canSubmitProtectionClaim,
         can_manage_protection_claims: canManageProtectionClaims,
         can_create_disbursement: canCreateDisbursement,
         payout_accounts,
+        errors: pageErrors,
     } = usePage<LoanApplicationShowPageProps>().props;
 
     const [arrearNote, setArrearNote] = useState('');
+    const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+    const [editingSchedule, setEditingSchedule] = useState<LoanSchedule | null>(
+        null,
+    );
+
+    const {
+        data: scheduleData,
+        setData: setScheduleData,
+        post: postSchedule,
+        put: putSchedule,
+        processing: scheduleProcessing,
+        errors: scheduleErrors,
+        reset: resetScheduleForm,
+    } = useForm({
+        due_date: getLocalDate(),
+        scheduled_principal: '',
+        scheduled_interest: '',
+        scheduled_fee: '',
+        scheduled_protection_fee: '',
+    });
 
     const { data, setData, processing } = useForm({
         approved_amount: String(
@@ -255,6 +286,83 @@ export default function LoanApplicationShow() {
                     {
                         frequency: 'MONTHLY',
                     },
+                );
+            });
+    };
+
+    const saveScheduleInstallment = (event: React.FormEvent) => {
+        event.preventDefault();
+        const options = {
+            onSuccess: () => {
+                setScheduleDialogOpen(false);
+                setEditingSchedule(null);
+                resetScheduleForm();
+            },
+        };
+
+        if (editingSchedule) {
+            putSchedule(
+                route('loan-applications.schedule.installments.update', {
+                    loan_application: application.id,
+                    schedule: editingSchedule.id,
+                }),
+                options,
+            );
+            return;
+        }
+
+        postSchedule(
+            route(
+                'loan-applications.schedule.installments.store',
+                application.id,
+            ),
+            options,
+        );
+    };
+
+    const openAddScheduleDialog = () => {
+        setEditingSchedule(null);
+        resetScheduleForm();
+        setScheduleDialogOpen(true);
+    };
+
+    const openEditScheduleDialog = (schedule: LoanSchedule) => {
+        setEditingSchedule(schedule);
+        setScheduleData('due_date', schedule.due_date.slice(0, 10));
+        setScheduleData(
+            'scheduled_principal',
+            String(schedule.scheduled_principal),
+        );
+        setScheduleData(
+            'scheduled_interest',
+            String(schedule.scheduled_interest),
+        );
+        setScheduleData('scheduled_fee', String(schedule.scheduled_fee));
+        setScheduleData(
+            'scheduled_protection_fee',
+            String(schedule.scheduled_protection_fee),
+        );
+        setScheduleDialogOpen(true);
+    };
+
+    const cancelScheduleInstallment = (scheduleId: number) => {
+        appSwal
+            .fire({
+                title: 'Cancel this installment?',
+                text: 'The installment will be marked as waived. Installments with repayments cannot be cancelled.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Cancel installment',
+                cancelButtonText: 'Keep installment',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) return;
+
+                router.post(
+                    route('loan-applications.schedule.installments.cancel', {
+                        loan_application: application.id,
+                        schedule: scheduleId,
+                    }),
                 );
             });
     };
@@ -505,21 +613,21 @@ export default function LoanApplicationShow() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={application.application_no} />
 
-            <div className="space-y-5 pb-6">
-                <section className="grid overflow-hidden rounded-lg border bg-card shadow-sm lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-                    <div className="relative flex min-h-64 flex-col justify-between gap-8 overflow-hidden bg-muted p-5 text-foreground sm:p-7">
+            <div className="mx-auto w-full max-w-[1600px] space-y-4 pb-6">
+                <section className="grid overflow-hidden rounded-xl border bg-card shadow-sm lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                    <div className="relative flex min-h-0 flex-col justify-between gap-4 overflow-hidden bg-muted p-4 text-foreground sm:p-5">
                         <div
                             aria-hidden="true"
                             className="absolute inset-y-0 left-0 w-1 bg-accent"
                         />
                         <div className="relative">
-                            <p className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+                            <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
                                 Loan application
                             </p>
-                            <h1 className="mt-3 text-2xl font-semibold break-words sm:text-3xl">
+                            <h1 className="mt-1.5 text-xl font-semibold break-words sm:text-2xl">
                                 {application.application_no}
                             </h1>
-                            <p className="mt-2 text-sm text-foreground">
+                            <p className="mt-1 text-sm text-foreground">
                                 {application.customer?.name ??
                                     'Unknown customer'}
                                 <span className="mx-2 text-muted-foreground">
@@ -528,13 +636,13 @@ export default function LoanApplicationShow() {
                                 {application.product?.name ?? 'Loan product'}
                             </p>
                         </div>
-                        <div className="relative flex flex-wrap items-end justify-between gap-4 border-t border-border pt-4">
+                        <div className="relative flex flex-wrap items-end justify-between gap-3 border-t border-border pt-3">
                             <div>
                                 <p className="text-[10px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
                                     Requested amount
                                 </p>
-                                <p className="mt-1 text-3xl font-semibold tabular-nums sm:text-4xl">
-                                    <span className="mr-1 text-lg text-muted-foreground">
+                                <p className="mt-0.5 text-2xl font-semibold tabular-nums sm:text-3xl">
+                                    <span className="mr-1 text-base text-muted-foreground">
                                         ৳
                                     </span>
                                     {formatBDTCurrency(
@@ -565,7 +673,7 @@ export default function LoanApplicationShow() {
                     </div>
 
                     <div className="flex flex-col">
-                        <div className="flex items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
+                        <div className="flex items-center justify-between gap-3 border-b px-4 py-2.5 sm:px-5">
                             <div>
                                 <p className="text-[10px] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
                                     Current status
@@ -624,9 +732,9 @@ export default function LoanApplicationShow() {
                     </div>
                 </section>
 
-                <section className="overflow-hidden rounded-lg border bg-card">
-                    <div className="flex items-center gap-3 border-b px-4 py-3.5 sm:px-5">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-accent/15 text-accent-foreground">
+                <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <div className="flex items-center gap-3 border-b px-4 py-2.5 sm:px-5">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent/15 text-accent-foreground">
                             <Users className="size-4" />
                         </div>
                         <div>
@@ -638,7 +746,7 @@ export default function LoanApplicationShow() {
                             </p>
                         </div>
                     </div>
-                    <div className="grid gap-px bg-border/70 sm:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-px bg-border/70 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                         <ApplicantDetailGroup
                             icon={Banknote}
                             title="Income"
@@ -684,7 +792,7 @@ export default function LoanApplicationShow() {
                                     `${education.institution_name}${education.qualification ? ` · ${education.qualification}` : ''}${education.field_of_study ? ` · ${education.field_of_study}` : ''}`,
                             )}
                         />
-                        <div className="min-w-0 bg-background p-4 sm:p-5">
+                        <div className="min-w-0 bg-background p-3 sm:p-3.5">
                             <div className="flex items-center gap-2">
                                 <FileText className="size-4 text-primary" />
                                 <h3 className="text-xs font-semibold tracking-wide uppercase">
@@ -730,8 +838,8 @@ export default function LoanApplicationShow() {
                 </section>
 
                 {/* Workflow */}
-                <section className="rounded-xl border bg-background">
-                    <div className="flex flex-col gap-3 border-b px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
+                <section className="rounded-xl border bg-card shadow-sm">
+                    <div className="flex flex-col gap-2 border-b px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <div className="flex items-center gap-2">
                                 <ClipboardCheck className="h-4 w-4 text-primary" />
@@ -838,7 +946,7 @@ export default function LoanApplicationShow() {
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-1.5 border-t bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-1.5 border-t bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
                         <WorkflowStep
                             label="Draft"
                             active={application.status === 'DRAFT'}
@@ -873,7 +981,7 @@ export default function LoanApplicationShow() {
 
                 {/* Loan account */}
                 {application.loan_account && (
-                    <section className="overflow-hidden rounded-xl border bg-background shadow-sm">
+                    <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
                         <SectionHeader
                             icon={Landmark}
                             title="Loan account"
@@ -904,8 +1012,18 @@ export default function LoanApplicationShow() {
                                 actions={
                                     ['CLOSED', 'WRITTEN_OFF'].includes(
                                         application.loan_account.status,
-                                    ) ? undefined : (
+                                    ) || !canManageSchedule ? undefined : (
                                         <>
+                                            <Button
+                                                size="sm"
+                                                onClick={() =>
+                                                    openAddScheduleDialog()
+                                                }
+                                            >
+                                                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                                                Add installment
+                                            </Button>
+
                                             <Button
                                                 size="sm"
                                                 variant="outline"
@@ -928,21 +1046,25 @@ export default function LoanApplicationShow() {
                                 }
                             />
 
-                            <div className="px-4 pb-4">
-                                <div className="mb-3 max-w-md">
-                                    <Label htmlFor="arrear-resolution-note">
-                                        Resolution note
-                                    </Label>
-                                    <Input
-                                        id="arrear-resolution-note"
-                                        className="mt-1.5 h-9"
-                                        value={arrearNote}
-                                        onChange={(event) =>
-                                            setArrearNote(event.target.value)
-                                        }
-                                        placeholder="Optional note for arrear resolution"
-                                    />
-                                </div>
+                            <div className="px-3.5 pb-3.5 sm:px-4">
+                                {activeArrears.length > 0 && (
+                                    <div className="mb-2 max-w-md">
+                                        <Label htmlFor="arrear-resolution-note">
+                                            Resolution note
+                                        </Label>
+                                        <Input
+                                            id="arrear-resolution-note"
+                                            className="mt-1 h-8"
+                                            value={arrearNote}
+                                            onChange={(event) =>
+                                                setArrearNote(
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Optional note for arrear resolution"
+                                        />
+                                    </div>
+                                )}
 
                                 {schedules.length > 0 ? (
                                     <DataTable>
@@ -964,63 +1086,205 @@ export default function LoanApplicationShow() {
                                                 </TableHead>
                                                 <TableHead>Version</TableHead>
                                                 <TableHead>Status</TableHead>
+                                                <TableHead>
+                                                    Financial transaction
+                                                </TableHead>
+                                                {canManageSchedule && (
+                                                    <TableHead>
+                                                        Action
+                                                    </TableHead>
+                                                )}
                                             </tr>
                                         </thead>
 
                                         <tbody>
-                                            {schedules.map((schedule) => (
-                                                <tr
-                                                    key={schedule.id}
-                                                    className="border-b border-border/60 last:border-0 hover:bg-muted/20"
-                                                >
-                                                    <TableCell>
-                                                        {
-                                                            schedule.installment_no
-                                                        }
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {formatDate(
-                                                            schedule.due_date,
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {formatBDTCurrency(
-                                                            schedule.scheduled_principal,
-                                                            false,
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {formatBDTCurrency(
-                                                            schedule.scheduled_interest,
-                                                            false,
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {formatBDTCurrency(
-                                                            schedule.scheduled_protection_fee,
-                                                            false,
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell
-                                                        align="right"
-                                                        className="font-semibold"
+                                            {schedules.map((schedule) => {
+                                                const scheduleTransactions = [
+                                                    ...new Map(
+                                                        repayments
+                                                            .filter(
+                                                                (repayment) =>
+                                                                    repayment.allocations?.some(
+                                                                        (
+                                                                            allocation,
+                                                                        ) =>
+                                                                            allocation.loan_schedule_id ===
+                                                                            schedule.id,
+                                                                    ),
+                                                            )
+                                                            .map(
+                                                                (repayment) =>
+                                                                    repayment.financial_transaction,
+                                                            )
+                                                            .filter(
+                                                                (
+                                                                    transaction,
+                                                                ): transaction is NonNullable<
+                                                                    typeof transaction
+                                                                > =>
+                                                                    Boolean(
+                                                                        transaction,
+                                                                    ),
+                                                            )
+                                                            .map(
+                                                                (
+                                                                    transaction,
+                                                                ) => [
+                                                                    transaction.id,
+                                                                    transaction,
+                                                                ],
+                                                            ),
+                                                    ).values(),
+                                                ];
+                                                const hasNoPayments =
+                                                    Number(
+                                                        schedule.total_paid,
+                                                    ) === 0;
+                                                const canEditSchedule =
+                                                    schedule.status ===
+                                                        'PENDING' &&
+                                                    hasNoPayments;
+                                                const canCancelSchedule =
+                                                    [
+                                                        'PENDING',
+                                                        'OVERDUE',
+                                                    ].includes(
+                                                        schedule.status,
+                                                    ) && hasNoPayments;
+
+                                                return (
+                                                    <tr
+                                                        key={schedule.id}
+                                                        className="border-b border-border/60 last:border-0 hover:bg-muted/20"
                                                     >
-                                                        {formatBDTCurrency(
-                                                            schedule.total_due,
-                                                            false,
+                                                        <TableCell>
+                                                            {
+                                                                schedule.installment_no
+                                                            }
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {formatDate(
+                                                                schedule.due_date,
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            {formatBDTCurrency(
+                                                                schedule.scheduled_principal,
+                                                                false,
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            {formatBDTCurrency(
+                                                                schedule.scheduled_interest,
+                                                                false,
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            {formatBDTCurrency(
+                                                                schedule.scheduled_protection_fee,
+                                                                false,
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell
+                                                            align="right"
+                                                            className="font-semibold"
+                                                        >
+                                                            {formatBDTCurrency(
+                                                                schedule.total_due,
+                                                                false,
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {schedule.schedule_version ??
+                                                                '-'}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <StatusBadge tone="neutral">
+                                                                {
+                                                                    schedule.status
+                                                                }
+                                                            </StatusBadge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <div className="flex flex-wrap gap-1.5">
+                                                                {scheduleTransactions.map(
+                                                                    (
+                                                                        transaction,
+                                                                    ) => (
+                                                                        <Link
+                                                                            key={
+                                                                                transaction.id
+                                                                            }
+                                                                            href={route(
+                                                                                'financial-transactions.show',
+                                                                                transaction.id,
+                                                                            )}
+                                                                            className="font-mono text-xs font-medium text-primary underline-offset-2 hover:underline"
+                                                                            aria-label={`View financial transaction ${transaction.transaction_no}`}
+                                                                        >
+                                                                            {
+                                                                                transaction.transaction_no
+                                                                            }
+                                                                        </Link>
+                                                                    ),
+                                                                )}
+                                                                {scheduleTransactions.length ===
+                                                                    0 && (
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        —
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </TableCell>
+                                                        {canManageSchedule && (
+                                                            <TableCell>
+                                                                <div className="flex items-center gap-1">
+                                                                    {canEditSchedule && (
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="h-8 px-2"
+                                                                            onClick={() =>
+                                                                                openEditScheduleDialog(
+                                                                                    schedule,
+                                                                                )
+                                                                            }
+                                                                            aria-label={`Edit installment ${schedule.installment_no}`}
+                                                                        >
+                                                                            <Pencil className="mr-1 h-3.5 w-3.5" />
+                                                                            Edit
+                                                                        </Button>
+                                                                    )}
+                                                                    {canCancelSchedule && (
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="h-8 px-2 text-destructive hover:text-destructive"
+                                                                            onClick={() =>
+                                                                                cancelScheduleInstallment(
+                                                                                    schedule.id,
+                                                                                )
+                                                                            }
+                                                                            aria-label={`Cancel installment ${schedule.installment_no}`}
+                                                                        >
+                                                                            <X className="mr-1 h-3.5 w-3.5" />
+                                                                            Cancel
+                                                                        </Button>
+                                                                    )}
+                                                                    {!canEditSchedule &&
+                                                                        !canCancelSchedule && (
+                                                                            <span className="text-xs text-muted-foreground">
+                                                                                —
+                                                                            </span>
+                                                                        )}
+                                                                </div>
+                                                            </TableCell>
                                                         )}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {schedule.schedule_version ??
-                                                            '-'}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <StatusBadge tone="neutral">
-                                                            {schedule.status}
-                                                        </StatusBadge>
-                                                    </TableCell>
-                                                </tr>
-                                            ))}
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </DataTable>
                                 ) : (
@@ -1030,6 +1294,133 @@ export default function LoanApplicationShow() {
                                     />
                                 )}
                             </div>
+
+                            <Dialog
+                                open={scheduleDialogOpen}
+                                onOpenChange={setScheduleDialogOpen}
+                            >
+                                <DialogContent className="max-w-xl">
+                                    <DialogHeader>
+                                        <DialogTitle>
+                                            {editingSchedule
+                                                ? 'Edit repayment installment'
+                                                : 'Add repayment installment'}
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            Set a due date and enter at least
+                                            one amount. The total is calculated
+                                            automatically.
+                                        </DialogDescription>
+                                    </DialogHeader>
+
+                                    <form
+                                        onSubmit={saveScheduleInstallment}
+                                        className="space-y-4"
+                                    >
+                                        <InputError
+                                            message={pageErrors?.schedule}
+                                        />
+                                        <div>
+                                            <Label htmlFor="schedule-due-date">
+                                                Due date
+                                            </Label>
+                                            <AppDatePicker
+                                                id="schedule-due-date"
+                                                value={scheduleData.due_date}
+                                                required
+                                                onChange={(value) =>
+                                                    setScheduleData(
+                                                        'due_date',
+                                                        value,
+                                                    )
+                                                }
+                                            />
+                                            <InputError
+                                                message={
+                                                    scheduleErrors.due_date
+                                                }
+                                            />
+                                        </div>
+
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            {(
+                                                [
+                                                    [
+                                                        'scheduled_principal',
+                                                        'Principal',
+                                                    ],
+                                                    [
+                                                        'scheduled_interest',
+                                                        'Interest',
+                                                    ],
+                                                    ['scheduled_fee', 'Fee'],
+                                                    [
+                                                        'scheduled_protection_fee',
+                                                        'Insurance',
+                                                    ],
+                                                ] as const
+                                            ).map(([field, label]) => (
+                                                <div key={field}>
+                                                    <Label htmlFor={field}>
+                                                        {label}
+                                                    </Label>
+                                                    <Input
+                                                        id={field}
+                                                        type="number"
+                                                        min="0"
+                                                        step="0.01"
+                                                        className="mt-1 h-9"
+                                                        value={
+                                                            scheduleData[field]
+                                                        }
+                                                        onChange={(event) =>
+                                                            setScheduleData(
+                                                                field,
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            scheduleErrors[
+                                                                field
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <DialogFooter>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    setScheduleDialogOpen(
+                                                        false,
+                                                    );
+                                                    setEditingSchedule(null);
+                                                }}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={scheduleProcessing}
+                                            >
+                                                {scheduleProcessing
+                                                    ? editingSchedule
+                                                        ? 'Saving…'
+                                                        : 'Adding…'
+                                                    : editingSchedule
+                                                      ? 'Save changes'
+                                                      : 'Add installment'}
+                                            </Button>
+                                        </DialogFooter>
+                                    </form>
+                                </DialogContent>
+                            </Dialog>
                         </div>
 
                         {/* Arrears */}
@@ -1045,7 +1436,7 @@ export default function LoanApplicationShow() {
                                     {activeArrears.map((arrear) => (
                                         <div
                                             key={arrear.id}
-                                            className="flex flex-col gap-3 px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between"
+                                            className="flex flex-col gap-2.5 px-3.5 py-2.5 lg:flex-row lg:items-center lg:justify-between"
                                         >
                                             <div>
                                                 <div className="flex flex-wrap items-center gap-2.5">
@@ -1125,7 +1516,7 @@ export default function LoanApplicationShow() {
                                     {disbursements.map((disbursement) => (
                                         <div
                                             key={disbursement.id}
-                                            className="flex flex-col gap-2.5 px-4 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between"
+                                            className="flex flex-col gap-2 px-3.5 py-2.5 text-sm sm:flex-row sm:items-center sm:justify-between"
                                         >
                                             <div>
                                                 <p className="font-medium">
@@ -1160,8 +1551,8 @@ export default function LoanApplicationShow() {
                             )}
 
                             {canDisburse && (
-                                <div className="border-t bg-muted/10 p-4 sm:p-5">
-                                    <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                                <div className="border-t bg-muted/10 p-3.5 sm:p-4">
+                                    <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                                         <div>
                                             <h3 className="text-sm font-semibold">
                                                 Record a disbursement
@@ -1429,423 +1820,436 @@ export default function LoanApplicationShow() {
                     </section>
                 )}
 
-                {/* Collateral */}
-                <section className="overflow-hidden rounded-xl border bg-background shadow-sm">
-                    <SectionHeader
-                        icon={ShieldCheck}
-                        title="Collateral"
-                        description="Register and verify security before disbursement."
-                        badge={String(
-                            depositLiens.length + otherCollaterals.length,
-                        )}
-                    />
+                <div className="grid items-start gap-3 xl:grid-cols-2">
+                    {/* Collateral */}
+                    <section className="h-full overflow-hidden rounded-xl border bg-card shadow-sm">
+                        <SectionHeader
+                            icon={ShieldCheck}
+                            title="Collateral"
+                            badge={String(
+                                depositLiens.length + otherCollaterals.length,
+                            )}
+                        />
 
-                    <div className="divide-y divide-border/70">
-                        <div className="border-b bg-muted/30 px-4 py-3">
-                            <p className="text-sm font-medium">Deposit Liens</p>
-                            <p className="text-xs text-muted-foreground">
-                                Bank deposits pledged as collateral.
-                            </p>
-                        </div>
+                        <div className="grid divide-y divide-border/70 md:grid-cols-2 md:divide-x md:divide-y-0">
+                            <div>
+                                <div className="border-b bg-muted/30 px-3 py-2">
+                                    <p className="text-xs font-semibold">
+                                        Deposit liens
+                                    </p>
+                                    <p className="text-[11px] text-muted-foreground">
+                                        Bank deposits pledged as security
+                                    </p>
+                                </div>
 
-                        {depositLiens.length > 0 ? (
-                            depositLiens.map((collateral) => (
-                                <CollateralRecord
-                                    key={collateral.id}
-                                    collateral={collateral}
-                                    onVerify={verifyCollateral}
-                                    onRelease={releaseCollateral}
-                                />
-                            ))
-                        ) : (
-                            <EmptyState
-                                icon={ShieldCheck}
-                                text="No deposit liens recorded."
-                            />
-                        )}
-
-                        <div className="border-b bg-muted/30 px-4 py-3">
-                            <p className="text-sm font-medium">
-                                Other Collateral
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                                Property, vehicle, guarantor, and other
-                                security.
-                            </p>
-                        </div>
-
-                        {otherCollaterals.length > 0 ? (
-                            otherCollaterals.map((collateral) => (
-                                <CollateralRecord
-                                    key={collateral.id}
-                                    collateral={collateral}
-                                    onVerify={verifyCollateral}
-                                    onRelease={releaseCollateral}
-                                />
-                            ))
-                        ) : (
-                            <EmptyState
-                                icon={ShieldCheck}
-                                text="No other collateral recorded."
-                            />
-                        )}
-                    </div>
-
-                    <div className="divide-y border-t bg-muted/30">
-                        <form
-                            onSubmit={submitDepositLien}
-                            className="p-4 sm:p-5"
-                        >
-                            <div className="mb-3 flex items-center gap-2">
-                                <Plus className="h-4 w-4 text-primary" />
-                                <p className="text-sm font-medium">
-                                    Add deposit lien
-                                </p>
+                                {depositLiens.length > 0 ? (
+                                    depositLiens.map((collateral) => (
+                                        <CollateralRecord
+                                            key={collateral.id}
+                                            collateral={collateral}
+                                            onVerify={verifyCollateral}
+                                            onRelease={releaseCollateral}
+                                        />
+                                    ))
+                                ) : (
+                                    <EmptyState
+                                        icon={ShieldCheck}
+                                        text="No deposit liens recorded."
+                                    />
+                                )}
                             </div>
-                            <div className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                <div className="sm:col-span-2">
-                                    <FormField label="Deposit account">
-                                        <FinancialAccountSearchInput
-                                            scope="deposit"
-                                            placeholder="Search deposit account"
-                                            onSelect={(account) =>
+
+                            <div>
+                                <div className="border-b bg-muted/30 px-3 py-2">
+                                    <p className="text-xs font-semibold">
+                                        Other collateral
+                                    </p>
+                                    <p className="text-[11px] text-muted-foreground">
+                                        Property, vehicle, and other security
+                                    </p>
+                                </div>
+
+                                {otherCollaterals.length > 0 ? (
+                                    otherCollaterals.map((collateral) => (
+                                        <CollateralRecord
+                                            key={collateral.id}
+                                            collateral={collateral}
+                                            onVerify={verifyCollateral}
+                                            onRelease={releaseCollateral}
+                                        />
+                                    ))
+                                ) : (
+                                    <EmptyState
+                                        icon={ShieldCheck}
+                                        text="No other collateral recorded."
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="divide-y border-t bg-muted/30">
+                            <form
+                                onSubmit={submitDepositLien}
+                                className="p-3.5 sm:p-4"
+                            >
+                                <div className="mb-2 flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-primary" />
+                                    <p className="text-sm font-medium">
+                                        Add deposit lien
+                                    </p>
+                                </div>
+                                <div className="grid items-end gap-2 sm:grid-cols-2">
+                                    <div className="sm:col-span-2">
+                                        <FormField label="Deposit account">
+                                            <FinancialAccountSearchInput
+                                                scope="deposit"
+                                                placeholder="Search deposit account"
+                                                onSelect={(account) =>
+                                                    setDepositLienData(
+                                                        'financial_account_id',
+                                                        String(account.id),
+                                                    )
+                                                }
+                                            />
+                                        </FormField>
+                                    </div>
+                                    <FormField label="Description">
+                                        <Input
+                                            className="h-9"
+                                            value={depositLienData.description}
+                                            onChange={(event) =>
                                                 setDepositLienData(
-                                                    'financial_account_id',
-                                                    String(account.id),
+                                                    'description',
+                                                    event.target.value,
                                                 )
                                             }
                                         />
                                     </FormField>
-                                </div>
-                                <FormField label="Description">
-                                    <Input
-                                        className="h-9"
-                                        value={depositLienData.description}
-                                        onChange={(event) =>
-                                            setDepositLienData(
-                                                'description',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-                                <FormField label="Assessed value">
-                                    <Input
-                                        className="h-9"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={depositLienData.assessed_value}
-                                        onChange={(event) =>
-                                            setDepositLienData(
-                                                'assessed_value',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-                                <FormField label="Secured value">
-                                    <Input
-                                        className="h-9"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={depositLienData.secured_value}
-                                        onChange={(event) =>
-                                            setDepositLienData(
-                                                'secured_value',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-                                <FormField label="Notes">
-                                    <Input
-                                        className="h-9"
-                                        value={depositLienData.notes}
-                                        onChange={(event) =>
-                                            setDepositLienData(
-                                                'notes',
-                                                event.target.value,
-                                            )
-                                        }
-                                        placeholder="Optional deposit lien notes"
-                                    />
-                                </FormField>
-                                <div className="flex justify-end sm:col-span-2 lg:col-span-4">
-                                    <Button
-                                        type="submit"
-                                        size="sm"
-                                        disabled={depositLienProcessing}
-                                    >
-                                        <Plus className="mr-1.5 h-4 w-4" />
-                                        Add deposit lien
-                                    </Button>
-                                </div>
-                            </div>
-                        </form>
-
-                        <form
-                            onSubmit={submitOtherCollateral}
-                            className="p-4 sm:p-5"
-                        >
-                            <div className="mb-3 flex items-center gap-2">
-                                <Plus className="h-4 w-4 text-primary" />
-                                <p className="text-sm font-medium">
-                                    Add other collateral
-                                </p>
-                            </div>
-                            <div className="grid items-end gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                <FormField label="Type">
-                                    <Select
-                                        className="h-9"
-                                        value={otherCollateralData.type}
-                                        onChange={(value) =>
-                                            setOtherCollateralData(
-                                                'type',
-                                                value,
-                                            )
-                                        }
-                                        options={[
-                                            'PROPERTY',
-                                            'VEHICLE',
-                                            'GUARANTEE',
-                                            'OTHER',
-                                        ].map((value) => ({
-                                            value,
-                                            label: value,
-                                        }))}
-                                    />
-                                </FormField>
-                                <FormField label="Description">
-                                    <Input
-                                        className="h-9"
-                                        value={otherCollateralData.description}
-                                        onChange={(event) =>
-                                            setOtherCollateralData(
-                                                'description',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-                                <FormField label="Assessed value">
-                                    <Input
-                                        className="h-9"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={
-                                            otherCollateralData.assessed_value
-                                        }
-                                        onChange={(event) =>
-                                            setOtherCollateralData(
-                                                'assessed_value',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-                                <FormField label="Secured value">
-                                    <Input
-                                        className="h-9"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        value={
-                                            otherCollateralData.secured_value
-                                        }
-                                        onChange={(event) =>
-                                            setOtherCollateralData(
-                                                'secured_value',
-                                                event.target.value,
-                                            )
-                                        }
-                                    />
-                                </FormField>
-                                <div className="sm:col-span-2 lg:col-span-3">
+                                    <FormField label="Assessed value">
+                                        <Input
+                                            className="h-9"
+                                            type="number"
+                                            min="0"
+                                            step="0.0001"
+                                            value={
+                                                depositLienData.assessed_value
+                                            }
+                                            onChange={(event) =>
+                                                setDepositLienData(
+                                                    'assessed_value',
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                    </FormField>
+                                    <FormField label="Secured value">
+                                        <Input
+                                            className="h-9"
+                                            type="number"
+                                            min="0"
+                                            step="0.0001"
+                                            value={
+                                                depositLienData.secured_value
+                                            }
+                                            onChange={(event) =>
+                                                setDepositLienData(
+                                                    'secured_value',
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                    </FormField>
                                     <FormField label="Notes">
                                         <Input
                                             className="h-9"
-                                            value={otherCollateralData.notes}
+                                            value={depositLienData.notes}
                                             onChange={(event) =>
-                                                setOtherCollateralData(
+                                                setDepositLienData(
                                                     'notes',
                                                     event.target.value,
                                                 )
                                             }
-                                            placeholder="Optional collateral notes"
+                                            placeholder="Optional deposit lien notes"
                                         />
                                     </FormField>
+                                    <div className="flex justify-end sm:col-span-2">
+                                        <Button
+                                            type="submit"
+                                            size="sm"
+                                            disabled={depositLienProcessing}
+                                        >
+                                            <Plus className="mr-1.5 h-4 w-4" />
+                                            Add deposit lien
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="flex justify-end">
+                            </form>
+
+                            <form
+                                onSubmit={submitOtherCollateral}
+                                className="p-3.5 sm:p-4"
+                            >
+                                <div className="mb-2 flex items-center gap-2">
+                                    <Plus className="h-4 w-4 text-primary" />
+                                    <p className="text-sm font-medium">
+                                        Add other collateral
+                                    </p>
+                                </div>
+                                <div className="grid items-end gap-2 sm:grid-cols-2">
+                                    <FormField label="Type">
+                                        <Select
+                                            className="h-9"
+                                            value={otherCollateralData.type}
+                                            onChange={(value) =>
+                                                setOtherCollateralData(
+                                                    'type',
+                                                    value,
+                                                )
+                                            }
+                                            options={[
+                                                'PROPERTY',
+                                                'VEHICLE',
+                                                'GUARANTEE',
+                                                'OTHER',
+                                            ].map((value) => ({
+                                                value,
+                                                label: value,
+                                            }))}
+                                        />
+                                    </FormField>
+                                    <FormField label="Description">
+                                        <Input
+                                            className="h-9"
+                                            value={
+                                                otherCollateralData.description
+                                            }
+                                            onChange={(event) =>
+                                                setOtherCollateralData(
+                                                    'description',
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                    </FormField>
+                                    <FormField label="Assessed value">
+                                        <Input
+                                            className="h-9"
+                                            type="number"
+                                            min="0"
+                                            step="0.0001"
+                                            value={
+                                                otherCollateralData.assessed_value
+                                            }
+                                            onChange={(event) =>
+                                                setOtherCollateralData(
+                                                    'assessed_value',
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                    </FormField>
+                                    <FormField label="Secured value">
+                                        <Input
+                                            className="h-9"
+                                            type="number"
+                                            min="0"
+                                            step="0.0001"
+                                            value={
+                                                otherCollateralData.secured_value
+                                            }
+                                            onChange={(event) =>
+                                                setOtherCollateralData(
+                                                    'secured_value',
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                    </FormField>
+                                    <div className="sm:col-span-2">
+                                        <FormField label="Notes">
+                                            <Input
+                                                className="h-9"
+                                                value={
+                                                    otherCollateralData.notes
+                                                }
+                                                onChange={(event) =>
+                                                    setOtherCollateralData(
+                                                        'notes',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="Optional collateral notes"
+                                            />
+                                        </FormField>
+                                    </div>
+                                    <div className="flex justify-end sm:col-span-2">
+                                        <Button
+                                            type="submit"
+                                            size="sm"
+                                            disabled={otherCollateralProcessing}
+                                        >
+                                            <Plus className="mr-1.5 h-4 w-4" />
+                                            Add other collateral
+                                        </Button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+
+                    {/* Guarantors */}
+                    <section className="h-full overflow-hidden rounded-xl border bg-card shadow-sm">
+                        <SectionHeader
+                            icon={Users}
+                            title="Guarantors"
+                            badge={String(guarantors.length)}
+                        />
+
+                        {guarantors.length > 0 && (
+                            <div className="divide-y divide-border/70">
+                                {guarantors.map((guarantor) => {
+                                    const name =
+                                        guarantor.customer?.name ??
+                                        guarantor.customer_id;
+
+                                    return (
+                                        <div
+                                            key={guarantor.id}
+                                            className="flex flex-col gap-2.5 px-3.5 py-2.5 lg:flex-row lg:items-center lg:justify-between"
+                                        >
+                                            <div className="flex min-w-0 items-center gap-3">
+                                                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted ring-1 ring-border/50">
+                                                    <UserCheck className="size-4 text-muted-foreground" />
+                                                </div>
+
+                                                <div className="min-w-0">
+                                                    <div className="flex flex-wrap items-center gap-2.5">
+                                                        <p className="truncate text-sm font-semibold">
+                                                            {name}
+                                                        </p>
+
+                                                        <StatusBadge tone="neutral">
+                                                            {guarantor.status}
+                                                        </StatusBadge>
+                                                    </div>
+
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {guarantor.customer
+                                                            ?.customer_no ??
+                                                            '-'}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {guarantor.status === 'PENDING' && (
+                                                <div className="flex gap-1.5">
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            decideGuarantor(
+                                                                guarantor.id,
+                                                                true,
+                                                                String(name),
+                                                            )
+                                                        }
+                                                    >
+                                                        <Check className="mr-1.5 h-3.5 w-3.5" />
+                                                        Accept
+                                                    </Button>
+
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() =>
+                                                            decideGuarantor(
+                                                                guarantor.id,
+                                                                false,
+                                                                String(name),
+                                                            )
+                                                        }
+                                                    >
+                                                        <X className="mr-1.5 h-3.5 w-3.5" />
+                                                        Reject
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        <form
+                            className="border-t bg-muted/30 p-3"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+
+                                postGuarantor(
+                                    route(
+                                        'loan-applications.guarantors.store',
+                                        application.id,
+                                    ),
+                                );
+                            }}
+                        >
+                            <div className="mb-2 flex items-center gap-2">
+                                <Plus className="h-4 w-4 text-primary" />
+                                <p className="text-sm font-medium">
+                                    Invite guarantor
+                                </p>
+                            </div>
+
+                            <div className="grid items-end gap-2 sm:grid-cols-2">
+                                <CustomerSearchInput
+                                    label="Customer"
+                                    placeholder="Search customer"
+                                    onSelect={(customer) =>
+                                        setGuarantorData(
+                                            'customer_id',
+                                            String(customer.id),
+                                        )
+                                    }
+                                />
+
+                                <FormField label="Notes">
+                                    <Input
+                                        className="h-9"
+                                        value={guarantorData.notes}
+                                        onChange={(event) =>
+                                            setGuarantorData(
+                                                'notes',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Optional notes"
+                                    />
+                                </FormField>
+
+                                <div className="flex justify-end sm:col-span-2">
                                     <Button
                                         type="submit"
                                         size="sm"
-                                        disabled={otherCollateralProcessing}
+                                        disabled={guarantorProcessing}
                                     >
-                                        <Plus className="mr-1.5 h-4 w-4" />
-                                        Add other collateral
+                                        <UserCheck className="mr-1.5 h-4 w-4" />
+                                        Invite guarantor
                                     </Button>
                                 </div>
                             </div>
                         </form>
-                    </div>
-                </section>
-
-                {/* Guarantors */}
-                <section className="overflow-hidden rounded-xl border bg-background shadow-sm">
-                    <SectionHeader
-                        icon={Users}
-                        title="Guarantors"
-                        description="Invite eligible customers and record their decisions."
-                        badge={String(guarantors.length)}
-                    />
-
-                    {guarantors.length > 0 && (
-                        <div className="divide-y divide-border/70">
-                            {guarantors.map((guarantor) => {
-                                const name =
-                                    guarantor.customer?.name ??
-                                    guarantor.customer_id;
-
-                                return (
-                                    <div
-                                        key={guarantor.id}
-                                        className="flex flex-col gap-3 px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between"
-                                    >
-                                        <div className="flex min-w-0 items-center gap-3">
-                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted ring-1 ring-border/50">
-                                                <UserCheck className="h-4 w-4 text-muted-foreground" />
-                                            </div>
-
-                                            <div className="min-w-0">
-                                                <div className="flex flex-wrap items-center gap-2.5">
-                                                    <p className="truncate text-sm font-semibold">
-                                                        {name}
-                                                    </p>
-
-                                                    <StatusBadge tone="neutral">
-                                                        {guarantor.status}
-                                                    </StatusBadge>
-                                                </div>
-
-                                                <p className="text-xs text-muted-foreground">
-                                                    {guarantor.customer
-                                                        ?.customer_no ?? '-'}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {guarantor.status === 'PENDING' && (
-                                            <div className="flex gap-1.5">
-                                                <Button
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        decideGuarantor(
-                                                            guarantor.id,
-                                                            true,
-                                                            String(name),
-                                                        )
-                                                    }
-                                                >
-                                                    <Check className="mr-1.5 h-3.5 w-3.5" />
-                                                    Accept
-                                                </Button>
-
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() =>
-                                                        decideGuarantor(
-                                                            guarantor.id,
-                                                            false,
-                                                            String(name),
-                                                        )
-                                                    }
-                                                >
-                                                    <X className="mr-1.5 h-3.5 w-3.5" />
-                                                    Reject
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                    <form
-                        className="border-t bg-muted/30 p-4"
-                        onSubmit={(event) => {
-                            event.preventDefault();
-
-                            postGuarantor(
-                                route(
-                                    'loan-applications.guarantors.store',
-                                    application.id,
-                                ),
-                            );
-                        }}
-                    >
-                        <div className="mb-3 flex items-center gap-2">
-                            <Plus className="h-4 w-4 text-primary" />
-                            <p className="text-sm font-medium">
-                                Invite guarantor
-                            </p>
-                        </div>
-
-                        <div className="grid items-end gap-3 sm:grid-cols-2">
-                            <CustomerSearchInput
-                                label="Customer"
-                                placeholder="Search customer"
-                                onSelect={(customer) =>
-                                    setGuarantorData(
-                                        'customer_id',
-                                        String(customer.id),
-                                    )
-                                }
-                            />
-
-                            <FormField label="Notes">
-                                <Input
-                                    className="h-9"
-                                    value={guarantorData.notes}
-                                    onChange={(event) =>
-                                        setGuarantorData(
-                                            'notes',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="Optional notes"
-                                />
-                            </FormField>
-
-                            <div className="flex justify-end sm:col-span-2">
-                                <Button
-                                    type="submit"
-                                    size="sm"
-                                    disabled={guarantorProcessing}
-                                >
-                                    <UserCheck className="mr-1.5 h-4 w-4" />
-                                    Invite guarantor
-                                </Button>
-                            </div>
-                        </div>
-                    </form>
-                </section>
+                    </section>
+                </div>
 
                 {/* Credit-life insurance */}
                 {application.loan_account && (
-                    <section className="overflow-hidden rounded-xl border bg-background shadow-sm">
+                    <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
                         <SectionHeader
                             icon={ShieldCheck}
                             title="Credit-life insurance"
-                            description="Optional insurance pays the outstanding loan principal after an approved death claim."
                             badge={protectionPolicy?.status ?? 'NOT ENROLLED'}
                         />
                         {protectionPolicy?.product ? (
-                            <div className="grid gap-3 border-b p-4 sm:grid-cols-3 sm:p-5">
+                            <div className="grid gap-2 border-b p-3.5 sm:grid-cols-3 sm:p-4">
                                 <MetricItem
                                     label="Insurance product"
                                     value={protectionPolicy.product.name}
@@ -1866,7 +2270,7 @@ export default function LoanApplicationShow() {
                                 />
                             </div>
                         ) : (
-                            <p className="border-b px-4 py-4 text-sm text-muted-foreground">
+                            <p className="border-b px-3.5 py-2.5 text-sm text-muted-foreground">
                                 No credit-life insurance was selected for this
                                 loan.
                             </p>
@@ -1877,7 +2281,7 @@ export default function LoanApplicationShow() {
                             !hasOpenProtectionClaim && (
                                 <form
                                     onSubmit={submitProtectionClaim}
-                                    className="grid gap-3 border-b bg-muted/20 p-4 sm:grid-cols-2 sm:p-5"
+                                    className="grid items-end gap-2 border-b bg-muted/20 p-3.5 sm:grid-cols-2 sm:p-4 xl:grid-cols-4"
                                 >
                                     <div>
                                         <Label htmlFor="claim-death-date">
@@ -1920,7 +2324,7 @@ export default function LoanApplicationShow() {
                                             }
                                         />
                                     </div>
-                                    <div className="sm:col-span-2">
+                                    <div>
                                         <Label htmlFor="claim-notes">
                                             Claim notes
                                         </Label>
@@ -1936,7 +2340,7 @@ export default function LoanApplicationShow() {
                                             placeholder="Optional notes"
                                         />
                                     </div>
-                                    <div className="flex justify-end sm:col-span-2">
+                                    <div className="flex justify-end">
                                         <Button
                                             type="submit"
                                             disabled={claimProcessing}
@@ -1953,7 +2357,7 @@ export default function LoanApplicationShow() {
                                 {protectionClaims.map((claim) => (
                                     <div
                                         key={claim.id}
-                                        className="space-y-3 p-4 sm:p-5"
+                                        className="space-y-2 p-3 sm:p-3.5"
                                     >
                                         <div className="flex flex-wrap items-start justify-between gap-3">
                                             <div>
@@ -2159,15 +2563,15 @@ function OverviewFact({
     detail?: string | null;
 }) {
     return (
-        <div className="flex min-w-0 gap-3 border-b border-border/70 p-4 odd:border-r sm:p-5 sm:[&:nth-child(n+3)]:border-b-0">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-accent/15 text-accent-foreground">
+        <div className="flex min-w-0 gap-2.5 border-b border-border/70 p-3 odd:border-r sm:p-3.5 sm:[&:nth-child(n+3)]:border-b-0">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent/15 text-accent-foreground">
                 <Icon className="size-4" />
             </div>
             <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
                     {label}
                 </p>
-                <p className="mt-1 text-sm leading-snug font-semibold break-words">
+                <p className="mt-0.5 text-sm leading-snug font-semibold break-words">
                     {value}
                 </p>
                 {detail && detail !== value && (
@@ -2192,7 +2596,7 @@ function ApplicantDetailGroup({
     empty: string;
 }) {
     return (
-        <div className="min-w-0 bg-background p-4 even:bg-muted/15 sm:p-5">
+        <div className="min-w-0 bg-background p-3 even:bg-muted/15 sm:p-3.5">
             <div className="flex items-center gap-2">
                 <Icon className="size-4 text-primary" />
                 <h3 className="text-xs font-semibold tracking-wide uppercase">
@@ -2200,18 +2604,20 @@ function ApplicantDetailGroup({
                 </h3>
             </div>
             {items.length ? (
-                <ul className="mt-3 space-y-2">
+                <ul className="mt-2 space-y-1.5">
                     {items.map((item, index) => (
                         <li
                             key={`${title}-${index}`}
-                            className="border-l-2 border-accent/60 pl-2.5 text-sm leading-relaxed break-words"
+                            className="border-l-2 border-accent/60 pl-2 text-[13px] leading-snug break-words"
                         >
                             {item}
                         </li>
                     ))}
                 </ul>
             ) : (
-                <p className="mt-3 text-sm text-muted-foreground">{empty}</p>
+                <p className="mt-2 text-[13px] text-muted-foreground">
+                    {empty}
+                </p>
             )}
         </div>
     );
@@ -2229,9 +2635,9 @@ function SectionHeader({
     badge?: string;
 }) {
     return (
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b px-4 py-3">
+        <div className="flex flex-wrap items-start justify-between gap-2.5 border-b px-3.5 py-2.5 sm:px-4">
             <div className="flex min-w-0 items-start gap-2.5">
-                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted">
+                <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10">
                     <Icon className="h-4 w-4 text-primary" />
                 </div>
 
@@ -2267,7 +2673,7 @@ function SubsectionHeader({
     actions?: React.ReactNode;
 }) {
     return (
-        <div className="flex flex-col gap-2.5 border-b bg-muted/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 border-b bg-muted/20 px-3.5 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
             <div className="flex items-center gap-2">
                 <Icon className="h-4 w-4 text-muted-foreground" />
 
@@ -2295,7 +2701,7 @@ function CollateralRecord({
     onRelease: (collateralId: number, type: string) => void;
 }) {
     return (
-        <div className="flex flex-col gap-3 px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-2.5 px-3.5 py-2.5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2.5">
                     <p className="text-sm font-medium">{collateral.type}</p>
@@ -2353,12 +2759,12 @@ function CollateralRecord({
 
 function MetricItem({ label, value }: { label: string; value: string }) {
     return (
-        <div className="border-b px-4 py-3.5 last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0">
+        <div className="border-b px-3 py-2.5 last:border-b-0 sm:border-r sm:border-b-0 sm:last:border-r-0">
             <p className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                 {label}
             </p>
 
-            <p className="mt-0.5 text-sm font-semibold">{value}</p>
+            <p className="mt-0.5 text-sm font-semibold tabular-nums">{value}</p>
         </div>
     );
 }
@@ -2409,7 +2815,7 @@ function FormField({
     return (
         <div className="min-w-0">
             <Label>{label}</Label>
-            <div className="mt-1.5">{children}</div>
+            <div className="mt-1">{children}</div>
         </div>
     );
 }
@@ -2422,7 +2828,7 @@ function EmptyState({
     text: string;
 }) {
     return (
-        <div className="flex items-center gap-2 px-4 pt-1 pb-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 px-3.5 py-2.5 text-xs text-muted-foreground">
             <Icon className="h-4 w-4" />
             <span>{text}</span>
         </div>
@@ -2448,7 +2854,7 @@ function TableHead({
 }) {
     return (
         <th
-            className={`bg-muted/50 px-3 py-2.5 text-[11px] font-semibold tracking-wide whitespace-nowrap text-muted-foreground uppercase ${
+            className={`bg-muted/50 px-3 py-2 text-[11px] font-semibold tracking-wide whitespace-nowrap text-muted-foreground uppercase ${
                 align === 'right' ? 'text-right' : 'text-left'
             }`}
         >
@@ -2468,7 +2874,7 @@ function TableCell({
 }) {
     return (
         <td
-            className={`px-3 py-2.5 align-middle whitespace-nowrap ${
+            className={`px-3 py-2 align-middle whitespace-nowrap ${
                 align === 'right' ? 'text-right' : 'text-left'
             } ${className}`}
         >

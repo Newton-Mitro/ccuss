@@ -7,33 +7,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/default-rules/index.types';
 
-type Rule = {
-    id: number;
-    name: string;
-    account_type: string;
-    fine_calculation: string;
-    fine_amount: string | number;
-    fine_rate: string | number;
-    maximum_fine?: string | number | null;
-    grace_days: number;
-    financial_product_id: number | null;
-    extends_maturity: boolean;
-    maturity_extension_days: number;
-    effective_from: string | null;
-    effective_to: string | null;
-    is_active: boolean;
-    product?: { code: string; name: string } | null;
-};
-
-type Props = SharedData & {
-    rules: Rule[];
-};
 
 export default function DefaultRulesIndex() {
     const { rules, auth } = usePage<Props>().props;

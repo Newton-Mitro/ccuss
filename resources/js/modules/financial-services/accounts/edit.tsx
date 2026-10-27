@@ -5,21 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/edit.interfaces';
 
-interface Props extends SharedData {
-    product: 'savings' | 'share' | 'fixed' | 'recurring' | 'loan';
-    account: {
-        id: number;
-        account_no: string;
-        name?: string | null;
-        account_type: string;
-        holder?: { name?: string } | null;
-        product?: { name?: string } | null;
-    };
-}
 
 export default function FinancialAccountEdit() {
     useFlashToastHandler();

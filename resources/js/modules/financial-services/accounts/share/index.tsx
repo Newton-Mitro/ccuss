@@ -8,29 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-interface Props extends SharedData {
-    accounts: {
-        data: Array<{
-            id: number;
-            account_no: string;
-            status: string;
-            holder?: { name?: string } | null;
-            share_account?: {
-                membership_no?: string;
-                membership_status?: string;
-                member_since?: string | null;
-            } | null;
-        }>;
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-    };
-    filters: { search?: string; per_page?: number };
-}
+import type { Props } from '@/modules/financial-services/types/accounts/share/index.interfaces';
+
 export default function ShareAccountIndex() {
     const { accounts, filters } = usePage<Props>().props;
     const { data, setData, get } = useForm({

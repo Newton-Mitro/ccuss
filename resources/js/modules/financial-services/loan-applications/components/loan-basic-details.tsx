@@ -3,27 +3,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
-import { FormErrors } from '@/modules/financial-services/loan-applications/types';
-import type { LoanApplicationFormPageProps } from '@/modules/financial-services/types/financial-services';
 
-type Props = {
-    customers: LoanApplicationFormPageProps['customers'];
-    products: LoanApplicationFormPageProps['products'];
-    protectionProducts: LoanApplicationFormPageProps['protectionProducts'];
-    customerId: string;
-    productId: string;
-    protectionProductId: string;
-    amount: string;
-    term: string;
-    purpose: string;
-    errors: FormErrors;
-    onCustomerChange: (value: string) => void;
-    onProductChange: (value: string) => void;
-    onProtectionProductChange: (value: string) => void;
-    onAmountChange: (value: string) => void;
-    onTermChange: (value: string) => void;
-    onPurposeChange: (value: string) => void;
-};
+
+import type { Props } from '@/modules/financial-services/types/loan-applications/components/loan-basic-details.types';
+
 
 export default function LoanBasicDetails(props: Props) {
     const {

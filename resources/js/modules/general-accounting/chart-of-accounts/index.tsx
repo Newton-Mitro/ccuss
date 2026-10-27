@@ -29,6 +29,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import { TYPE_COLORS } from '@/modules/general-accounting/chart-of-accounts/utils';
+import type { AccountGroupTreeItem } from '@/modules/general-accounting/types/chart-of-accounts/index.interfaces';
+
 
 const ledgerTypeIcons: Record<string, any> = {
     ASSET: Landmark,
@@ -37,19 +39,6 @@ const ledgerTypeIcons: Record<string, any> = {
     INCOME: TrendingUp,
     EXPENSE: TrendingDown,
 };
-
-interface AccountGroupTreeItem {
-    id: number;
-    code: string;
-    name: string;
-    type: string;
-    normal_balance: string;
-    status: boolean;
-    parent_id?: number | null;
-    level: number;
-    children_count: number;
-    accounts_count: number;
-}
 
 export default function GlAccountsIndex() {
     const { glAccounts, accountGroups, filters, auth } =

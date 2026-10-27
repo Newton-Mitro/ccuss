@@ -9,7 +9,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
@@ -23,21 +23,8 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/savings/show.interfaces';
 
-interface Props extends SharedData {
-    account: {
-        id: number;
-        account_no: string;
-        name?: string;
-        balance: string | number;
-        available_balance: string | number;
-        status: string;
-        opened_at?: string;
-        holder?: { name?: string } | null;
-        product?: { name?: string } | null;
-        saving_account?: { minimum_balance?: string | number } | null;
-    };
-}
 
 export default function SavingsAccountShow() {
     useFlashToastHandler();

@@ -9,41 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Search, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/audit-compliance/types/audits/approval-logs-page.interfaces';
 
-interface ApprovalLog {
-    id: number;
-    record_id: number | null;
-    record_kind: string;
-    record_reference: string;
-    record_title: string;
-    action: string;
-    previous_status: string | null;
-    new_status: string;
-    comment: string | null;
-    acted_at: string;
-    actor?: { name: string } | null;
-    record?: { id: number } | null;
-}
-
-interface Props extends SharedData {
-    logs: {
-        data: ApprovalLog[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-        total: number;
-    };
-    filters: {
-        action?: string;
-        search?: string;
-        per_page?: number;
-    };
-    actions: string[];
-}
 
 export default function ApprovalLogsPage() {
     const { logs, filters, actions, auth } = usePage<Props>().props;

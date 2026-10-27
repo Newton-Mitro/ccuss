@@ -2,11 +2,10 @@ import { Button } from '@/components/ui/button';
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
+import type {
+    FinancialAccountActivationProps,
+} from '@/modules/financial-services/types/components/financial-account-activation.interfaces';
 
-interface FinancialAccountActivationProps {
-    accountId: number;
-    status: string;
-}
 
 export default function FinancialAccountActivation({
     accountId,

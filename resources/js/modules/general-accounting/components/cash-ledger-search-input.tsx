@@ -4,12 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LedgerAccount } from '@/modules/general-accounting/types/finance_and_accounting';
+import type {
+    CashLedgerSearchInputProps,
+} from '@/modules/general-accounting/types/components/cash-ledger-search-input.interfaces';
 
-interface CashLedgerSearchInputProps {
-    onSelect: (ledger: LedgerAccount) => void;
-    label?: string;
-    placeholder?: string;
-}
 
 export const CashLedgerSearchInput: React.FC<CashLedgerSearchInputProps> = ({
     onSelect,

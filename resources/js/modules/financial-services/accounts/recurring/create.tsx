@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
-import type { FinancialProductTermOption } from '@/modules/financial-services/types/financial-services';
-import type { BreadcrumbItem, SharedData } from '@/types';
+
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -24,15 +24,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/recurring/create.interfaces';
 
-interface Props extends SharedData {
-    products: Array<{
-        id: number;
-        code: string;
-        name: string;
-        terms: FinancialProductTermOption[];
-    }>;
-}
 
 export default function RecurringDepositAccountCreate() {
     const { products } = usePage<Props>().props;

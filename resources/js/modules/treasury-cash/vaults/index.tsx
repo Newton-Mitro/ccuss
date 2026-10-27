@@ -10,7 +10,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
-import type { VaultIndexProps } from '@/modules/treasury-cash/types/treasury-cash/vaults';
+import type { VaultIndexProps } from '@/modules/treasury-cash/types/vaults';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Vault as VaultIcon } from 'lucide-react';
 import { useEffect } from 'react';

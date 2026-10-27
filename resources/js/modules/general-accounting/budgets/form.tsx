@@ -19,32 +19,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Entry, PageProps } from '@/modules/general-accounting/types/budgets/form.types';
 
-type Option = { id: number; code?: string; name: string };
-type Entry = {
-    account_id: string;
-    cost_center_id: string;
-    fiscal_period_id: string;
-    amount: string;
-};
-type Budget = {
-    id: number;
-    name: string;
-    fiscal_year_id: number;
-    entries: {
-        account_id: number;
-        cost_center_id: number | null;
-        fiscal_period_id: number | null;
-        amount: string | number;
-    }[];
-};
-type PageProps = {
-    budget?: Budget | null;
-    fiscalYears: Option[];
-    fiscalPeriods: Option[];
-    accounts: Option[];
-    costCenters: Option[];
-};
 
 const emptyEntry = (): Entry => ({
     account_id: '',

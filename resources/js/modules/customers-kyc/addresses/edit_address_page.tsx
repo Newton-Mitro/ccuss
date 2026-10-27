@@ -21,25 +21,11 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type {
-    AddressType,
-    CustomerAddress,
-} from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { BreadcrumbItem } from '@/types';
+import type { AddressType } from '@/modules/customers-kyc/types/customer_kyc_module';
 import { addressTypes } from '@/modules/customers-kyc/addresses/data/address_types';
+import type { InputFieldProps, Props } from '@/modules/customers-kyc/types/addresses/edit_address_page.interfaces';
 
-interface Props extends SharedData {
-    address: CustomerAddress;
-}
-
-interface InputFieldProps {
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    error?: string;
-    placeholder?: string;
-    required?: boolean;
-}
 
 const Edit = () => {
     const { address } = usePage<Props>().props;

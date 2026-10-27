@@ -47,7 +47,7 @@ class FinancialAccountController extends Controller
         $this->middleware('permission:financial.accounts.membership.manage')->only(['storeShareAccount', 'updateShareAccount']);
         $this->middleware('permission:financial.accounts.fixed-deposits.manage')->only('storeFixedDeposit');
         $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only('storeRecurringDeposit');
-        $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only(['markRecurringInstallmentMissed', 'waiveRecurringInstallment']);
+        $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only(['addRecurringInstallment', 'updateRecurringInstallment', 'markRecurringInstallmentMissed', 'waiveRecurringInstallment']);
         $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only('payRecurringInstallment');
     }
 
@@ -324,6 +324,7 @@ class FinancialAccountController extends Controller
 
         return Inertia::render($page, [
             'account' => $financialAccount->load($relations),
+            'can_manage_recurring_deposits' => $request->user()->hasPermission('financial.accounts.recurring-deposits.manage'),
             'customers' => Customer::query()
                 ->where('organization_id', $this->organizationId($request))
                 ->orderBy('name')
@@ -588,6 +589,36 @@ class FinancialAccountController extends Controller
         return back()->with('success', 'Recurring-deposit contract opened successfully.');
     }
 
+    public function addRecurringInstallment(Request $request, FinancialAccount $financialAccount, RecurringDeposit $recurringDeposit)
+    {
+        $this->authorizeRecurringInstallment($request, $financialAccount, $recurringDeposit);
+        $data = $request->validate([
+            'due_date' => ['required', 'date'],
+            'amount_due' => ['required', 'numeric', 'gt:0'],
+        ]);
+
+        $this->recurringDepositService->addInstallment($recurringDeposit, $data);
+
+        return back()->with('success', 'Recurring-deposit installment added.');
+    }
+
+    public function updateRecurringInstallment(Request $request, FinancialAccount $financialAccount, RecurringDeposit $recurringDeposit, RecurringDepositInstallment $installment)
+    {
+        $this->authorizeRecurringInstallment($request, $financialAccount, $recurringDeposit);
+        $data = $request->validate([
+            'due_date' => ['required', 'date'],
+            'amount_due' => ['required', 'numeric', 'gt:0'],
+        ]);
+
+        try {
+            $this->recurringDepositService->updateInstallment($recurringDeposit, $installment, $data);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['schedule' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'Recurring-deposit installment updated.');
+    }
+
     public function markRecurringInstallmentMissed(Request $request, FinancialAccount $financialAccount, RecurringDeposit $recurringDeposit, RecurringDepositInstallment $installment)
     {
         $this->authorizeRecurringInstallment($request, $financialAccount, $recurringDeposit);
@@ -732,5 +763,6 @@ class FinancialAccountController extends Controller
         abort_unless($account->account_type === 'RECURRING_DEPOSIT', 422, 'Installments are only available for recurring-deposit accounts.');
         abort_unless($recurringDeposit->financial_account_id === $account->id, 404);
         abort_if($account->status === 'CLOSED', 422, 'Closed accounts cannot change installments.');
+        abort_if($recurringDeposit->closed_at !== null, 422, 'Closed recurring-deposit contracts cannot change installments.');
     }
 }

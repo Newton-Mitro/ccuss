@@ -13,14 +13,11 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
-import { Organization } from '@/modules/organization-settings/types/organization';
-import { User } from '@/modules/administration-security/types/user';
+import { BreadcrumbItem } from '@/types';
 
-interface Props extends SharedData {
-    user: User;
-    organizations: Organization[];
-}
+
+import type { Props } from '@/modules/administration-security/types/users/assign-organization-page.interfaces';
+
 
 export default function AssignOrganizationPage() {
     const { user, organizations } = usePage<Props>().props;

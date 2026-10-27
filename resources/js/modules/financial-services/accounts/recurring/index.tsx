@@ -9,32 +9,13 @@ import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-interface Props extends SharedData {
-    accounts: {
-        data: Array<{
-            id: number;
-            account_no: string;
-            balance: string | number;
-            status: string;
-            holder?: { name?: string } | null;
-            recurring_deposit?: {
-                installment_amount?: string | number;
-                installment_frequency?: string;
-                total_installments?: number;
-                paid_installments?: number;
-                maturity_date?: string;
-            } | null;
-        }>;
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-    };
-    filters: { search?: string; per_page?: number };
-}
+import type { Props } from '@/modules/financial-services/types/accounts/recurring/index.interfaces';
+
 export default function RecurringDepositAccountIndex() {
     const { accounts, filters } = usePage<Props>().props;
     const { data, setData, get } = useForm({

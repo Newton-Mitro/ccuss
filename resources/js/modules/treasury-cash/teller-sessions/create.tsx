@@ -22,19 +22,8 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { BranchDay, Teller } from '@/modules/treasury-cash/types/teller-sessions/create.types';
 
-type BranchDay = {
-    id: number;
-    business_date: string;
-    branch_name?: string;
-};
-
-type Teller = {
-    id: number;
-    name: string;
-    code: string;
-    current_balance?: string | number | null;
-};
 
 export default function CreateTellerSessionPage() {
     const {

@@ -12,27 +12,9 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { FiscalPeriod, Props } from '@/modules/general-accounting/types/period-end/period-action.interfaces';
 
-interface FiscalPeriod {
-    id: number;
-    name: string;
-    start_date: string;
-    end_date: string;
-    status: 'OPEN' | 'CLOSED';
-    draft_vouchers_count: number;
-    fiscal_year?: { name: string };
-}
-
-interface Props extends SharedData {
-    operation: 'close' | 'reopen';
-    fiscalPeriods: {
-        data: FiscalPeriod[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-    };
-    filters: { search?: string; per_page?: string; page?: string };
-}
 
 export default function PeriodActionPage() {
     const { operation, fiscalPeriods, filters } = usePage<Props>().props;

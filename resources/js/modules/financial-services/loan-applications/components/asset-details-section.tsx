@@ -2,8 +2,8 @@ import { AssetDetail } from '@/modules/financial-services/loan-applications/type
 import DetailInput from '@/modules/financial-services/loan-applications/components/detail-input';
 import RepeatableRow from '@/modules/financial-services/loan-applications/components/repeatable-row';
 import RepeatableSection from '@/modules/financial-services/loan-applications/components/repeatable-section';
+import type { Props } from '@/modules/financial-services/types/loan-applications/components/asset-details-section.types';
 
-type Props = { rows: AssetDetail[]; onChange: (rows: AssetDetail[]) => void };
 
 export default function AssetDetailsSection({ rows, onChange }: Props) {
     const update = (index: number, key: keyof AssetDetail, value: string) =>

@@ -9,7 +9,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowUpRight,
@@ -24,28 +24,8 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/fixed/show.interfaces';
 
-interface Props extends SharedData {
-    account: {
-        id: number;
-        account_no: string;
-        balance: string | number;
-        status: string;
-        account_type?: string;
-        holder?: { name?: string } | null;
-        product?: { name?: string } | null;
-        fixed_deposit?: {
-            principal_amount?: string | number;
-            contractual_rate?: string | number;
-            term_value?: number;
-            term_unit?: string;
-            started_at?: string;
-            maturity_date?: string;
-            maturity_amount?: string | number;
-            maturity_instruction?: string;
-        } | null;
-    };
-}
 
 function SummaryMetric({
     icon: Icon,

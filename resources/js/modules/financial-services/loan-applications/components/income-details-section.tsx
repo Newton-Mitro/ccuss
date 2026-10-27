@@ -2,8 +2,8 @@ import { IncomeDetail } from '@/modules/financial-services/loan-applications/typ
 import DetailInput from '@/modules/financial-services/loan-applications/components/detail-input';
 import RepeatableRow from '@/modules/financial-services/loan-applications/components/repeatable-row';
 import RepeatableSection from '@/modules/financial-services/loan-applications/components/repeatable-section';
+import type { Props } from '@/modules/financial-services/types/loan-applications/components/income-details-section.types';
 
-type Props = { rows: IncomeDetail[]; onChange: (rows: IncomeDetail[]) => void };
 
 export default function IncomeDetailsSection({ rows, onChange }: Props) {
     const update = (index: number, key: keyof IncomeDetail, value: string) =>

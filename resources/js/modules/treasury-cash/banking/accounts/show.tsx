@@ -1,23 +1,11 @@
 import TreasuryAccountDetails from '@/modules/treasury-cash/components/treasury-account-details';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
-import type { BankAccountType } from '@/modules/treasury-cash/types/treasury-cash/bank-accounts';
+
 import { usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import type { BankAccountDetails } from '@/modules/treasury-cash/types/banking/accounts/show.interfaces';
 
-interface BankAccountDetails {
-    id: number;
-    account_name: string;
-    account_number: string;
-    routing_number?: string | null;
-    account_type: BankAccountType;
-    balance: string | number;
-    opening_balance: string | number;
-    is_reconcilable: boolean;
-    status: string;
-    branch?: { name: string } | null;
-    financial_account?: { account_no: string; name: string } | null;
-}
 
 export default function Show() {
     const { account } = usePage<SharedData & { account: BankAccountDetails }>()

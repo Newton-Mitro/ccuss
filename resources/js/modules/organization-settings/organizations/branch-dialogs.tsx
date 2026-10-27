@@ -13,15 +13,14 @@ import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
 import { useEffect, type FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { Branch } from '@/modules/branch-operations/types/branch';
+
 import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
 import { CustomerSearchBox } from '@/modules/customers-kyc/customers/components/customer-search-box';
+import type {
+    BranchDetailsDialogProps,
+    BranchFormDialogProps,
+} from '@/modules/organization-settings/types/organizations/branch-dialogs.interfaces';
 
-interface BranchFormDialogProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    branch?: Branch | null;
-}
 
 export function BranchFormDialog({
     open,
@@ -221,11 +220,6 @@ export function BranchFormDialog({
             </DialogContent>
         </Dialog>
     );
-}
-
-interface BranchDetailsDialogProps {
-    branch: Branch | null;
-    onOpenChange: (open: boolean) => void;
 }
 
 export function BranchDetailsDialog({

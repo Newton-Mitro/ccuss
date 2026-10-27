@@ -5,18 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { FileText, Trash2, Upload } from 'lucide-react';
 import { route } from 'ziggy-js';
-import { FormErrors, SupportingDocument } from '@/modules/financial-services/loan-applications/types';
+import { SupportingDocument } from '@/modules/financial-services/loan-applications/types';
 import RepeatableSection from '@/modules/financial-services/loan-applications/components/repeatable-section';
+import type { Props } from '@/modules/financial-services/types/loan-applications/components/supporting-documents-section.types';
 
-type ExistingDocument = { id: number | string; file_name: string };
-type Props = {
-    rows: SupportingDocument[];
-    onChange: (rows: SupportingDocument[]) => void;
-    existingDocuments?: ExistingDocument[];
-    applicationId?: number | string;
-    canViewExisting: boolean;
-    errors: FormErrors;
-};
 
 const documentOptions = [
     { value: '', label: 'Select document type' },

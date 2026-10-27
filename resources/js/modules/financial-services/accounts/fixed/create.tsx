@@ -7,8 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
-import type { FinancialProductTermOption } from '@/modules/financial-services/types/financial-services';
-import type { BreadcrumbItem, SharedData } from '@/types';
+
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -22,23 +22,8 @@ import {
     Users,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/fixed/create.interfaces';
 
-interface Props extends SharedData {
-    products: Array<{
-        id: number;
-        code: string;
-        name: string;
-        base_interest_rate?: string | number | null;
-        terms: FinancialProductTermOption[];
-    }>;
-    customers: Array<{
-        id: number;
-        customer_no: string;
-        name: string;
-        type: 'INDIVIDUAL' | 'ORGANIZATION';
-        dob?: string | null;
-    }>;
-}
 
 const maturityInstructions = [
     { value: 'PAYOUT', label: 'Pay out at maturity' },

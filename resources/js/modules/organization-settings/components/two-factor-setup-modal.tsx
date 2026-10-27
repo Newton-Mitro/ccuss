@@ -22,6 +22,10 @@ import { Check, Copy, ScanLine } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AlertError from '@/components/alert-error';
 import { Spinner } from '@/components/ui/spinner';
+import type {
+    TwoFactorSetupModalProps,
+} from '@/modules/organization-settings/types/components/two-factor-setup-modal.interfaces';
+
 
 function GridScanIcon() {
     return (
@@ -219,18 +223,6 @@ function TwoFactorVerificationStep({
             )}
         </Form>
     );
-}
-
-interface TwoFactorSetupModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    requiresConfirmation: boolean;
-    twoFactorEnabled: boolean;
-    qrCodeSvg: string | null;
-    manualSetupKey: string | null;
-    clearSetupData: () => void;
-    fetchSetupData: () => Promise<void>;
-    errors: string[];
 }
 
 export default function TwoFactorSetupModal({

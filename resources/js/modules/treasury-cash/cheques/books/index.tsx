@@ -9,7 +9,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
-import type { ChequeBookIndexProps } from '@/modules/treasury-cash/types/treasury-cash/cheque-books';
+import type { ChequeBookIndexProps } from '@/modules/treasury-cash/types/cheque-books';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { BookOpenCheck, Plus } from 'lucide-react';
 import { useEffect } from 'react';

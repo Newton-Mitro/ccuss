@@ -1,7 +1,7 @@
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { FinancialAccountSearchInput } from '@/modules/financial-services/components/financial-account-search-input';
-import type { TellerCashTransactionFormPageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { TellerCashTransactionFormPageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,

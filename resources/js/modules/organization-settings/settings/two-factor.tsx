@@ -11,11 +11,8 @@ import { Form, Head } from '@inertiajs/react';
 import { ShieldBan, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { TwoFactorProps } from '@/modules/organization-settings/types/settings/two-factor.interfaces';
 
-interface TwoFactorProps {
-    requiresConfirmation?: boolean;
-    twoFactorEnabled?: boolean;
-}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

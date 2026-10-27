@@ -17,16 +17,13 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { KycDocument } from '@/modules/customers-kyc/types/customer_kyc_module';
-import { PaginatedResponse } from '@/types/paginated_response';
+
 import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 import { documentTypes } from '@/modules/customers-kyc/kyc-documents/data/document_types';
+import type { Props } from '@/modules/customers-kyc/types/kyc-documents/list_kyc_documents_page.interfaces';
 
-interface Props extends SharedData {
-    paginated_data: PaginatedResponse<KycDocument>;
-    filters: Record<string, string>;
-}
 
 export default function KycDocumentsIndex() {
     const { paginated_data, filters } = usePage<Props>().props;

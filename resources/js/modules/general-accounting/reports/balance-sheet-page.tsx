@@ -5,25 +5,9 @@ import ReportExportActions from '@/components/report-export-actions';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { Props } from '@/modules/general-accounting/types/reports/balance-sheet-page.interfaces';
 
-interface BalanceSheetRow {
-    ledger_account_id: number;
-    category: string;
-    account_name: string;
-    balance: number;
-}
-
-interface FiscalYear {
-    id: number;
-    code: string;
-}
-
-interface Props extends SharedData {
-    balanceSheet: BalanceSheetRow[];
-    fiscalYears: FiscalYear[];
-    selectedFiscalYear?: number;
-}
 
 export default function BalanceSheetPage() {
     const { balanceSheet, fiscalYears, selectedFiscalYear } =

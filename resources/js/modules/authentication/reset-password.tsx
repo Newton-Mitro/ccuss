@@ -6,11 +6,8 @@ import { Spinner } from '@/components/ui/spinner';
 import { update } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import AppLogo from '@/components/app-logo';
+import type { ResetPasswordProps } from '@/modules/authentication/types/reset-password.interfaces';
 
-interface ResetPasswordProps {
-    token: string;
-    email: string;
-}
 
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
     return (

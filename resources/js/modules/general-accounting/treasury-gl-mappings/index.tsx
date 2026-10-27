@@ -8,33 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeftRight, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
+import type { Props, TreasuryGlMapping } from '@/modules/general-accounting/types/treasury-gl-mappings/index.interfaces';
 
-interface TreasuryGlMapping {
-    id: number;
-    source_type: string;
-    source_code: string;
-    transaction_type: string;
-    status: boolean;
-    debit_account: { code: string; name: string };
-    credit_account: { code: string; name: string };
-}
-
-interface Props extends SharedData {
-    mappings: {
-        data: TreasuryGlMapping[];
-        links: { url: string | null; label: string; active: boolean }[];
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-    };
-    filters: { search?: string; per_page?: string; page?: string };
-}
 
 export default function TreasuryGlMappingsPage() {
     const { mappings, filters } = usePage<Props>().props;

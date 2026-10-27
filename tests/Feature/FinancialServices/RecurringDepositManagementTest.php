@@ -1,8 +1,8 @@
 <?php
 
 use App\CustomerModule\Models\Customer;
-use App\FinancialServices\Application\RecurringDepositService;
 use App\FinancialServices\Application\FinancialTransactionService;
+use App\FinancialServices\Application\RecurringDepositService;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\RecurringDeposit;
@@ -32,7 +32,7 @@ function grantRecurringDepositManagementPermission(User $user): void
 
 function recurringDepositFixture(): array
 {
-    $organization = Organization::factory()->create();
+    $organization = Organization::factory()->create(['code' => 'ORG-001']);
     $branch = Branch::factory()->create(['organization_id' => $organization->id]);
     $user = User::factory()->create(['organization_id' => $organization->id, 'branch_id' => $branch->id]);
     grantRecurringDepositManagementPermission($user);
@@ -73,6 +73,56 @@ it('generates a recurring-deposit schedule with month-end-safe dates', function 
         ->and($contract->maturity_date->toDateString())->toBe('2026-04-05');
 });
 
+it('adds, updates, and cancels recurring-deposit installments', function () {
+    $fixture = recurringDepositFixture();
+    $contract = app(RecurringDepositService::class)->open($fixture['account'], [
+        'installment_amount' => 100,
+        'installment_frequency' => 'MONTHLY',
+        'total_installments' => 2,
+        'started_at' => '2026-01-01',
+        'maturity_extension_days' => 2,
+        'grace_days' => 0,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('financial-accounts.recurring-deposit.installments.store', [
+            'financial_account' => $fixture['account']->id,
+            'recurringDeposit' => $contract->id,
+        ]), [
+            'due_date' => '2026-03-01',
+            'amount_due' => 125,
+        ])
+        ->assertRedirect();
+
+    $installment = $contract->installments()->where('installment_no', 3)->firstOrFail();
+    expect((int) $contract->fresh()->total_installments)->toBe(3)
+        ->and($contract->fresh()->maturity_date->toDateString())->toBe('2026-03-03')
+        ->and($installment->status)->toBe('PENDING')
+        ->and((float) $installment->amount_due)->toBe(125.0);
+
+    $this->put(route('financial-accounts.recurring-deposit.installments.update', [
+        'financial_account' => $fixture['account']->id,
+        'recurringDeposit' => $contract->id,
+        'installment' => $installment->id,
+    ]), [
+        'due_date' => '2026-03-05',
+        'amount_due' => 150,
+    ])->assertRedirect();
+
+    expect($installment->fresh()->due_date->toDateString())->toBe('2026-03-05')
+        ->and((float) $installment->fresh()->amount_due)->toBe(150.0)
+        ->and($contract->fresh()->maturity_date->toDateString())->toBe('2026-03-07');
+
+    $this->post(route('financial-accounts.recurring-deposit.installments.waive', [
+        'financial_account' => $fixture['account']->id,
+        'recurringDeposit' => $contract->id,
+        'installment' => $installment->id,
+    ]))->assertRedirect();
+
+    expect($installment->fresh()->status)->toBe('WAIVED');
+});
+
 it('rejects a second recurring-deposit contract for the same account', function () {
     $fixture = recurringDepositFixture();
     $service = app(RecurringDepositService::class);
@@ -85,7 +135,7 @@ it('rejects a second recurring-deposit contract for the same account', function 
         'grace_days' => 0,
     ]);
 
-    expect(fn() => $service->open($fixture['account'], [
+    expect(fn () => $service->open($fixture['account'], [
         'installment_amount' => 100,
         'installment_frequency' => 'MONTHLY',
         'total_installments' => 2,
@@ -107,7 +157,7 @@ it('supports missed and waived installment transitions with due-date guards', fu
     $pastInstallment = $contract->installments->first();
     $futureInstallment = $contract->installments->last();
 
-    expect(fn() => $service->markMissed($contract, $futureInstallment))
+    expect(fn () => $service->markMissed($contract, $futureInstallment))
         ->toThrow(RuntimeException::class, 'due pending');
 
     expect($service->markMissed($contract, $pastInstallment)->status)->toBe('MISSED')

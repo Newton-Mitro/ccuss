@@ -7,12 +7,8 @@ import {
     Save,
     ShieldCheck,
 } from 'lucide-react';
+import type { Props } from '@/modules/financial-services/types/loan-applications/components/form-actions.types';
 
-type Props = {
-    cancelHref: string;
-    processing: boolean;
-    isEditing: boolean;
-};
 
 export default function FormActions({
     cancelHref,

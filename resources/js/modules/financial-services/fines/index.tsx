@@ -14,27 +14,8 @@ import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/fines/index.types';
 
-type Fine = {
-    id: number;
-    assessed_amount: string | number;
-    paid_amount: string | number;
-    waived_amount: string | number;
-    status: string;
-    assessed_at: string;
-    financial_account?: { account_no?: string; name?: string };
-    default_event?: { rule?: { name?: string } };
-};
-type Props = {
-    fines: {
-        data: Fine[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-        current_page: number;
-        last_page: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-};
 
 export default function FinesIndex() {
     const { fines, filters } = usePage<Props>().props;

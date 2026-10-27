@@ -7,13 +7,8 @@ import { route } from 'ziggy-js';
 import { Label } from '@/components/ui/label';
 import formatUndersoreString from '@/lib/formatUnderscoreString';
 import { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { CustomerSearchBoxProps } from '@/modules/customers-kyc/types/customers/components/customer-search-box.interfaces';
 
-interface CustomerSearchBoxProps {
-    onSelect: (customer: Customer) => void;
-    label?: string;
-    selectedCustomer?: Customer;
-    placeholder?: string;
-}
 
 export const CustomerSearchBox: React.FC<CustomerSearchBoxProps> = ({
     onSelect,

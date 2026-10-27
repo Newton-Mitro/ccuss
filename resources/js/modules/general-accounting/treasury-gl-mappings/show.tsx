@@ -17,22 +17,8 @@ import {
     ReceiptText,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Account, Mapping } from '@/modules/general-accounting/types/treasury-gl-mappings/show.types';
 
-type Account = {
-    id: number;
-    code: string;
-    name: string;
-};
-
-type Mapping = {
-    id: number;
-    source_type: string;
-    source_code: string;
-    transaction_type: string;
-    status: boolean;
-    debit_account: Account;
-    credit_account: Account;
-};
 
 export default function TreasuryGlMappingShow({
     mapping,

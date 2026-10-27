@@ -3,24 +3,8 @@ import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import type { PettyCashFundDetails } from '@/modules/treasury-cash/types/petty-cash/accounts/show.interfaces';
 
-interface PettyCashFundDetails {
-    id: number;
-    code: string;
-    name: string;
-    method: string;
-    status: string;
-    current_balance: string | number;
-    fund_limit: string | number;
-    custodian?: { name: string; email: string } | null;
-    cash_location?: {
-        branch?: { name: string } | null;
-        financial_account?: {
-            account_no: string;
-            balance: string | number;
-        } | null;
-    } | null;
-}
 
 export default function Show() {
     const { fund } = usePage<SharedData & { fund: PettyCashFundDetails }>()

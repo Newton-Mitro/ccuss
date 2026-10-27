@@ -10,37 +10,12 @@ import {
 } from '@/components/resource-page-shell';
 import TreasuryDashboardCharts from '@/modules/treasury-cash/components/treasury-dashboard-charts';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { CalendarDays, Clock3, UserRound, Vault } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { TreasuryCashDashboardProps } from '@/modules/treasury-cash/types/dashboard.interfaces';
 
-interface TreasuryCashDashboardProps extends SharedData {
-    stats: {
-        vaults: number;
-        tellers: number;
-        openBranchDays: number;
-        openTellerSessions: number;
-    };
-    cashAccounts: {
-        id: number;
-        type: string;
-        code: string;
-        name: string;
-        account_no: string | null;
-    }[];
-    dailyActivity: {
-        date: string;
-        label: string;
-        teller_cash: number;
-        bank: number;
-    }[];
-    cashLocationBalances: {
-        type: string;
-        locations: number;
-        balance: number;
-    }[];
-}
 
 const links = [
     {

@@ -1,15 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import type { ReactNode } from 'react';
 
-type RepeatableSectionProps = {
-    title: string;
-    description?: string;
-    count: number;
-    addLabel: string;
-    onAdd: () => void;
-    children: ReactNode;
-};
+import type { RepeatableSectionProps } from '@/modules/financial-services/types/loan-applications/components/repeatable-section.types';
+
 
 export default function RepeatableSection({
     title,

@@ -18,42 +18,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/audit-compliance/types/audits/record-form-page.interfaces';
 
-interface Register {
-    route: string;
-    title: string;
-    singular: string;
-    area: string;
-    description: string;
-}
-
-interface RecordData {
-    id: number;
-    reference: string;
-    title: string;
-    category: string | null;
-    description: string | null;
-    status: string;
-    priority: string;
-    responsible_person: string | null;
-    due_date: string | null;
-    related_record_id: number | null;
-}
-
-interface RelatedRecord {
-    id: number;
-    kind: string;
-    reference: string;
-    title: string;
-}
-
-interface Props {
-    register: Register;
-    record: RecordData | null;
-    relatedRecords: RelatedRecord[];
-    statuses: string[];
-    priorities: string[];
-}
 
 function formatKind(kind: string) {
     return kind

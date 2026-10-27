@@ -7,21 +7,9 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { FiscalYear, Props } from '@/modules/general-accounting/types/period-end/year-end-closing.interfaces';
 
-interface FiscalYear {
-    id: number;
-    name: string;
-    status: 'OPEN' | 'CLOSED';
-    periods_count: number;
-    closed_periods_count: number;
-    draft_vouchers_count: number;
-}
-
-interface Props extends SharedData {
-    fiscalYears: FiscalYear[];
-    retainedEarningsAccounts: { id: number; code: string; name: string }[];
-}
 
 export default function YearEndClosingPage() {
     const { fiscalYears, retainedEarningsAccounts } = usePage<Props>().props;

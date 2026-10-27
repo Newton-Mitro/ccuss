@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ChevronDown,
@@ -20,15 +20,8 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
 import { CostCenterDetailsDialog, type CostCenter } from '@/modules/general-accounting/cost-centers/cost-center-dialog';
+import type { Props } from '@/modules/general-accounting/types/cost-centers/index.interfaces';
 
-interface Props extends SharedData {
-    costCenters: {
-        data: CostCenter[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page?: number;
-    };
-    filters: { search?: string; per_page?: string; page?: string };
-}
 
 export default function CostCenterIndex() {
     const { costCenters, filters } = usePage<Props>().props;

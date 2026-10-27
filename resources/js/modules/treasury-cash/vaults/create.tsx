@@ -1,4 +1,4 @@
-import type { VaultCreatePageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { VaultCreatePageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,

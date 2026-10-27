@@ -18,7 +18,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import type { TellerCashTransactionIndexProps } from '@/modules/treasury-cash/types/treasury-cash/teller-transactions';
+import type { TellerCashTransactionIndexProps } from '@/modules/treasury-cash/types/teller-transactions';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {

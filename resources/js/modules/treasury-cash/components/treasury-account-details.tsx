@@ -7,12 +7,13 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
+import type {
+    TreasuryAccountDetail,
+} from '@/modules/treasury-cash/types/components/treasury-account-details.interfaces';
+export type {
+    TreasuryAccountDetail,
+} from '@/modules/treasury-cash/types/components/treasury-account-details.interfaces';
 
-export interface TreasuryAccountDetail {
-    label: string;
-    value: string | number | null | undefined;
-    mono?: boolean;
-}
 
 export default function TreasuryAccountDetails({
     title,

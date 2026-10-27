@@ -23,17 +23,15 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type { KycDocument } from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { BreadcrumbItem } from '@/types';
+
 import {
     KYC_DOCUMENT_ACCEPT,
     validateKycDocumentFile,
 } from '@/modules/customers-kyc/kyc-documents/data/document-file';
 import { documentTypes } from '@/modules/customers-kyc/kyc-documents/data/document_types';
+import type { Props } from '@/modules/customers-kyc/types/kyc-documents/edit_kyc_document_page.interfaces';
 
-interface Props extends SharedData {
-    document: KycDocument;
-}
 
 export default function EditKycDocument() {
     const { document } = usePage<Props>().props;

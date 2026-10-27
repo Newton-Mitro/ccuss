@@ -5,30 +5,10 @@ import ReportExportActions from '@/components/report-export-actions';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem, SharedData } from '@/types';
-import { FiscalPeriod } from '@/modules/general-accounting/types/finance_and_accounting';
+import { BreadcrumbItem } from '@/types';
 
-/* ---------------- Types ---------------- */
+import type { Props, TrialBalanceRow } from '@/modules/general-accounting/types/reports/trial-balance-page.interfaces';
 
-interface TrialBalanceRow {
-    ledger_account_id: number;
-    account_code: string;
-    account_name: string;
-    account_type: string;
-    fiscal_year_id: number;
-    fiscal_year_code: string;
-    fiscal_period_id: number;
-    period_name: string;
-    total_debit: number;
-    total_credit: number;
-    balance: number;
-}
-
-interface Props extends SharedData {
-    trialBalance: TrialBalanceRow[];
-    fiscalPeriods: (FiscalPeriod & { fiscal_year_name: string })[];
-    selectedFiscalPeriod?: number;
-}
 
 /* ---------------- Page ---------------- */
 

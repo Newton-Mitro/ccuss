@@ -14,15 +14,12 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { CustomerAddress } from '@/modules/customers-kyc/types/customer_kyc_module';
-import { PaginatedResponse } from '@/types/paginated_response';
-import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 
-interface Props extends SharedData {
-    paginated_data: PaginatedResponse<CustomerAddress>;
-    filters: Record<string, string | number>;
-}
+import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
+import type { Props } from '@/modules/customers-kyc/types/addresses/list_address_page.interfaces';
+
 
 export default function AddressIndex() {
     const { paginated_data, filters } = usePage<Props>().props;

@@ -14,20 +14,8 @@ import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/treasury-cash/types/bank-reconciliations/index.types';
 
-type Reconciliation = {
-    id: number;
-    statement_date: string;
-    statement_balance: string | number;
-    book_balance: string | number;
-    difference: string | number;
-    status: string;
-    bank_account?: { account_name?: string; account_number?: string };
-};
-type Props = {
-    reconciliations: { data: Reconciliation[] };
-    accounts: { id: number; account_name: string; account_number: string }[];
-};
 
 export default function BankReconciliationsIndex() {
     const { reconciliations, accounts } = usePage<Props>().props;

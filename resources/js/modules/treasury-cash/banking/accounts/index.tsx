@@ -9,7 +9,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
-import type { BankAccountIndexProps } from '@/modules/treasury-cash/types/treasury-cash/bank-accounts';
+import type { BankAccountIndexProps } from '@/modules/treasury-cash/types/bank-accounts';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Building2, Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';

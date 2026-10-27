@@ -10,53 +10,13 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Eye, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
+import type { Props, RegisterRecord } from '@/modules/audit-compliance/types/audits/register-page.interfaces';
 
-interface Register {
-    route: string;
-    title: string;
-    singular: string;
-    area: string;
-    description: string;
-    permission: string;
-}
-
-interface RegisterRecord {
-    id: number;
-    reference: string;
-    title: string;
-    category: string | null;
-    status: string;
-    priority: string;
-    responsible_person: string | null;
-    due_date: string | null;
-    updated_at: string;
-}
-
-interface Props extends SharedData {
-    register: Register;
-    records: {
-        data: RegisterRecord[];
-        links: { url: string | null; label: string; active: boolean }[];
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-    };
-    filters: {
-        search?: string;
-        status?: string;
-        priority?: string;
-        page?: number;
-        per_page?: number;
-    };
-    statuses: string[];
-    priorities: string[];
-}
 
 function toneForStatus(status: string) {
     if (['APPROVED', 'COMPLIANT', 'ACCEPTED', 'COMPLETED'].includes(status)) {

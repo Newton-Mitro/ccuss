@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -23,17 +23,8 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/savings/create.interfaces';
 
-interface Props extends SharedData {
-    products: Array<{
-        id: number;
-        code: string;
-        name: string;
-        policy?: {
-            minimum_opening_amount?: string | number;
-        } | null;
-    }>;
-}
 
 function SectionHeading({
     icon: Icon,

@@ -11,7 +11,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -28,25 +28,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/share/show.interfaces';
 
-interface Props extends SharedData {
-    account: {
-        id: number;
-        account_no: string;
-        balance: string | number;
-        status: string;
-        holder?: { name?: string } | null;
-        product?: { name?: string } | null;
-        share_account?: {
-            id: number;
-            membership_no?: string;
-            member_since?: string;
-            membership_status?: string;
-            total_shares?: string | number;
-            share_value?: string | number;
-        } | null;
-    };
-}
 
 export default function ShareAccountShow() {
     useFlashToastHandler();

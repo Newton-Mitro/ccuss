@@ -9,7 +9,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
-import type { BranchDayListItem } from '@/modules/treasury-cash/types/treasury-cash/branch-days';
+import type { BranchDayListItem } from '@/modules/treasury-cash/types/branch-days';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CalendarDays, LockKeyhole, Plus } from 'lucide-react';
 import { useEffect } from 'react';

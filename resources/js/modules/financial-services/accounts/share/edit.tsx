@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -23,25 +23,8 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/share/edit.interfaces';
 
-interface Props extends SharedData {
-    canManageProductDetails: boolean;
-    account: {
-        id: number;
-        account_no: string;
-        account_type?: string;
-        balance?: string | number;
-        status?: string;
-        name?: string;
-        product?: { code?: string; name?: string } | null;
-        share_account?: {
-            membership_no?: string;
-            membership_status?: string;
-            member_since?: string;
-        } | null;
-        holder?: { name?: string } | null;
-    };
-}
 
 const membershipStatuses = [
     { value: 'PENDING', label: 'Pending' },

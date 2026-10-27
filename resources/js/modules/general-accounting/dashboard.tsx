@@ -9,7 +9,7 @@ import {
     StatusBadge,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
@@ -22,27 +22,8 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { GeneralAccountingDashboardProps } from '@/modules/general-accounting/types/dashboard.interfaces';
 
-interface GeneralAccountingDashboardProps extends SharedData {
-    stats: {
-        accountGroups: number;
-        ledgerAccounts: number;
-        openFiscalYears: number;
-        openFiscalPeriods: number;
-        draftVouchers: number;
-        postedVouchers: number;
-        activeBudgets: number;
-    };
-    dailyVoucherActivity: {
-        date: string;
-        label: string;
-        posted: number;
-    }[];
-    voucherStatusBreakdown: {
-        status: string;
-        count: number;
-    }[];
-}
 
 const links = [
     {

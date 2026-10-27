@@ -10,23 +10,8 @@ import { formatDate } from '@/lib/date_util';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/treasury-cash/types/branch-summaries/index.types';
 
-type Summary = {
-    id: number;
-    opening_cash: string | number;
-    cash_received: string | number;
-    cash_paid: string | number;
-    vault_balance: string | number;
-    teller_balance: string | number;
-    petty_cash_balance: string | number;
-    closing_cash: string | number;
-    cash_difference: string | number;
-    branch_day?: { business_date: string; status: string };
-};
-type Props = {
-    summaries: { data: Summary[] };
-    branchDays: { id: number; business_date: string; status: string }[];
-};
 
 export default function BranchCashSummariesIndex() {
     const { summaries, branchDays } = usePage<Props>().props;

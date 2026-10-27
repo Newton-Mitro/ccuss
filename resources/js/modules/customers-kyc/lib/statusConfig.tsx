@@ -1,3 +1,6 @@
+
+import type { Status } from '@/modules/customers-kyc/types/lib/statusConfig.types';
+export type { Status, StatusClass, StatusConfig } from '@/modules/customers-kyc/types/lib/statusConfig.types';
 const statusConfig = {
     pending: {
         label: 'Pending',
@@ -30,12 +33,6 @@ const statusConfig = {
 };
 
 export default statusConfig;
-
-export type StatusConfig = typeof statusConfig;
-
-export type Status = keyof StatusConfig;
-
-export type StatusClass = StatusConfig[Status]['class'];
 
 const Badge = ({ text }: { text: Status | string }) => {
     const normalizedText = text.toLowerCase() as Status;

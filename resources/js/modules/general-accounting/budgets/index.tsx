@@ -13,15 +13,8 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Check, Eye, Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Budget } from '@/modules/general-accounting/types/budgets/index.interfaces';
 
-interface Budget {
-    id: number;
-    name: string;
-    status: 'DRAFT' | 'ACTIVE' | 'CLOSED';
-    entries_count: number;
-    entries_sum_amount: string;
-    fiscal_year: { name: string };
-}
 
 export default function BudgetIndex() {
     const { budgets } = usePage().props as {

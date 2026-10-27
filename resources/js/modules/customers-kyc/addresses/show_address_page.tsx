@@ -21,13 +21,11 @@ import { route } from 'ziggy-js';
 import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type { CustomerAddress } from '@/modules/customers-kyc/types/customer_kyc_module';
-import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
+import type { BreadcrumbItem } from '@/types';
 
-interface Props extends SharedData {
-    address: CustomerAddress;
-}
+import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
+import type { Props } from '@/modules/customers-kyc/types/addresses/show_address_page.interfaces';
+
 
 export default function ViewAddress({ address }: Props) {
     useFlashToastHandler();

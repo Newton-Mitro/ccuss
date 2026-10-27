@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -22,22 +22,8 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/accounts/savings/edit.interfaces';
 
-interface Props extends SharedData {
-    account: {
-        id: number;
-        account_no: string;
-        account_type?: string;
-        balance?: string | number;
-        status?: string;
-        name?: string;
-        product?: { code?: string; name?: string } | null;
-        holder?: { name?: string } | null;
-        saving_account?: {
-            minimum_balance?: string | number;
-        } | null;
-    };
-}
 
 function SectionHeading({
     icon: Icon,

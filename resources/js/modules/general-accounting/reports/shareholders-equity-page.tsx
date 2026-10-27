@@ -5,25 +5,11 @@ import ReportExportActions from '@/components/report-export-actions';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem, SharedData } from '@/types';
-import { FiscalYear } from '@/modules/general-accounting/types/finance_and_accounting';
+import { BreadcrumbItem } from '@/types';
 
-/* ---------------- Types ---------------- */
+import type { Props } from '@/modules/general-accounting/types/reports/shareholders-equity-page.interfaces';
+import type { EquityLine } from '@/modules/general-accounting/types/reports/shareholders-equity-page.types';
 
-type EquityLine = {
-    account_code: string;
-    account_name: string;
-    period_name: string | null;
-    opening_balance: number | null;
-    net_profit: number | null;
-    ending_balance: number | null;
-};
-
-interface Props extends SharedData {
-    equityStatement: EquityLine[];
-    fiscalYears: FiscalYear[];
-    selectedFiscalYear?: number;
-}
 
 /* ---------------- Page ---------------- */
 

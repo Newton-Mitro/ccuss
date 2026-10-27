@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
-import type { SavingsChequeWithdrawalPageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { SavingsChequeWithdrawalPageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
     ArrowUpFromLine,
@@ -27,16 +27,10 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import type {
+    SignatureOption,
+} from '@/modules/treasury-cash/types/teller-transactions/savings-cheque-withdrawal-page.interfaces';
 
-interface SignatureOption {
-    key: string;
-    name: string;
-    detail: string;
-    signature: {
-        url: string;
-        verification_status: string;
-    } | null;
-}
 
 export default function SavingsChequeWithdrawalPage() {
     useFlashToastHandler();

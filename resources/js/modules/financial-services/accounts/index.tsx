@@ -8,32 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
+import type { Account, Props } from '@/modules/financial-services/types/accounts/index.interfaces';
 
-interface Account {
-    id: number;
-    account_no: string;
-    name?: string;
-    account_type: string;
-    status: string;
-    balance: string | number;
-    holder?: { name?: string } | null;
-    product?: { name?: string } | null;
-}
-
-interface Props extends SharedData {
-    accounts: {
-        data: Account[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-    };
-    filters: { search?: string };
-    category?: string | null;
-}
 
 export default function FinancialAccountIndex() {
     const { accounts, filters, category } = usePage<Props>().props;

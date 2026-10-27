@@ -1,7 +1,7 @@
 import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { ClipboardList, FilePenLine } from 'lucide-react';
+import type { Props } from '@/modules/financial-services/types/loan-applications/components/loan-application-header.types';
 
-type Props = { applicationNo?: string | null; isEditing: boolean };
 
 export default function LoanApplicationHeader({ applicationNo, isEditing }: Props) {
     return (

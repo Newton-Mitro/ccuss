@@ -21,36 +21,8 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/treasury-cash/types/cash-counts/index.types';
 
-type Denomination = {
-    id: number;
-    currency: string;
-    type: string;
-    value: string | number;
-    name?: string | null;
-};
-type Props = {
-    counts: {
-        data: {
-            id: number;
-            type: string;
-            total_amount: string | number;
-            counted_at: string;
-            cash_location?: { name?: string };
-            denominations?: {
-                quantity: number;
-                amount: string | number;
-                denomination?: {
-                    value: string | number;
-                    name?: string | null;
-                };
-            }[];
-        }[];
-    };
-    branchDays: { id: number; business_date: string }[];
-    locations: { id: number; name: string; type: string }[];
-    denominations: Denomination[];
-};
 
 export default function CashCountsIndex() {
     const { counts, branchDays, locations, denominations } =

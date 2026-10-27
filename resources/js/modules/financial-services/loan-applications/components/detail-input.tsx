@@ -1,15 +1,8 @@
 import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { DetailInputProps } from '@/modules/financial-services/types/loan-applications/components/detail-input.types';
 
-type DetailInputProps = {
-    label: string;
-    value: string | number;
-    onChange: (value: string) => void;
-    type?: string;
-    error?: string;
-    placeholder?: string;
-};
 
 export default function DetailInput({
     label,

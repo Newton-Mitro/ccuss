@@ -20,13 +20,11 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
-import { addressTypes } from '@/modules/customers-kyc/addresses/data/address_types';
+import type { BreadcrumbItem } from '@/types';
 
-interface Props extends SharedData {
-    customer: Customer;
-}
+import { addressTypes } from '@/modules/customers-kyc/addresses/data/address_types';
+import type { Props } from '@/modules/customers-kyc/types/addresses/create_address_page.interfaces';
+
 
 const Create = () => {
     const { customer } = usePage<Props>().props;

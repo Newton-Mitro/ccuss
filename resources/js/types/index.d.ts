@@ -42,6 +42,7 @@ export interface SharedData {
         success?: string;
         message?: string;
     };
+    errors?: Record<string, string>;
     [key: string]: unknown;
 }
 

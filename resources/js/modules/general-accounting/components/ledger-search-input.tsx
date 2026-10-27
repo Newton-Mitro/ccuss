@@ -5,16 +5,8 @@ import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { LedgerAccount } from '@/modules/general-accounting/types/finance_and_accounting';
+import type { LedgerSearchInputProps } from '@/modules/general-accounting/types/components/ledger-search-input.interfaces';
 
-interface LedgerSearchInputProps {
-    value?: string;
-    onSelect?: (ledger: LedgerAccount) => void;
-    label?: string;
-    placeholder?: string;
-    error?: string;
-    showErrorText?: boolean;
-    disabled?: boolean;
-}
 
 export const LedgerSearchInput: React.FC<LedgerSearchInputProps> = ({
     value,

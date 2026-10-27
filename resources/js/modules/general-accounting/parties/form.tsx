@@ -21,21 +21,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/general-accounting/types/parties/form.interfaces';
 
-interface Party {
-    id: number;
-    code: string;
-    name: string;
-    party_type: string;
-    phone: string | null;
-    email: string | null;
-    address: string | null;
-    status: boolean;
-}
-
-interface Props {
-    party?: Party;
-}
 
 const partyTypes = [
     { value: 'CUSTOMER', label: 'Customer' },

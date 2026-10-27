@@ -1,67 +1,46 @@
+import InputError from '@/components/input-error';
 import {
     ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import FinancialAccountActivation from '@/modules/financial-services/components/financial-account-activation';
 import FinancialAccountPeopleManagement from '@/modules/financial-services/components/financial-account-people-management';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import type { BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     CalendarDays,
     CheckCircle2,
     Clock3,
     CreditCard,
     FileClock,
+    Pencil,
+    Plus,
     ReceiptText,
     Wallet,
+    X,
 } from 'lucide-react';
+import type { FormEvent } from 'react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
-
-interface Installment {
-    id: number;
-    installment_no: number;
-    due_date: string;
-    status: string;
-    amount_due?: string | number;
-    financial_transaction?: TransactionReference | null;
-    transaction_entries?: Array<{
-        transaction?: TransactionReference | null;
-    }>;
-}
-
-interface TransactionReference {
-    id: number;
-    transaction_no: string;
-    reference?: string | null;
-    status: string;
-}
-
-interface Props extends SharedData {
-    account: {
-        id: number;
-        account_no: string;
-        status: string;
-        account_type?: string;
-        balance?: string | number;
-        holder?: { name?: string } | null;
-        product?: { name?: string } | null;
-        recurring_deposit?: {
-            installment_amount?: string | number;
-            installment_frequency?: string;
-            total_installments?: number;
-            paid_installments?: number;
-            started_at?: string;
-            maturity_date?: string;
-            installments?: Installment[];
-        } | null;
-    };
-}
+import type { Installment, Props, TransactionReference } from '@/modules/financial-services/types/accounts/recurring/show.interfaces';
 
 function SummaryMetric({
     icon: Icon,
@@ -124,7 +103,12 @@ function getInstallmentTone(status: string) {
 export default function RecurringDepositAccountShow() {
     useFlashToastHandler();
 
-    const { account, customers } = usePage<
+    const {
+        account,
+        customers,
+        can_manage_recurring_deposits: canManageRecurringDeposits,
+        errors: pageErrors,
+    } = usePage<
         Props & {
             customers: Array<{
                 id: number;
@@ -142,6 +126,113 @@ export default function RecurringDepositAccountShow() {
         totalInstallments > 0
             ? Math.min((paidInstallments / totalInstallments) * 100, 100)
             : 0;
+    const canManageSchedule =
+        canManageRecurringDeposits &&
+        account.status !== 'CLOSED' &&
+        !deposit?.closed_at;
+    const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+    const [editingInstallment, setEditingInstallment] =
+        useState<Installment | null>(null);
+    const {
+        data: scheduleData,
+        setData: setScheduleData,
+        post: postSchedule,
+        put: putSchedule,
+        processing: scheduleProcessing,
+        errors: scheduleErrors,
+        reset: resetScheduleForm,
+    } = useForm({
+        due_date: new Date().toLocaleDateString('en-CA'),
+        amount_due: '',
+    });
+
+    const openAddInstallment = () => {
+        setEditingInstallment(null);
+        resetScheduleForm();
+        setScheduleDialogOpen(true);
+    };
+
+    const openEditInstallment = (installment: Installment) => {
+        setEditingInstallment(installment);
+        setScheduleData('due_date', installment.due_date.slice(0, 10));
+        setScheduleData(
+            'amount_due',
+            String(installment.amount_due ?? deposit?.installment_amount ?? ''),
+        );
+        setScheduleDialogOpen(true);
+    };
+
+    const saveInstallment = (event: FormEvent) => {
+        event.preventDefault();
+        if (!deposit) {
+            return;
+        }
+
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => {
+                setScheduleDialogOpen(false);
+                setEditingInstallment(null);
+                resetScheduleForm();
+            },
+        };
+        const routeParameters = {
+            financial_account: account.id,
+            recurringDeposit: deposit.id,
+        };
+
+        if (editingInstallment) {
+            putSchedule(
+                route(
+                    'financial-accounts.recurring-deposit.installments.update',
+                    {
+                        ...routeParameters,
+                        installment: editingInstallment.id,
+                    },
+                ),
+                options,
+            );
+            return;
+        }
+
+        postSchedule(
+            route(
+                'financial-accounts.recurring-deposit.installments.store',
+                routeParameters,
+            ),
+            options,
+        );
+    };
+
+    const cancelInstallment = (installment: Installment) => {
+        appSwal
+            .fire({
+                title: 'Cancel this installment?',
+                text: 'It will be marked as waived and will no longer be collectable.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Cancel installment',
+                cancelButtonText: 'Keep installment',
+            })
+            .then((result) => {
+                if (!result.isConfirmed || !deposit) {
+                    return;
+                }
+
+                router.post(
+                    route(
+                        'financial-accounts.recurring-deposit.installments.waive',
+                        {
+                            financial_account: account.id,
+                            recurringDeposit: deposit.id,
+                            installment: installment.id,
+                        },
+                    ),
+                    {},
+                    { preserveScroll: true },
+                );
+            });
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
@@ -338,6 +429,12 @@ export default function RecurringDepositAccountShow() {
                                 </p>
                             </div>
                         </div>
+                        {canManageSchedule && (
+                            <Button size="sm" onClick={openAddInstallment}>
+                                <Plus className="mr-1.5 size-4" />
+                                Add installment
+                            </Button>
+                        )}
                     </div>
 
                     {installments.length > 0 ? (
@@ -360,6 +457,11 @@ export default function RecurringDepositAccountShow() {
                                         <th className="px-4 py-3 text-center font-medium">
                                             Status
                                         </th>
+                                        {canManageSchedule && (
+                                            <th className="px-4 py-3 text-center font-medium">
+                                                Actions
+                                            </th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -470,6 +572,72 @@ export default function RecurringDepositAccountShow() {
                                                         {item.status}
                                                     </StatusBadge>
                                                 </td>
+                                                {canManageSchedule && (
+                                                    <td className="px-4 py-3.5 text-center">
+                                                        <div className="flex justify-center gap-1">
+                                                            {item.status ===
+                                                                'PENDING' &&
+                                                                !item.financial_transaction_id &&
+                                                                Number(
+                                                                    item.amount_paid ??
+                                                                        0,
+                                                                ) === 0 && (
+                                                                    <Button
+                                                                        type="button"
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className="h-8 px-2"
+                                                                        onClick={() =>
+                                                                            openEditInstallment(
+                                                                                item,
+                                                                            )
+                                                                        }
+                                                                        aria-label={`Edit installment ${item.installment_no}`}
+                                                                    >
+                                                                        <Pencil className="mr-1 size-3.5" />
+                                                                        Edit
+                                                                    </Button>
+                                                                )}
+                                                            {[
+                                                                'PENDING',
+                                                                'MISSED',
+                                                            ].includes(
+                                                                item.status,
+                                                            ) &&
+                                                                !item.financial_transaction_id &&
+                                                                Number(
+                                                                    item.amount_paid ??
+                                                                        0,
+                                                                ) === 0 && (
+                                                                    <Button
+                                                                        type="button"
+                                                                        size="sm"
+                                                                        variant="ghost"
+                                                                        className="h-8 px-2 text-destructive hover:text-destructive"
+                                                                        onClick={() =>
+                                                                            cancelInstallment(
+                                                                                item,
+                                                                            )
+                                                                        }
+                                                                        aria-label={`Cancel installment ${item.installment_no}`}
+                                                                    >
+                                                                        <X className="mr-1 size-3.5" />
+                                                                        Cancel
+                                                                    </Button>
+                                                                )}
+                                                            {![
+                                                                'PENDING',
+                                                                'MISSED',
+                                                            ].includes(
+                                                                item.status,
+                                                            ) && (
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    —
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                )}
                                             </tr>
                                         );
                                     })}
@@ -491,6 +659,88 @@ export default function RecurringDepositAccountShow() {
                         </div>
                     )}
                 </ResourceTableCard>
+
+                <Dialog
+                    open={scheduleDialogOpen}
+                    onOpenChange={(open) => {
+                        setScheduleDialogOpen(open);
+                        if (!open) {
+                            setEditingInstallment(null);
+                            resetScheduleForm();
+                        }
+                    }}
+                >
+                    <DialogContent className="max-w-lg">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {editingInstallment
+                                    ? 'Edit recurring installment'
+                                    : 'Add recurring installment'}
+                            </DialogTitle>
+                            <DialogDescription>
+                                Set the due date and installment amount.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={saveInstallment} className="space-y-4">
+                            <InputError message={pageErrors?.schedule} />
+                            <div>
+                                <Label htmlFor="recurring-installment-due-date">
+                                    Due date
+                                </Label>
+                                <AppDatePicker
+                                    id="recurring-installment-due-date"
+                                    value={scheduleData.due_date}
+                                    required
+                                    onChange={(value) =>
+                                        setScheduleData('due_date', value)
+                                    }
+                                />
+                                <InputError message={scheduleErrors.due_date} />
+                            </div>
+                            <div>
+                                <Label htmlFor="recurring-installment-amount">
+                                    Amount due
+                                </Label>
+                                <Input
+                                    id="recurring-installment-amount"
+                                    type="number"
+                                    min="0.01"
+                                    step="0.01"
+                                    className="mt-1 h-9"
+                                    value={scheduleData.amount_due}
+                                    onChange={(event) =>
+                                        setScheduleData(
+                                            'amount_due',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError
+                                    message={scheduleErrors.amount_due}
+                                />
+                            </div>
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setScheduleDialogOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={scheduleProcessing}
+                                >
+                                    {scheduleProcessing
+                                        ? 'Saving…'
+                                        : editingInstallment
+                                          ? 'Save changes'
+                                          : 'Add installment'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
 
                 {/* Account holder and nominee management */}
                 <div className="space-y-3">

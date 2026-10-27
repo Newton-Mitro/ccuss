@@ -15,28 +15,8 @@ import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/interest-provisions/index.types';
 
-type Provision = {
-    id: number;
-    period_start: string;
-    period_end: string;
-    basis_amount: string | number;
-    annual_rate: string | number;
-    provisioned_amount: string | number;
-    status: string;
-    financial_account?: { account_no?: string; name?: string };
-    product?: { code?: string; name?: string };
-};
-type Props = {
-    provisions: {
-        data: Provision[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-        current_page: number;
-        last_page: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-};
 
 export default function InterestProvisionsIndex() {
     const { provisions, filters } = usePage<Props>().props;

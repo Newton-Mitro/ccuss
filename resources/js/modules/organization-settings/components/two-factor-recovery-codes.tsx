@@ -11,12 +11,10 @@ import { Form } from '@inertiajs/react';
 import { Eye, EyeOff, LockKeyhole, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import AlertError from '@/components/alert-error';
+import type {
+    TwoFactorRecoveryCodesProps,
+} from '@/modules/organization-settings/types/components/two-factor-recovery-codes.interfaces';
 
-interface TwoFactorRecoveryCodesProps {
-    recoveryCodesList: string[];
-    fetchRecoveryCodes: () => Promise<void>;
-    errors: string[];
-}
 
 export default function TwoFactorRecoveryCodes({
     recoveryCodesList,

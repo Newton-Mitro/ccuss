@@ -9,24 +9,14 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
 import { PartyDetailsDialog, type Party } from '@/modules/general-accounting/parties/party-dialog';
+import type { Props } from '@/modules/general-accounting/types/parties/index.interfaces';
 
-interface Props extends SharedData {
-    parties: {
-        data: Party[];
-        links: { url: string | null; label: string; active: boolean }[];
-        current_page: number;
-        last_page: number;
-        per_page: number;
-        total: number;
-    };
-    filters: { search?: string; per_page?: string; page?: string };
-}
 
 export default function PartyIndex() {
     const { parties, filters } = usePage<Props>().props;

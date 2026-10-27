@@ -17,6 +17,8 @@ import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 import { VoucherLine } from '@/modules/general-accounting/types/finance_and_accounting';
 import { LedgerSearchInput } from '@/modules/general-accounting/components/ledger-search-input';
+import type { VoucherFormData } from '@/modules/general-accounting/types/vouchers/edit/debit_voucher_edit_page.interfaces';
+
 
 /* -------------------------------------------------------
  | Helpers
@@ -41,23 +43,6 @@ function normalizeErrors(errors: Record<string, string>) {
 
     if (lines.length > 0) result.lines = lines;
     return result;
-}
-
-/* -------------------------------------------------------
- | Types
- ------------------------------------------------------- */
-interface VoucherFormData {
-    voucher_no: string;
-    voucher_date: string;
-    voucher_type: string;
-    fiscal_year_id?: number;
-    fiscal_period_id?: number;
-    branch_id?: number;
-    status: string;
-    narration: string;
-    cash_ledger_id?: number;
-    cash_subledger_id?: number;
-    lines: VoucherLine[];
 }
 
 /* -------------------------------------------------------

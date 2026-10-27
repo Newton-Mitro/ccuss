@@ -7,34 +7,12 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ArrowDownLeft, ArrowUpRight, BookOpen, Scale } from 'lucide-react';
 import { useState } from 'react';
+import type { Props } from '@/modules/general-accounting/types/reports/general-ledger-page.interfaces';
 
-interface LedgerEntry {
-    id: number;
-    voucher_no: string;
-    voucher_type: string;
-    voucher_date: string;
-    entry_description?: string;
-    debit: number;
-    credit: number;
-    running_balance: number;
-}
-
-interface FiscalPeriod {
-    id: number;
-    name: string;
-}
-
-interface Props extends SharedData {
-    account: { id: number; code: string; name: string } | null;
-    entries: LedgerEntry[];
-    accounts: { id: number; code: string; name: string }[];
-    fiscalPeriods: FiscalPeriod[];
-    filters: { account_id?: string; fiscal_period_id?: string };
-}
 
 export default function GeneralLedgerPage() {
     const { account, entries, accounts, fiscalPeriods, filters } =

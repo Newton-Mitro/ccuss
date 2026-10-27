@@ -15,33 +15,8 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/dividends/index.types';
 
-type Declaration = {
-    id: number;
-    declaration_no: string;
-    declaration_date: string;
-    dividend_rate: string | number;
-    total_basis_amount: string | number;
-    total_dividend_amount: string | number;
-    status: string;
-    note?: string;
-    allocations?: {
-        id: number;
-        basis_amount: string | number;
-        dividend_amount: string | number;
-        status: string;
-    }[];
-};
-type Props = {
-    declarations: {
-        data: Declaration[];
-        links: { url: string | null; label: string; active: boolean }[];
-        per_page: number;
-        current_page: number;
-        last_page: number;
-    };
-    filters: { search?: string; page?: number; per_page?: number };
-};
 
 export default function DividendsIndex() {
     const { declarations, filters } = usePage<Props>().props;

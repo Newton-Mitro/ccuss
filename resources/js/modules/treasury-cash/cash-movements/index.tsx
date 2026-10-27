@@ -10,7 +10,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
-import type { CashTransferIndexProps } from '@/modules/treasury-cash/types/treasury-cash/cash-movements';
+import type { CashTransferIndexProps } from '@/modules/treasury-cash/types/cash-movements';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowRightLeft, CheckCircle2, ClipboardCheck } from 'lucide-react';
 import { useEffect } from 'react';

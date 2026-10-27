@@ -13,6 +13,8 @@ use App\FinancialServices\Models\FinancialProductPolicy;
 use App\FinancialServices\Models\FinancialTransaction;
 use App\FinancialServices\Models\LoanProtectionPolicy;
 use App\FinancialServices\Models\LoanProtectionProduct;
+use App\FinancialServices\Models\LoanRepayment;
+use App\FinancialServices\Models\LoanRepaymentAllocation;
 use App\SystemAdministration\Models\Branch;
 use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
@@ -456,4 +458,125 @@ it('generates a reproducible reducing-balance schedule across month boundaries',
         ->and($events)->toHaveCount(1)
         ->and($events[0]->fines->first()->assessed_amount)->toBe('25.0000')
         ->and(app(DefaultFineService::class)->assessOrganization($fixture['organization']->id, '2026-03-01'))->toHaveCount(1);
+});
+
+it('adds a manual repayment installment with calculated total and components', function () {
+    $fixture = loanApplicationFixture();
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 1000,
+        'requested_term_months' => 3,
+    ], $fixture['organization']->id);
+    $service->submit($application);
+    $service->approve($application, [], $fixture['user']->id);
+    $loan = $service->createLoanAccount($application->fresh());
+    $scheduleService = app(LoanScheduleService::class);
+    $scheduleService->generate($loan, ['frequency' => 'MONTHLY', 'start_date' => '2026-01-31']);
+
+    $installment = $scheduleService->addInstallment($loan, [
+        'due_date' => '2026-05-31',
+        'scheduled_principal' => 100,
+        'scheduled_interest' => 10,
+        'scheduled_fee' => 2,
+        'scheduled_protection_fee' => 3,
+    ]);
+
+    expect($installment->installment_no)->toBe(4)
+        ->and($installment->schedule_version)->toBe(1)
+        ->and((float) $installment->total_due)->toBe(115.0)
+        ->and($installment->generation_inputs['source'])->toBe('MANUAL')
+        ->and($installment->components)->toHaveCount(4)
+        ->and($installment->status)->toBe('PENDING');
+
+    expect(fn () => $scheduleService->addInstallment($loan, [
+        'due_date' => '2026-06-30',
+        'scheduled_principal' => 0,
+        'scheduled_interest' => 0,
+        'scheduled_fee' => 0,
+        'scheduled_protection_fee' => 0,
+    ]))->toThrow(RuntimeException::class, 'greater than zero');
+});
+
+it('updates a pending repayment installment and its components', function () {
+    $fixture = loanApplicationFixture();
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 1000,
+        'requested_term_months' => 3,
+    ], $fixture['organization']->id);
+    $service->submit($application);
+    $service->approve($application, [], $fixture['user']->id);
+    $loan = $service->createLoanAccount($application->fresh());
+    $scheduleService = app(LoanScheduleService::class);
+    $schedules = $scheduleService->generate($loan, ['frequency' => 'MONTHLY', 'start_date' => '2026-01-31']);
+
+    $updated = $scheduleService->updateInstallment($loan, $schedules[0], [
+        'due_date' => '2026-02-15',
+        'scheduled_principal' => 400,
+        'scheduled_interest' => 25,
+        'scheduled_fee' => 5,
+        'scheduled_protection_fee' => 2,
+    ]);
+
+    expect($updated->due_date->toDateString())->toBe('2026-02-15')
+        ->and((float) $updated->total_due)->toBe(432.0)
+        ->and($updated->components)->toHaveCount(4)
+        ->and((float) $updated->components->firstWhere('type', 'PRINCIPAL')->amount_due)->toBe(400.0)
+        ->and($updated->status)->toBe('PENDING');
+
+    expect(fn () => $scheduleService->updateInstallment($loan, $updated, [
+        'due_date' => '2026-02-16',
+        'scheduled_principal' => 0,
+        'scheduled_interest' => 0,
+        'scheduled_fee' => 0,
+        'scheduled_protection_fee' => 0,
+    ]))->toThrow(RuntimeException::class, 'greater than zero');
+});
+
+it('cancels unpaid installments and rejects cancellation after repayment allocation', function () {
+    $fixture = loanApplicationFixture();
+    $service = app(LoanApplicationService::class);
+    $application = $service->create([
+        'customer_id' => $fixture['customer']->id,
+        'financial_product_id' => $fixture['product']->id,
+        'requested_amount' => 1000,
+        'requested_term_months' => 3,
+    ], $fixture['organization']->id);
+    $service->submit($application);
+    $service->approve($application, [], $fixture['user']->id);
+    $loan = $service->createLoanAccount($application->fresh());
+    $scheduleService = app(LoanScheduleService::class);
+    $schedules = $scheduleService->generate($loan, ['frequency' => 'MONTHLY', 'start_date' => '2026-01-31']);
+
+    $arrears = $scheduleService->assessArrears($loan, '2026-03-01');
+    expect($arrears)->not->toBeEmpty();
+
+    $cancelled = $scheduleService->cancelInstallment($loan, $schedules[0], $fixture['user']->id);
+    expect($cancelled->status)->toBe('WAIVED')
+        ->and($cancelled->components->every(fn ($component) => $component->status === 'WAIVED'))->toBeTrue()
+        ->and($arrears[0]->fresh()->status)->toBe('CLEARED')
+        ->and($arrears[0]->fresh()->resolution_type)->toBe('WAIVED');
+
+    $allocatedSchedule = $schedules[1];
+    $component = $allocatedSchedule->components->firstWhere('amount_due', '>', 0);
+    $repayment = LoanRepayment::query()->create([
+        'loan_account_id' => $loan->id,
+        'repayment_at' => '2026-02-01 10:00:00',
+        'amount' => 1,
+        'status' => 'PENDING',
+        'created_by' => $fixture['user']->id,
+    ]);
+    LoanRepaymentAllocation::query()->create([
+        'loan_repayment_id' => $repayment->id,
+        'loan_schedule_id' => $allocatedSchedule->id,
+        'loan_schedule_component_id' => $component->id,
+        'amount' => 1,
+    ]);
+
+    expect(fn () => $scheduleService->cancelInstallment($loan, $allocatedSchedule, $fixture['user']->id))
+        ->toThrow(RuntimeException::class, 'repayment allocations');
 });

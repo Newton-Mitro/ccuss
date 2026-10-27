@@ -5,12 +5,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
 import { Label } from '@/components/ui/label';
 import { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { CustomerSearchInputProps } from '@/modules/administration-security/types/users/components/user-search-input.interfaces';
 
-interface CustomerSearchInputProps {
-    onSelect: (customer: Customer) => void;
-    label?: string;
-    placeholder?: string; // <-- new prop
-}
 
 export const CustomerSearchInput: React.FC<CustomerSearchInputProps> = ({
     onSelect,

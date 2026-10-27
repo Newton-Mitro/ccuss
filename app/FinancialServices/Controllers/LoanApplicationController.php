@@ -15,6 +15,7 @@ use App\FinancialServices\Models\LoanGuarantor;
 use App\FinancialServices\Models\LoanProduct;
 use App\FinancialServices\Models\LoanProtectionClaim;
 use App\FinancialServices\Models\LoanProtectionProduct;
+use App\FinancialServices\Models\LoanSchedule;
 use App\FinancialServices\Requests\ApproveLoanProtectionClaimRequest;
 use App\FinancialServices\Requests\DecideLoanApplicationRequest;
 use App\FinancialServices\Requests\StoreLoanApplicationRequest;
@@ -28,6 +29,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 
 class LoanApplicationController extends Controller
 {
@@ -41,7 +43,7 @@ class LoanApplicationController extends Controller
         $this->middleware('permission:financial.loan-applications.documents.view')->only(['downloadSupportingDocument', 'downloadProtectionClaimDocument']);
         $this->middleware('permission:financial.loan-applications.create')->only(['create', 'store', 'submit', 'submitProtectionClaim']);
         $this->middleware('permission:financial.loan-applications.update')->only(['edit', 'update']);
-        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount', 'generateSchedule', 'assessArrears', 'resolveArrear', 'storeCollateral', 'verifyCollateral', 'releaseCollateral', 'storeGuarantor', 'decideGuarantor', 'storeProtection', 'activateProtection', 'cancelProtection', 'approveProtectionClaim', 'rejectProtectionClaim']);
+        $this->middleware('permission:financial.loan-applications.manage')->only(['review', 'approve', 'reject', 'createLoanAccount', 'generateSchedule', 'addScheduleInstallment', 'updateScheduleInstallment', 'cancelScheduleInstallment', 'assessArrears', 'resolveArrear', 'storeCollateral', 'verifyCollateral', 'releaseCollateral', 'storeGuarantor', 'decideGuarantor', 'storeProtection', 'activateProtection', 'cancelProtection', 'approveProtectionClaim', 'rejectProtectionClaim']);
     }
 
     public function index(Request $request): Response
@@ -144,6 +146,7 @@ class LoanApplicationController extends Controller
             'can_view_supporting_documents' => $canViewSupportingDocuments,
             'can_submit_protection_claim' => $request->user()->hasPermission('financial.loan-applications.create'),
             'can_manage_protection_claims' => $request->user()->hasPermission('financial.loan-applications.manage'),
+            'can_manage_schedule' => $request->user()->hasPermission('financial.loan-applications.manage'),
             'can_create_disbursement' => $request->user()->hasPermission('financial.transactions.create'),
             'payout_accounts' => $request->user()->hasPermission('financial.transactions.create')
                 || $request->user()->hasPermission('financial.loan-applications.manage')
@@ -297,6 +300,66 @@ class LoanApplicationController extends Controller
         $this->scheduleService->generate($loanApplication->loanAccount, $request->only(['frequency', 'term_months', 'start_date']));
 
         return back()->with('success', 'Loan repayment schedule generated successfully.');
+    }
+
+    public function addScheduleInstallment(Request $request, LoanApplication $loanApplication)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        abort_unless($loanApplication->loanAccount, 422, 'Create the loan account before adding an installment.');
+        $data = $request->validate([
+            'due_date' => ['required', 'date'],
+            'scheduled_principal' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_interest' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_fee' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_protection_fee' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        try {
+            $this->scheduleService->addInstallment($loanApplication->loanAccount, $data);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['schedule' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'Repayment installment added successfully.');
+    }
+
+    public function updateScheduleInstallment(Request $request, LoanApplication $loanApplication, LoanSchedule $schedule)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        abort_unless($loanApplication->loanAccount, 422, 'Create the loan account before managing installments.');
+        $data = $request->validate([
+            'due_date' => ['required', 'date'],
+            'scheduled_principal' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_interest' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_fee' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_protection_fee' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        try {
+            $this->scheduleService->updateInstallment($loanApplication->loanAccount, $schedule, $data);
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['schedule' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'Repayment installment updated successfully.');
+    }
+
+    public function cancelScheduleInstallment(Request $request, LoanApplication $loanApplication, LoanSchedule $schedule)
+    {
+        $this->authorizeOrganization($request, $loanApplication);
+        abort_unless($loanApplication->loanAccount, 422, 'Create the loan account before managing installments.');
+
+        try {
+            $this->scheduleService->cancelInstallment(
+                $loanApplication->loanAccount,
+                $schedule,
+                $request->user()->id,
+            );
+        } catch (RuntimeException $exception) {
+            return back()->withErrors(['schedule' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'Repayment installment cancelled successfully.');
     }
 
     public function assessArrears(Request $request, LoanApplication $loanApplication)

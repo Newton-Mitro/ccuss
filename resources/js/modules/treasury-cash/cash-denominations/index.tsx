@@ -2,7 +2,7 @@ import { ResourcePageHeader } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Banknote,
@@ -17,20 +17,8 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/treasury-cash/types/cash-denominations/index.types';
 
-type Denomination = {
-    id: number;
-    currency: string;
-    type: 'NOTE' | 'COIN';
-    value: string | number;
-    name?: string | null;
-    is_active: boolean;
-    count_lines_count: number;
-};
-
-type Props = SharedData & {
-    denominations: Denomination[];
-};
 
 export default function CashDenominationsIndex() {
     const { denominations, auth } = usePage<Props>().props;

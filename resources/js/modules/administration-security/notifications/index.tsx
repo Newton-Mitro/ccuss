@@ -3,27 +3,9 @@ import { Bell, Check, CheckCheck, Circle, Inbox } from 'lucide-react';
 import { route } from 'ziggy-js';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { NotificationItem, Props } from '@/modules/administration-security/types/notifications/index.interfaces';
 
-interface NotificationItem {
-    id: string;
-    read_at: string | null;
-    created_at: string;
-    data: {
-        title?: string;
-        message?: string;
-        url?: string;
-        event?: string;
-    };
-}
-
-interface Props extends SharedData {
-    notifications: {
-        data: NotificationItem[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    unreadCount: number;
-}
 
 export default function NotificationIndex() {
     const { notifications, unreadCount } = usePage<Props>().props;

@@ -10,7 +10,16 @@ import { formatDate } from '@/lib/date_util';
 import type { FinancialTransactionPageProps } from '@/modules/financial-services/types/financial-services';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Check, RotateCcw } from 'lucide-react';
+import {
+    ArrowLeft,
+    ArrowLeftRight,
+    CalendarDays,
+    Check,
+    CircleDollarSign,
+    FileText,
+    Landmark,
+    RotateCcw,
+} from 'lucide-react';
 import { route } from 'ziggy-js';
 
 export default function FinancialTransactionShow() {
@@ -25,6 +34,7 @@ export default function FinancialTransactionShow() {
             <Head title={transaction.transaction_no} />
             <div className="space-y-4">
                 <ResourcePageHeader
+                    variant="account"
                     title={transaction.transaction_no}
                     description={`${transaction.transaction_type} · ${
                         transaction.entries
@@ -113,61 +123,125 @@ export default function FinancialTransactionShow() {
                         </div>
                     }
                 />
-                <div className="grid gap-3 sm:grid-cols-4">
-                    <div className="rounded-lg border bg-card p-3">
-                        <p className="text-xs text-muted-foreground">Status</p>
-                        <StatusBadge
-                            tone={
-                                transaction.status === 'POSTED'
-                                    ? 'success'
-                                    : 'neutral'
-                            }
-                        >
-                            {transaction.status}
-                        </StatusBadge>
+                <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <p className="text-xs font-medium text-muted-foreground">
+                                    Status
+                                </p>
+                                <div className="mt-2">
+                                    <StatusBadge
+                                        tone={
+                                            transaction.status === 'POSTED'
+                                                ? 'success'
+                                                : transaction.status ===
+                                                    'CANCELLED'
+                                                  ? 'danger'
+                                                  : transaction.status ===
+                                                      'REVERSED'
+                                                    ? 'info'
+                                                    : 'warning'
+                                        }
+                                    >
+                                        {transaction.status}
+                                    </StatusBadge>
+                                </div>
+                            </div>
+                            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <ArrowLeftRight className="size-4" />
+                            </div>
+                        </div>
                     </div>
-                    <div className="rounded-lg border bg-card p-3">
-                        <p className="text-xs text-muted-foreground">Date</p>
-                        <p className="mt-1 font-medium">
-                            {formatDate(transaction.transaction_date)}
-                        </p>
+                    <div className="rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-xs font-medium text-muted-foreground">
+                                    Transaction date
+                                </p>
+                                <p className="mt-2 text-sm font-semibold">
+                                    {formatDate(transaction.transaction_date)}
+                                </p>
+                            </div>
+                            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <CalendarDays className="size-4" />
+                            </div>
+                        </div>
                     </div>
-                    <div className="rounded-lg border bg-card p-3">
-                        <p className="text-xs text-muted-foreground">Amount</p>
-                        <p className="mt-1 font-semibold tabular-nums">
-                            {formatBDTCurrency(transaction.amount, false)}{' '}
-                            {transaction.currency}
-                        </p>
+                    <div className="rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-xs font-medium text-muted-foreground">
+                                    Transaction amount
+                                </p>
+                                <p className="mt-2 text-lg font-semibold tracking-tight break-words tabular-nums">
+                                    {formatBDTCurrency(
+                                        transaction.amount,
+                                        false,
+                                    )}{' '}
+                                    <span className="text-xs font-medium text-muted-foreground">
+                                        {transaction.currency}
+                                    </span>
+                                </p>
+                            </div>
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <CircleDollarSign className="size-4" />
+                            </div>
+                        </div>
                     </div>
-                    <div className="rounded-lg border bg-card p-3">
-                        <p className="text-xs text-muted-foreground">
-                            Reference
-                        </p>
-                        <p className="mt-1 font-medium">
-                            {transaction.reference ?? '-'}
-                        </p>
+                    <div className="rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                                <p className="text-xs font-medium text-muted-foreground">
+                                    Reference
+                                </p>
+                                <p className="mt-2 text-sm font-semibold break-words">
+                                    {transaction.reference || 'No reference'}
+                                </p>
+                            </div>
+                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <FileText className="size-4" />
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </section>
                 {transaction.description && (
-                    <div className="rounded-lg border bg-card p-3 text-sm">
-                        {transaction.description}
-                    </div>
+                    <section className="flex items-start gap-3 rounded-xl border bg-card p-4 shadow-sm">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                            <FileText className="size-4" />
+                        </div>
+                        <div className="min-w-0">
+                            <h2 className="text-sm font-semibold">
+                                Description
+                            </h2>
+                            <p className="mt-1 text-sm leading-6 break-words text-muted-foreground">
+                                {transaction.description}
+                            </p>
+                        </div>
+                    </section>
                 )}
                 {transaction.voucher && (
-                    <div className="rounded-lg border bg-card p-3 text-sm">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                            <span>
-                                Accounting voucher:{' '}
-                                <Link
-                                    className="font-medium text-primary hover:underline"
-                                    href={route(
-                                        'vouchers.show',
-                                        transaction.voucher.id,
-                                    )}
-                                >
-                                    {transaction.voucher.voucher_no}
-                                </Link>
-                            </span>
+                    <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
+                            <div className="flex items-center gap-3">
+                                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <Landmark className="size-4" />
+                                </div>
+                                <div>
+                                    <h2 className="text-sm font-semibold">
+                                        Accounting voucher
+                                    </h2>
+                                    <Link
+                                        className="text-xs text-primary hover:underline"
+                                        href={route(
+                                            'vouchers.show',
+                                            transaction.voucher.id,
+                                        )}
+                                    >
+                                        {transaction.voucher.voucher_no}
+                                    </Link>
+                                </div>
+                            </div>
                             <StatusBadge
                                 tone={
                                     transaction.voucher.status === 'POSTED'
@@ -178,20 +252,23 @@ export default function FinancialTransactionShow() {
                                 {transaction.voucher.status}
                             </StatusBadge>
                         </div>
-                        <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        <div className="divide-y">
                             {transaction.voucher.entries?.map(
                                 (entry, index) => (
                                     <div
                                         key={index}
-                                        className="flex flex-wrap justify-between gap-x-4"
+                                        className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 text-sm sm:px-5"
                                     >
-                                        <span>
-                                            {entry.account?.code ?? '-'} ·{' '}
+                                        <span className="text-muted-foreground">
+                                            <span className="font-medium text-foreground">
+                                                {entry.account?.code ?? '-'}
+                                            </span>
+                                            {' · '}
                                             {Number(entry.debit) > 0
                                                 ? 'Debit'
                                                 : 'Credit'}
                                         </span>
-                                        <span className="tabular-nums">
+                                        <span className="font-medium tabular-nums">
                                             {formatBDTCurrency(
                                                 Number(entry.debit) > 0
                                                     ? entry.debit
@@ -203,36 +280,71 @@ export default function FinancialTransactionShow() {
                                 ),
                             )}
                         </div>
-                    </div>
+                    </section>
                 )}
-                <div className="rounded-lg border bg-card p-3">
-                    <h2 className="mb-2 text-sm font-medium">Entries</h2>
-                    <div className="space-y-2 text-sm">
+                <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <div className="flex items-center justify-between border-b px-4 py-3 sm:px-5">
+                        <div>
+                            <h2 className="text-sm font-semibold">
+                                Transaction entries
+                            </h2>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                {transaction.entries?.length ?? 0} ledger{' '}
+                                {(transaction.entries?.length ?? 0) === 1
+                                    ? 'entry'
+                                    : 'entries'}
+                            </p>
+                        </div>
+                        <ArrowLeftRight className="size-4 text-muted-foreground" />
+                    </div>
+                    <div className="divide-y">
                         {transaction.entries?.map((entry, index) => (
                             <div
                                 key={index}
-                                className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5"
                             >
-                                <span>
-                                    {entry.financial_account?.name
-                                        ? `${entry.financial_account.name} (${entry.financial_account.account_no ?? '-'})`
-                                        : (entry.financial_account
-                                              ?.account_no ?? '-')}
-                                </span>
-                                <span className="tabular-nums">
-                                    {entry.direction}{' '}
-                                    {formatBDTCurrency(entry.amount, false)}
-                                </span>
+                                <div className="flex min-w-0 items-start gap-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                        <Landmark className="size-4" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-medium">
+                                            {entry.financial_account?.name ||
+                                                'Financial account'}
+                                        </p>
+                                        <p className="mt-0.5 text-xs text-muted-foreground">
+                                            Account{' '}
+                                            {entry.financial_account
+                                                ?.account_no ?? '-'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between gap-4 pl-11 sm:justify-end sm:pl-0">
+                                    <StatusBadge
+                                        tone={
+                                            entry.direction === 'DEBIT'
+                                                ? 'info'
+                                                : 'success'
+                                        }
+                                    >
+                                        {entry.direction}
+                                    </StatusBadge>
+                                    <span className="min-w-28 text-right text-sm font-semibold tabular-nums">
+                                        {formatBDTCurrency(entry.amount, false)}
+                                    </span>
+                                </div>
                             </div>
                         ))}
                     </div>
+                </section>
+                <div className="flex justify-start">
+                    <Button variant="outline" asChild>
+                        <Link href={route('financial-transactions.index')}>
+                            <ArrowLeft className="mr-2 size-4" />
+                            Back to transactions
+                        </Link>
+                    </Button>
                 </div>
-                <Link
-                    className="text-sm text-primary hover:underline"
-                    href={route('financial-transactions.index')}
-                >
-                    Back to transactions
-                </Link>
             </div>
         </CustomAuthLayout>
     );

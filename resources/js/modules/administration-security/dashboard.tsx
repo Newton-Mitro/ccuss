@@ -8,7 +8,7 @@ import {
     StatusBadge,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Activity,
@@ -19,15 +19,8 @@ import {
     Users,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { AdministrativeTasksDashboardProps } from '@/modules/administration-security/types/dashboard.interfaces';
 
-interface AdministrativeTasksDashboardProps extends SharedData {
-    stats: {
-        users: number;
-        roles: number;
-        auditLogs: number;
-        successfulBackups: number;
-    };
-}
 
 const links = [
     {

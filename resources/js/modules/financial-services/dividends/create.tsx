@@ -17,15 +17,8 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/dividends/create.types';
 
-type Props = {
-    fiscalYears: {
-        id: number;
-        name: string;
-        start_date: string;
-        end_date: string;
-    }[];
-};
 
 export default function DividendDeclarationCreate() {
     const { fiscalYears } = usePage<Props>().props;

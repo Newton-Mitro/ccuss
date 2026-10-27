@@ -6,20 +6,8 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { FolderTree, Landmark } from 'lucide-react';
+import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/account-details-dialog.types';
 
-type Detail = {
-    label: string;
-    value: string | number | boolean | null | undefined;
-};
-
-type Props = {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    kind: 'ledger' | 'group';
-    title: string;
-    description: string;
-    details: Detail[];
-};
 
 export default function AccountDetailsDialog({
     open,

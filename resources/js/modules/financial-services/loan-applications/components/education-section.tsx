@@ -2,11 +2,8 @@ import { EducationDetail } from '@/modules/financial-services/loan-applications/
 import DetailInput from '@/modules/financial-services/loan-applications/components/detail-input';
 import RepeatableRow from '@/modules/financial-services/loan-applications/components/repeatable-row';
 import RepeatableSection from '@/modules/financial-services/loan-applications/components/repeatable-section';
+import type { Props } from '@/modules/financial-services/types/loan-applications/components/education-section.types';
 
-type Props = {
-    rows: EducationDetail[];
-    onChange: (rows: EducationDetail[]) => void;
-};
 
 export default function EducationSection({ rows, onChange }: Props) {
     const update = (index: number, key: keyof EducationDetail, value: string) =>

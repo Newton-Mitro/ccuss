@@ -1,16 +1,16 @@
 <?php
 
-use App\FinancialServices\Controllers\FinancialProductController;
-use App\FinancialServices\Controllers\FinancialAccountController;
-use App\FinancialServices\Controllers\FinancialTransactionController;
-use App\FinancialServices\Controllers\FinancialProductPolicyController;
-use App\FinancialServices\Controllers\FinancialReportController;
-use App\FinancialServices\Controllers\LoanApplicationController;
-use App\FinancialServices\Controllers\LoanProtectionProductController;
 use App\FinancialServices\Controllers\AccountDefaultRuleController;
 use App\FinancialServices\Controllers\AccountFineController;
-use App\FinancialServices\Controllers\InterestProvisionController;
 use App\FinancialServices\Controllers\DividendController;
+use App\FinancialServices\Controllers\FinancialAccountController;
+use App\FinancialServices\Controllers\FinancialProductController;
+use App\FinancialServices\Controllers\FinancialProductPolicyController;
+use App\FinancialServices\Controllers\FinancialReportController;
+use App\FinancialServices\Controllers\FinancialTransactionController;
+use App\FinancialServices\Controllers\InterestProvisionController;
+use App\FinancialServices\Controllers\LoanApplicationController;
+use App\FinancialServices\Controllers\LoanProtectionProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'organization'])->group(function () {
@@ -141,6 +141,8 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::put('/financial-accounts/{financial_account}/membership/{shareAccount}', [FinancialAccountController::class, 'updateShareAccount'])->name('financial-accounts.membership.update');
     Route::post('/financial-accounts/{financial_account}/fixed-deposit', [FinancialAccountController::class, 'storeFixedDeposit'])->name('financial-accounts.fixed-deposit.store');
     Route::post('/financial-accounts/{financial_account}/recurring-deposit', [FinancialAccountController::class, 'storeRecurringDeposit'])->name('financial-accounts.recurring-deposit.store');
+    Route::post('/financial-accounts/{financial_account}/recurring-deposit/{recurringDeposit}/installments', [FinancialAccountController::class, 'addRecurringInstallment'])->name('financial-accounts.recurring-deposit.installments.store');
+    Route::put('/financial-accounts/{financial_account}/recurring-deposit/{recurringDeposit}/installments/{installment}', [FinancialAccountController::class, 'updateRecurringInstallment'])->name('financial-accounts.recurring-deposit.installments.update');
     Route::post('/financial-accounts/{financial_account}/recurring-deposit/{recurringDeposit}/installments/{installment}/miss', [FinancialAccountController::class, 'markRecurringInstallmentMissed'])->name('financial-accounts.recurring-deposit.installments.miss');
     Route::post('/financial-accounts/{financial_account}/recurring-deposit/{recurringDeposit}/installments/{installment}/waive', [FinancialAccountController::class, 'waiveRecurringInstallment'])->name('financial-accounts.recurring-deposit.installments.waive');
     Route::post('/financial-accounts/{financial_account}/recurring-deposit/{recurringDeposit}/installments/{installment}/pay', [FinancialAccountController::class, 'payRecurringInstallment'])->name('financial-accounts.recurring-deposit.installments.pay');
@@ -177,6 +179,9 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::post('/loan-applications/{loan_application}/reject', [LoanApplicationController::class, 'reject'])->name('loan-applications.reject');
     Route::post('/loan-applications/{loan_application}/create-account', [LoanApplicationController::class, 'createLoanAccount'])->name('loan-applications.create-account');
     Route::post('/loan-applications/{loan_application}/schedule', [LoanApplicationController::class, 'generateSchedule'])->name('loan-applications.schedule.generate');
+    Route::post('/loan-applications/{loan_application}/schedule/installments', [LoanApplicationController::class, 'addScheduleInstallment'])->name('loan-applications.schedule.installments.store');
+    Route::put('/loan-applications/{loan_application}/schedule/installments/{schedule}', [LoanApplicationController::class, 'updateScheduleInstallment'])->name('loan-applications.schedule.installments.update');
+    Route::post('/loan-applications/{loan_application}/schedule/installments/{schedule}/cancel', [LoanApplicationController::class, 'cancelScheduleInstallment'])->name('loan-applications.schedule.installments.cancel');
     Route::post('/loan-applications/{loan_application}/arrears/assess', [LoanApplicationController::class, 'assessArrears'])->name('loan-applications.arrears.assess');
     Route::post('/loan-applications/{loan_application}/arrears/{arrear}/resolve', [LoanApplicationController::class, 'resolveArrear'])->name('loan-applications.arrears.resolve');
     Route::post('/loan-applications/{loan_application}/collaterals', [LoanApplicationController::class, 'storeCollateral'])->name('loan-applications.collaterals.store');

@@ -21,29 +21,10 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/groups/form.interfaces';
+
 
 const types = ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'];
-
-interface AccountGroup {
-    id: number;
-    code: string;
-    name: string;
-    type: string;
-    normal_balance: string;
-    parent_id?: number | null;
-    status: boolean;
-}
-
-interface AccountGroupParent {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface Props {
-    accountGroup?: AccountGroup;
-    parents?: AccountGroupParent[];
-}
 
 export default function AccountGroupForm({
     accountGroup,

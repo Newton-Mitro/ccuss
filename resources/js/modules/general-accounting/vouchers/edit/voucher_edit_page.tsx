@@ -10,50 +10,9 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { Props, VoucherEntry } from '@/modules/general-accounting/types/vouchers/edit/voucher_edit_page.interfaces';
 
-interface Account {
-    id: number;
-    code: string;
-    name: string;
-}
-
-interface Party {
-    id: number;
-    code: string;
-    name: string;
-    party_type: string;
-}
-
-interface VoucherEntry {
-    id?: number;
-    account_id: number;
-    party_id?: number | string | null;
-    account?: Account;
-    party?: Party | null;
-    debit: number | string;
-    credit: number | string;
-    description?: string | null;
-    reference?: string | null;
-}
-
-interface Voucher {
-    id: number;
-    voucher_no: string;
-    voucher_date: string;
-    voucher_type: string;
-    fiscal_period_id: number;
-    description?: string | null;
-    status: string;
-    entries: VoucherEntry[];
-}
-
-interface Props extends SharedData {
-    voucher: Voucher;
-    accounts: Account[];
-    parties: Party[];
-    fiscalPeriods: { id: number; name?: string; period_name?: string }[];
-}
 
 const voucherTypes = [
     'JOURNAL',

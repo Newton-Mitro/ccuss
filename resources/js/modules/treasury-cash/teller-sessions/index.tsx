@@ -12,7 +12,7 @@ import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type {
     TellerSessionIndexProps,
     TellerSessionListItem,
-} from '@/modules/treasury-cash/types/treasury-cash/teller-sessions';
+} from '@/modules/treasury-cash/types/teller-sessions';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Clock3, LockKeyhole, Plus } from 'lucide-react';

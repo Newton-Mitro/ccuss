@@ -11,7 +11,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { BreadcrumbItem } from '@/types';
-import type { PettyCashTransactionIndexProps } from '@/modules/treasury-cash/types/treasury-cash/petty-cash-transactions';
+import type { PettyCashTransactionIndexProps } from '@/modules/treasury-cash/types/petty-cash-transactions';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,

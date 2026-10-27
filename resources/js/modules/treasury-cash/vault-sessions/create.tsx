@@ -18,26 +18,8 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
+import type { PageProps } from '@/modules/treasury-cash/types/vault-sessions/create.types';
 
-type BranchDay = {
-    id: number;
-    business_date: string;
-    branch_name?: string;
-};
-
-type VaultOption = {
-    id: number;
-    code: string;
-    name: string;
-    current_balance?: string | number | null;
-};
-
-type PageProps = {
-    branch_day?: BranchDay;
-    branch_days?: BranchDay[];
-    vaults?: VaultOption[];
-    user_branch_id?: number | null;
-};
 
 export default function CreateVaultSessionPage() {
     const {

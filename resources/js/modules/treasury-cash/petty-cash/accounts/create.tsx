@@ -6,7 +6,7 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem } from '@/types';
-import type { PettyCashAccountCreatePageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { PettyCashAccountCreatePageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,

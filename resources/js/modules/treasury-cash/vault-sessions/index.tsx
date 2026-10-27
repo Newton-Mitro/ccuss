@@ -13,7 +13,7 @@ import { BreadcrumbItem } from '@/types';
 import type {
     VaultSessionIndexProps,
     VaultSessionListItem,
-} from '@/modules/treasury-cash/types/treasury-cash/vault-sessions';
+} from '@/modules/treasury-cash/types/vault-sessions';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { Clock3, LockKeyhole, Plus } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';

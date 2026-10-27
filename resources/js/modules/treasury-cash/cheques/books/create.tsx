@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem } from '@/types';
-import type { ChequeBookCreatePageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { ChequeBookCreatePageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,

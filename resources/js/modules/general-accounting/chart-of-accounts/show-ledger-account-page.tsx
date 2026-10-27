@@ -20,46 +20,8 @@ import {
     Users,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/show-ledger-account-page.interfaces';
 
-interface RelatedLedger {
-    id: number;
-    code?: string | null;
-    name?: string | null;
-}
-
-interface RelatedGroup {
-    id: number;
-    code?: string | null;
-    name?: string | null;
-}
-
-interface Ledger {
-    id: number;
-    code?: string | null;
-    name?: string | null;
-    type?: string | null;
-    account_type?: string | null;
-    normal_balance?: string | null;
-    account_group_id?: number | null;
-    parent_id?: number | null;
-    status?: boolean | null;
-    is_active?: boolean | null;
-    is_group?: boolean | null;
-    is_control_account?: boolean | null;
-    is_reconcilable?: boolean | null;
-    is_cash_account?: boolean | null;
-    is_system?: boolean | null;
-    subledger_type?: string | null;
-    subledger_sub_type?: string | null;
-    description?: string | null;
-    group?: RelatedGroup | null;
-    parent?: RelatedLedger | null;
-    children?: RelatedLedger[];
-}
-
-interface Props {
-    ledger: Ledger;
-}
 
 function DetailItem({
     label,

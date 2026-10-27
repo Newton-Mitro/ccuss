@@ -4,7 +4,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
@@ -19,24 +19,8 @@ import {
     X,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/treasury-cash/types/cheques/clearings.types';
 
-type Clearing = {
-    id: number;
-    clearing_no: string;
-    amount: string | number;
-    clearing_date: string;
-    status: string;
-    cheque?: {
-        cheque_no?: string;
-        payee?: string | null;
-    };
-};
-
-type Props = SharedData & {
-    clearings: {
-        data: Clearing[];
-    };
-};
 
 const statusConfig: Record<
     string,

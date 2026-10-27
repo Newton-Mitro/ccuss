@@ -3,22 +3,8 @@ import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
+import type { TellerDetails } from '@/modules/treasury-cash/types/tellers/show.interfaces';
 
-interface TellerDetails {
-    id: number;
-    code: string;
-    name: string;
-    status: string;
-    maximum_cash: string | number | null;
-    user?: { name: string; email: string } | null;
-    cash_location?: {
-        branch?: { name: string } | null;
-        financial_account?: {
-            account_no: string;
-            balance: string | number;
-        } | null;
-    } | null;
-}
 
 export default function Show() {
     const { teller } = usePage<SharedData & { teller: TellerDetails }>().props;

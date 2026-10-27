@@ -5,34 +5,9 @@ import ReportExportActions from '@/components/report-export-actions';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
+import type { Props } from '@/modules/general-accounting/types/reports/profit-and-loss-page.interfaces';
 
-interface PLRow {
-    ledger_account_id: number;
-    category: 'income' | 'expense';
-    account_name: string;
-    amount: number;
-    fiscal_year_id?: number;
-    fiscal_period_id?: number;
-}
-
-interface FiscalYear {
-    id: number;
-    code: string;
-}
-
-interface FiscalPeriod {
-    id: number;
-    period_name: string;
-}
-
-interface Props extends SharedData {
-    profitAndLoss: PLRow[];
-    fiscalYears: FiscalYear[];
-    fiscalPeriods: FiscalPeriod[];
-    selectedFiscalYear?: number;
-    selectedFiscalPeriod?: number;
-}
 
 export default function ProfitAndLossPage() {
     const {

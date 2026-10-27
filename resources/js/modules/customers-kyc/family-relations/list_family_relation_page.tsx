@@ -19,15 +19,12 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { CustomerFamilyRelation } from '@/modules/customers-kyc/types/customer_kyc_module';
-import { PaginatedResponse } from '@/types/paginated_response';
-import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 
-interface Props extends SharedData {
-    paginated_data: PaginatedResponse<CustomerFamilyRelation>;
-    filters: Record<string, string | number>;
-}
+import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
+import type { Props } from '@/modules/customers-kyc/types/family-relations/list_family_relation_page.interfaces';
+
 
 export default function FamilyRelationIndex() {
     const { paginated_data, filters } = usePage<Props>().props;

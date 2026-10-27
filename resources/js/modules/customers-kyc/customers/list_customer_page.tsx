@@ -20,15 +20,12 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
-import { PaginatedResponse } from '@/types/paginated_response';
-import { kycStatuses } from '@/modules/customers-kyc/customers/data/customer_data_types';
 
-interface Props extends SharedData {
-    paginated_data: PaginatedResponse<Customer>;
-    filters: Record<string, string>;
-}
+import { kycStatuses } from '@/modules/customers-kyc/customers/data/customer_data_types';
+import type { Props } from '@/modules/customers-kyc/types/customers/list_customer_page.interfaces';
+
 
 export default function Index() {
     const { paginated_data, filters } = usePage<Props>().props;

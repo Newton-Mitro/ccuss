@@ -9,34 +9,12 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowUpRight, Plus } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/treasury-cash/types/cheques/payments/index.types';
 
-type PaymentRow = {
-    id: number;
-    status: string;
-    amount: string | number;
-    created_at: string;
-    cheque: { cheque_no: string };
-    financial_account: { account_no: string };
-    received_by?: { name: string } | null;
-};
-
-type Props = SharedData & {
-    payments: {
-        data: PaymentRow[];
-        links: { url: string | null; label: string; active: boolean }[];
-    };
-    available_cheques: {
-        id: number;
-        cheque_no: string;
-        amount: number;
-        account_no: string | null;
-    }[];
-    teller_sessions: { id: number; label: string }[];
-};
 
 function statusTone(
     status: string,

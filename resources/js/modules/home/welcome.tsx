@@ -5,10 +5,8 @@ import { Heart, Sparkles } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem } from '@/types';
+import type { Quote } from '@/modules/home/types/welcome.interfaces';
 
-interface Quote {
-    message?: string;
-}
 
 export default function HomePage({ quote }: { quote: Quote }) {
     const breadcrumbs: BreadcrumbItem[] = [

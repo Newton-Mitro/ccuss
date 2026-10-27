@@ -6,32 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CalendarClock, FileText, Percent } from 'lucide-react';
 import { route } from 'ziggy-js';
+import type { Props } from '@/modules/financial-services/types/default-rules/form.types';
 
-type AccountDefaultRule = {
-    id: number;
-    financial_product_id: number | null;
-    account_type: string;
-    name: string;
-    grace_days: number;
-    fine_calculation: string;
-    fine_amount: string | number;
-    fine_rate: string | number;
-    maximum_fine?: string | number | null;
-    extends_maturity: boolean;
-    maturity_extension_days: number;
-    effective_from: string | null;
-    effective_to: string | null;
-    is_active: boolean;
-};
-
-type Props = SharedData & {
-    rule: AccountDefaultRule | null;
-    products: { id: number; code: string; name: string; category: string }[];
-};
 
 const accountTypes = [
     'SAVINGS',

@@ -8,22 +8,9 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import type { PartyDetailsDialogProps } from '@/modules/general-accounting/types/parties/party-dialog.interfaces';
+export type { Party } from '@/modules/general-accounting/types/parties/party-dialog.interfaces';
 
-export interface Party {
-    id: number;
-    code: string;
-    name: string;
-    party_type: string;
-    phone: string | null;
-    email: string | null;
-    address: string | null;
-    status: boolean;
-}
-
-interface PartyDetailsDialogProps {
-    party: Party | null;
-    onOpenChange: (open: boolean) => void;
-}
 
 export function PartyDetailsDialog({
     party,

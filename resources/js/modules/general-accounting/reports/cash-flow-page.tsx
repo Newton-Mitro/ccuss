@@ -5,28 +5,10 @@ import ReportExportActions from '@/components/report-export-actions';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem, SharedData } from '@/types';
-import {
-    FiscalPeriod,
-    FiscalYear,
-} from '@/modules/general-accounting/types/finance_and_accounting';
+import { BreadcrumbItem } from '@/types';
 
-/* ---------------- Types ---------------- */
+import type { CashFlowRow, Props } from '@/modules/general-accounting/types/reports/cash-flow-page.interfaces';
 
-interface CashFlowRow {
-    fiscal_year_code: string;
-    period_name: string;
-    cash_category: 'Operating' | 'Investing' | 'Financing' | 'Other';
-    net_cash: number;
-}
-
-interface Props extends SharedData {
-    cashFlows: CashFlowRow[];
-    fiscalYears: FiscalYear[];
-    fiscalPeriods: FiscalPeriod[];
-    selectedFiscalYear?: number;
-    selectedFiscalPeriod?: number;
-}
 
 /* ---------------- Page ---------------- */
 

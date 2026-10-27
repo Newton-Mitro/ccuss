@@ -455,6 +455,13 @@ it('searches customer deposit accounts by account and holder details', function 
         'account_no' => 'LOAN-ACCOUNT-SEARCH-001',
         'name' => 'Loan Account Search',
     ]);
+    $closedAccount = FinancialAccount::factory()->active(0)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'account_no' => 'SAV-CLOSED-STATEMENT-001',
+        'name' => 'Closed Statement Account',
+        'status' => 'CLOSED',
+    ]);
 
     foreach ([
         $account->account_no,
@@ -491,6 +498,18 @@ it('searches customer deposit accounts by account and holder details', function 
         ->assertSuccessful()
         ->assertJsonFragment(['id' => $loanAccount->id])
         ->assertJsonCount(1);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->getJson(route('teller-transactions.deposit.accounts.search', [
+            'search' => $closedAccount->account_no,
+            'scope' => 'statement',
+        ]))
+        ->assertSuccessful()
+        ->assertJsonFragment([
+            'id' => $closedAccount->id,
+            'status' => 'CLOSED',
+        ]);
 });
 
 it('shows the last posted deposit date for customer accounts', function () {

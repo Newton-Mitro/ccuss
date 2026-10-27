@@ -8,21 +8,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import type {
+    CostCenterDetailsDialogProps,
+} from '@/modules/general-accounting/types/cost-centers/cost-center-dialog.interfaces';
+export type { CostCenter } from '@/modules/general-accounting/types/cost-centers/cost-center-dialog.interfaces';
 
-export interface CostCenter {
-    id: number;
-    parent_id?: number | null;
-    code: string;
-    name: string;
-    level: number;
-    status: boolean;
-    parent?: { code: string; name: string } | null;
-}
-
-interface CostCenterDetailsDialogProps {
-    costCenter: CostCenter | null;
-    onOpenChange: (open: boolean) => void;
-}
 
 export function CostCenterDetailsDialog({
     costCenter,

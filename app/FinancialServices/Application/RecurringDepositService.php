@@ -6,15 +6,13 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use Carbon\CarbonImmutable;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
 class RecurringDepositService
 {
-    public function __construct(private readonly FinancialTransactionService $transactionService)
-    {
-    }
+    public function __construct(private readonly FinancialTransactionService $transactionService) {}
 
     public function open(FinancialAccount $account, array $data): RecurringDeposit
     {
@@ -22,7 +20,7 @@ class RecurringDepositService
             throw new RuntimeException('Recurring-deposit contracts require a recurring-deposit account.');
         }
 
-        if (!in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
+        if (! in_array($account->status, ['PENDING', 'ACTIVE'], true)) {
             throw new RuntimeException('A recurring-deposit contract cannot be opened for this account status.');
         }
 
@@ -40,7 +38,7 @@ class RecurringDepositService
                 'QUARTER' => ['QUARTERLY', $productTerm->tenure_value],
                 'YEAR' => ['MONTHLY', $productTerm->tenure_value * 12],
             }
-            : [$data['installment_frequency'], (int) $data['total_installments']];
+        : [$data['installment_frequency'], (int) $data['total_installments']];
         $maturityDate = $this->dueDate($startedAt, $frequency, $totalInstallments - 1)
             ->addDays((int) ($data['maturity_extension_days'] ?? 0));
 
@@ -57,7 +55,7 @@ class RecurringDepositService
                 'contractual_rate' => $account->depositProductTerm?->interest_rate,
             ]);
 
-            $recurringDeposit->installments()->createMany(collect(range(1, $totalInstallments))->map(fn(int $number): array => [
+            $recurringDeposit->installments()->createMany(collect(range(1, $totalInstallments))->map(fn (int $number): array => [
                 'installment_no' => $number,
                 'due_date' => $this->dueDate($startedAt, $frequency, $number - 1)->toDateString(),
                 'amount_due' => $data['installment_amount'],
@@ -77,7 +75,7 @@ class RecurringDepositService
         $extensionDays = (int) ($data['maturity_extension_days'] ?? 0);
         $graceDays = (int) ($data['grace_days'] ?? 0);
 
-        return DB::transaction(function () use ($recurringDeposit, $data, $startedAt, $frequency, $totalInstallments, $installmentAmount, $extensionDays, $graceDays): RecurringDeposit {
+        return DB::transaction(function () use ($recurringDeposit, $startedAt, $frequency, $totalInstallments, $installmentAmount, $extensionDays, $graceDays): RecurringDeposit {
             $deposit = RecurringDeposit::query()->lockForUpdate()->findOrFail($recurringDeposit->id);
             if ($deposit->closed_at !== null) {
                 throw new RuntimeException('A closed recurring-deposit contract cannot be amended.');
@@ -88,7 +86,7 @@ class RecurringDepositService
                 || (float) $deposit->installment_amount !== $installmentAmount;
 
             if ($scheduleChanged && $deposit->installments()
-                ->where(fn($query) => $query
+                ->where(fn ($query) => $query
                     ->where('status', '!=', 'PENDING')
                     ->orWhereNotNull('financial_transaction_id')
                     ->orWhere('amount_paid', '>', 0))
@@ -120,7 +118,7 @@ class RecurringDepositService
 
             if ($scheduleChanged) {
                 $deposit->installments()->delete();
-                $deposit->installments()->createMany(collect(range(1, $totalInstallments))->map(fn(int $number): array => [
+                $deposit->installments()->createMany(collect(range(1, $totalInstallments))->map(fn (int $number): array => [
                     'installment_no' => $number,
                     'due_date' => $this->dueDate($startedAt, $frequency, $number - 1)->toDateString(),
                     'amount_due' => $installmentAmount,
@@ -145,12 +143,87 @@ class RecurringDepositService
         return $installment->refresh();
     }
 
+    public function addInstallment(RecurringDeposit $recurringDeposit, array $data): RecurringDepositInstallment
+    {
+        return DB::transaction(function () use ($recurringDeposit, $data): RecurringDepositInstallment {
+            $deposit = RecurringDeposit::query()->lockForUpdate()->findOrFail($recurringDeposit->id);
+            if ($deposit->closed_at !== null) {
+                throw new RuntimeException('A closed recurring-deposit contract cannot have installments added.');
+            }
+            if ($deposit->total_installments >= 600) {
+                throw ValidationException::withMessages([
+                    'schedule' => 'The recurring-deposit schedule cannot exceed 600 installments.',
+                ]);
+            }
+
+            $installmentNo = (int) $deposit->installments()->max('installment_no') + 1;
+            $installment = $deposit->installments()->create([
+                'installment_no' => $installmentNo,
+                'due_date' => $data['due_date'],
+                'amount_due' => $data['amount_due'],
+                'status' => 'PENDING',
+            ]);
+
+            $deposit->update([
+                'total_installments' => $installmentNo,
+                'maturity_date' => CarbonImmutable::parse($data['due_date'])
+                    ->addDays((int) $deposit->maturity_extension_days)
+                    ->toDateString(),
+            ]);
+
+            return $installment;
+        });
+    }
+
+    public function updateInstallment(RecurringDeposit $recurringDeposit, RecurringDepositInstallment $installment, array $data): RecurringDepositInstallment
+    {
+        $this->assertInstallment($recurringDeposit, $installment);
+
+        return DB::transaction(function () use ($recurringDeposit, $installment, $data): RecurringDepositInstallment {
+            $deposit = RecurringDeposit::query()->lockForUpdate()->findOrFail($recurringDeposit->id);
+            if ($deposit->closed_at !== null) {
+                throw new RuntimeException('A closed recurring-deposit contract cannot be amended.');
+            }
+
+            $lockedInstallment = $deposit->installments()
+                ->whereKey($installment->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            if ($lockedInstallment->status !== 'PENDING'
+                || $lockedInstallment->financial_transaction_id !== null
+                || (float) $lockedInstallment->amount_paid > 0
+                || $lockedInstallment->transactionEntries()->exists()) {
+                throw new RuntimeException('Only pending installments without payment history can be updated.');
+            }
+
+            $lockedInstallment->update([
+                'due_date' => $data['due_date'],
+                'amount_due' => $data['amount_due'],
+            ]);
+
+            if ((int) $lockedInstallment->installment_no === (int) $deposit->total_installments) {
+                $deposit->update([
+                    'maturity_date' => CarbonImmutable::parse($data['due_date'])
+                        ->addDays((int) $deposit->maturity_extension_days)
+                        ->toDateString(),
+                ]);
+            }
+
+            return $lockedInstallment->refresh();
+        });
+    }
+
     public function waive(RecurringDeposit $recurringDeposit, RecurringDepositInstallment $installment): RecurringDepositInstallment
     {
         $this->assertInstallment($recurringDeposit, $installment);
 
-        if (!in_array($installment->status, ['PENDING', 'MISSED'], true)) {
+        if (! in_array($installment->status, ['PENDING', 'MISSED'], true)) {
             throw new RuntimeException('Only pending or missed installments can be waived.');
+        }
+        if ($installment->financial_transaction_id !== null
+            || (float) $installment->amount_paid > 0
+            || $installment->transactionEntries()->exists()) {
+            throw new RuntimeException('Installments with payment history cannot be cancelled.');
         }
 
         $installment->update(['status' => 'WAIVED']);
@@ -161,7 +234,7 @@ class RecurringDepositService
     public function collectPayment(RecurringDeposit $recurringDeposit, RecurringDepositInstallment $installment, array $data, int $organizationId, int $userId): \App\FinancialServices\Models\FinancialTransaction
     {
         $this->assertInstallment($recurringDeposit, $installment);
-        if (!in_array($installment->status, ['PENDING', 'PARTIAL'], true)) {
+        if (! in_array($installment->status, ['PENDING', 'PARTIAL'], true)) {
             throw new RuntimeException('Only pending or partial installments can receive payments.');
         }
 

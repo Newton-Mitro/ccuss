@@ -13,7 +13,7 @@ import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { BreadcrumbItem } from '@/types';
-import type { BankTransactionIndexPageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { BankTransactionIndexPageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, Plus, ReceiptText } from 'lucide-react';
 import { useEffect, useState } from 'react';
