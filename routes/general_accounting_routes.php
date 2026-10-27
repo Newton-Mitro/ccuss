@@ -154,4 +154,10 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('opening-balances.create');
     Route::post('/opening-balances', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'store'])
         ->name('opening-balances.store');
+    Route::get('/opening-balances/member-import', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'memberImport'])
+        ->name('opening-balances.member-import');
+    Route::get('/opening-balances/member-import/template', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'memberImportTemplate'])
+        ->name('opening-balances.member-import.template');
+    Route::post('/opening-balances/member-import', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'storeMemberImport'])
+        ->name('opening-balances.member-import.store');
 });

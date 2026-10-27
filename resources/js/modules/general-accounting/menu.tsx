@@ -53,6 +53,13 @@ export const generalAccounting: SidebarItem[] = [
                 ],
             },
             {
+                name: 'Opening Balances',
+                icon: <i className="fa-solid fa-scale-balanced" />,
+                path: '/opening-balances',
+                match_path: 'opening-balances',
+                permission: ['accounting.opening_balances.view'],
+            },
+            {
                 name: 'Vouchers',
                 icon: <i className="fa-solid fa-receipt" />,
                 children_expanded: false,

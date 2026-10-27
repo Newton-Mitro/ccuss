@@ -2,10 +2,10 @@
 
 namespace App\GeneralAccounting\Application;
 
+use App\GeneralAccounting\Application\Contracts\VoucherRepositoryInterface;
 use App\GeneralAccounting\Models\FiscalPeriod;
 use App\GeneralAccounting\Models\LedgerAccount;
 use App\GeneralAccounting\Models\Voucher;
-use App\GeneralAccounting\Application\Contracts\VoucherRepositoryInterface;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -14,13 +14,19 @@ class OpeningBalanceService
     public function __construct(
         private readonly VoucherRepositoryInterface $voucherRepository,
         private readonly VoucherService $voucherService,
-    ) {
-    }
+    ) {}
 
-    public function apply(array $entries, int $organizationId, int $userId, int $fiscalPeriodId, ?int $offsetAccountId = null): Voucher
-    {
+    public function apply(
+        array $entries,
+        int $organizationId,
+        int $userId,
+        int $fiscalPeriodId,
+        ?int $offsetAccountId = null,
+        ?string $voucherDate = null,
+        ?int $financialTransactionId = null,
+    ): Voucher {
         $period = FiscalPeriod::query()
-            ->whereHas('fiscalYear', fn($query) => $query->where('organization_id', $organizationId))
+            ->whereHas('fiscalYear', fn ($query) => $query->where('organization_id', $organizationId))
             ->findOrFail($fiscalPeriodId);
 
         if ($period->status !== 'OPEN') {
@@ -36,12 +42,13 @@ class OpeningBalanceService
             ->where('status', true)
             ->find($offsetAccountId);
 
-        if (!$offsetAccount) {
+        if (! $offsetAccount) {
             throw new InvalidArgumentException('The offset account is invalid for this organization.');
         }
 
         $normalized = [];
-        $total = 0.0;
+        $debitTotal = 0.0;
+        $creditTotal = 0.0;
 
         foreach ($entries as $entry) {
             $account = LedgerAccount::query()
@@ -49,7 +56,7 @@ class OpeningBalanceService
                 ->where('status', true)
                 ->find($entry['account_id'] ?? null);
 
-            if (!$account) {
+            if (! $account) {
                 throw new InvalidArgumentException('Each opening balance entry must reference an active ledger account.');
             }
 
@@ -59,29 +66,44 @@ class OpeningBalanceService
             }
 
             $amount = round($amount, 4);
-            $total += $amount;
+            $debit = $account->normal_balance === 'DEBIT' ? $amount : 0;
+            $credit = $account->normal_balance === 'CREDIT' ? $amount : 0;
+            $debitTotal += $debit;
+            $creditTotal += $credit;
             $normalized[] = [
                 'account_id' => $account->id,
-                'debit' => $account->normal_balance === 'DEBIT' ? $amount : 0,
-                'credit' => $account->normal_balance === 'CREDIT' ? $amount : 0,
+                'debit' => $debit,
+                'credit' => $credit,
                 'description' => $entry['description'] ?? 'Opening balance',
             ];
         }
 
-        $openingEntry = [
-            'account_id' => $offsetAccount->id,
-            'debit' => $offsetAccount->normal_balance === 'DEBIT' ? $total : 0,
-            'credit' => $offsetAccount->normal_balance === 'CREDIT' ? $total : 0,
-            'description' => 'Opening balance offset',
-        ];
+        $difference = round($debitTotal - $creditTotal, 4);
+        if ($difference !== 0.0) {
+            $normalized[] = [
+                'account_id' => $offsetAccount->id,
+                'debit' => $difference < 0 ? abs($difference) : 0,
+                'credit' => $difference > 0 ? $difference : 0,
+                'description' => 'Opening balance offset',
+            ];
+        }
+
+        $voucherDate ??= $period->start_date->toDateString();
+        if ($voucherDate < $period->start_date->toDateString() || $voucherDate > $period->end_date->toDateString()) {
+            throw new InvalidArgumentException('The opening balance date must be within the selected fiscal period.');
+        }
 
         $voucher = $this->voucherService->createDraft([
             'fiscal_period_id' => $period->id,
             'voucher_type' => 'OPENING',
-            'voucher_date' => $period->start_date->toDateString(),
+            'voucher_date' => $voucherDate,
             'description' => 'Opening balance',
-            'entries' => array_merge($normalized, [$openingEntry]),
+            'entries' => $normalized,
         ], $organizationId, $userId);
+
+        if ($financialTransactionId !== null) {
+            $voucher->update(['financial_transaction_id' => $financialTransactionId]);
+        }
 
         return $this->voucherService->post($voucher, $organizationId, $userId);
     }

@@ -24,11 +24,18 @@ export default function OpeningBalancesIndex() {
                         title="Opening Balances"
                         description="Post opening balances into an open fiscal period."
                     />
-                    <Link href={route('opening-balances.create')}>
-                        <Button size="sm">
-                            <Plus className="mr-1 h-4 w-4" /> Apply balances
-                        </Button>
-                    </Link>
+                    <div className="flex flex-wrap gap-2">
+                        <Link href={route('opening-balances.member-import')}>
+                            <Button size="sm" variant="outline">
+                                Import member balances
+                            </Button>
+                        </Link>
+                        <Link href={route('opening-balances.create')}>
+                            <Button size="sm">
+                                <Plus className="mr-1 h-4 w-4" /> Apply balances
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
                 <div className="rounded-md border bg-card p-5">
                     <h2 className="font-medium">Available fiscal periods</h2>

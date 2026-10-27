@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Entry } from '@/modules/general-accounting/types/opening-balances/create.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
@@ -20,8 +21,6 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { route } from 'ziggy-js';
-import type { Entry } from '@/modules/general-accounting/types/opening-balances/create.interfaces';
-
 
 export default function OpeningBalancesCreate() {
     const { fiscalPeriods, accounts } = usePage().props as any;
@@ -152,8 +151,8 @@ export default function OpeningBalancesCreate() {
                                         ]}
                                     />
                                     <p className="text-xs leading-5 text-muted-foreground">
-                                        This account balances the opening
-                                        voucher entries.
+                                        Only the net debit-credit difference is
+                                        posted to this offset account.
                                     </p>
                                     <InputError
                                         message={errors.offset_account_id}
@@ -388,8 +387,8 @@ export default function OpeningBalancesCreate() {
                                     correct ledger account.
                                 </li>
                                 <li>
-                                    Choose the offset account that balances the
-                                    opening voucher.
+                                    Choose an offset account for any net
+                                    debit-credit difference.
                                 </li>
                             </ul>
                         </section>
