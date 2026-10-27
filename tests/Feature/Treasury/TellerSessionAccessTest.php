@@ -164,6 +164,25 @@ it('does not expose teller sessions without permission', function () {
         ->assertForbidden();
 });
 
+it('prevents a second active teller session for the same branch day', function () {
+    $fixture = tellerSessionFixture();
+    grantTellerSessionLifecyclePermissions($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-sessions.open'), [
+            'branch_day_id' => $fixture['branchDay']->id,
+            'teller_id' => $fixture['teller']->id,
+            'opening_cash' => 5000,
+        ])
+        ->assertSessionHas('error', 'An active teller session for this teller and branch day already exists.');
+
+    expect(TellerSession::query()
+        ->where('branch_day_id', $fixture['branchDay']->id)
+        ->where('teller_id', $fixture['teller']->id)
+        ->count())->toBe(1);
+});
+
 it('opens and closes a teller session for an active branch day', function () {
     $fixture = tellerSessionFixture();
     grantTellerSessionLifecyclePermissions($fixture['user']);
@@ -223,4 +242,24 @@ it('opens and closes a teller session for an active branch day', function () {
     expect($session->fresh()->status)->toBe('CLOSED')
         ->and($session->fresh()->closing_cash)->toBe('5300.0000')
         ->and($session->fresh()->cash_difference)->toBe('-200.0000');
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('teller-sessions.open'), [
+            'branch_day_id' => $selectedBranchDay->id,
+            'teller_id' => $freshTeller->id,
+            'opening_cash' => 5300,
+            'opening_note' => 'Reopened session',
+        ])
+        ->assertRedirect(route('teller-sessions.index'));
+
+    expect(TellerSession::query()
+        ->where('branch_day_id', $selectedBranchDay->id)
+        ->where('teller_id', $freshTeller->id)
+        ->count())->toBe(2)
+        ->and(TellerSession::query()
+            ->where('branch_day_id', $selectedBranchDay->id)
+            ->where('teller_id', $freshTeller->id)
+            ->where('status', 'OPEN')
+            ->count())->toBe(1);
 });

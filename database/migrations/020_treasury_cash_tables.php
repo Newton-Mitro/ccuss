@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('cash_locations', function (Blueprint $table): void {
@@ -60,7 +61,7 @@ return new class extends Migration {
             $table->timestamp('closed_at')->nullable();
             $table->text('closing_note')->nullable();
             $table->timestamps();
-            $table->unique(['branch_day_id', 'teller_id']);
+            $table->index(['branch_day_id', 'teller_id']);
         });
 
         Schema::create('cash_denominations', function (Blueprint $table): void {

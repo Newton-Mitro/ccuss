@@ -45,11 +45,26 @@ class TellerSessionService
             throw new \RuntimeException('The selected teller does not belong to the active branch.');
         }
 
-        if (TellerSession::query()->where('branch_day_id', $branchDay->id)->where('teller_id', $tellerId)->exists()) {
-            throw new \RuntimeException('A teller session for this teller and branch day already exists.');
-        }
+        return DB::transaction(function () use ($organizationId, $branchId, $branchDay, $teller, $userId, $openingCash, $openingNote) {
+            $branchDay = BranchDay::query()
+                ->whereKey($branchDay->id)
+                ->where('organization_id', $organizationId)
+                ->where('branch_id', $branchId)
+                ->lockForUpdate()
+                ->first();
 
-        return DB::transaction(function () use ($branchDay, $teller, $userId, $openingCash, $openingNote) {
+            if (! $branchDay || $branchDay->status !== BranchDay::STATUS_OPEN) {
+                throw new \RuntimeException('The selected branch day is not open for this branch.');
+            }
+
+            if (TellerSession::query()
+                ->where('branch_day_id', $branchDay->id)
+                ->where('teller_id', $teller->id)
+                ->whereIn('status', ['OPEN', 'CLOSING'])
+                ->exists()) {
+                throw new \RuntimeException('An active teller session for this teller and branch day already exists.');
+            }
+
             $this->cashLocationFinancialAccountService->ensureLinked(
                 $teller->cashLocation,
                 $openingCash,
