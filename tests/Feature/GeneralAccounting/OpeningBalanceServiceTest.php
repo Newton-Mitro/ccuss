@@ -71,10 +71,30 @@ it('serves the member balance importer and CSV template to authorized users', fu
         ->assertHeader('content-type', 'application/zip');
 
     $templates = app(CutoverBundleImportService::class)->templates();
+    $templatesByName = collect($templates)->keyBy('name');
+    $readCsv = static function (string $contents): array {
+        $lines = explode("\n", trim($contents));
+        $headers = str_getcsv(array_shift($lines));
+
+        return array_map(
+            fn (string $line): array => array_combine($headers, str_getcsv($line)),
+            $lines,
+        );
+    };
+    $accounts = collect($readCsv($templatesByName['accounts.csv']['contents']))->keyBy('account_no');
+    $loanSchedules = collect($readCsv($templatesByName['loan_schedules.csv']['contents']));
+    $recurringInstallments = collect($readCsv($templatesByName['recurring_installments.csv']['contents']));
     expect($templates)->toHaveCount(8)
-        ->and(collect($templates)->firstWhere('name', 'customers.csv')['contents'])->toContain('EXAMPLE-MEMBER-001')
-        ->and(collect($templates)->firstWhere('name', 'loan_schedules.csv')['contents'])->toContain('EXAMPLE-LOAN-001')
-        ->and(collect($templates)->firstWhere('name', 'README.txt')['contents'])->toContain('illustrative examples');
+        ->and($templatesByName['customers.csv']['contents'])->toContain('EXAMPLE-MEMBER-001')
+        ->and($templatesByName['README.txt']['contents'])->toContain('illustrative examples', 'BR-001', 'SAV-REG', 'super.admin@email.com', '3300')
+        ->and($accounts['EXAMPLE-SAV-001']['product_code'])->toBe('SAV-REG')
+        ->and($accounts['EXAMPLE-SAV-001']['ledger_account_code'])->toBe('2100')
+        ->and($accounts['EXAMPLE-RDP-001']['opening_balance'])->toBe('30.00')
+        ->and($loanSchedules)->toHaveCount(10)
+        ->and($loanSchedules->sum(fn (array $row): float => (float) $row['scheduled_principal']))->toBe(800.0)
+        ->and($recurringInstallments)->toHaveCount(24)
+        ->and($recurringInstallments->sum(fn (array $row): float => (float) $row['amount_paid']))->toBe(30.0)
+        ->and($recurringInstallments->last()['due_date'])->toBe('2028-06-28');
 });
 
 it('forbids users without opening balance create permission from member imports', function () {

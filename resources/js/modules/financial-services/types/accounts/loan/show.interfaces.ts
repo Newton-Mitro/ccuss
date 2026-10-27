@@ -1,6 +1,7 @@
 import type { SharedData } from '@/types';
 
 export interface Props extends SharedData {
+    can_manage_schedule: boolean;
     account: {
         id: number;
         account_no: string;
@@ -32,6 +33,10 @@ export interface Props extends SharedData {
                 due_date: string;
                 total_due?: string | number;
                 total_paid?: string | number;
+                scheduled_principal?: string | number;
+                scheduled_interest?: string | number;
+                scheduled_fee?: string | number;
+                scheduled_protection_fee?: string | number;
                 status: string;
             }>;
         } | null;

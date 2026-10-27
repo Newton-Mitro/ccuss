@@ -22,6 +22,20 @@ import { route } from 'ziggy-js';
 
 export default function FinancialTransactionShow() {
     const { transaction } = usePage<FinancialTransactionPageProps>().props;
+    const entryTotals = (transaction.entries ?? []).reduce(
+        (totals, entry) => {
+            const amount = Number(entry.amount ?? 0);
+
+            if (entry.direction === 'DEBIT') {
+                totals.debit += amount;
+            } else if (entry.direction === 'CREDIT') {
+                totals.credit += amount;
+            }
+
+            return totals;
+        },
+        { debit: 0, credit: 0 },
+    );
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
         { title: 'Transactions', href: route('financial-transactions.index') },
@@ -334,6 +348,26 @@ export default function FinancialTransactionShow() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                    <div className="grid gap-3 border-t bg-muted/20 px-4 py-3 sm:grid-cols-2 sm:px-5">
+                        <div className="flex items-center justify-between gap-3 text-sm">
+                            <span className="font-medium text-muted-foreground">
+                                Debit total
+                            </span>
+                            <span className="font-semibold tabular-nums">
+                                {formatBDTCurrency(entryTotals.debit, false)}{' '}
+                                {transaction.currency}
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3 text-sm">
+                            <span className="font-medium text-muted-foreground">
+                                Credit total
+                            </span>
+                            <span className="font-semibold tabular-nums">
+                                {formatBDTCurrency(entryTotals.credit, false)}{' '}
+                                {transaction.currency}
+                            </span>
+                        </div>
                     </div>
                 </section>
                 <div className="flex justify-start">

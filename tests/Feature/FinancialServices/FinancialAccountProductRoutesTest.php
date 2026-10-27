@@ -9,6 +9,7 @@ use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialProduct;
 use App\FinancialServices\Models\FinancialProductPolicy;
 use App\FinancialServices\Models\FinancialTransaction;
+use App\FinancialServices\Models\LoanAccount;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
@@ -71,6 +72,76 @@ function createFinancialAccountProductFixture(string $category = 'SAVINGS'): arr
 
     return compact('organization', 'branch', 'user', 'customer', 'product', 'account');
 }
+
+it('manages loan schedules from the loan account detail page', function () {
+    $fixture = createFinancialAccountProductFixture('LOAN');
+    grantFinancialAccountProductPermissions($fixture['user'], [
+        'financial.accounts.view',
+        'financial.loan-applications.manage',
+    ]);
+    $loan = LoanAccount::query()->create([
+        'financial_account_id' => $fixture['account']->id,
+        'loan_no' => 'LOAN-SCHEDULE-001',
+        'principal_amount' => 900,
+        'disbursed_amount' => 900,
+        'contractual_rate' => 12,
+        'interest_calculation' => 'REDUCING_BALANCE',
+        'interest_frequency' => 'MONTHLY',
+        'term_value' => 3,
+        'term_unit' => 'MONTH',
+        'repayment_frequency' => 'MONTHLY',
+        'status' => 'ACTIVE',
+        'disbursed_at' => '2026-10-01',
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('loan-accounts.show', $fixture['account']))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('financial-services/accounts/loan/show')
+            ->where('can_manage_schedule', true));
+
+    $this->post(route('loan-accounts.schedules.generate', $fixture['account']), [
+        'frequency' => 'MONTHLY',
+        'term_months' => 3,
+        'start_date' => '2026-10-01',
+    ])->assertRedirect();
+
+    expect($loan->schedules()->count())->toBe(3);
+
+    $this->post(route('loan-accounts.schedules.installments.store', $fixture['account']), [
+        'due_date' => '2027-02-01',
+        'scheduled_principal' => 0,
+        'scheduled_interest' => 10,
+        'scheduled_fee' => 0,
+        'scheduled_protection_fee' => 0,
+    ])->assertRedirect();
+
+    $installment = $loan->schedules()->orderByDesc('installment_no')->firstOrFail();
+    expect((float) $installment->total_due)->toBe(10.0);
+
+    $this->put(route('loan-accounts.schedules.installments.update', [
+        'financial_account' => $fixture['account']->id,
+        'schedule' => $installment->id,
+    ]), [
+        'due_date' => '2027-02-10',
+        'scheduled_principal' => 20,
+        'scheduled_interest' => 5,
+        'scheduled_fee' => 0,
+        'scheduled_protection_fee' => 0,
+    ])->assertRedirect();
+
+    expect($installment->fresh()->due_date->toDateString())->toBe('2027-02-10')
+        ->and((float) $installment->fresh()->total_due)->toBe(25.0);
+
+    $this->post(route('loan-accounts.schedules.installments.cancel', [
+        'financial_account' => $fixture['account']->id,
+        'schedule' => $installment->id,
+    ]))->assertRedirect();
+
+    expect($installment->fresh()->status)->toBe('WAIVED');
+});
 
 it('serves a product-scoped index and rejects accounts of another category', function () {
     $fixture = createFinancialAccountProductFixture('SAVINGS');

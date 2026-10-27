@@ -5,11 +5,14 @@ namespace App\FinancialServices\Controllers;
 use App\CustomerModule\Models\Customer;
 use App\FinancialServices\Application\FinancialAccountService;
 use App\FinancialServices\Application\FixedDepositService;
+use App\FinancialServices\Application\LoanScheduleService;
 use App\FinancialServices\Application\RecurringDepositService;
 use App\FinancialServices\Models\DepositNominee;
 use App\FinancialServices\Models\DepositProduct;
 use App\FinancialServices\Models\FinancialAccount;
 use App\FinancialServices\Models\FinancialAccountAuthorizedPerson;
+use App\FinancialServices\Models\LoanAccount;
+use App\FinancialServices\Models\LoanSchedule;
 use App\FinancialServices\Models\RecurringDeposit;
 use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareAccount;
@@ -35,6 +38,7 @@ class FinancialAccountController extends Controller
         private readonly FinancialAccountService $accountService,
         private readonly FixedDepositService $fixedDepositService,
         private readonly RecurringDepositService $recurringDepositService,
+        private readonly LoanScheduleService $loanScheduleService,
     ) {
         $this->middleware('permission:financial.accounts.view')->only(['index', 'show', 'statement']);
         $this->middleware('permission:financial.accounts.view')->only(['productIndex', 'productShow']);
@@ -49,6 +53,12 @@ class FinancialAccountController extends Controller
         $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only('storeRecurringDeposit');
         $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only(['addRecurringInstallment', 'updateRecurringInstallment', 'markRecurringInstallmentMissed', 'waiveRecurringInstallment']);
         $this->middleware('permission:financial.accounts.recurring-deposits.manage')->only('payRecurringInstallment');
+        $this->middleware('permission:financial.loan-applications.manage')->only([
+            'generateLoanSchedule',
+            'addLoanScheduleInstallment',
+            'updateLoanScheduleInstallment',
+            'cancelLoanScheduleInstallment',
+        ]);
     }
 
     public function index(Request $request): Response
@@ -297,6 +307,82 @@ class FinancialAccountController extends Controller
         return $this->show($request, $financialAccount, "financial-services/accounts/{$request->route('product')}/show");
     }
 
+    public function generateLoanSchedule(Request $request, FinancialAccount $financialAccount)
+    {
+        $loan = $this->loanForScheduleManagement($request, $financialAccount);
+        if ($loan->schedules()->exists()) {
+            return back()->withErrors(['schedule' => 'A repayment schedule already exists for this loan.']);
+        }
+
+        $data = $request->validate([
+            'frequency' => ['required', Rule::in(['WEEKLY', 'MONTHLY', 'QUARTERLY'])],
+            'term_months' => ['required', 'integer', 'min:1', 'max:480'],
+            'start_date' => ['required', 'date'],
+        ]);
+
+        try {
+            $this->loanScheduleService->generate($loan, $data);
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['schedule' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'Loan repayment schedule generated successfully.');
+    }
+
+    public function addLoanScheduleInstallment(Request $request, FinancialAccount $financialAccount)
+    {
+        $loan = $this->loanForScheduleManagement($request, $financialAccount);
+        $data = $request->validate([
+            'due_date' => ['required', 'date'],
+            'scheduled_principal' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_interest' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_fee' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_protection_fee' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        try {
+            $this->loanScheduleService->addInstallment($loan, $data);
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['schedule' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'Repayment installment added successfully.');
+    }
+
+    public function updateLoanScheduleInstallment(Request $request, FinancialAccount $financialAccount, LoanSchedule $schedule)
+    {
+        $loan = $this->loanForScheduleManagement($request, $financialAccount);
+        $data = $request->validate([
+            'due_date' => ['required', 'date'],
+            'scheduled_principal' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_interest' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_fee' => ['nullable', 'numeric', 'min:0'],
+            'scheduled_protection_fee' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        try {
+            $this->loanScheduleService->updateInstallment($loan, $schedule, $data);
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['schedule' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'Repayment installment updated successfully.');
+    }
+
+    public function cancelLoanScheduleInstallment(Request $request, FinancialAccount $financialAccount, LoanSchedule $schedule)
+    {
+        $loan = $this->loanForScheduleManagement($request, $financialAccount);
+        abort_unless(! in_array($loan->status, ['CLOSED', 'WRITTEN_OFF'], true), 422, 'Closed loans cannot have repayment installments cancelled.');
+
+        try {
+            $this->loanScheduleService->cancelInstallment($loan, $schedule, $request->user()->id);
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['schedule' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'Repayment installment cancelled successfully.');
+    }
+
     public function show(Request $request, FinancialAccount $financialAccount, string $page = 'financial-services/accounts/show'): Response
     {
         $this->authorizeOrganization($request, $financialAccount);
@@ -325,6 +411,7 @@ class FinancialAccountController extends Controller
         return Inertia::render($page, [
             'account' => $financialAccount->load($relations),
             'can_manage_recurring_deposits' => $request->user()->hasPermission('financial.accounts.recurring-deposits.manage'),
+            'can_manage_schedule' => $request->user()->hasPermission('financial.loan-applications.manage'),
             'customers' => Customer::query()
                 ->where('organization_id', $this->organizationId($request))
                 ->orderBy('name')
@@ -653,6 +740,16 @@ class FinancialAccountController extends Controller
     private function organizationId(Request $request): int
     {
         return (int) $request->attributes->get('active_organization')->id;
+    }
+
+    private function loanForScheduleManagement(Request $request, FinancialAccount $financialAccount): LoanAccount
+    {
+        $this->authorizeOrganization($request, $financialAccount);
+        abort_unless($financialAccount->account_type === 'LOAN', 404);
+        $loan = $financialAccount->loanAccount()->first();
+        abort_unless($loan, 404);
+
+        return $loan;
     }
 
     private function productCategory(Request $request): string

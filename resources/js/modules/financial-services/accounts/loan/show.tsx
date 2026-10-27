@@ -1,16 +1,29 @@
 import HeadingSmall from '@/components/heading-small';
+import InputError from '@/components/input-error';
 import {
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { Props } from '@/modules/financial-services/types/accounts/loan/show.interfaces';
 import type { BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     CalendarDays,
@@ -18,10 +31,23 @@ import {
     CircleDollarSign,
     Clock3,
     FileText,
+    Pencil,
     PencilLine,
+    Plus,
+    RefreshCw,
     UserRound,
 } from 'lucide-react';
+import { useState } from 'react';
 import { route } from 'ziggy-js';
+
+function getLocalDate() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
 
 function DetailItem({ label, value }: { label: string; value: string }) {
     return (
@@ -61,10 +87,143 @@ function statusTone(
 export default function LoanAccountShow() {
     useFlashToastHandler();
 
-    const { account } = usePage<Props>().props;
+    const {
+        account,
+        can_manage_schedule: canManageSchedule,
+        errors: pageErrors,
+    } = usePage<Props>().props;
     const loan = account.loan_account;
     const loanNumber = loan?.loan_no ?? account.account_no;
     const schedules = loan?.schedules ?? [];
+    const canEditSchedules =
+        canManageSchedule &&
+        Boolean(loan) &&
+        !['CLOSED', 'WRITTEN_OFF'].includes(loan?.status ?? '');
+    const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+    const [editingSchedule, setEditingSchedule] = useState<
+        (typeof schedules)[number] | null
+    >(null);
+    const {
+        data: scheduleData,
+        setData: setScheduleData,
+        post: postSchedule,
+        put: putSchedule,
+        processing: scheduleProcessing,
+        errors: scheduleErrors,
+        reset: resetScheduleForm,
+    } = useForm({
+        due_date: getLocalDate(),
+        scheduled_principal: '',
+        scheduled_interest: '',
+        scheduled_fee: '',
+        scheduled_protection_fee: '',
+    });
+
+    const openAddScheduleDialog = () => {
+        setEditingSchedule(null);
+        resetScheduleForm();
+        setScheduleDialogOpen(true);
+    };
+
+    const openEditScheduleDialog = (schedule: (typeof schedules)[number]) => {
+        setEditingSchedule(schedule);
+        setScheduleData('due_date', schedule.due_date.slice(0, 10));
+        setScheduleData(
+            'scheduled_principal',
+            String(schedule.scheduled_principal ?? 0),
+        );
+        setScheduleData(
+            'scheduled_interest',
+            String(schedule.scheduled_interest ?? 0),
+        );
+        setScheduleData('scheduled_fee', String(schedule.scheduled_fee ?? 0));
+        setScheduleData(
+            'scheduled_protection_fee',
+            String(schedule.scheduled_protection_fee ?? 0),
+        );
+        setScheduleDialogOpen(true);
+    };
+
+    const saveScheduleInstallment = (event: React.FormEvent) => {
+        event.preventDefault();
+        const options = {
+            onSuccess: () => {
+                setScheduleDialogOpen(false);
+                setEditingSchedule(null);
+                resetScheduleForm();
+            },
+        };
+
+        if (editingSchedule) {
+            putSchedule(
+                route('loan-accounts.schedules.installments.update', {
+                    financial_account: account.id,
+                    schedule: editingSchedule.id,
+                }),
+                options,
+            );
+            return;
+        }
+
+        postSchedule(
+            route('loan-accounts.schedules.installments.store', account.id),
+            options,
+        );
+    };
+
+    const generateSchedule = () => {
+        const frequency = ['WEEKLY', 'MONTHLY', 'QUARTERLY'].includes(
+            loan?.repayment_frequency ?? '',
+        )
+            ? loan?.repayment_frequency
+            : 'MONTHLY';
+        appSwal
+            .fire({
+                title: 'Generate repayment schedule?',
+                text: `Generate installments for ${loanNumber}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Generate schedule',
+                cancelButtonText: 'Cancel',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) return;
+
+                router.post(
+                    route('loan-accounts.schedules.generate', account.id),
+                    {
+                        frequency,
+                        term_months: loan?.term_value ?? 12,
+                        start_date:
+                            loan?.disbursed_at?.slice(0, 10) ??
+                            loan?.approved_at?.slice(0, 10) ??
+                            getLocalDate(),
+                    },
+                );
+            });
+    };
+
+    const cancelScheduleInstallment = (scheduleId: number) => {
+        appSwal
+            .fire({
+                title: 'Cancel this installment?',
+                text: 'It will be marked as waived. Installments with repayments cannot be cancelled.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Cancel installment',
+                cancelButtonText: 'Keep installment',
+            })
+            .then((result) => {
+                if (!result.isConfirmed) return;
+
+                router.post(
+                    route('loan-accounts.schedules.installments.cancel', {
+                        financial_account: account.id,
+                        schedule: scheduleId,
+                    }),
+                );
+            });
+    };
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Financial Services', href: '' },
@@ -262,6 +421,29 @@ export default function LoanAccountShow() {
                                 ? 'installment'
                                 : 'installments'}
                         </span>
+                        {canEditSchedules && (
+                            <div className="flex flex-wrap gap-2">
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={openAddScheduleDialog}
+                                >
+                                    <Plus className="mr-1.5 size-4" />
+                                    Add installment
+                                </Button>
+                                {schedules.length === 0 && (
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={generateSchedule}
+                                    >
+                                        <RefreshCw className="mr-1.5 size-4" />
+                                        Generate schedule
+                                    </Button>
+                                )}
+                            </div>
+                        )}
                     </div>
                     {schedules.length > 0 ? (
                         <div className="overflow-x-auto">
@@ -283,6 +465,11 @@ export default function LoanAccountShow() {
                                         <th className="px-5 py-3 text-center font-medium">
                                             Status
                                         </th>
+                                        {canEditSchedules && (
+                                            <th className="px-5 py-3 text-right font-medium">
+                                                Actions
+                                            </th>
+                                        )}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -323,6 +510,70 @@ export default function LoanAccountShow() {
                                                     )}
                                                 </StatusBadge>
                                             </td>
+                                            {canEditSchedules && (
+                                                <td className="px-5 py-3.5 text-right">
+                                                    <div className="flex justify-end gap-1">
+                                                        {item.status ===
+                                                            'PENDING' &&
+                                                            Number(
+                                                                item.total_paid ??
+                                                                    0,
+                                                            ) === 0 && (
+                                                                <Button
+                                                                    type="button"
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={() =>
+                                                                        openEditScheduleDialog(
+                                                                            item,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Pencil className="mr-1.5 size-4" />
+                                                                    Edit
+                                                                </Button>
+                                                            )}
+                                                        {![
+                                                            'PAID',
+                                                            'WAIVED',
+                                                        ].includes(
+                                                            item.status,
+                                                        ) &&
+                                                            Number(
+                                                                item.total_paid ??
+                                                                    0,
+                                                            ) === 0 && (
+                                                                <Button
+                                                                    type="button"
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    className="text-destructive hover:text-destructive"
+                                                                    onClick={() =>
+                                                                        cancelScheduleInstallment(
+                                                                            item.id,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    Cancel
+                                                                </Button>
+                                                            )}
+                                                        {([
+                                                            'PAID',
+                                                            'WAIVED',
+                                                        ].includes(
+                                                            item.status,
+                                                        ) ||
+                                                            Number(
+                                                                item.total_paid ??
+                                                                    0,
+                                                            ) > 0) && (
+                                                            <span className="px-2 text-xs text-muted-foreground">
+                                                                —
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -343,6 +594,100 @@ export default function LoanAccountShow() {
                         </div>
                     )}
                 </ResourceTableCard>
+                <Dialog
+                    open={scheduleDialogOpen}
+                    onOpenChange={setScheduleDialogOpen}
+                >
+                    <DialogContent className="max-w-xl">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {editingSchedule
+                                    ? 'Edit repayment installment'
+                                    : 'Add repayment installment'}
+                            </DialogTitle>
+                            <DialogDescription>
+                                Set the due date and installment amounts. The
+                                total is calculated automatically.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form
+                            onSubmit={saveScheduleInstallment}
+                            className="space-y-4"
+                        >
+                            <InputError message={pageErrors?.schedule} />
+                            <div>
+                                <Label htmlFor="schedule-due-date">
+                                    Due date
+                                </Label>
+                                <AppDatePicker
+                                    id="schedule-due-date"
+                                    value={scheduleData.due_date}
+                                    required
+                                    onChange={(value) =>
+                                        setScheduleData('due_date', value)
+                                    }
+                                />
+                                <InputError message={scheduleErrors.due_date} />
+                            </div>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                {(
+                                    [
+                                        ['scheduled_principal', 'Principal'],
+                                        ['scheduled_interest', 'Interest'],
+                                        ['scheduled_fee', 'Fee'],
+                                        [
+                                            'scheduled_protection_fee',
+                                            'Insurance',
+                                        ],
+                                    ] as const
+                                ).map(([field, label]) => (
+                                    <div key={field}>
+                                        <Label htmlFor={field}>{label}</Label>
+                                        <Input
+                                            id={field}
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            className="mt-1 h-9"
+                                            value={scheduleData[field]}
+                                            onChange={(event) =>
+                                                setScheduleData(
+                                                    field,
+                                                    event.target.value,
+                                                )
+                                            }
+                                        />
+                                        <InputError
+                                            message={scheduleErrors[field]}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => {
+                                        setScheduleDialogOpen(false);
+                                        setEditingSchedule(null);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={scheduleProcessing}
+                                >
+                                    {scheduleProcessing
+                                        ? 'Saving…'
+                                        : editingSchedule
+                                          ? 'Save changes'
+                                          : 'Add installment'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </div>
         </CustomAuthLayout>
     );

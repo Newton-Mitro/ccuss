@@ -66,9 +66,12 @@ class CutoverBundleImportService
             'name' => 'README.txt',
             'contents' => "CUTOVER IMPORT SAMPLE DATA\n\n".
                 "The CSV rows in this ZIP are illustrative examples, not your organization's data.\n".
-                "Replace every EXAMPLE-* identifier, GL-* ledger code, SAMPLE-* product code, and teller@example.invalid email with actual configured records before importing.\n".
+                "Example values match DatabaseSeeder's ORG-001 defaults: branch BR-001; products SAV-REG, SHR-MEM, FDR-12M, RD-24M, LN-GEN; GL accounts 1100, 1130, 1200, 1300, 2100, 2200, 2300, 3100; teller super.admin@email.com.\n".
+                "For that seeded chart, ledger 3300 (Retained Earnings) is the sample opening-balance offset account; confirm the correct offset with your accountant before posting.\n".
+                "These defaults exist only if the corresponding seeders have run for ORG-001. Replace branch, product, GL, or staff-user codes if importing into another organization or if your setup differs. Replace every EXAMPLE-* customer/account identifier and the sample member identity with actual records.\n".
                 "Keep all CSV filenames and headers unchanged. Remove sample rows you do not need. Keep account_no, customer_no, product_code, branch_code, and installment references consistent across files.\n".
                 "The selected import cutover date defaults to 2026-10-28. Loan arrears as_of_date must match the date selected in the import screen.\n".
+                "For VAULT or TELLER rows, open the branch day for the selected cutover date first; the importer creates cash sessions and rejects existing sessions for those locations. The default DatabaseSeeder does not create treasury cash locations.\n".
                 "Preconfigure branches, deposit/loan products, staff users, and GL accounts first. The importer does not create products, users, branches, or ledger mappings.\n".
                 "Only current active records and balances are imported; old transaction history is not.\n",
         ];
@@ -82,7 +85,7 @@ class CutoverBundleImportService
             return [
                 'account_no' => $accountNo,
                 'customer_no' => in_array($type, ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT', 'LOAN'], true) ? 'EXAMPLE-MEMBER-001' : '',
-                'branch_code' => 'EXAMPLE-BRANCH',
+                'branch_code' => 'BR-001',
                 'account_type' => $type,
                 'product_code' => $extra['product_code'] ?? '',
                 'opening_balance' => $balance,
@@ -94,17 +97,40 @@ class CutoverBundleImportService
         };
 
         $installments = [];
-        for ($number = 1; $number <= 12; $number++) {
+        for ($number = 1; $number <= 24; $number++) {
             $paid = $number <= 3 ? '10.00' : '0.00';
             $installments[] = [
                 'account_no' => 'EXAMPLE-RDP-001',
                 'installment_no' => (string) $number,
-                'due_date' => \Illuminate\Support\Carbon::parse('2026-07-28')->addMonths($number - 1)->toDateString(),
+                'due_date' => \Illuminate\Support\Carbon::create(2026, 7, 28)->addMonths($number - 1)->toDateString(),
                 'amount_due' => '10.00',
                 'amount_paid' => $paid,
                 'fine_amount' => '0.00',
                 'status' => $number <= 3 ? 'PAID' : 'PENDING',
-                'paid_at' => $number <= 3 ? '2026-'.sprintf('%02d', 7 + $number - 1).'-28 12:00:00' : '',
+                'paid_at' => $number <= 3
+                    ? \Illuminate\Support\Carbon::create(2026, 7, 28)->addMonths($number - 1)->setTime(12, 0)->toDateTimeString()
+                    : '',
+            ];
+        }
+
+        $loanSchedules = [];
+        for ($number = 3; $number <= 12; $number++) {
+            $openingPrincipal = 800 - (($number - 3) * 80);
+            $loanSchedules[] = [
+                'account_no' => 'EXAMPLE-LOAN-001',
+                'installment_no' => (string) $number,
+                'due_date' => \Illuminate\Support\Carbon::create(2026, 7, 28)->addMonths($number - 1)->toDateString(),
+                'opening_principal' => number_format($openingPrincipal, 2, '.', ''),
+                'scheduled_principal' => '80.00',
+                'scheduled_interest' => '20.00',
+                'scheduled_fee' => '0.00',
+                'scheduled_protection_fee' => '0.00',
+                'total_due' => '100.00',
+                'total_paid' => '0.00',
+                'principal_paid' => '0.00',
+                'interest_paid' => '0.00',
+                'fee_paid' => '0.00',
+                'protection_fee_paid' => '0.00',
             ];
         }
 
@@ -115,7 +141,7 @@ class CutoverBundleImportService
                 'name' => 'Example Member',
                 'identification_type' => 'NATIONAL_IDENTIFICATION_NUMBER',
                 'identification_number' => 'EXAMPLE-NID-001',
-                'branch_code' => 'EXAMPLE-BRANCH',
+                'branch_code' => 'BR-001',
                 'primary_phone' => '+8801000000000',
                 'primary_email' => 'member@example.invalid',
                 'dob' => '1990-01-01',
@@ -123,34 +149,31 @@ class CutoverBundleImportService
                 'status' => 'ACTIVE',
             ]],
             'accounts.csv' => [
-                $account('EXAMPLE-SAV-001', 'SAVINGS', '2500.00', 'GL-SAVINGS-CONTROL', ['product_code' => 'SAMPLE-SAVINGS']),
-                $account('EXAMPLE-SHR-001', 'SHARE', '500.00', 'GL-SHARE-CAPITAL', ['product_code' => 'SAMPLE-SHARE', 'membership_no' => 'EXAMPLE-MEMBERSHIP-001', 'member_since' => '2025-01-01']),
-                $account('EXAMPLE-FDR-001', 'FIXED_DEPOSIT', '1000.00', 'GL-FIXED-DEPOSIT', ['product_code' => 'SAMPLE-FIXED', 'principal_amount' => '1000.00', 'contractual_rate' => '8.00', 'term_value' => '12', 'term_unit' => 'MONTH', 'started_at' => '2025-10-28', 'maturity_date' => '2026-10-28', 'maturity_amount' => '1080.00', 'maturity_instruction' => 'PAYOUT']),
-                $account('EXAMPLE-RDP-001', 'RECURRING_DEPOSIT', '120.00', 'GL-RECURRING-DEPOSIT', ['product_code' => 'SAMPLE-RECURRING', 'installment_amount' => '10.00', 'installment_frequency' => 'MONTHLY', 'total_installments' => '12', 'paid_installments' => '3', 'started_at' => '2026-07-28', 'maturity_date' => '2027-06-28']),
-                $account('EXAMPLE-LOAN-001', 'LOAN', '800.00', 'GL-LOANS-RECEIVABLE', ['product_code' => 'SAMPLE-LOAN', 'principal_amount' => '1000.00', 'disbursed_amount' => '1000.00', 'contractual_rate' => '12.00', 'interest_calculation' => 'REDUCING_BALANCE', 'interest_frequency' => 'MONTHLY', 'term_value' => '12', 'term_unit' => 'MONTH', 'repayment_frequency' => 'MONTHLY', 'scheduled_principal_amount' => '100.00', 'grace_days' => '0', 'maturity_date' => '2027-01-01']),
-                $account('EXAMPLE-CASH-VAULT', 'CASH', '5000.00', 'GL-CASH-ON-HAND'),
-                $account('EXAMPLE-CASH-TELLER', 'CASH', '1000.00', 'GL-CASH-ON-HAND'),
-                $account('EXAMPLE-CASH-PETTY', 'CASH', '200.00', 'GL-CASH-ON-HAND'),
-                $account('EXAMPLE-BANK-001', 'BANK', '20000.00', 'GL-BANK'),
+                $account('EXAMPLE-SAV-001', 'SAVINGS', '2500.00', '2100', ['product_code' => 'SAV-REG']),
+                $account('EXAMPLE-SHR-001', 'SHARE', '500.00', '3100', ['product_code' => 'SHR-MEM', 'membership_no' => 'EXAMPLE-MEMBERSHIP-001', 'member_since' => '2025-01-01']),
+                $account('EXAMPLE-FDR-001', 'FIXED_DEPOSIT', '1000.00', '2200', ['product_code' => 'FDR-12M', 'principal_amount' => '1000.00', 'contractual_rate' => '8.50', 'term_value' => '12', 'term_unit' => 'MONTH', 'opened_at' => '2025-10-28', 'started_at' => '2025-10-28', 'maturity_date' => '2026-10-28', 'maturity_amount' => '1085.00', 'maturity_instruction' => 'PAYOUT']),
+                $account('EXAMPLE-RDP-001', 'RECURRING_DEPOSIT', '30.00', '2300', ['product_code' => 'RD-24M', 'installment_amount' => '10.00', 'installment_frequency' => 'MONTHLY', 'total_installments' => '24', 'paid_installments' => '3', 'opened_at' => '2026-07-28', 'started_at' => '2026-07-28', 'maturity_date' => '2028-06-28']),
+                $account('EXAMPLE-LOAN-001', 'LOAN', '800.00', '1300', ['product_code' => 'LN-GEN', 'principal_amount' => '1000.00', 'disbursed_amount' => '1000.00', 'contractual_rate' => '12.00', 'interest_calculation' => 'REDUCING_BALANCE', 'interest_frequency' => 'MONTHLY', 'term_value' => '12', 'term_unit' => 'MONTH', 'repayment_frequency' => 'MONTHLY', 'scheduled_principal_amount' => '100.00', 'grace_days' => '0', 'opened_at' => '2026-06-28', 'maturity_date' => '2027-06-28']),
+                $account('EXAMPLE-CASH-VAULT', 'CASH', '5000.00', '1100'),
+                $account('EXAMPLE-CASH-TELLER', 'CASH', '1000.00', '1100'),
+                $account('EXAMPLE-CASH-PETTY', 'CASH', '200.00', '1130'),
+                $account('EXAMPLE-BANK-001', 'BANK', '20000.00', '1200'),
             ],
-            'loan_schedules.csv' => [
-                ['account_no' => 'EXAMPLE-LOAN-001', 'installment_no' => '1', 'due_date' => '2026-09-28', 'opening_principal' => '1000.00', 'scheduled_principal' => '300.00', 'scheduled_interest' => '20.00', 'scheduled_fee' => '0.00', 'scheduled_protection_fee' => '0.00', 'total_due' => '320.00', 'total_paid' => '0.00', 'principal_paid' => '0.00', 'interest_paid' => '0.00', 'fee_paid' => '0.00', 'protection_fee_paid' => '0.00'],
-                ['account_no' => 'EXAMPLE-LOAN-001', 'installment_no' => '2', 'due_date' => '2026-11-28', 'opening_principal' => '700.00', 'scheduled_principal' => '500.00', 'scheduled_interest' => '20.00', 'scheduled_fee' => '0.00', 'scheduled_protection_fee' => '0.00', 'total_due' => '520.00', 'total_paid' => '0.00', 'principal_paid' => '0.00', 'interest_paid' => '0.00', 'fee_paid' => '0.00', 'protection_fee_paid' => '0.00'],
-            ],
+            'loan_schedules.csv' => $loanSchedules,
             'loan_arrears.csv' => [[
                 'account_no' => 'EXAMPLE-LOAN-001',
-                'installment_no' => '1',
+                'installment_no' => '3',
                 'as_of_date' => '2026-10-28',
                 'days_overdue' => '30',
-                'principal_overdue' => '300.00',
+                'principal_overdue' => '80.00',
                 'interest_overdue' => '20.00',
                 'fee_overdue' => '0.00',
-                'total_overdue' => '320.00',
+                'total_overdue' => '100.00',
             ]],
             'recurring_installments.csv' => $installments,
             'bank_accounts.csv' => [[
                 'financial_account_no' => 'EXAMPLE-BANK-001',
-                'branch_code' => 'EXAMPLE-BRANCH',
+                'branch_code' => 'BR-001',
                 'account_name' => 'Example Operating Bank',
                 'account_number' => 'EXAMPLE-BANK-ACCOUNT',
                 'routing_number' => 'EXAMPLE-ROUTING',
@@ -159,10 +182,10 @@ class CutoverBundleImportService
                 'status' => 'ACTIVE',
             ]],
             'cash_locations.csv' => [
-                ['code' => 'EXAMPLE-VAULT', 'name' => 'Example Vault', 'type' => 'VAULT', 'branch_code' => 'EXAMPLE-BRANCH', 'financial_account_no' => 'EXAMPLE-CASH-VAULT', 'maximum_balance' => '100000.00'],
-                ['code' => 'EXAMPLE-TELLER', 'name' => 'Example Teller', 'type' => 'TELLER', 'branch_code' => 'EXAMPLE-BRANCH', 'financial_account_no' => 'EXAMPLE-CASH-TELLER', 'user_email' => 'teller@example.invalid', 'maximum_cash' => '10000.00'],
-                ['code' => 'EXAMPLE-PETTY', 'name' => 'Example Petty Cash', 'type' => 'PETTY_CASH', 'branch_code' => 'EXAMPLE-BRANCH', 'financial_account_no' => 'EXAMPLE-CASH-PETTY', 'custodian_email' => 'teller@example.invalid', 'fund_limit' => '500.00', 'current_balance' => '200.00', 'method' => 'IMPREST'],
-                ['code' => 'EXAMPLE-OTHER', 'name' => 'Example Other Cash Location', 'type' => 'OTHER', 'branch_code' => 'EXAMPLE-BRANCH'],
+                ['code' => 'EXAMPLE-VAULT', 'name' => 'Example Vault', 'type' => 'VAULT', 'branch_code' => 'BR-001', 'financial_account_no' => 'EXAMPLE-CASH-VAULT', 'maximum_balance' => '100000.00'],
+                ['code' => 'EXAMPLE-TELLER', 'name' => 'Example Teller', 'type' => 'TELLER', 'branch_code' => 'BR-001', 'financial_account_no' => 'EXAMPLE-CASH-TELLER', 'user_email' => 'super.admin@email.com', 'maximum_cash' => '10000.00'],
+                ['code' => 'EXAMPLE-PETTY', 'name' => 'Example Petty Cash', 'type' => 'PETTY_CASH', 'branch_code' => 'BR-001', 'financial_account_no' => 'EXAMPLE-CASH-PETTY', 'custodian_email' => 'super.admin@email.com', 'fund_limit' => '500.00', 'current_balance' => '200.00', 'method' => 'IMPREST'],
+                ['code' => 'EXAMPLE-OTHER', 'name' => 'Example Other Cash Location', 'type' => 'OTHER', 'branch_code' => 'BR-001'],
             ],
         ];
     }

@@ -125,6 +125,14 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
     Route::get('/loan-accounts/{financial_account}', [FinancialAccountController::class, 'productShow'])
         ->defaults('product', 'loan')
         ->name('loan-accounts.show');
+    Route::post('/loan-accounts/{financial_account}/schedules/generate', [FinancialAccountController::class, 'generateLoanSchedule'])
+        ->name('loan-accounts.schedules.generate');
+    Route::post('/loan-accounts/{financial_account}/schedules/installments', [FinancialAccountController::class, 'addLoanScheduleInstallment'])
+        ->name('loan-accounts.schedules.installments.store');
+    Route::put('/loan-accounts/{financial_account}/schedules/installments/{schedule}', [FinancialAccountController::class, 'updateLoanScheduleInstallment'])
+        ->name('loan-accounts.schedules.installments.update');
+    Route::post('/loan-accounts/{financial_account}/schedules/installments/{schedule}/cancel', [FinancialAccountController::class, 'cancelLoanScheduleInstallment'])
+        ->name('loan-accounts.schedules.installments.cancel');
     Route::get('/financial-accounts/{financial_account}', [FinancialAccountController::class, 'show'])->name('financial-accounts.show');
     Route::post('/financial-accounts/{financial_account}/activate', [FinancialAccountController::class, 'activate'])->name('financial-accounts.activate');
     Route::post('/financial-accounts/{financial_account}/close', [FinancialAccountController::class, 'close'])->name('financial-accounts.close');
