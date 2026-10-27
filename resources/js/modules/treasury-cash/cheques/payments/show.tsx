@@ -1,7 +1,5 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -9,6 +7,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { Props } from '@/modules/treasury-cash/types/cheques/payments/show.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -29,8 +28,6 @@ import {
 } from 'lucide-react';
 import ReactPanZoom from 'react-image-pan-zoom-rotate';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/cheques/payments/show.types';
-
 
 const checkLabels: Record<string, string> = {
     details_verified: 'Cheque details verified',
@@ -242,17 +239,19 @@ export default function ChequePaymentReview() {
                     Header
                 ───────────────────────────────────────────── */}
 
-                <ResourcePageHeader
-                    title={`Cheque ${payment.cheque.cheque_no}`}
-                    description={`${payment.financial_account.account_no} · Received ${new Date(
-                        payment.created_at,
-                    ).toLocaleString()}`}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={`Cheque ${payment.cheque.cheque_no}`}
+                        description={`${payment.financial_account.account_no} · Received ${new Date(
+                            payment.created_at,
+                        ).toLocaleString()}`}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge tone={tone}>
                             {payment.status.replaceAll('_', ' ')}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* ─────────────────────────────────────────────
                     Error

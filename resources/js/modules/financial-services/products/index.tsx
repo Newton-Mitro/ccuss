@@ -1,5 +1,6 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -7,13 +8,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 import type { FinancialProductsPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '@/components/data-table-pagination';
 
 export default function FinancialProductIndex() {
     const {
@@ -63,29 +63,31 @@ export default function FinancialProductIndex() {
                 }
             />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title={
-                        family === 'loan'
-                            ? 'Loan Products'
-                            : family === 'deposit'
-                              ? 'Deposit Products'
-                              : 'Financial Products'
-                    }
-                    description={
-                        family === 'loan'
-                            ? 'Configure loan products and their operating terms.'
-                            : family === 'deposit'
-                              ? 'Configure savings, share, and deposit products.'
-                              : 'Configure savings, deposits, shares, and loan products.'
-                    }
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={
+                            family === 'loan'
+                                ? 'Loan Products'
+                                : family === 'deposit'
+                                  ? 'Deposit Products'
+                                  : 'Financial Products'
+                        }
+                        description={
+                            family === 'loan'
+                                ? 'Configure loan products and their operating terms.'
+                                : family === 'deposit'
+                                  ? 'Configure savings, share, and deposit products.'
+                                  : 'Configure savings, deposits, shares, and loan products.'
+                        }
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild size="sm">
                             <Link href={route(`${productRoute}.create`)}>
                                 <Plus className="mr-1 h-4 w-4" /> New product
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
 
                 <Input
                     value={search}

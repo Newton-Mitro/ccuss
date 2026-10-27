@@ -1,15 +1,16 @@
-import BranchOperationsCharts from '@/modules/branch-operations/components/branch-operations-charts';
 import {
     DashboardMetricGrid,
     DashboardQuickLinks,
 } from '@/components/dashboard-summary';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import BranchOperationsCharts from '@/modules/branch-operations/components/branch-operations-charts';
+import type { BranchOperationsDashboardProps } from '@/modules/branch-operations/types/dashboard.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -22,8 +23,6 @@ import {
     WalletCards,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { BranchOperationsDashboardProps } from '@/modules/branch-operations/types/dashboard.interfaces';
-
 
 const links = [
     { label: 'Branch days', href: 'branch-days.index', icon: CalendarDays },
@@ -64,17 +63,19 @@ export default function BranchOperationsDashboard() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Branch Operations" />
             <div className="space-y-5 text-foreground">
-                <ResourcePageHeader
-                    title="Branch Operations"
-                    description="Daily branch readiness, teller coverage, and cash activity."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Branch Operations"
+                        description="Daily branch readiness, teller coverage, and cash activity."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge tone={branch_day ? 'success' : 'warning'}>
                             {branch_day
                                 ? 'Branch day open'
                                 : 'Branch day closed'}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 {!branch ? (
                     <ResourceEmptyState

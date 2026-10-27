@@ -2,20 +2,19 @@ import {
     DashboardMetricGrid,
     DashboardQuickLinks,
 } from '@/components/dashboard-summary';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
-import TreasuryDashboardCharts from '@/modules/treasury-cash/components/treasury-dashboard-charts';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import TreasuryDashboardCharts from '@/modules/treasury-cash/components/treasury-dashboard-charts';
+import type { TreasuryCashDashboardProps } from '@/modules/treasury-cash/types/dashboard.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { CalendarDays, Clock3, UserRound, Vault } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { TreasuryCashDashboardProps } from '@/modules/treasury-cash/types/dashboard.interfaces';
-
 
 const links = [
     {
@@ -87,10 +86,12 @@ export default function TreasuryCashDashboard() {
             <Head title="Treasury & Cash" />
 
             <div className="space-y-5 text-foreground">
-                <ResourcePageHeader
-                    title="Treasury & Cash"
-                    description="Monitor branch readiness, cash locations, and teller activity."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Treasury & Cash"
+                        description="Monitor branch readiness, cash locations, and teller activity."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge
                             tone={
                                 stats.openBranchDays > 0 ? 'success' : 'warning'
@@ -100,8 +101,8 @@ export default function TreasuryCashDashboard() {
                                 ? `${stats.openBranchDays} branch day${stats.openBranchDays === 1 ? '' : 's'} open`
                                 : 'No branch day open'}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Summary Metrics */}
                 <DashboardMetricGrid metrics={metrics} />

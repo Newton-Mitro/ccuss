@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { TellerIndexProps } from '@/modules/treasury-cash/types/teller';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, UserRound } from 'lucide-react';
 import { useEffect } from 'react';
@@ -51,11 +51,13 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Tellers" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Tellers"
-                    description="Review teller assignments, branches, and operating limits."
-                    action={
-                        canCreate ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Tellers"
+                        description="Review teller assignments, branches, and operating limits."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canCreate ? (
                             <Link
                                 type="button"
                                 href={route('tellers.create')}
@@ -64,9 +66,9 @@ export default function Index() {
                                 <Plus className="h-4 w-4" />
                                 Create teller
                             </Link>
-                        ) : undefined
-                    }
-                />
+                        ) : undefined}
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-72"
                     placeholder="Search teller, code, or branch..."

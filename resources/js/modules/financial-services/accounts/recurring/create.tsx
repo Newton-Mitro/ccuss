@@ -1,5 +1,5 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 
+import HeadingSmall from '@/components/heading-small';
+import type { Props } from '@/modules/financial-services/types/accounts/recurring/create.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -24,8 +26,6 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/recurring/create.interfaces';
-
 
 export default function RecurringDepositAccountCreate() {
     const { products } = usePage<Props>().props;
@@ -85,11 +85,12 @@ export default function RecurringDepositAccountCreate() {
             <Head title="Open recurring deposit" />
 
             <div className="w-full max-w-screen-xl space-y-5 pb-6">
-                <ResourcePageHeader
-                    variant="account"
-                    title="Open recurring deposit"
-                    description="Configure the savings plan, installment schedule, and maturity settings."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Open recurring deposit"
+                        description="Configure the savings plan, installment schedule, and maturity settings."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button variant="outline" asChild>
                             <Link
                                 href={route(
@@ -102,8 +103,8 @@ export default function RecurringDepositAccountCreate() {
                                 </span>
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
 
                 <form onSubmit={submit} className="space-y-5">
                     <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">

@@ -1,20 +1,20 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourceEmptyState,
-    ResourcePageHeader,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { ResourceEmptyState } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Lock, RotateCcw } from 'lucide-react';
-import { useEffect } from 'react';
-import { route } from 'ziggy-js';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
+import type {
+    FiscalPeriod,
+    Props,
+} from '@/modules/general-accounting/types/period-end/period-action.interfaces';
 import { BreadcrumbItem } from '@/types';
-import type { FiscalPeriod, Props } from '@/modules/general-accounting/types/period-end/period-action.interfaces';
-
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Lock, RotateCcw } from 'lucide-react';
+import { useEffect } from 'react';
+import { route } from 'ziggy-js';
 
 export default function PeriodActionPage() {
     const { operation, fiscalPeriods, filters } = usePage<Props>().props;
@@ -79,18 +79,20 @@ export default function PeriodActionPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={isClosing ? 'Close Period' : 'Reopen Period'} />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title={
-                        isClosing
-                            ? 'Close Fiscal Period'
-                            : 'Reopen Fiscal Period'
-                    }
-                    description={
-                        isClosing
-                            ? 'Close periods after all draft vouchers are resolved.'
-                            : 'Reopen a previously closed fiscal period.'
-                    }
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={
+                            isClosing
+                                ? 'Close Fiscal Period'
+                                : 'Reopen Fiscal Period'
+                        }
+                        description={
+                            isClosing
+                                ? 'Close periods after all draft vouchers are resolved.'
+                                : 'Reopen a previously closed fiscal period.'
+                        }
+                    />
+                </div>
                 <div className="w-60">
                     <Input
                         className="bg-card"

@@ -1,9 +1,8 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/show-ledger-account-page.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import {
@@ -20,8 +19,6 @@ import {
     Users,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/show-ledger-account-page.interfaces';
-
 
 function DetailItem({
     label,
@@ -52,7 +49,10 @@ export default function Show({ ledger }: Props) {
     ];
 
     const settings = [
-        { label: 'Control account', enabled: Boolean(ledger.is_control_account) },
+        {
+            label: 'Control account',
+            enabled: Boolean(ledger.is_control_account),
+        },
         { label: 'Reconcilable', enabled: Boolean(ledger.is_reconcilable) },
         { label: 'Cash account', enabled: Boolean(ledger.is_cash_account) },
         { label: 'System account', enabled: Boolean(ledger.is_system) },
@@ -60,13 +60,17 @@ export default function Show({ ledger }: Props) {
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
-            <Head title={`${ledger.code ?? 'Ledger Account'} · ${ledger.name ?? 'Details'}`} />
+            <Head
+                title={`${ledger.code ?? 'Ledger Account'} · ${ledger.name ?? 'Details'}`}
+            />
 
             <div className="mx-auto w-full max-w-6xl space-y-6 pb-8 text-foreground">
-                <ResourcePageHeader
-                    title="Ledger Account"
-                    description="Review account identity, classification, and hierarchy."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <HeadingSmall
+                        title="Ledger Account"
+                        description="Review account identity, classification, and hierarchy."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             <Button variant="outline" asChild>
                                 <Link href={route('ledger-accounts.index')}>
@@ -86,9 +90,8 @@ export default function Show({ ledger }: Props) {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                    className="rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:p-6"
-                />
+                    </div>
+                </div>
 
                 <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                     <div className="flex flex-col gap-4 border-b border-border bg-muted/20 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">

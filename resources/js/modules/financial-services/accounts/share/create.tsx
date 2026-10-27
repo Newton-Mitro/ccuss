@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
+import HeadingSmall from '@/components/heading-small';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
+import type { Props } from '@/modules/financial-services/types/accounts/share/create.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -22,8 +24,6 @@ import {
     Users,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/share/create.interfaces';
-
 
 export default function ShareAccountCreate() {
     const { products, customers } = usePage<Props>().props;
@@ -76,11 +76,12 @@ export default function ShareAccountCreate() {
             <div className="w-full max-w-5xl space-y-5 pb-8 text-foreground">
                 {/* Page header */}
                 <div className="flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
-                    <ResourcePageHeader
-                        variant="account"
-                        title="Register Share Membership"
-                        description="Register a member, assign a share product, and configure membership details."
-                    />
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <HeadingSmall
+                            title="Register Share Membership"
+                            description="Register a member, assign a share product, and configure membership details."
+                        />
+                    </div>
 
                     <Button
                         asChild

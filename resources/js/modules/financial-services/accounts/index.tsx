@@ -1,6 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -8,13 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type {
+    Account,
+    Props,
+} from '@/modules/financial-services/types/accounts/index.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Eye, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import type { Account, Props } from '@/modules/financial-services/types/accounts/index.interfaces';
-
 
 export default function FinancialAccountIndex() {
     const { accounts, filters, category } = usePage<Props>().props;
@@ -55,29 +57,30 @@ export default function FinancialAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`${categoryLabel} Account Management`} />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    variant="account"
-                    title={
-                        category
-                            ? `${categoryLabel} Management`
-                            : 'Finincial Accounts'
-                    }
-                    description={
-                        category
-                            ? `Manage ${categoryLabel.toLowerCase()} accounts and member activity.`
-                            : 'Manage member, deposit, loan, cash, and bank accounts.'
-                    }
-                    action={
-                        createRoute ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={
+                            category
+                                ? `${categoryLabel} Management`
+                                : 'Finincial Accounts'
+                        }
+                        description={
+                            category
+                                ? `Manage ${categoryLabel.toLowerCase()} accounts and member activity.`
+                                : 'Manage member, deposit, loan, cash, and bank accounts.'
+                        }
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {createRoute ? (
                             <Button asChild>
                                 <Link href={createRoute}>
                                     <Plus className="mr-2 h-4 w-4" />
                                     New account
                                 </Link>
                             </Button>
-                        ) : null
-                    }
-                />
+                        ) : null}
+                    </div>
+                </div>
                 <Input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}

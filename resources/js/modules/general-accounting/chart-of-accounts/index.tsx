@@ -1,12 +1,15 @@
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import { TYPE_COLORS } from '@/modules/general-accounting/chart-of-accounts/utils';
+import type { AccountGroupTreeItem } from '@/modules/general-accounting/types/chart-of-accounts/index.interfaces';
 import type { GeneralLedgerAccountsPageProps } from '@/modules/general-accounting/types/general-accounting';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -27,10 +30,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import { TYPE_COLORS } from '@/modules/general-accounting/chart-of-accounts/utils';
-import type { AccountGroupTreeItem } from '@/modules/general-accounting/types/chart-of-accounts/index.interfaces';
-
 
 const ledgerTypeIcons: Record<string, any> = {
     ASSET: Landmark,
@@ -527,10 +526,12 @@ export default function GlAccountsIndex() {
             <Head title="Chart of Accounts" />
 
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Chart of Accounts"
-                    description="Manage your ledger hierarchy and account groups."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Chart of Accounts"
+                        description="Manage your ledger hierarchy and account groups."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             <Button
                                 type="button"
@@ -551,11 +552,7 @@ export default function GlAccountsIndex() {
                                 Collapse all
                             </Button>
                             {canCreateGroup && (
-                                <Button
-                                    asChild
-                                    size="sm"
-                                    variant="outline"
-                                >
+                                <Button asChild size="sm" variant="outline">
                                     <Link href={route('account-groups.create')}>
                                         <Plus className="h-4 w-4" /> Add Group
                                     </Link>
@@ -563,7 +560,9 @@ export default function GlAccountsIndex() {
                             )}
                             {canCreateLedger && (
                                 <Button asChild size="sm">
-                                    <Link href={route('ledger-accounts.create')}>
+                                    <Link
+                                        href={route('ledger-accounts.create')}
+                                    >
                                         <Plus className="h-4 w-4" /> Add Ledger
                                     </Link>
                                 </Button>
@@ -575,8 +574,8 @@ export default function GlAccountsIndex() {
                                 <Plus className="h-4 w-4" /> Apply balances
                             </Link>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Input
@@ -606,11 +605,7 @@ export default function GlAccountsIndex() {
                         </p>
                         <div className="mt-4 flex flex-wrap justify-center gap-2">
                             {canCreateGroup && (
-                                <Button
-                                    asChild
-                                    size="sm"
-                                    variant="outline"
-                                >
+                                <Button asChild size="sm" variant="outline">
                                     <Link href={route('account-groups.create')}>
                                         Add Group
                                     </Link>
@@ -618,7 +613,9 @@ export default function GlAccountsIndex() {
                             )}
                             {canCreateLedger && (
                                 <Button asChild size="sm">
-                                    <Link href={route('ledger-accounts.create')}>
+                                    <Link
+                                        href={route('ledger-accounts.create')}
+                                    >
                                         Add Ledger
                                     </Link>
                                 </Button>

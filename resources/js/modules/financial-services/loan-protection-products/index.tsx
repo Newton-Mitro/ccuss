@@ -1,14 +1,12 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourceEmptyState,
-    ResourcePageHeader,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { ResourceEmptyState } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem } from '@/types';
 import type { LoanProtectionProductsPageProps } from '@/modules/financial-services/types/financial-services';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
@@ -51,11 +49,13 @@ export default function LoanProtectionProductsIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Loan Protection Products" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Credit-life products"
-                    description="Configure optional insurance that pays the remaining loan principal after an approved death claim."
-                    action={
-                        canManage ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Credit-life products"
+                        description="Configure optional insurance that pays the remaining loan principal after an approved death claim."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canManage ? (
                             <Button asChild size="sm">
                                 <Link
                                     href={route(
@@ -66,9 +66,9 @@ export default function LoanProtectionProductsIndex() {
                                     New product
                                 </Link>
                             </Button>
-                        ) : null
-                    }
-                />
+                        ) : null}
+                    </div>
+                </div>
 
                 <Input
                     className="w-full bg-card sm:w-80"

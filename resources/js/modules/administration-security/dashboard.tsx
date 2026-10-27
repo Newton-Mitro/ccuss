@@ -2,12 +2,13 @@ import {
     DashboardMetricGrid,
     DashboardQuickLinks,
 } from '@/components/dashboard-summary';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { AdministrativeTasksDashboardProps } from '@/modules/administration-security/types/dashboard.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -19,8 +20,6 @@ import {
     Users,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { AdministrativeTasksDashboardProps } from '@/modules/administration-security/types/dashboard.interfaces';
-
 
 const links = [
     {
@@ -87,10 +86,12 @@ export default function AdministrativeTasksDashboard() {
 
             <div className="space-y-5 text-foreground">
                 {/* Page Header */}
-                <ResourcePageHeader
-                    title="Administrative Tasks"
-                    description="Manage users, access control, system activity, and administrative operations."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Administrative Tasks"
+                        description="Manage users, access control, system activity, and administrative operations."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge
                             tone={
                                 stats.successfulBackups > 0
@@ -102,8 +103,8 @@ export default function AdministrativeTasksDashboard() {
                                 ? 'System activity monitored'
                                 : 'Backup attention required'}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Summary Metrics */}
                 <DashboardMetricGrid metrics={metrics} />

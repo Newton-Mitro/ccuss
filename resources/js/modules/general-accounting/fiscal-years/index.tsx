@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -12,8 +12,8 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
 import type { FiscalYearsPageProps } from '@/modules/general-accounting/types/general-accounting';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -92,18 +92,20 @@ export default function FiscalYearIndex() {
             <Head title="Fiscal Years" />
 
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Fiscal Years"
-                    description="Manage fiscal years and close periods with a consistent, theme-aware workflow."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Fiscal Years"
+                        description="Manage fiscal years and close periods with a consistent, theme-aware workflow."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild size="sm">
                             <Link href={route('fiscal-years.create')}>
                                 <Plus className="h-4 w-4" />
                                 Create Fiscal Year
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Input

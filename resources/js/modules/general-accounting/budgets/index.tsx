@@ -1,6 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -9,12 +9,11 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { Budget } from '@/modules/general-accounting/types/budgets/index.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Check, Eye, Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Budget } from '@/modules/general-accounting/types/budgets/index.interfaces';
-
 
 export default function BudgetIndex() {
     const { budgets } = usePage().props as {
@@ -44,10 +43,12 @@ export default function BudgetIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Budgets" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Budgets"
-                    description="Plan and monitor spending by account, cost center, and period."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Budgets"
+                        description="Plan and monitor spending by account, cost center, and period."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex gap-2">
                             <Link
                                 href={route(
@@ -65,8 +66,8 @@ export default function BudgetIndex() {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
                 <ResourceTableCard className="h-[calc(100vh-320px)] md:h-[calc(100vh-300px)]">
                     <table className="w-full text-sm">
                         <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">

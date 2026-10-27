@@ -2,12 +2,11 @@ import {
     DashboardMetricGrid,
     DashboardQuickLinks,
 } from '@/components/dashboard-summary';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDateTime } from '@/lib/date_util';
+import type { DashboardProps } from '@/modules/home/types/dashboard.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -25,8 +24,6 @@ import {
     WalletCards,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { DashboardProps } from '@/modules/home/types/dashboard.interfaces';
-
 
 const numberFormat = new Intl.NumberFormat('en-BD');
 const compactNumberFormat = new Intl.NumberFormat('en-BD', {
@@ -103,10 +100,12 @@ export default function DashboardPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Organization Overview" />
             <div className="space-y-5 text-foreground">
-                <ResourcePageHeader
-                    title="Organization overview"
-                    description="A live operating snapshot across branches, accounts, lending, and treasury."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Organization overview"
+                        description="A live operating snapshot across branches, accounts, lending, and treasury."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="text-right">
                             <div className="text-sm font-medium">
                                 {organization.active?.name ??
@@ -123,8 +122,8 @@ export default function DashboardPage() {
                                 })}
                             </div>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
 
                 <DashboardMetricGrid
                     className="xl:grid-cols-5"

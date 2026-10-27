@@ -1,7 +1,5 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +7,7 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate, formatDateTime } from '@/lib/date_util';
+import type { Props } from '@/modules/treasury-cash/types/cash-counts/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -21,8 +20,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/cash-counts/index.types';
-
 
 export default function CashCountsIndex() {
     const { counts, branchDays, locations, denominations } =
@@ -56,10 +53,12 @@ export default function CashCountsIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cash Counts" />
             <div className="w-full max-w-7xl space-y-6 text-foreground">
-                <ResourcePageHeader
-                    title="Cash Counts"
-                    description="Record physical cash by denomination, reconcile balances, and review previous counts."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Cash Counts"
+                        description="Record physical cash by denomination, reconcile balances, and review previous counts."
+                    />
+                </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                     {[
                         {

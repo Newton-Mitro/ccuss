@@ -1,14 +1,13 @@
+import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/financial-services/types/accounts/loan/edit.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -21,8 +20,6 @@ import {
     UserRound,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/loan/edit.interfaces';
-
 
 function DetailItem({ label, value }: { label: string; value: string }) {
     return (
@@ -129,10 +126,12 @@ export default function LoanAccountEdit() {
             <Head title={`Edit ${loanNumber}`} />
 
             <div className="w-full max-w-7xl space-y-6 pb-8">
-                <ResourcePageHeader variant="account"
-                    title="Edit loan account"
-                    description="Update the account display name and review the approved loan details."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <HeadingSmall
+                        title="Edit loan account"
+                        description="Update the account display name and review the approved loan details."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button variant="outline" asChild>
                             <Link
                                 href={route('loan-accounts.show', account.id)}
@@ -141,9 +140,8 @@ export default function LoanAccountEdit() {
                                 Back to loan
                             </Link>
                         </Button>
-                    }
-                    className="rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:p-6"
-                />
+                    </div>
+                </div>
 
                 <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                     <div className="flex flex-col gap-4 border-b border-border bg-muted/20 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">

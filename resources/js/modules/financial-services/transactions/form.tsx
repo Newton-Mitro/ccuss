@@ -1,13 +1,14 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
+import HeadingSmall from '@/components/heading-small';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 import type { FinancialTransactionFormPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
@@ -39,10 +40,12 @@ export default function FinancialTransactionForm() {
                 title={`${data.transaction_type === 'WITHDRAWAL' ? 'Withdrawal' : 'Deposit'} Transaction`}
             />
             <div className="max-w-3xl space-y-4">
-                <ResourcePageHeader
-                    title={`${data.transaction_type === 'WITHDRAWAL' ? 'Withdrawal' : 'Deposit'} transaction`}
-                    description="Create an operational transaction draft for an active account."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={`${data.transaction_type === 'WITHDRAWAL' ? 'Withdrawal' : 'Deposit'} transaction`}
+                        description="Create an operational transaction draft for an active account."
+                    />
+                </div>
                 <form
                     onSubmit={submit}
                     className="space-y-4 rounded-xl border bg-card p-4"

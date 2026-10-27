@@ -1,8 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourcePageHeader,
-    ResourceTableCard,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { ResourceTableCard } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
@@ -23,10 +21,12 @@ export default function BudgetEntries() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Budget Entries" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Budget Entries"
-                    description="Review planned amounts assigned to accounts, cost centers, and fiscal periods."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Budget Entries"
+                        description="Review planned amounts assigned to accounts, cost centers, and fiscal periods."
+                    />
+                </div>
                 {entries.data.length === 0 ? (
                     <div className="flex flex-col items-center justify-center rounded-md border bg-card py-16 text-center text-muted-foreground">
                         <p className="text-base font-medium">

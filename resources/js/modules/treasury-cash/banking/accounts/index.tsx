@@ -1,15 +1,15 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { BankAccountIndexProps } from '@/modules/treasury-cash/types/bank-accounts';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Building2, Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
@@ -52,11 +52,13 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Bank Accounts" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Bank Accounts"
-                    description="Review bank accounts, branch assignments, and reconciliation settings."
-                    action={
-                        permissions.has('bank_accounts.create') ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Bank Accounts"
+                        description="Review bank accounts, branch assignments, and reconciliation settings."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {permissions.has('bank_accounts.create') ? (
                             <Link
                                 type="button"
                                 href={route('bank-accounts.create')}
@@ -65,9 +67,9 @@ export default function Index() {
                                 <Plus className="h-4 w-4" />
                                 Create bank account
                             </Link>
-                        ) : undefined
-                    }
-                />
+                        ) : undefined}
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search account, bank, or branch..."

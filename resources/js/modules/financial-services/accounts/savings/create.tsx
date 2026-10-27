@@ -1,11 +1,13 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
+import type { Props } from '@/modules/financial-services/types/accounts/savings/create.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -23,8 +25,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/savings/create.interfaces';
-
 
 function SectionHeading({
     icon: Icon,
@@ -88,11 +88,12 @@ export default function SavingsAccountCreate() {
             <Head title="Open savings account" />
 
             <div className="w-full max-w-6xl space-y-6 pb-24">
-                <ResourcePageHeader
-                    variant="account"
-                    title="Open savings account"
-                    description="Create a savings account and configure its minimum-balance requirement."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Open savings account"
+                        description="Create a savings account and configure its minimum-balance requirement."
+                    />
+                </div>
 
                 <form onSubmit={submit} className="space-y-5">
                     <div className="overflow-hidden rounded-xl border bg-card">

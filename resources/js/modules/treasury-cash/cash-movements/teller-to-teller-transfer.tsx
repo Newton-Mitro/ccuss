@@ -1,4 +1,4 @@
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -192,10 +192,12 @@ export default function TellerToTellerTransfer() {
             <Head title={transferConfig.title} />
 
             <div className="w-full max-w-5xl space-y-5 pb-24 text-foreground">
-                <ResourcePageHeader
-                    title={transferConfig.title}
-                    description={transferConfig.description}
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={transferConfig.title}
+                        description={transferConfig.description}
+                    />
+                </div>
 
                 {/* Business day status */}
                 <section className="flex flex-col gap-3 rounded-xl border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">

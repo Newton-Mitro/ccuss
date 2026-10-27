@@ -1,11 +1,11 @@
-import {
-    FinancialAccountSearchInput,
-    type FinancialAccountSearchResult,
-} from '@/modules/financial-services/components/financial-account-search-input';
 import { Input } from '@/components/ui/input';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import {
+    FinancialAccountSearchInput,
+    type FinancialAccountSearchResult,
+} from '@/modules/financial-services/components/financial-account-search-input';
 import type { SavingsChequeWithdrawalPageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
@@ -17,20 +17,15 @@ import {
 import { useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
 
-import ReactPanZoom from 'react-image-pan-zoom-rotate';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { SignatureOption } from '@/modules/treasury-cash/types/teller-transactions/savings-cheque-withdrawal-page.interfaces';
 import { BreadcrumbItem } from '@/types';
-import type {
-    SignatureOption,
-} from '@/modules/treasury-cash/types/teller-transactions/savings-cheque-withdrawal-page.interfaces';
-
+import ReactPanZoom from 'react-image-pan-zoom-rotate';
 
 export default function SavingsChequeWithdrawalPage() {
     useFlashToastHandler();
@@ -255,10 +250,12 @@ export default function SavingsChequeWithdrawalPage() {
                 {/* =========================================================
                     PAGE HEADER
                 ========================================================= */}
-                <ResourcePageHeader
-                    title="Savings Cheque Withdrawal"
-                    description="Receive an issued cheque for account, signature, and payment review."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Savings Cheque Withdrawal"
+                        description="Receive an issued cheque for account, signature, and payment review."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge
                             tone={signatureVerified ? 'success' : 'warning'}
                         >
@@ -266,8 +263,8 @@ export default function SavingsChequeWithdrawalPage() {
                                 ? 'Signature on file'
                                 : 'Signature review required'}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 <div className="grid gap-2 md:grid-cols-2">
                     <div

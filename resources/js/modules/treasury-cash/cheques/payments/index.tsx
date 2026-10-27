@@ -1,6 +1,6 @@
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -9,12 +9,11 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { Props } from '@/modules/treasury-cash/types/cheques/payments/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowUpRight, Plus } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/cheques/payments/index.types';
-
 
 function statusTone(
     status: string,
@@ -51,10 +50,12 @@ export default function ChequePaymentQueue() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cheque Payment Review" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Cheque Payment Review"
-                    description="Review received cheques before approval and teller posting."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Cheque Payment Review"
+                        description="Review received cheques before approval and teller posting."
+                    />
+                </div>
 
                 {canReceive && (
                     <form

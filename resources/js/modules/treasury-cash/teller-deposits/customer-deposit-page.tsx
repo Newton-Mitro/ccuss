@@ -1,7 +1,5 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -23,6 +21,10 @@ import {
     FinancialAccountSearchInput,
     type FinancialAccountSearchResult,
 } from '@/modules/financial-services/components/financial-account-search-input';
+import type {
+    CustomerAccount,
+    CustomerDepositPageProps,
+} from '@/modules/treasury-cash/types/teller-deposits/customer-deposit-page.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import {
@@ -35,11 +37,6 @@ import {
 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
-import type {
-    CustomerAccount,
-    CustomerDepositPageProps,
-} from '@/modules/treasury-cash/types/teller-deposits/customer-deposit-page.interfaces';
-
 
 export default function CustomerDepositPage() {
     useFlashToastHandler();
@@ -257,11 +254,15 @@ export default function CustomerDepositPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Customer Deposit" />
             <div className="space-y-3 text-foreground">
-                <ResourcePageHeader
-                    title="Customer Deposit"
-                    description="Record customer deposits, then post the teller transaction to update account schedules."
-                    action={<StatusBadge tone="info">Teller ready</StatusBadge>}
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Customer Deposit"
+                        description="Record customer deposits, then post the teller transaction to update account schedules."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        <StatusBadge tone="info">Teller ready</StatusBadge>
+                    </div>
+                </div>
 
                 <div className="w-full pr-1 lg:w-1/2">
                     <FinancialAccountSearchInput

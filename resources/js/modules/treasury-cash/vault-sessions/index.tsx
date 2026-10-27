@@ -1,23 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { appSwal } from '@/lib/appSwal';
-import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
-import type {
-    VaultSessionIndexProps,
-    VaultSessionListItem,
-} from '@/modules/treasury-cash/types/vault-sessions';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Clock3, LockKeyhole, Plus } from 'lucide-react';
-import { FormEvent, useEffect, useState } from 'react';
-import { route } from 'ziggy-js';
 import {
     Dialog,
     DialogContent,
@@ -26,6 +10,20 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type {
+    VaultSessionIndexProps,
+    VaultSessionListItem,
+} from '@/modules/treasury-cash/types/vault-sessions';
+import { BreadcrumbItem } from '@/types';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { Clock3, LockKeyhole, Plus } from 'lucide-react';
+import { FormEvent, useEffect, useState } from 'react';
+import { route } from 'ziggy-js';
 
 export default function Index() {
     const { vault_sessions, branch_day, filters, auth } =
@@ -102,11 +100,13 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Vault Sessions" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Vault Sessions"
-                    description="Review vault session status and cash position for each business day."
-                    action={
-                        canOpen ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Vault Sessions"
+                        description="Review vault session status and cash position for each business day."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canOpen ? (
                             <Button
                                 type="button"
                                 disabled={!branch_day}
@@ -122,9 +122,9 @@ export default function Index() {
                                 <Plus className="h-4 w-4" />
                                 Open vault session
                             </Button>
-                        ) : null
-                    }
-                />
+                        ) : null}
+                    </div>
+                </div>
                 {!branch_day && canOpen && (
                     <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
                         Open a branch day before creating a vault session.

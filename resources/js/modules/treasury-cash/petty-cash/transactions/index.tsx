@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,8 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { PettyCashTransactionIndexProps } from '@/modules/treasury-cash/types/petty-cash-transactions';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowDownToLine,
@@ -65,10 +65,12 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Petty Cash Transactions" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Petty Cash Transactions"
-                    description="Review and post pending petty cash funding and expenses."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Petty Cash Transactions"
+                        description="Review and post pending petty cash funding and expenses."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             {canFund && (
                                 <Button asChild variant="outline">
@@ -95,8 +97,8 @@ export default function Index() {
                                 </Button>
                             )}
                         </div>
-                    }
-                />
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search transaction, fund, payee, or status..."

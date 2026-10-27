@@ -1,16 +1,14 @@
-import {
-    ResourcePageHeader,
-    ResourceTableCard,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import ReportExportActions from '@/components/report-export-actions';
+import { ResourceTableCard } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type {
     ProductSummaryItem,
     ProductSummaryReportPageProps,
 } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import ReportExportActions from '@/components/report-export-actions';
 
 export default function ProductSummaryReport() {
     const { products } = usePage<ProductSummaryReportPageProps>().props;
@@ -42,7 +40,9 @@ function ReportTable({
             <Head title={title} />
             <div className="space-y-4">
                 <ReportExportActions report="product-summary" />
-                <ResourcePageHeader title={title} description={description} />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall title={title} description={description} />
+                </div>
                 <ResourceTableCard>
                     <table className="w-full text-sm">
                         <thead className="bg-muted/70 text-left text-xs text-muted-foreground">

@@ -1,17 +1,17 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
+import HeadingSmall from '@/components/heading-small';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Props } from '@/modules/financial-services/types/default-rules/form.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeft, CalendarClock, FileText, Percent } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/default-rules/form.types';
-
 
 const accountTypes = [
     'SAVINGS',
@@ -81,20 +81,24 @@ export default function DefaultRuleForm() {
                 title={editing ? 'Edit default rule' : 'Create default rule'}
             />
             <div className="mx-auto max-w-5xl space-y-5">
-                <ResourcePageHeader
-                    title={
-                        editing ? 'Edit default rule' : 'Create default rule'
-                    }
-                    description="Configure the account scope, fine, and effective dates for this rule."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={
+                            editing
+                                ? 'Edit default rule'
+                                : 'Create default rule'
+                        }
+                        description="Configure the account scope, fine, and effective dates for this rule."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild variant="outline">
                             <Link href={route('account-default-rules.index')}>
                                 <ArrowLeft className="mr-2 size-4" />
                                 Back to rules
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
                 <form
                     onSubmit={submit}
                     className="overflow-hidden rounded-2xl border bg-card shadow-sm"

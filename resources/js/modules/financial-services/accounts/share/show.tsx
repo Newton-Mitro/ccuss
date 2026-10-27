@@ -1,9 +1,5 @@
-import FinancialAccountActivation from '@/modules/financial-services/components/financial-account-activation';
-import FinancialAccountPeopleManagement from '@/modules/financial-services/components/financial-account-people-management';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
@@ -11,6 +7,9 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import FinancialAccountActivation from '@/modules/financial-services/components/financial-account-activation';
+import FinancialAccountPeopleManagement from '@/modules/financial-services/components/financial-account-people-management';
+import type { Props } from '@/modules/financial-services/types/accounts/share/show.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -28,8 +27,6 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/share/show.interfaces';
-
 
 export default function ShareAccountShow() {
     useFlashToastHandler();
@@ -117,10 +114,12 @@ export default function ShareAccountShow() {
             <Head title={`Share Account ${account.account_no}`} />
 
             <div className="w-full max-w-screen space-y-5 pb-6">
-                <ResourcePageHeader variant="account"
-                    title={account.account_no}
-                    description={`${account.holder?.name ?? 'Unassigned account'} · ${account.product?.name ?? 'Share membership'}`}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={account.account_no}
+                        description={`${account.holder?.name ?? 'Unassigned account'} · ${account.product?.name ?? 'Share membership'}`}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap items-center gap-2">
                             <FinancialAccountActivation
                                 accountId={account.id}
@@ -152,8 +151,8 @@ export default function ShareAccountShow() {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Account summary */}
                 <section className="overflow-hidden rounded-xl border bg-card">

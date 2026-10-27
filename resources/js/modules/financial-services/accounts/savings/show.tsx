@@ -1,14 +1,13 @@
-import FinancialAccountActivation from '@/modules/financial-services/components/financial-account-activation';
-import FinancialAccountPeopleManagement from '@/modules/financial-services/components/financial-account-people-management';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import FinancialAccountActivation from '@/modules/financial-services/components/financial-account-activation';
+import FinancialAccountPeopleManagement from '@/modules/financial-services/components/financial-account-people-management';
+import type { Props } from '@/modules/financial-services/types/accounts/savings/show.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -23,8 +22,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/savings/show.interfaces';
-
 
 export default function SavingsAccountShow() {
     useFlashToastHandler();
@@ -78,10 +75,12 @@ export default function SavingsAccountShow() {
             <Head title={`Savings Account ${account.account_no}`} />
 
             <div className="w-full max-w-screen space-y-5 pb-6">
-                <ResourcePageHeader variant="account"
-                    title={account.account_no}
-                    description={`${account.holder?.name ?? 'Unassigned account'} · ${account.product?.name ?? 'Savings account'}`}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={account.account_no}
+                        description={`${account.holder?.name ?? 'Unassigned account'} · ${account.product?.name ?? 'Savings account'}`}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap items-center gap-2">
                             <FinancialAccountActivation
                                 accountId={account.id}
@@ -113,8 +112,8 @@ export default function SavingsAccountShow() {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Account overview */}
                 <section

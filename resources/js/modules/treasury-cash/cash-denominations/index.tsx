@@ -1,7 +1,8 @@
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Props } from '@/modules/treasury-cash/types/cash-denominations/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -17,8 +18,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/cash-denominations/index.types';
-
 
 export default function CashDenominationsIndex() {
     const { denominations, auth } = usePage<Props>().props;
@@ -84,10 +83,12 @@ export default function CashDenominationsIndex() {
 
             <div className="w-full max-w-7xl space-y-6 pb-8 text-foreground">
                 <div className="flex flex-col gap-4 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                    <ResourcePageHeader
-                        title="Cash Denominations"
-                        description="Configure banknotes and coins used in branch cash counting and reconciliation."
-                    />
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <HeadingSmall
+                            title="Cash Denominations"
+                            description="Configure banknotes and coins used in branch cash counting and reconciliation."
+                        />
+                    </div>
                     {canCreate && (
                         <Button
                             asChild

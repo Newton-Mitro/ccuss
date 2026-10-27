@@ -1,15 +1,13 @@
+import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 import type { FinancialProductPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
@@ -95,10 +93,12 @@ export default function FinancialProductShow() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={product.name} />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title={product.name}
-                    description={`${product.code} · ${product.category.replaceAll('_', ' ')}`}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={product.name}
+                        description={`${product.code} · ${product.category.replaceAll('_', ' ')}`}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             <Button asChild size="sm" variant="outline">
                                 <Link
@@ -122,8 +122,8 @@ export default function FinancialProductShow() {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                         ['Balance type', product.balance_type],

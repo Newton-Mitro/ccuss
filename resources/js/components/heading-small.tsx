@@ -1,5 +1,4 @@
 import { cn } from '@/lib/utils';
-import { ResourcePageHeader } from './resource-page-shell';
 
 export default function HeadingSmall({
     title,
@@ -11,10 +10,13 @@ export default function HeadingSmall({
     className?: string;
 }) {
     return (
-        <ResourcePageHeader
-            title={title}
-            description={description}
-            className={cn('space-y-1', className)}
-        />
+        <div className={cn('space-y-1', className)}>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                {title}
+            </h1>
+            {description && (
+                <p className="text-sm text-muted-foreground">{description}</p>
+            )}
+        </div>
     );
 }

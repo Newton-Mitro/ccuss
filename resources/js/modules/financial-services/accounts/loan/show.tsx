@@ -1,5 +1,5 @@
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -8,6 +8,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/financial-services/types/accounts/loan/show.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -21,8 +22,6 @@ import {
     UserRound,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/loan/show.interfaces';
-
 
 function DetailItem({ label, value }: { label: string; value: string }) {
     return (
@@ -138,10 +137,12 @@ export default function LoanAccountShow() {
             <Head title={loanNumber} />
 
             <div className="w-full max-w-7xl space-y-6 pb-8">
-                <ResourcePageHeader variant="account"
-                    title={loanNumber}
-                    description="Loan account overview, approved terms and repayment progress."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <HeadingSmall
+                        title={loanNumber}
+                        description="Loan account overview, approved terms and repayment progress."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             <Button variant="outline" asChild>
                                 <Link href={route('loan-accounts.index')}>
@@ -161,9 +162,8 @@ export default function LoanAccountShow() {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                    className="rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:p-6"
-                />
+                    </div>
+                </div>
 
                 <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                     <div className="flex flex-col gap-4 border-b border-border bg-muted/20 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">

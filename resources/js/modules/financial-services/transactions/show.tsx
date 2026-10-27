@@ -1,7 +1,5 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
@@ -33,20 +31,21 @@ export default function FinancialTransactionShow() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={transaction.transaction_no} />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    variant="account"
-                    title={transaction.transaction_no}
-                    description={`${transaction.transaction_type} · ${
-                        transaction.entries
-                            ?.map(
-                                (entry) =>
-                                    entry.financial_account?.name ||
-                                    entry.financial_account?.account_no,
-                            )
-                            .filter(Boolean)
-                            .join(', ') || '-'
-                    }`}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={transaction.transaction_no}
+                        description={`${transaction.transaction_type} · ${
+                            transaction.entries
+                                ?.map(
+                                    (entry) =>
+                                        entry.financial_account?.name ||
+                                        entry.financial_account?.account_no,
+                                )
+                                .filter(Boolean)
+                                .join(', ') || '-'
+                        }`}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex gap-2">
                             {transaction.status === 'PENDING' && (
                                 <Button
@@ -121,8 +120,8 @@ export default function FinancialTransactionShow() {
                                 </Button>
                             )}
                         </div>
-                    }
-                />
+                    </div>
+                </div>
                 <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <div className="rounded-xl border bg-card p-4 shadow-sm transition-colors hover:bg-muted/20">
                         <div className="flex items-start justify-between gap-3">

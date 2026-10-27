@@ -1,18 +1,15 @@
+import HeadingSmall from '@/components/heading-small';
 import ReportExportActions from '@/components/report-export-actions';
-import {
-    ResourceEmptyState,
-    ResourcePageHeader,
-} from '@/components/resource-page-shell';
+import { ResourceEmptyState } from '@/components/resource-page-shell';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/general-accounting/types/reports/general-ledger-page.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ArrowDownLeft, ArrowUpRight, BookOpen, Scale } from 'lucide-react';
 import { useState } from 'react';
-import type { Props } from '@/modules/general-accounting/types/reports/general-ledger-page.interfaces';
-
 
 export default function GeneralLedgerPage() {
     const { account, entries, accounts, fiscalPeriods, filters } =
@@ -70,22 +67,24 @@ export default function GeneralLedgerPage() {
                         fiscal_period_id: periodId,
                     }}
                 />
-                <ResourcePageHeader
-                    title="General Ledger"
-                    description={
-                        account
-                            ? `${account.code} · ${account.name} — review posted activity and its running balance.`
-                            : 'Select a ledger account to review its posted activity and running balance.'
-                    }
-                    action={
-                        account ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="General Ledger"
+                        description={
+                            account
+                                ? `${account.code} · ${account.name} — review posted activity and its running balance.`
+                                : 'Select a ledger account to review its posted activity and running balance.'
+                        }
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {account ? (
                             <span className="inline-flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground">
                                 <BookOpen className="size-3.5 text-primary" />
                                 {entries.length} entries
                             </span>
-                        ) : undefined
-                    }
-                />
+                        ) : undefined}
+                    </div>
+                </div>
 
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
                     <div className="mb-3">

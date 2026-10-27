@@ -1,9 +1,10 @@
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/treasury-cash/types/cheques/clearings.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
@@ -19,8 +20,6 @@ import {
     X,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/cheques/clearings.types';
-
 
 const statusConfig: Record<
     string,
@@ -139,10 +138,12 @@ export default function ChequeClearings() {
 
             <div className="w-full max-w-5xl space-y-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <ResourcePageHeader
-                        title="Cheque Clearings"
-                        description="Manage cheque presentation, settlement, returns, and clearing status."
-                    />
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <HeadingSmall
+                            title="Cheque Clearings"
+                            description="Manage cheque presentation, settlement, returns, and clearing status."
+                        />
+                    </div>
                     {canCreate && (
                         <Button asChild className="shrink-0 gap-2">
                             <Link href={route('cheque-clearings.create')}>

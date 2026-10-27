@@ -1,7 +1,5 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +9,10 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/treasury-cash/types/bank-reconciliations/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/bank-reconciliations/index.types';
-
 
 export default function BankReconciliationsIndex() {
     const { reconciliations, accounts } = usePage<Props>().props;
@@ -35,10 +32,12 @@ export default function BankReconciliationsIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Bank Reconciliations" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Bank Reconciliations"
-                    description="Compare bank statement balances with posted book balances and finalize matched sessions."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Bank Reconciliations"
+                        description="Compare bank statement balances with posted book balances and finalize matched sessions."
+                    />
+                </div>
                 <section className="rounded-lg border bg-card p-4">
                     <form
                         className="flex flex-wrap items-end gap-3"

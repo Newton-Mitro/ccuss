@@ -1,9 +1,11 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type {
+    Account,
+    Mapping,
+} from '@/modules/general-accounting/types/treasury-gl-mappings/show.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import {
@@ -17,8 +19,6 @@ import {
     ReceiptText,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Account, Mapping } from '@/modules/general-accounting/types/treasury-gl-mappings/show.types';
-
 
 export default function TreasuryGlMappingShow({
     mapping,
@@ -39,10 +39,12 @@ export default function TreasuryGlMappingShow({
             <Head title={`Treasury GL Mapping ${mapping.source_code}`} />
             <div className="mx-auto w-full max-w-6xl space-y-5 pb-8">
                 <div className="flex flex-col gap-4 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                    <ResourcePageHeader
-                        title="Treasury GL mapping"
-                        description="Review how this Treasury transaction is posted to the general ledger."
-                    />
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <HeadingSmall
+                            title="Treasury GL mapping"
+                            description="Review how this Treasury transaction is posted to the general ledger."
+                        />
+                    </div>
                     <div className="flex flex-wrap gap-2">
                         <Button asChild variant="outline" className="gap-2">
                             <Link href={route('treasury-gl-mappings.index')}>

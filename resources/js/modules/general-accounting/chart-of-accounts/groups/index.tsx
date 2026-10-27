@@ -1,5 +1,5 @@
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -7,6 +7,11 @@ import { Button } from '@/components/ui/button';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import AccountDetailsDialog from '@/modules/general-accounting/chart-of-accounts/account-details-dialog';
+import type {
+    AccountGroup,
+    Props,
+} from '@/modules/general-accounting/types/chart-of-accounts/groups/index.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
@@ -19,9 +24,6 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
-import AccountDetailsDialog from '@/modules/general-accounting/chart-of-accounts/account-details-dialog';
-import type { AccountGroup, Props } from '@/modules/general-accounting/types/chart-of-accounts/groups/index.interfaces';
-
 
 export default function AccountGroupIndex() {
     const { accountGroups, auth } = usePage<Props>().props;
@@ -86,19 +88,21 @@ export default function AccountGroupIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Groups" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Account Groups"
-                    description="Organize the chart of accounts by reporting category and keep the structure consistent across all ledger views."
-                    action={
-                        canCreate ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Account Groups"
+                        description="Organize the chart of accounts by reporting category and keep the structure consistent across all ledger views."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canCreate ? (
                             <Button asChild size="sm" className="gap-1">
                                 <Link href={route('account-groups.create')}>
                                     <Plus className="h-4 w-4" /> Add Group
                                 </Link>
                             </Button>
-                        ) : undefined
-                    }
-                />
+                        ) : undefined}
+                    </div>
+                </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm text-muted-foreground">

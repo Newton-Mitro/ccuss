@@ -1,11 +1,6 @@
-import type { FiscalPeriodsPageProps } from '@/modules/general-accounting/types/general-accounting';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Lock, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
-import { route } from 'ziggy-js';
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge as ThemeStatusBadge,
 } from '@/components/resource-page-shell';
@@ -16,8 +11,13 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
 import { periodStatuses } from '@/modules/general-accounting/fiscal-periods/data/period_statuses';
+import type { FiscalPeriodsPageProps } from '@/modules/general-accounting/types/general-accounting';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Lock, Pencil, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { route } from 'ziggy-js';
 
 export default function FiscalPeriodIndex() {
     const { fiscalPeriods, filters } = usePage<FiscalPeriodsPageProps>().props;
@@ -77,10 +77,12 @@ export default function FiscalPeriodIndex() {
             <Head title="Fiscal Periods" />
 
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Fiscal Periods"
-                    description="Manage fiscal periods and their open or closed status."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Fiscal Periods"
+                        description="Manage fiscal periods and their open or closed status."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild size="sm">
                             <Link href={route('fiscal-periods.create')}>
                                 <Plus className="h-4 w-4" />
@@ -89,8 +91,8 @@ export default function FiscalPeriodIndex() {
                                 </span>
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Input

@@ -1,11 +1,14 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { accountTypes } from '@/modules/general-accounting/chart-of-accounts/data/account-type';
+import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/edit-ledger-account-page.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
@@ -22,9 +25,6 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import { accountTypes } from '@/modules/general-accounting/chart-of-accounts/data/account-type';
-import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/edit-ledger-account-page.interfaces';
-
 
 const settingOptions = [
     {
@@ -73,16 +73,16 @@ export default function Edit({
         status: ledger.status ?? true,
     });
 
-    const availableParents = parents.filter((parent) => parent.id !== ledger.id);
+    const availableParents = parents.filter(
+        (parent) => parent.id !== ledger.id,
+    );
     const selectedGroup = accountGroups.find(
         (group) => String(group.id) === data.account_group_id,
     );
     const selectedParent = availableParents.find(
         (parent) => String(parent.id) === data.parent_id,
     );
-    const selectedType = accountTypes.find(
-        (type) => type.value === data.type,
-    );
+    const selectedType = accountTypes.find((type) => type.value === data.type);
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -102,19 +102,20 @@ export default function Edit({
             <Head title={`Edit ${ledger.code ?? 'Ledger Account'}`} />
 
             <div className="mx-auto w-full max-w-6xl space-y-6 pb-8 text-foreground">
-                <ResourcePageHeader
-                    title="Edit Ledger Account"
-                    description="Update the account’s classification, hierarchy, and reconciliation behavior."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <HeadingSmall
+                        title="Edit Ledger Account"
+                        description="Update the account’s classification, hierarchy, and reconciliation behavior."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button variant="outline" asChild>
                             <Link href={route('ledger-accounts.index')}>
                                 <ArrowLeft className="mr-2 size-4" />
                                 Back to accounts
                             </Link>
                         </Button>
-                    }
-                    className="rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:p-6"
-                />
+                    </div>
+                </div>
 
                 <form
                     onSubmit={handleSubmit}
@@ -223,10 +224,7 @@ export default function Edit({
                                         <Select
                                             value={data.normal_balance}
                                             onChange={(value) =>
-                                                setData(
-                                                    'normal_balance',
-                                                    value,
-                                                )
+                                                setData('normal_balance', value)
                                             }
                                             options={[
                                                 {
@@ -387,9 +385,7 @@ export default function Edit({
                                     ) : (
                                         <Check className="mr-2 size-4" />
                                     )}
-                                    {processing
-                                        ? 'Saving...'
-                                        : 'Save changes'}
+                                    {processing ? 'Saving...' : 'Save changes'}
                                 </Button>
                             </div>
                         </div>
@@ -441,7 +437,8 @@ export default function Edit({
                                             Normal balance
                                         </dt>
                                         <dd className="flex items-center gap-1.5 text-xs font-medium">
-                                            {data.normal_balance === 'CREDIT' ? (
+                                            {data.normal_balance ===
+                                            'CREDIT' ? (
                                                 <ArrowUpRight className="size-3.5 text-sky-600" />
                                             ) : (
                                                 <ArrowDownLeft className="size-3.5 text-amber-600" />
@@ -487,7 +484,9 @@ export default function Edit({
                                                         : 'bg-muted-foreground/50'
                                                 }`}
                                             />
-                                            {data.status ? 'Active' : 'Inactive'}
+                                            {data.status
+                                                ? 'Active'
+                                                : 'Inactive'}
                                         </dd>
                                     </div>
                                 </dl>

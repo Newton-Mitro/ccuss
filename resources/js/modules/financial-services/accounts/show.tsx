@@ -1,8 +1,6 @@
+import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import { StatusBadge } from '@/components/resource-page-shell';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +10,8 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
 import type { FinancialAccountShowPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { CircleDollarSign, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
@@ -226,10 +224,12 @@ export default function FinancialAccountShow() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={account.account_no} />
             <div className="space-y-4">
-                <ResourcePageHeader variant="account"
-                    title={account.account_no}
-                    description={`${account.holder?.name ?? account.name ?? 'Unassigned'} · ${account.product?.name ?? account.account_type}`}
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={account.account_no}
+                        description={`${account.holder?.name ?? account.name ?? 'Unassigned'} · ${account.product?.name ?? account.account_type}`}
+                    />
+                </div>
                 <div className="grid gap-3 sm:grid-cols-3">
                     <div className="rounded-lg border bg-card p-3">
                         <p className="text-xs text-muted-foreground">Status</p>

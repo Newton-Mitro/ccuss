@@ -1,4 +1,4 @@
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -210,10 +210,12 @@ export default function TransactionWorkflow() {
             <Head title={detail.title} />
 
             <div className="w-full max-w-5xl space-y-5 pb-24">
-                <ResourcePageHeader
-                    title={detail.title}
-                    description={detail.description}
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={detail.title}
+                        description={detail.description}
+                    />
+                </div>
 
                 {/* Workflow overview */}
                 <div className="relative overflow-hidden rounded-xl border bg-card">

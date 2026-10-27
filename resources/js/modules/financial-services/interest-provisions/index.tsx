@@ -1,6 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -11,12 +11,11 @@ import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { Props } from '@/modules/financial-services/types/interest-provisions/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/interest-provisions/index.types';
-
 
 export default function InterestProvisionsIndex() {
     const { provisions, filters } = usePage<Props>().props;
@@ -68,10 +67,12 @@ export default function InterestProvisionsIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Interest Provisions" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Interest Provisions"
-                    description="Calculate, review, approve, and reject account interest provisions."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Interest Provisions"
+                        description="Calculate, review, approve, and reject account interest provisions."
+                    />
+                </div>
                 <section className="rounded-lg border bg-card p-4">
                     <form
                         className="flex flex-wrap items-end gap-3"

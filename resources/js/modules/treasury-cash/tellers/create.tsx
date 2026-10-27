@@ -13,15 +13,14 @@ import {
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem } from '@/types';
 import type { Props } from '@/modules/treasury-cash/types/tellers/create.types';
-
+import type { BreadcrumbItem } from '@/types';
 
 export default function Create({ teller, branch_locked = false }: Props) {
     const editing = Boolean(teller);
@@ -70,14 +69,16 @@ export default function Create({ teller, branch_locked = false }: Props) {
             <Head title={editing ? 'Edit Teller' : 'Create Teller'} />
 
             <div className="w-full max-w-4xl space-y-5 pb-24 text-foreground">
-                <ResourcePageHeader
-                    title={editing ? 'Edit Teller' : 'Create Teller'}
-                    description={
-                        editing
-                            ? 'Update teller assignments, cash limits, and operational status.'
-                            : 'Register a teller, assign a branch user, and configure cash handling limits.'
-                    }
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={editing ? 'Edit Teller' : 'Create Teller'}
+                        description={
+                            editing
+                                ? 'Update teller assignments, cash limits, and operational status.'
+                                : 'Register a teller, assign a branch user, and configure cash handling limits.'
+                        }
+                    />
+                </div>
 
                 {/* Page introduction */}
                 <div className="relative overflow-hidden rounded-xl border bg-card">

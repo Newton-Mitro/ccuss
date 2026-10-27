@@ -1,16 +1,14 @@
-import {
-    ResourceEmptyState,
-    ResourcePageHeader,
-} from '@/components/resource-page-shell';
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
+import ReportExportActions from '@/components/report-export-actions';
+import { ResourceEmptyState } from '@/components/resource-page-shell';
+import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { AccountBalancesReportPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '@/components/data-table-pagination';
-import ReportExportActions from '@/components/report-export-actions';
-import { Select } from '@/components/ui/select';
 export default function AccountBalancesReport() {
     const { accounts, products, filters } =
         usePage<AccountBalancesReportPageProps>().props;
@@ -24,10 +22,12 @@ export default function AccountBalancesReport() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Balances" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Account balances"
-                    description="Current and available balances across financial accounts."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Account balances"
+                        description="Current and available balances across financial accounts."
+                    />
+                </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Select
                         className="w-full bg-card sm:w-72"

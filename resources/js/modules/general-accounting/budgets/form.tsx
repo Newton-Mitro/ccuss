@@ -1,11 +1,16 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type {
+    Entry,
+    PageProps,
+} from '@/modules/general-accounting/types/budgets/form.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -19,8 +24,6 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { Entry, PageProps } from '@/modules/general-accounting/types/budgets/form.types';
-
 
 const emptyEntry = (): Entry => ({
     account_id: '',
@@ -87,10 +90,12 @@ export default function BudgetForm() {
             <Head title={editing ? 'Edit Budget' : 'Create Budget'} />
             <div className="mx-auto w-full max-w-6xl space-y-5 pb-28 text-foreground">
                 <div className="flex flex-col gap-4 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                    <ResourcePageHeader
-                        title={editing ? 'Edit Budget' : 'Create Budget'}
-                        description="Plan account spending across a fiscal year, cost centers, and periods."
-                    />
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <HeadingSmall
+                            title={editing ? 'Edit Budget' : 'Create Budget'}
+                            description="Plan account spending across a fiscal year, cost centers, and periods."
+                        />
+                    </div>
                     <Button asChild variant="outline" className="gap-2">
                         <Link href={route('budgets.index')}>
                             <ArrowLeft className="size-4" />

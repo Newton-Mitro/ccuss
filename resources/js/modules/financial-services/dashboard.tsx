@@ -1,5 +1,4 @@
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -21,8 +20,8 @@ import {
     DashboardMetricGrid,
     DashboardQuickLinks,
 } from '@/components/dashboard-summary';
+import HeadingSmall from '@/components/heading-small';
 import type { FinancialServicesDashboardProps } from '@/modules/financial-services/types/dashboard.interfaces';
-
 
 const links = [
     {
@@ -73,10 +72,12 @@ export default function FinancialServicesDashboard() {
 
             <div className="space-y-5 text-foreground">
                 {/* Header */}
-                <ResourcePageHeader
-                    title="Financial Services"
-                    description="Products, financial accounts, and transaction activity."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Financial Services"
+                        description="Products, financial accounts, and transaction activity."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge
                             tone={
                                 metrics.postedTransactions > 0
@@ -86,8 +87,8 @@ export default function FinancialServicesDashboard() {
                         >
                             {metrics.postedTransactions.toLocaleString()} posted
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Summary metrics */}
                 <DashboardMetricGrid

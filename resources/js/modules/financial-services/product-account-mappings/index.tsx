@@ -1,15 +1,15 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 import type { FinancialProductAccountMappingsPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { AlertTriangle, ArrowRight, Settings2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -97,22 +97,24 @@ export default function FinancialProductAccountMappings() {
                 }
             />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title={
-                        family === 'loan'
-                            ? 'Loan account mappings'
-                            : family === 'deposit'
-                              ? 'Deposit account mappings'
-                              : 'Account mappings'
-                    }
-                    description={
-                        family === 'loan'
-                            ? 'Connect loan transactions to their general-ledger accounts.'
-                            : family === 'deposit'
-                              ? 'Connect deposit transactions to their general-ledger accounts.'
-                              : 'Connect each financial product transaction to its general-ledger accounts.'
-                    }
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={
+                            family === 'loan'
+                                ? 'Loan account mappings'
+                                : family === 'deposit'
+                                  ? 'Deposit account mappings'
+                                  : 'Account mappings'
+                        }
+                        description={
+                            family === 'loan'
+                                ? 'Connect loan transactions to their general-ledger accounts.'
+                                : family === 'deposit'
+                                  ? 'Connect deposit transactions to their general-ledger accounts.'
+                                  : 'Connect each financial product transaction to its general-ledger accounts.'
+                        }
+                    />
+                </div>
 
                 <div className="flex flex-col justify-between sm:flex-row sm:items-center">
                     <Input

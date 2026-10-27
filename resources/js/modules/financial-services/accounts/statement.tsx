@@ -1,7 +1,7 @@
+import HeadingSmall from '@/components/heading-small';
 import ReportExportActions from '@/components/report-export-actions';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -81,13 +81,13 @@ export default function AccountStatement() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Statements" />
             <div className="space-y-3">
-                <ResourcePageHeader
-                    variant="account"
-                    className="py-3 sm:py-3"
-                    title="Account statements"
-                    description="Review account movements and balances for a selected period."
-                    action={
-                        account ? (
+                <div className="flex flex-col items-start justify-between gap-3 py-3 sm:flex-row sm:items-center sm:py-3">
+                    <HeadingSmall
+                        title="Account statements"
+                        description="Review account movements and balances for a selected period."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {account ? (
                             <ReportExportActions
                                 report="account-statement"
                                 query={{
@@ -96,9 +96,9 @@ export default function AccountStatement() {
                                     date: statementDate,
                                 }}
                             />
-                        ) : undefined
-                    }
-                />
+                        ) : undefined}
+                    </div>
+                </div>
                 <section className="grid gap-3 rounded-xl border bg-card p-3 shadow-sm sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] sm:items-end">
                     <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground">

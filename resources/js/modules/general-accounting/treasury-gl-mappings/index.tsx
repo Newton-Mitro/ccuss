@@ -1,20 +1,22 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type {
+    Props,
+    TreasuryGlMapping,
+} from '@/modules/general-accounting/types/treasury-gl-mappings/index.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowLeftRight, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import type { Props, TreasuryGlMapping } from '@/modules/general-accounting/types/treasury-gl-mappings/index.interfaces';
-
 
 export default function TreasuryGlMappingsPage() {
     const { mappings, filters } = usePage<Props>().props;
@@ -55,10 +57,12 @@ export default function TreasuryGlMappingsPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Treasury GL Mappings" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Treasury GL Mappings"
-                    description="Map Treasury transaction categories to balanced General Ledger entries."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Treasury GL Mappings"
+                        description="Map Treasury transaction categories to balanced General Ledger entries."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             <Button asChild>
                                 <Link
@@ -77,8 +81,8 @@ export default function TreasuryGlMappingsPage() {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
 
                 <div className="w-full sm:w-60">
                     <Input

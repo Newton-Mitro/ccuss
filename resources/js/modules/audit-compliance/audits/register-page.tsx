@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -10,13 +10,15 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import type {
+    Props,
+    RegisterRecord,
+} from '@/modules/audit-compliance/types/audits/register-page.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Eye, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import type { Props, RegisterRecord } from '@/modules/audit-compliance/types/audits/register-page.interfaces';
-
 
 function toneForStatus(status: string) {
     if (['APPROVED', 'COMPLIANT', 'ACCEPTED', 'COMPLETED'].includes(status)) {
@@ -119,10 +121,12 @@ export default function RegisterPage() {
             <Head title={register.title} />
 
             <div className="mx-auto w-full max-w-7xl space-y-6 pb-8 text-foreground">
-                <ResourcePageHeader
-                    title={register.title}
-                    description={register.description}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <HeadingSmall
+                        title={register.title}
+                        description={register.description}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             {canViewOverview && (
                                 <Button variant="outline" asChild>
@@ -143,9 +147,8 @@ export default function RegisterPage() {
                                 </Button>
                             )}
                         </div>
-                    }
-                    className="rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:p-6"
-                />
+                    </div>
+                </div>
 
                 <section className="grid gap-3 sm:grid-cols-3">
                     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">

@@ -1,4 +1,4 @@
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,13 +6,12 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { Props } from '@/modules/treasury-cash/types/cheques/clearings-create.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Banknote, Building2, Plus, RefreshCw } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/cheques/clearings-create.types';
-
 
 export default function CreateChequeClearing({
     cheques,
@@ -46,10 +45,12 @@ export default function CreateChequeClearing({
             <Head title="New Cheque Clearing" />
             <div className="w-full max-w-4xl space-y-5 pb-24 text-foreground">
                 <div className="flex flex-col gap-4 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                    <ResourcePageHeader
-                        title="New cheque clearing"
-                        description="Create a clearing record for a presented cheque."
-                    />
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <HeadingSmall
+                            title="New cheque clearing"
+                            description="Create a clearing record for a presented cheque."
+                        />
+                    </div>
                     <Button asChild variant="outline" className="gap-2">
                         <Link href={route('cheque-clearings.index')}>
                             <ArrowLeft className="size-4" />

@@ -1,5 +1,5 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 
+import HeadingSmall from '@/components/heading-small';
+import type { Props } from '@/modules/financial-services/types/accounts/fixed/create.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -22,8 +24,6 @@ import {
     Users,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/fixed/create.interfaces';
-
 
 const maturityInstructions = [
     { value: 'PAYOUT', label: 'Pay out at maturity' },
@@ -161,11 +161,12 @@ export default function FixedDepositAccountCreate() {
             <Head title="Open fixed deposit" />
 
             <div className="max-w-4xl space-y-5 pb-8">
-                <ResourcePageHeader
-                    variant="account"
-                    title="Open fixed deposit"
-                    description="Set up the depositor, principal, contracted rate, tenure, and maturity instructions."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Open fixed deposit"
+                        description="Set up the depositor, principal, contracted rate, tenure, and maturity instructions."
+                    />
+                </div>
 
                 <form
                     onSubmit={submit}

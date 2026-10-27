@@ -1,15 +1,15 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
 import type { ChequeBookIndexProps } from '@/modules/treasury-cash/types/cheque-books';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { BookOpenCheck, Plus } from 'lucide-react';
 import { useEffect } from 'react';
@@ -47,10 +47,12 @@ export default function Index() {
             <Head title="Cheque Books" />
             <div className="space-y-4 text-foreground">
                 <div className="flex items-center justify-around gap-4 sm:justify-between">
-                    <ResourcePageHeader
-                        title="Cheque Books"
-                        description="Review cheque books assigned to the active organization bank accounts."
-                    />
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <HeadingSmall
+                            title="Cheque Books"
+                            description="Review cheque books assigned to the active organization bank accounts."
+                        />
+                    </div>
                     <Link
                         href={route('cheque-books.create')}
                         className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"

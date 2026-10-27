@@ -1,6 +1,6 @@
+import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -23,6 +23,11 @@ import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import FinancialAccountActivation from '@/modules/financial-services/components/financial-account-activation';
 import FinancialAccountPeopleManagement from '@/modules/financial-services/components/financial-account-people-management';
+import type {
+    Installment,
+    Props,
+    TransactionReference,
+} from '@/modules/financial-services/types/accounts/recurring/show.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -40,7 +45,6 @@ import {
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
-import type { Installment, Props, TransactionReference } from '@/modules/financial-services/types/accounts/recurring/show.interfaces';
 
 function SummaryMetric({
     icon: Icon,
@@ -248,11 +252,12 @@ export default function RecurringDepositAccountShow() {
             <Head title={`Recurring Deposit - ${account.account_no}`} />
 
             <div className="space-y-5 pb-6">
-                <ResourcePageHeader
-                    variant="account"
-                    title={account.account_no}
-                    description={`${account.holder?.name ?? 'Unassigned'} · Recurring deposit account`}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={account.account_no}
+                        description={`${account.holder?.name ?? 'Unassigned'} · Recurring deposit account`}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap items-center gap-2">
                             <FinancialAccountActivation
                                 accountId={account.id}
@@ -269,8 +274,8 @@ export default function RecurringDepositAccountShow() {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Account overview */}
                 <section className="overflow-hidden rounded-xl border bg-card">

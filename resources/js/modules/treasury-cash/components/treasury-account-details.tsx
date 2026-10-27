@@ -1,19 +1,12 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { TreasuryAccountDetail } from '@/modules/treasury-cash/types/components/treasury-account-details.interfaces';
 import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
-import type {
-    TreasuryAccountDetail,
-} from '@/modules/treasury-cash/types/components/treasury-account-details.interfaces';
-export type {
-    TreasuryAccountDetail,
-} from '@/modules/treasury-cash/types/components/treasury-account-details.interfaces';
-
+export type { TreasuryAccountDetail } from '@/modules/treasury-cash/types/components/treasury-account-details.interfaces';
 
 export default function TreasuryAccountDetails({
     title,
@@ -46,17 +39,16 @@ export default function TreasuryAccountDetails({
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={title} />
             <div className="space-y-5 text-foreground">
-                <ResourcePageHeader
-                    title={title}
-                    description={description}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall title={title} description={description} />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge
                             tone={status === 'ACTIVE' ? 'success' : 'neutral'}
                         >
                             {status}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
                 <div className="flex flex-wrap gap-2">
                     <Button asChild variant="outline">
                         <Link href={indexHref}>

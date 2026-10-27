@@ -1,15 +1,13 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
 import type { BranchDayListItem } from '@/modules/treasury-cash/types/branch-days';
+import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CalendarDays, LockKeyhole, Plus } from 'lucide-react';
 import { useEffect } from 'react';
@@ -58,10 +56,12 @@ export default function Index() {
             <Head title="Branch Days" />
 
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Branch Days"
-                    description="Track business-day activity across the active organization branches."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Branch Days"
+                        description="Track business-day activity across the active organization branches."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button
                             type="button"
                             disabled={!userHasBranch}
@@ -77,8 +77,8 @@ export default function Index() {
                             <Plus className="h-4 w-4" />
                             Open branch day
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
 
                 {!userHasBranch && (
                     <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">

@@ -1,8 +1,6 @@
+import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import { StatusBadge } from '@/components/resource-page-shell';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { Props } from '@/modules/financial-services/types/accounts/fixed/edit.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -23,8 +22,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/fixed/edit.interfaces';
-
 
 const termUnits = [
     { value: 'DAY', label: 'Days' },
@@ -140,10 +137,12 @@ export default function FixedDepositAccountEdit() {
             <Head title={`Edit ${account.account_no}`} />
 
             <div className="max-w-4xl space-y-5 pb-8">
-                <ResourcePageHeader variant="account"
-                    title="Edit fixed deposit account"
-                    description={`${account.holder?.name ?? 'Depositor'} · Account ${account.account_no}`}
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Edit fixed deposit account"
+                        description={`${account.holder?.name ?? 'Depositor'} · Account ${account.account_no}`}
+                    />
+                </div>
 
                 {/* Account overview */}
                 <section className="overflow-hidden rounded-xl border bg-card">

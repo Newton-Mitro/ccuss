@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -9,13 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Props } from '@/modules/audit-compliance/types/audits/approval-logs-page.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Search, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/audit-compliance/types/audits/approval-logs-page.interfaces';
-
 
 export default function ApprovalLogsPage() {
     const { logs, filters, actions, auth } = usePage<Props>().props;
@@ -55,19 +54,20 @@ export default function ApprovalLogsPage() {
             <Head title="Approval Logs" />
 
             <div className="mx-auto w-full max-w-7xl space-y-6 pb-8 text-foreground">
-                <ResourcePageHeader
-                    title="Approval Logs"
-                    description="Review the immutable status decisions recorded across audit, compliance, risk, and regulatory records."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <HeadingSmall
+                        title="Approval Logs"
+                        description="Review the immutable status decisions recorded across audit, compliance, risk, and regulatory records."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button variant="outline" asChild>
                             <Link href={route('internal-audit.index')}>
                                 <ArrowLeft className="mr-2 size-4" />
                                 Audit overview
                             </Link>
                         </Button>
-                    }
-                    className="rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:p-6"
-                />
+                    </div>
+                </div>
 
                 <div className="grid gap-3 sm:grid-cols-2">
                     <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">

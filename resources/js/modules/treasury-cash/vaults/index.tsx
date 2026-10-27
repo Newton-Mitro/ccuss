@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { VaultIndexProps } from '@/modules/treasury-cash/types/vaults';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Vault as VaultIcon } from 'lucide-react';
 import { useEffect } from 'react';
@@ -51,11 +51,13 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Vaults" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Vaults"
-                    description="Review vault locations and their operating limits across the active organization."
-                    action={
-                        canCreate ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Vaults"
+                        description="Review vault locations and their operating limits across the active organization."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canCreate ? (
                             <Link
                                 type="button"
                                 href={route('vaults.create')}
@@ -64,9 +66,9 @@ export default function Index() {
                                 <Plus className="h-4 w-4" />
                                 Create vault
                             </Link>
-                        ) : undefined
-                    }
-                />
+                        ) : undefined}
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-72"
                     placeholder="Search vault, code, or branch..."

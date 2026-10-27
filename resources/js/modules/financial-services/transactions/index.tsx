@@ -1,6 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -103,10 +103,12 @@ export default function FinancialTransactionIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Financial Transactions" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Financial Transactions"
-                    description="Create, post, and reverse operational account movements."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Financial Transactions"
+                        description="Create, post, and reverse operational account movements."
+                    />
+                </div>
                 <Input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}

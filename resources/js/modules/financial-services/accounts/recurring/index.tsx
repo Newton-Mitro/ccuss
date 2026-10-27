@@ -1,6 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -9,12 +9,12 @@ import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/financial-services/types/accounts/recurring/index.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/recurring/index.interfaces';
 
 export default function RecurringDepositAccountIndex() {
     const { accounts, filters } = usePage<Props>().props;
@@ -42,10 +42,12 @@ export default function RecurringDepositAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Recurring deposits" />
             <div className="space-y-4">
-                <ResourcePageHeader variant="account"
-                    title="Recurring deposits"
-                    description="Follow installment commitments, paid progress, and maturity dates."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Recurring deposits"
+                        description="Follow installment commitments, paid progress, and maturity dates."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild>
                             <Link
                                 href={route(
@@ -56,8 +58,8 @@ export default function RecurringDepositAccountIndex() {
                                 Open recurring deposit
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-96"
                     placeholder="Search account or depositor..."

@@ -1,5 +1,6 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
+import HeadingSmall from '@/components/heading-small';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { Props } from '@/modules/financial-services/types/accounts/share/edit.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -23,8 +25,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/share/edit.interfaces';
-
 
 const membershipStatuses = [
     { value: 'PENDING', label: 'Pending' },
@@ -140,10 +140,12 @@ export default function ShareAccountEdit() {
             <Head title={`Edit ${account.account_no}`} />
 
             <div className="w-full max-w-5xl space-y-6 pb-24">
-                <ResourcePageHeader variant="account"
-                    title="Edit share account"
-                    description="Update the account display name and manage membership information."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Edit share account"
+                        description="Update the account display name and manage membership information."
+                    />
+                </div>
 
                 {/* Account summary */}
                 <section className="overflow-hidden rounded-xl border bg-card">

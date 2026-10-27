@@ -1,10 +1,11 @@
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Props } from '@/modules/treasury-cash/types/cash-denominations/create.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
@@ -18,8 +19,6 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/cash-denominations/create.types';
-
 
 export default function CashDenominationForm({ denomination }: Props) {
     const editing = Boolean(denomination);
@@ -66,14 +65,16 @@ export default function CashDenominationForm({ denomination }: Props) {
             />
             <div className="w-full max-w-3xl space-y-5 pb-24 text-foreground">
                 <div className="flex flex-col gap-4 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                    <ResourcePageHeader
-                        title={title}
-                        description={
-                            editing
-                                ? 'Update denomination settings while preserving historical cash counts.'
-                                : 'Add a custom denomination or load the Bangladesh currency preset.'
-                        }
-                    />
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                        <HeadingSmall
+                            title={title}
+                            description={
+                                editing
+                                    ? 'Update denomination settings while preserving historical cash counts.'
+                                    : 'Add a custom denomination or load the Bangladesh currency preset.'
+                            }
+                        />
+                    </div>
                     <Button asChild variant="outline" className="gap-2">
                         <Link href={route('cash-denominations.index')}>
                             <ArrowLeft className="size-4" />

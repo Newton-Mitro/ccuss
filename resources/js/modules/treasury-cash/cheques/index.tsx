@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
@@ -10,8 +10,8 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import { BreadcrumbItem } from '@/types';
 import type { ChequeIndexProps } from '@/modules/treasury-cash/types/cheques';
+import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CheckSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -51,10 +51,12 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cheques" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Cheques"
-                    description="Track cheque status, dates, payees, and linked financial accounts."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Cheques"
+                        description="Track cheque status, dates, payees, and linked financial accounts."
+                    />
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search cheque, book, or payee..."

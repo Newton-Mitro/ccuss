@@ -1,16 +1,14 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { CashTransferIndexProps } from '@/modules/treasury-cash/types/cash-movements';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowRightLeft, CheckCircle2, ClipboardCheck } from 'lucide-react';
 import { useEffect } from 'react';
@@ -59,11 +57,13 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cash Movements" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Cash Movements"
-                    description="Approve and complete cash transfers between active branch locations."
-                    action={
-                        canCreate ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Cash Movements"
+                        description="Approve and complete cash transfers between active branch locations."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canCreate ? (
                             <div className="flex flex-wrap justify-end gap-2">
                                 <Button asChild size="sm" variant="outline">
                                     <Link
@@ -126,9 +126,9 @@ export default function Index() {
                                     </Link>
                                 </Button>
                             </div>
-                        ) : undefined
-                    }
-                />
+                        ) : undefined}
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search transfer, location, or status..."

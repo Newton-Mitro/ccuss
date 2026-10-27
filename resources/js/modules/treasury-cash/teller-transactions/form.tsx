@@ -1,6 +1,9 @@
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import { FinancialAccountSearchInput } from '@/modules/financial-services/components/financial-account-search-input';
+import {
+    FinancialAccountSearchInput,
+    type FinancialAccountSearchResult,
+} from '@/modules/financial-services/components/financial-account-search-input';
 import type { TellerCashTransactionFormPageProps } from '@/modules/treasury-cash/types/forms';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
@@ -41,7 +44,16 @@ export default function Form() {
         lines: [{ financial_account_id: '', amount: '', description: '' }],
     });
 
+    const selectedTellerSession =
+        teller_sessions.find(
+            (session) => String(session.id) === data.teller_session_id,
+        ) ?? null;
     const [depositLines, setDepositLines] = useState(data.lines);
+    const [selectedDepositAccounts, setSelectedDepositAccounts] = useState<
+        (FinancialAccountSearchResult | null)[]
+    >([null]);
+    const [selectedWithdrawalAccount, setSelectedWithdrawalAccount] =
+        useState<FinancialAccountSearchResult | null>(null);
 
     useFlashToastHandler();
 
@@ -71,6 +83,7 @@ export default function Form() {
     };
 
     const addLine = () => {
+        setSelectedDepositAccounts((accounts) => [...accounts, null]);
         updateDepositLines([
             ...depositLines,
             {
@@ -84,6 +97,9 @@ export default function Form() {
     const removeLine = (index: number) => {
         if (depositLines.length === 1) return;
 
+        setSelectedDepositAccounts((accounts) =>
+            accounts.filter((_, lineIndex) => lineIndex !== index),
+        );
         updateDepositLines(
             depositLines.filter((_, lineIndex) => lineIndex !== index),
         );
@@ -201,6 +217,43 @@ export default function Form() {
                             ]}
                         />
 
+                        <div className="mt-3 overflow-hidden rounded-lg border bg-background/80">
+                            <div className="border-b px-3 py-2 text-xs font-medium">
+                                {selectedTellerSession
+                                    ? `${selectedTellerSession.teller?.name ?? 'Teller'}${selectedTellerSession.teller?.code ? ` (${selectedTellerSession.teller.code})` : ''}`
+                                    : 'Teller cash balance'}
+                            </div>
+                            <div className="grid grid-cols-2">
+                                <div className="px-3 py-2.5">
+                                    <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        Opening cash
+                                    </div>
+                                    <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                        BDT{' '}
+                                        {formatBDTCurrency(
+                                            selectedTellerSession?.opening_cash ??
+                                                0,
+                                            false,
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="border-l px-3 py-2.5">
+                                    <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        Current cash
+                                    </div>
+                                    <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                        BDT{' '}
+                                        {formatBDTCurrency(
+                                            selectedTellerSession?.expected_cash ??
+                                                selectedTellerSession?.opening_cash ??
+                                                0,
+                                            false,
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {errors.teller_session_id && (
                             <p className="mt-1 text-xs text-destructive">
                                 {errors.teller_session_id}
@@ -275,6 +328,18 @@ export default function Form() {
                                                 </div>
                                                 <FinancialAccountSearchInput
                                                     onSelect={(account) => {
+                                                        setSelectedDepositAccounts(
+                                                            (accounts) => {
+                                                                const nextAccounts =
+                                                                    [
+                                                                        ...accounts,
+                                                                    ];
+                                                                nextAccounts[
+                                                                    index
+                                                                ] = account;
+                                                                return nextAccounts;
+                                                            },
+                                                        );
                                                         const lines = [
                                                             ...depositLines,
                                                         ];
@@ -292,6 +357,18 @@ export default function Form() {
                                                         );
                                                     }}
                                                     clearSelectedAccount={() => {
+                                                        setSelectedDepositAccounts(
+                                                            (accounts) => {
+                                                                const nextAccounts =
+                                                                    [
+                                                                        ...accounts,
+                                                                    ];
+                                                                nextAccounts[
+                                                                    index
+                                                                ] = null;
+                                                                return nextAccounts;
+                                                            },
+                                                        );
                                                         const lines = [
                                                             ...depositLines,
                                                         ];
@@ -354,6 +431,39 @@ export default function Form() {
                                             >
                                                 <Trash2 className="size-4" />
                                             </Button>
+
+                                            <div className="grid grid-cols-2 overflow-hidden rounded-lg border bg-muted/20 sm:col-span-3">
+                                                <div className="px-3 py-2.5">
+                                                    <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                                        Available balance
+                                                    </div>
+                                                    <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                                        BDT{' '}
+                                                        {formatBDTCurrency(
+                                                            selectedDepositAccounts[
+                                                                index
+                                                            ]
+                                                                ?.available_balance ??
+                                                                0,
+                                                            false,
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="border-l px-3 py-2.5">
+                                                    <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                                        Current balance
+                                                    </div>
+                                                    <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                                        BDT{' '}
+                                                        {formatBDTCurrency(
+                                                            selectedDepositAccounts[
+                                                                index
+                                                            ]?.balance ?? 0,
+                                                            false,
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -413,6 +523,9 @@ export default function Form() {
                                         scope="deposit"
                                         placeholder="Search customer or savings account..."
                                         onSelect={(account) => {
+                                            setSelectedWithdrawalAccount(
+                                                account,
+                                            );
                                             const lines = [...data.lines];
                                             lines[0] = {
                                                 ...lines[0],
@@ -423,6 +536,7 @@ export default function Form() {
                                             setData('lines', lines);
                                         }}
                                         clearSelectedAccount={() => {
+                                            setSelectedWithdrawalAccount(null);
                                             const lines = [...data.lines];
                                             lines[0] = {
                                                 ...lines[0],
@@ -484,6 +598,34 @@ export default function Form() {
                                             {errors.amount}
                                         </p>
                                     )}
+                                </div>
+                                <div className="grid grid-cols-2 overflow-hidden rounded-lg border bg-muted/20 lg:col-span-2">
+                                    <div className="px-3 py-2.5">
+                                        <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            Available balance
+                                        </div>
+                                        <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                            BDT{' '}
+                                            {formatBDTCurrency(
+                                                selectedWithdrawalAccount?.available_balance ??
+                                                    0,
+                                                false,
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="border-l px-3 py-2.5">
+                                        <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            Current balance
+                                        </div>
+                                        <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                            BDT{' '}
+                                            {formatBDTCurrency(
+                                                selectedWithdrawalAccount?.balance ??
+                                                    0,
+                                                false,
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
                             </section>
                         )}

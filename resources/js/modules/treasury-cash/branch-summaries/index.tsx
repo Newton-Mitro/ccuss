@@ -1,17 +1,14 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/treasury-cash/types/branch-summaries/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/treasury-cash/types/branch-summaries/index.types';
-
 
 export default function BranchCashSummariesIndex() {
     const { summaries, branchDays } = usePage<Props>().props;
@@ -26,10 +23,12 @@ export default function BranchCashSummariesIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Branch Cash Summaries" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Branch Cash Summaries"
-                    description="Compare branch cash movements with closing balances and differences."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Branch Cash Summaries"
+                        description="Compare branch cash movements with closing balances and differences."
+                    />
+                </div>
                 <section className="rounded-lg border bg-card p-4">
                     <h2 className="text-sm font-semibold">Calculate summary</h2>
                     <div className="mt-3 flex flex-wrap gap-2">

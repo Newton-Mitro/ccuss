@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -9,14 +9,16 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import {
+    PartyDetailsDialog,
+    type Party,
+} from '@/modules/general-accounting/parties/party-dialog';
+import type { Props } from '@/modules/general-accounting/types/parties/index.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import { PartyDetailsDialog, type Party } from '@/modules/general-accounting/parties/party-dialog';
-import type { Props } from '@/modules/general-accounting/types/parties/index.interfaces';
-
 
 export default function PartyIndex() {
     const { parties, filters } = usePage<Props>().props;
@@ -66,10 +68,12 @@ export default function PartyIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Parties" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Parties"
-                    description="Manage customers, suppliers, employees, and other accounting parties."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Parties"
+                        description="Manage customers, suppliers, employees, and other accounting parties."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild>
                             <Link href={route('parties.create')}>
                                 <Plus className="h-4 w-4" />
@@ -78,8 +82,8 @@ export default function PartyIndex() {
                                 </span>
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
 
                 <div className="w-full sm:w-60">
                     <Input

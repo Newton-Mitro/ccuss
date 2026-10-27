@@ -1,8 +1,5 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourceEmptyState,
-    ResourcePageHeader,
-} from '@/components/resource-page-shell';
+import { ResourceEmptyState } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import {
@@ -20,12 +17,12 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem } from '@/types';
 import { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import { BreadcrumbItem } from '@/types';
 
+import HeadingSmall from '@/components/heading-small';
 import { kycStatuses } from '@/modules/customers-kyc/customers/data/customer_data_types';
 import type { Props } from '@/modules/customers-kyc/types/customers/list_customer_page.interfaces';
-
 
 export default function Index() {
     const { paginated_data, filters } = usePage<Props>().props;
@@ -77,10 +74,12 @@ export default function Index() {
             <Head title="Customers" />
 
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Customers"
-                    description="Manage your customers."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Customers"
+                        description="Manage your customers."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Link
                             href={route('customers.create')}
                             className="flex items-center gap-2 rounded bg-primary px-3 py-2 text-sm text-primary-foreground transition hover:bg-primary/90"
@@ -90,8 +89,8 @@ export default function Index() {
                                 Create Customer
                             </span>
                         </Link>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

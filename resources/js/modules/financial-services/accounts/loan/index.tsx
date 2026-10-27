@@ -1,6 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -9,12 +9,12 @@ import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/financial-services/types/accounts/loan/index.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/accounts/loan/index.interfaces';
 
 export default function LoanAccountIndex() {
     const { accounts, filters } = usePage<Props>().props;
@@ -42,10 +42,12 @@ export default function LoanAccountIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Loan accounts" />
             <div className="space-y-4">
-                <ResourcePageHeader variant="account"
-                    title="Loan accounts"
-                    description="Monitor approved loan contracts, disbursement, outstanding balance, and repayment lifecycle."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Loan accounts"
+                        description="Monitor approved loan contracts, disbursement, outstanding balance, and repayment lifecycle."
+                    />
+                </div>
                 <Input
                     className="w-full bg-card sm:w-96"
                     placeholder="Search loan or borrower..."

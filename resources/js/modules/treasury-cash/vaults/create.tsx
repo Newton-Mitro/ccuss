@@ -14,7 +14,7 @@ import {
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -65,14 +65,16 @@ export default function Create({ vault, branch_locked = false }: any) {
             <Head title={editing ? 'Edit Vault' : 'Create Vault'} />
 
             <div className="w-full max-w-4xl space-y-5 pb-24 text-foreground">
-                <ResourcePageHeader
-                    title={editing ? 'Edit Vault' : 'Create Vault'}
-                    description={
-                        editing
-                            ? 'Manage vault identification, branch assignment, and cash holding limits.'
-                            : 'Set up a secure branch cash location with clearly defined holding limits.'
-                    }
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={editing ? 'Edit Vault' : 'Create Vault'}
+                        description={
+                            editing
+                                ? 'Manage vault identification, branch assignment, and cash holding limits.'
+                                : 'Set up a secure branch cash location with clearly defined holding limits.'
+                        }
+                    />
+                </div>
 
                 {/* Overview */}
                 <div className="overflow-hidden rounded-xl border bg-card">

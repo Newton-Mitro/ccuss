@@ -1,32 +1,32 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
+import {
+    ResourceTableCard,
+    ResourceToolbar,
+    StatusBadge,
+} from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import { formatDate } from '@/lib/date_util';
 import type {
     VoucherIndexPageProps,
     VoucherListItem,
 } from '@/modules/general-accounting/types/general-accounting';
+import { transactionStatus } from '@/modules/general-accounting/vouchers/data/transaction_statuses';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourcePageHeader,
-    ResourceTableCard,
-    ResourceToolbar,
-    StatusBadge,
-} from '@/components/resource-page-shell';
-import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { formatDate } from '@/lib/date_util';
-import { transactionStatus } from '@/modules/general-accounting/vouchers/data/transaction_statuses';
 
 export default function Index() {
     const { vouchers, filters } = usePage<VoucherIndexPageProps>().props;
@@ -69,10 +69,12 @@ export default function Index() {
         >
             <Head title="Vouchers" />
             <div className="space-y-4 p-2 text-foreground">
-                <ResourcePageHeader
-                    title="Vouchers"
-                    description="Manage all vouchers with ease"
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Vouchers"
+                        description="Manage all vouchers with ease"
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             {createTypes.map((item) => (
                                 <Button
@@ -91,8 +93,8 @@ export default function Index() {
                                 </Button>
                             ))}
                         </div>
-                    }
-                />
+                    </div>
+                </div>
                 <ResourceToolbar>
                     <div className="flex w-full flex-col justify-between gap-2 sm:flex-row sm:items-center">
                         {/* Search */}

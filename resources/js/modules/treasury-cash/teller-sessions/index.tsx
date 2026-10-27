@@ -1,8 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
@@ -160,11 +158,13 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Teller Sessions" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Teller Sessions"
-                    description="Review teller session status and cash position for each business day."
-                    action={
-                        canOpen ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Teller Sessions"
+                        description="Review teller session status and cash position for each business day."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canOpen ? (
                             <Button
                                 type="button"
                                 disabled={!branch_day}
@@ -182,9 +182,9 @@ export default function Index() {
                                 <Plus className="h-4 w-4" />
                                 Open teller session
                             </Button>
-                        ) : null
-                    }
-                />
+                        ) : null}
+                    </div>
+                </div>
                 {!branch_day && canOpen && (
                     <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-900 dark:text-amber-200">
                         Open a branch day before creating a teller session.

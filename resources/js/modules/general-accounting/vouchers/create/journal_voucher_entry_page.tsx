@@ -1,8 +1,6 @@
+import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import { StatusBadge } from '@/components/resource-page-shell';
 import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +9,6 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
-import { Plus, Trash2 } from 'lucide-react';
-import React, { useState } from 'react';
-import { route } from 'ziggy-js';
 import type {
     Account,
     CostCenter,
@@ -23,7 +16,11 @@ import type {
     FiscalPeriod,
     Party,
 } from '@/modules/general-accounting/types/vouchers/create/journal_voucher_entry_page.interfaces';
-
+import { BreadcrumbItem } from '@/types';
+import { Head, useForm, usePage } from '@inertiajs/react';
+import { Plus, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { route } from 'ziggy-js';
 
 const emptyEntry = (): Entry => ({
     account_id: '',
@@ -512,10 +509,12 @@ export default function JournalVoucherEntryPage() {
             <Head title={`${data.voucher_type} Voucher`} />
 
             <div className="space-y-3">
-                <ResourcePageHeader
-                    title={mode.label}
-                    description={mode.description}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={mode.label}
+                        description={mode.description}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge
                             tone={
                                 balanced && !accountingIssue
@@ -529,8 +528,8 @@ export default function JournalVoucherEntryPage() {
                                   ? 'Needs review'
                                   : 'Needs balancing'}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 <form
                     onSubmit={submit}

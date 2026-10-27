@@ -1,12 +1,15 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
+import {
+    CostCenterDetailsDialog,
+    type CostCenter,
+} from '@/modules/general-accounting/cost-centers/cost-center-dialog';
+import type { Props } from '@/modules/general-accounting/types/cost-centers/index.interfaces';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
@@ -19,9 +22,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
-import { CostCenterDetailsDialog, type CostCenter } from '@/modules/general-accounting/cost-centers/cost-center-dialog';
-import type { Props } from '@/modules/general-accounting/types/cost-centers/index.interfaces';
-
 
 export default function CostCenterIndex() {
     const { costCenters, filters } = usePage<Props>().props;
@@ -224,18 +224,20 @@ export default function CostCenterIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cost Centers" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Cost Centers"
-                    description="Track expenses by department, branch, project, or activity."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Cost Centers"
+                        description="Track expenses by department, branch, project, or activity."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild size="sm">
                             <Link href={route('cost-centers.create')}>
                                 <Plus className="mr-1 h-4 w-4" /> Add Cost
                                 Center
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <Input

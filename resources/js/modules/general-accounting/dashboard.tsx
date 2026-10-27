@@ -2,13 +2,14 @@ import {
     DashboardMetricGrid,
     DashboardQuickLinks,
 } from '@/components/dashboard-summary';
-import GeneralAccountingDashboardCharts from '@/modules/general-accounting/components/general-accounting-dashboard-charts';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import GeneralAccountingDashboardCharts from '@/modules/general-accounting/components/general-accounting-dashboard-charts';
+import type { GeneralAccountingDashboardProps } from '@/modules/general-accounting/types/dashboard.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -22,8 +23,6 @@ import {
     Wallet,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { GeneralAccountingDashboardProps } from '@/modules/general-accounting/types/dashboard.interfaces';
-
 
 const links = [
     {
@@ -96,10 +95,12 @@ export default function GeneralAccountingDashboard() {
 
             <div className="space-y-5 text-foreground">
                 {/* Page Header */}
-                <ResourcePageHeader
-                    title="General Accounting"
-                    description="Monitor the organization ledger, vouchers, fiscal periods, and budgets."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="General Accounting"
+                        description="Monitor the organization ledger, vouchers, fiscal periods, and budgets."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge
                             tone={
                                 stats.openFiscalPeriods > 0
@@ -111,8 +112,8 @@ export default function GeneralAccountingDashboard() {
                                 ? `${stats.openFiscalPeriods} period${stats.openFiscalPeriods === 1 ? '' : 's'} open`
                                 : 'No fiscal period open'}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Accounting Metrics */}
                 <DashboardMetricGrid metrics={metrics} />

@@ -1,16 +1,14 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { CashAdjustmentIndexProps } from '@/modules/treasury-cash/types/cash-adjustments';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     CheckCircle2,
@@ -63,11 +61,13 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cash Adjustments" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Cash Adjustments"
-                    description="Approve and post teller shortages and excesses after cash verification."
-                    action={
-                        canCreate ? (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Cash Adjustments"
+                        description="Approve and post teller shortages and excesses after cash verification."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canCreate ? (
                             <Button asChild>
                                 <Link
                                     href={route(
@@ -78,9 +78,9 @@ export default function Index() {
                                     Create cash adjustment
                                 </Link>
                             </Button>
-                        ) : undefined
-                    }
-                />
+                        ) : undefined}
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search teller, type, reason, or status..."

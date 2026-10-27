@@ -1,6 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -10,12 +10,11 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDateTime } from '@/lib/date_util';
+import type { Props } from '@/modules/financial-services/types/fines/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/fines/index.types';
-
 
 export default function FinesIndex() {
     const { fines, filters } = usePage<Props>().props;
@@ -46,10 +45,12 @@ export default function FinesIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Account Fines" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Account Fines"
-                    description="Review assessed fines or waive authorized balances."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Account Fines"
+                        description="Review assessed fines or waive authorized balances."
+                    />
+                </div>
                 <Input
                     className="w-full bg-card sm:w-96"
                     placeholder="Search account, rule, or status..."

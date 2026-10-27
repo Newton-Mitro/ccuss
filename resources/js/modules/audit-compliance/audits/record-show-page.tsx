@@ -1,9 +1,8 @@
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Props } from '@/modules/audit-compliance/types/audits/record-show-page.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
@@ -16,8 +15,6 @@ import {
     UserRound,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/audit-compliance/types/audits/record-show-page.interfaces';
-
 
 function statusTone(status: string) {
     if (['APPROVED', 'COMPLIANT', 'ACCEPTED', 'COMPLETED'].includes(status)) {
@@ -65,10 +62,12 @@ export default function RecordShowPage({
             <Head title={`${record.reference} · ${record.title}`} />
 
             <div className="mx-auto w-full max-w-6xl space-y-6 pb-8 text-foreground">
-                <ResourcePageHeader
-                    title={record.title}
-                    description={`${register.singular} · ${record.reference}`}
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <HeadingSmall
+                        title={record.title}
+                        description={`${register.singular} · ${record.reference}`}
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             <Button variant="outline" asChild>
                                 <Link href={route(`${register.route}.index`)}>
@@ -90,9 +89,8 @@ export default function RecordShowPage({
                                 </Button>
                             )}
                         </div>
-                    }
-                    className="rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:p-6"
-                />
+                    </div>
+                </div>
 
                 <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
                     <div className="space-y-5">

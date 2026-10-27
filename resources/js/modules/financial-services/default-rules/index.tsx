@@ -1,19 +1,18 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Props } from '@/modules/financial-services/types/default-rules/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/default-rules/index.types';
-
 
 export default function DefaultRulesIndex() {
     const { rules, auth } = usePage<Props>().props;
@@ -58,11 +57,13 @@ export default function DefaultRulesIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Default Rules" />
             <div className="space-y-5">
-                <ResourcePageHeader
-                    title="Default rules"
-                    description="Manage effective account and product fine rules."
-                    action={
-                        canUpdate && (
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Default rules"
+                        description="Manage effective account and product fine rules."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        {canUpdate && (
                             <Button asChild>
                                 <Link
                                     href={route('account-default-rules.create')}
@@ -71,9 +72,9 @@ export default function DefaultRulesIndex() {
                                     Create rule
                                 </Link>
                             </Button>
-                        )
-                    }
-                />
+                        )}
+                    </div>
+                </div>
                 <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h2 className="text-sm font-semibold">

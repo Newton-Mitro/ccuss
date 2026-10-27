@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -132,10 +132,12 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Teller Transactions" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Teller Transactions"
-                    description="Review and post pending deposits and withdrawals for the active branch."
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Teller Transactions"
+                        description="Review and post pending deposits and withdrawals for the active branch."
+                    />
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search transaction, teller, type, or status..."

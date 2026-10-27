@@ -1,7 +1,7 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
     ResourceEmptyState,
-    ResourcePageHeader,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { PettyCashIndexProps } from '@/modules/treasury-cash/types/petty-cash-accounts';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, WalletCards } from 'lucide-react';
 import { useEffect } from 'react';
@@ -56,17 +56,19 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Petty Cash Accounts" />
             <div className="space-y-4 text-foreground">
-                <ResourcePageHeader
-                    title="Petty Cash Accounts"
-                    description="Review petty cash funds, custodians, limits, and available balances."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Petty Cash Accounts"
+                        description="Review petty cash funds, custodians, limits, and available balances."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild>
                             <Link href={route('petty-cash-accounts.create')}>
                                 Create Fund
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-80"
                     placeholder="Search fund, code, or branch..."

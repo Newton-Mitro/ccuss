@@ -1,17 +1,17 @@
+import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 import type { ProductPoliciesPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Edit2, FileText } from 'lucide-react';
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
-import DataTablePagination from '@/components/data-table-pagination';
 
 export default function ProductPoliciesIndex() {
     const {
@@ -66,22 +66,24 @@ export default function ProductPoliciesIndex() {
                 }
             />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title={
-                        family === 'loan'
-                            ? 'Loan product policies'
-                            : family === 'deposit'
-                              ? 'Deposit product policies'
-                              : 'Product policies'
-                    }
-                    description={
-                        family === 'loan'
-                            ? 'Configure operating rules for loan products.'
-                            : family === 'deposit'
-                              ? 'Configure operating rules for savings, share, and deposit products.'
-                              : 'Operational rules and policy provenance for every financial product.'
-                    }
-                />
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title={
+                            family === 'loan'
+                                ? 'Loan product policies'
+                                : family === 'deposit'
+                                  ? 'Deposit product policies'
+                                  : 'Product policies'
+                        }
+                        description={
+                            family === 'loan'
+                                ? 'Configure operating rules for loan products.'
+                                : family === 'deposit'
+                                  ? 'Configure operating rules for savings, share, and deposit products.'
+                                  : 'Operational rules and policy provenance for every financial product.'
+                        }
+                    />
+                </div>
 
                 <Input
                     className="w-full bg-card sm:w-80"

@@ -1,16 +1,18 @@
 import InputError from '@/components/input-error';
-import { ResourcePageHeader } from '@/components/resource-page-shell';
+
+import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/groups/form.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
-    ArrowLeft,
     ArrowDownLeft,
+    ArrowLeft,
     ArrowUpRight,
     Check,
     CircleHelp,
@@ -21,8 +23,6 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/general-accounting/types/chart-of-accounts/groups/form.interfaces';
-
 
 const types = ['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE'];
 
@@ -77,23 +77,29 @@ export default function AccountGroupForm({
                 title={editing ? 'Edit Account Group' : 'Create Account Group'}
             />
             <div className="mx-auto w-full max-w-6xl space-y-6 pb-8">
-                <ResourcePageHeader
-                    title={
-                        editing ? 'Edit Account Group' : 'Create Account Group'
-                    }
-                    description="Define a reporting group to organize related ledger accounts."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <HeadingSmall
+                        title={
+                            editing
+                                ? 'Edit Account Group'
+                                : 'Create Account Group'
+                        }
+                        description="Define a reporting group to organize related ledger accounts."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button variant="outline" asChild>
                             <Link href={route('account-groups.index')}>
                                 <ArrowLeft className="mr-2 size-4" />
                                 Back to groups
                             </Link>
                         </Button>
-                    }
-                    className="rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:p-6"
-                />
+                    </div>
+                </div>
 
-                <form onSubmit={submit} className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+                <form
+                    onSubmit={submit}
+                    className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]"
+                >
                     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
                         <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-5 py-4 sm:px-6">
                             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -169,8 +175,8 @@ export default function AccountGroupForm({
                                         Classification and hierarchy
                                     </h3>
                                     <p className="mt-1 text-xs text-muted-foreground">
-                                        Choose the accounting category and
-                                        where this group belongs.
+                                        Choose the accounting category and where
+                                        this group belongs.
                                     </p>
                                 </div>
                                 <div className="grid gap-4 sm:grid-cols-2">
@@ -200,10 +206,7 @@ export default function AccountGroupForm({
                                         <Select
                                             value={data.normal_balance}
                                             onChange={(value) =>
-                                                setData(
-                                                    'normal_balance',
-                                                    value,
-                                                )
+                                                setData('normal_balance', value)
                                             }
                                             options={[
                                                 {
@@ -261,8 +264,8 @@ export default function AccountGroupForm({
                                                 Active group
                                             </span>
                                             <span className="mt-0.5 block text-xs text-muted-foreground">
-                                                Available for classifying
-                                                ledger accounts.
+                                                Available for classifying ledger
+                                                accounts.
                                             </span>
                                         </span>
                                     </span>
@@ -354,7 +357,8 @@ export default function AccountGroupForm({
                                             Normal balance
                                         </dt>
                                         <dd className="flex items-center gap-1.5 text-xs font-medium">
-                                            {data.normal_balance === 'CREDIT' ? (
+                                            {data.normal_balance ===
+                                            'CREDIT' ? (
                                                 <ArrowUpRight className="size-3.5 text-sky-600" />
                                             ) : (
                                                 <ArrowDownLeft className="size-3.5 text-amber-600" />
@@ -390,7 +394,9 @@ export default function AccountGroupForm({
                                                         : 'bg-muted-foreground/50'
                                                 }`}
                                             />
-                                            {data.status ? 'Active' : 'Inactive'}
+                                            {data.status
+                                                ? 'Active'
+                                                : 'Inactive'}
                                         </dd>
                                     </div>
                                 </dl>

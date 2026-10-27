@@ -1,6 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
+import HeadingSmall from '@/components/heading-small';
 import {
-    ResourcePageHeader,
     ResourceTableCard,
     StatusBadge,
 } from '@/components/resource-page-shell';
@@ -10,13 +10,12 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/financial-services/types/dividends/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/dividends/index.types';
-
 
 export default function DividendsIndex() {
     const { declarations, filters } = usePage<Props>().props;
@@ -54,18 +53,20 @@ export default function DividendsIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Share Dividends" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Share Dividends"
-                    description="Declare, calculate, review, and approve member dividends."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Share Dividends"
+                        description="Declare, calculate, review, and approve member dividends."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <Button asChild>
                             <Link href={route('dividends.create')}>
                                 <Plus />
                                 Create declaration
                             </Link>
                         </Button>
-                    }
-                />
+                    </div>
+                </div>
                 <Input
                     className="w-full bg-card sm:w-96"
                     placeholder="Search declaration, status, or note..."

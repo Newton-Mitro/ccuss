@@ -1,8 +1,6 @@
 import DataTablePagination from '@/components/data-table-pagination';
-import {
-    ResourceEmptyState,
-    ResourcePageHeader,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { ResourceEmptyState } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
@@ -14,11 +12,11 @@ import {
 } from '@/components/ui/tooltip';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import type { BreadcrumbItem } from '@/types';
 import type {
     LoanApplication,
     LoanApplicationIndexPageProps,
 } from '@/modules/financial-services/types/financial-services';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { Eye, Pencil, Plus } from 'lucide-react';
 import { useEffect } from 'react';
@@ -121,10 +119,12 @@ export default function LoanApplicationsIndex() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Loan Applications" />
             <div className="space-y-4">
-                <ResourcePageHeader
-                    title="Loan applications"
-                    description="Originate, review, and decide customer loan requests."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Loan applications"
+                        description="Originate, review, and decide customer loan requests."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <div className="flex flex-wrap gap-2">
                             {canManageProtectionProducts && (
                                 <Button asChild size="sm" variant="outline">
@@ -144,8 +144,8 @@ export default function LoanApplicationsIndex() {
                                 </Link>
                             </Button>
                         </div>
-                    }
-                />
+                    </div>
+                </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-full sm:w-72">
                         <Input

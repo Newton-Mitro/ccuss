@@ -14,15 +14,12 @@ import {
 } from 'lucide-react';
 import { route } from 'ziggy-js';
 
-import {
-    ResourcePageHeader,
-    StatusBadge,
-} from '@/components/resource-page-shell';
+import HeadingSmall from '@/components/heading-small';
+import { StatusBadge } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import CustomerDashboardCharts from '@/modules/customers-kyc/components/customer-dashboard-charts';
-import { BreadcrumbItem } from '@/types';
 import type { CustomerKycDashboardProps } from '@/modules/customers-kyc/types/dashboard.interfaces';
-
+import { BreadcrumbItem } from '@/types';
 
 const links = [
     {
@@ -74,10 +71,12 @@ export default function Dashboard() {
 
             <div className="space-y-5 text-foreground">
                 {/* Header */}
-                <ResourcePageHeader
-                    title="Customer & KYC"
-                    description="Customer onboarding, records, and verification activities."
-                    action={
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                    <HeadingSmall
+                        title="Customer & KYC"
+                        description="Customer onboarding, records, and verification activities."
+                    />
+                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge
                             tone={totalPending > 0 ? 'warning' : 'success'}
                         >
@@ -85,8 +84,8 @@ export default function Dashboard() {
                                 ? `${totalPending.toLocaleString()} pending`
                                 : 'All clear'}
                         </StatusBadge>
-                    }
-                />
+                    </div>
+                </div>
 
                 {/* Summary metrics */}
                 <DashboardMetricGrid
