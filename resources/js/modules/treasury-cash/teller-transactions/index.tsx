@@ -5,14 +5,22 @@ import {
     StatusBadge,
 } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
-import { BreadcrumbItem } from '@/types';
 import type { TellerCashTransactionIndexProps } from '@/modules/treasury-cash/types/treasury-cash/teller-transactions';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     Ban,
     CheckCircle2,
@@ -23,14 +31,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { route } from 'ziggy-js';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 
 export default function Index() {
     const { transactions, filters, auth } =
@@ -199,6 +199,24 @@ export default function Index() {
                                                         {transaction.reference ??
                                                             '-'}
                                                     </div>
+                                                    {transaction.financial_transaction && (
+                                                        <Link
+                                                            href={route(
+                                                                'financial-transactions.show',
+                                                                transaction
+                                                                    .financial_transaction
+                                                                    .id,
+                                                            )}
+                                                            className="text-xs text-primary underline-offset-2 hover:underline"
+                                                            aria-label={`View financial transaction ${transaction.financial_transaction.transaction_no}`}
+                                                        >
+                                                            {
+                                                                transaction
+                                                                    .financial_transaction
+                                                                    .transaction_no
+                                                            }
+                                                        </Link>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
@@ -388,29 +406,29 @@ export default function Index() {
                 open={Boolean(viewingTransaction)}
                 onOpenChange={(open) => !open && setViewingTransaction(null)}
             >
-                <DialogContent>
-                    <DialogHeader>
+                <DialogContent className="max-h-[85vh] gap-3 overflow-y-auto p-4 sm:max-w-2xl">
+                    <DialogHeader className="gap-1">
                         <DialogTitle>Transaction details</DialogTitle>
                         <DialogDescription>
                             {viewingTransaction?.transaction_no}
                         </DialogDescription>
                     </DialogHeader>
                     {viewingTransaction && (
-                        <div className="space-y-4 text-sm">
-                            <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                        <div className="space-y-3 text-sm">
+                            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg border bg-muted/20 p-3 sm:grid-cols-3">
                                 <div>
-                                    <dt className="text-muted-foreground">
+                                    <dt className="text-xs text-muted-foreground">
                                         Type
                                     </dt>
-                                    <dd className="font-medium">
+                                    <dd className="leading-snug font-medium">
                                         {viewingTransaction.type}
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-muted-foreground">
+                                    <dt className="text-xs text-muted-foreground">
                                         Amount
                                     </dt>
-                                    <dd className="font-medium">
+                                    <dd className="leading-snug font-medium">
                                         {formatBDTCurrency(
                                             viewingTransaction.amount,
                                             false,
@@ -418,7 +436,7 @@ export default function Index() {
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-muted-foreground">
+                                    <dt className="text-xs text-muted-foreground">
                                         Status
                                     </dt>
                                     <dd className="font-medium">
@@ -426,41 +444,41 @@ export default function Index() {
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-muted-foreground">
+                                    <dt className="text-xs text-muted-foreground">
                                         Teller
                                     </dt>
-                                    <dd className="font-medium">
+                                    <dd className="leading-snug font-medium">
                                         {viewingTransaction.teller_session
                                             ?.teller?.name ?? '-'}
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-muted-foreground">
+                                    <dt className="text-xs text-muted-foreground">
                                         Business date
                                     </dt>
-                                    <dd className="font-medium">
+                                    <dd className="leading-snug font-medium">
                                         {viewingTransaction.branch_day
                                             ?.business_date ?? '-'}
                                     </dd>
                                 </div>
                                 <div>
-                                    <dt className="text-muted-foreground">
+                                    <dt className="text-xs text-muted-foreground">
                                         Requested
                                     </dt>
-                                    <dd className="font-medium">
+                                    <dd className="leading-snug font-medium">
                                         {viewingTransaction.requested_at ?? '-'}
                                     </dd>
                                 </div>
-                                <div className="col-span-2">
-                                    <dt className="text-muted-foreground">
+                                <div className="col-span-2 sm:col-span-3">
+                                    <dt className="text-xs text-muted-foreground">
                                         Reference
                                     </dt>
-                                    <dd className="font-medium">
+                                    <dd className="font-medium break-words">
                                         {viewingTransaction.reference || '-'}
                                     </dd>
                                 </div>
-                                <div className="col-span-2">
-                                    <dt className="text-muted-foreground">
+                                <div className="col-span-2 sm:col-span-3">
+                                    <dt className="text-xs text-muted-foreground">
                                         Note
                                     </dt>
                                     <dd className="font-medium whitespace-pre-wrap">
@@ -468,8 +486,8 @@ export default function Index() {
                                     </dd>
                                 </div>
                                 {viewingTransaction.cancellation_reason && (
-                                    <div className="col-span-2">
-                                        <dt className="text-muted-foreground">
+                                    <div className="col-span-2 sm:col-span-3">
+                                        <dt className="text-xs text-muted-foreground">
                                             Cancellation reason
                                         </dt>
                                         <dd className="font-medium whitespace-pre-wrap">
@@ -478,28 +496,26 @@ export default function Index() {
                                             }
                                         </dd>
                                         <dd className="text-xs text-muted-foreground">
-                                            Cancelled at{' '}
                                             {viewingTransaction.cancelled_at ??
                                                 '-'}
-                                            {' by user '}
+                                            {' · User '}
                                             {viewingTransaction.cancelled_by ??
                                                 '-'}
                                         </dd>
                                     </div>
                                 )}
                                 {viewingTransaction.reversal_reason && (
-                                    <div className="col-span-2">
-                                        <dt className="text-muted-foreground">
+                                    <div className="col-span-2 sm:col-span-3">
+                                        <dt className="text-xs text-muted-foreground">
                                             Reversal reason
                                         </dt>
                                         <dd className="font-medium whitespace-pre-wrap">
                                             {viewingTransaction.reversal_reason}
                                         </dd>
                                         <dd className="text-xs text-muted-foreground">
-                                            Reversed at{' '}
                                             {viewingTransaction.reversed_at ??
                                                 '-'}
-                                            {' by user '}
+                                            {' · User '}
                                             {viewingTransaction.reversed_by ??
                                                 '-'}
                                         </dd>
@@ -507,37 +523,128 @@ export default function Index() {
                                 )}
                             </dl>
                             {viewingTransaction.financial_transaction && (
-                                <div className="space-y-2 border-t pt-3">
-                                    <h3 className="font-medium">
-                                        Ledger entries (
-                                        {
-                                            viewingTransaction
-                                                .financial_transaction
-                                                .transaction_no
-                                        }
-                                        )
-                                    </h3>
-                                    <div className="divide-y rounded-md border">
+                                <div className="space-y-2 rounded-lg border p-3">
+                                    <div className="flex flex-wrap items-start justify-between gap-2">
+                                        <div>
+                                            <h3 className="text-sm font-semibold">
+                                                Financial transaction
+                                            </h3>
+                                            <p className="text-xs text-muted-foreground">
+                                                {
+                                                    viewingTransaction
+                                                        .financial_transaction
+                                                        .transaction_no
+                                                }
+                                            </p>
+                                        </div>
+                                        <StatusBadge
+                                            tone={
+                                                viewingTransaction
+                                                    .financial_transaction
+                                                    .status === 'POSTED'
+                                                    ? 'success'
+                                                    : viewingTransaction
+                                                            .financial_transaction
+                                                            .status ===
+                                                        'CANCELLED'
+                                                      ? 'danger'
+                                                      : viewingTransaction
+                                                              .financial_transaction
+                                                              .status ===
+                                                          'REVERSED'
+                                                        ? 'info'
+                                                        : 'warning'
+                                            }
+                                        >
+                                            {
+                                                viewingTransaction
+                                                    .financial_transaction
+                                                    .status
+                                            }
+                                        </StatusBadge>
+                                    </div>
+                                    <dl className="grid grid-cols-2 gap-x-3 gap-y-2 sm:grid-cols-4">
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">
+                                                Type
+                                            </dt>
+                                            <dd className="leading-snug font-medium">
+                                                {
+                                                    viewingTransaction
+                                                        .financial_transaction
+                                                        .transaction_type
+                                                }
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">
+                                                Amount
+                                            </dt>
+                                            <dd className="leading-snug font-medium">
+                                                {formatBDTCurrency(
+                                                    viewingTransaction
+                                                        .financial_transaction
+                                                        .amount,
+                                                    false,
+                                                )}
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">
+                                                Date
+                                            </dt>
+                                            <dd className="leading-snug font-medium">
+                                                {viewingTransaction
+                                                    .financial_transaction
+                                                    .transaction_date ?? '-'}
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs text-muted-foreground">
+                                                Reference
+                                            </dt>
+                                            <dd className="leading-snug font-medium break-words">
+                                                {viewingTransaction
+                                                    .financial_transaction
+                                                    .reference || '-'}
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                    <h4 className="pt-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                        Ledger entries
+                                    </h4>
+                                    <div className="divide-y rounded-md border bg-muted/20">
                                         {viewingTransaction.financial_transaction.entries.map(
                                             (entry) => (
                                                 <div
                                                     key={entry.id}
-                                                    className="flex justify-between gap-3 px-3 py-2"
+                                                    className="flex items-start justify-between gap-3 px-2.5 py-2"
                                                 >
-                                                    <span>
-                                                        {entry.financial_account
-                                                            ?.account_no ??
-                                                            'Account'}
-                                                        {entry.financial_account
-                                                            ?.name
-                                                            ? ` · ${entry.financial_account.name}`
-                                                            : ''}
-                                                        {entry.description
-                                                            ? ` · ${entry.description}`
-                                                            : ''}
-                                                    </span>
-                                                    <span className="shrink-0">
-                                                        {entry.direction}{' '}
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium">
+                                                            {entry
+                                                                .financial_account
+                                                                ?.account_no ??
+                                                                'Account'}
+                                                            {entry
+                                                                .financial_account
+                                                                ?.name
+                                                                ? ` · ${entry.financial_account.name}`
+                                                                : ''}
+                                                        </p>
+                                                        {entry.description && (
+                                                            <p className="truncate text-xs text-muted-foreground">
+                                                                {
+                                                                    entry.description
+                                                                }
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <span className="shrink-0 text-right text-xs font-medium">
+                                                        <span className="text-muted-foreground">
+                                                            {entry.direction}
+                                                        </span>
+                                                        <br />
                                                         {formatBDTCurrency(
                                                             entry.amount,
                                                             false,

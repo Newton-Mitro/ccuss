@@ -294,12 +294,19 @@ Route::middleware(['auth', 'verified', 'organization'])
     });
 
 Route::middleware(['auth', 'verified', 'organization'])
-    ->prefix('teller-transactions')
+    ->prefix('teller-transaction-lists')
     ->name('teller-transactions.')
     ->group(function () {
         Route::get('/', [CashMovementController::class, 'tellerCashTransactions'])
             ->middleware('permission:cash_transactions.view')
             ->name('index');
+    });
+
+Route::middleware(['auth', 'verified', 'organization'])
+    ->prefix('teller-transactions')
+    ->name('teller-transactions.')
+    ->group(function () {
+
         Route::patch('/{transaction}', [CashMovementController::class, 'updateTellerCashTransaction'])
             ->middleware('permission:cash_transactions.update')
             ->name('update');

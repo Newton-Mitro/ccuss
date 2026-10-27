@@ -56,6 +56,13 @@ export const branchOperations: SidebarItem[] = [
                 permission: ['cash_transactions.view'],
                 children: [
                     {
+                        name: 'Teller Transactions',
+                        icon: <i className="fa-solid fa-receipt" />,
+                        path: '/teller-transaction-lists',
+                        match_path: 'teller-transaction-lists',
+                        permission: ['cash_transactions.view'],
+                    },
+                    {
                         name: 'Cash Deposit',
                         icon: <i className="fa-solid fa-arrow-down" />,
                         path: '/teller-transactions/deposit',
@@ -99,13 +106,6 @@ export const branchOperations: SidebarItem[] = [
                         icon: <i className="fa-solid fa-chart-column" />,
                         path: '/branch-cash-summaries',
                         match_path: 'branch-cash-summaries',
-                        permission: ['cash_transactions.view'],
-                    },
-                    {
-                        name: 'Teller Transactions',
-                        icon: <i className="fa-solid fa-receipt" />,
-                        path: '/teller-transactions',
-                        match_path: 'teller-transactions',
                         permission: ['cash_transactions.view'],
                     },
                 ],

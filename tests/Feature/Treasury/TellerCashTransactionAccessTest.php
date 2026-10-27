@@ -358,6 +358,26 @@ it('loads deposit and withdrawal forms with scoped teller sessions', function ()
 it('loads the teller transaction queue for users with view permission', function () {
     $fixture = tellerCashTransactionFixture();
     grantTellerCashTransactionViewPermission($fixture['user']);
+    $financialTransaction = FinancialTransaction::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'transaction_no' => 'FT-TELLER-QUEUE-001',
+        'transaction_type' => 'DEPOSIT',
+        'amount' => 250,
+        'status' => 'POSTED',
+    ]);
+    TellerCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'cash_location_id' => $fixture['location']->id,
+        'teller_session_id' => $fixture['session']->id,
+        'financial_transaction_id' => $financialTransaction->id,
+        'transaction_no' => 'TELLER-QUEUE-001',
+        'type' => 'DEPOSIT',
+        'amount' => 250,
+        'status' => 'POSTED',
+        'requested_by' => $fixture['user']->id,
+        'requested_at' => now(),
+    ]);
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -365,7 +385,13 @@ it('loads the teller transaction queue for users with view permission', function
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
             ->component('treasury-cash/teller-transactions/index')
-            ->has('transactions.data', 0));
+            ->has('transactions.data', 1)
+            ->where('transactions.data.0.financial_transaction.id', $financialTransaction->id)
+            ->where('transactions.data.0.financial_transaction.transaction_no', 'FT-TELLER-QUEUE-001')
+            ->where('transactions.data.0.financial_transaction.transaction_type', 'DEPOSIT')
+            ->where('transactions.data.0.financial_transaction.status', 'POSTED')
+            ->has('transactions.data.0.financial_transaction.entries', 1)
+            ->has('transactions.data.0.financial_transaction.entries.0.financial_account'));
 });
 
 it('loads the customer deposit page without a selected customer', function () {

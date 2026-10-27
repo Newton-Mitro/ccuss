@@ -28,8 +28,13 @@ export interface TellerCashTransactionListItem {
     reversed_by?: number | null;
     reversal_reason?: string | null;
     financial_transaction?: {
+        id: number;
         transaction_no: string;
+        transaction_type: string;
+        transaction_date: string;
+        amount: string | number;
         status: string;
+        reference?: string | null;
         entries: {
             id: number;
             direction: string;

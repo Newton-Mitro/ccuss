@@ -4,12 +4,14 @@ namespace App\TreasuryAndCash\Application;
 
 use App\FinancialServices\Models\FinancialAccount;
 use App\TreasuryAndCash\Models\BankAccount;
+use App\TreasuryAndCash\Models\BankTransaction;
 use App\TreasuryAndCash\Models\BranchDay;
-use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\CashAdjustment;
+use App\TreasuryAndCash\Models\CashLocation;
 use App\TreasuryAndCash\Models\CashTransfer;
 use App\TreasuryAndCash\Models\TellerCashTransaction;
 use App\TreasuryAndCash\Models\TellerSession;
+use App\TreasuryAndCash\Models\VaultSession;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CashMovementDataService
@@ -86,7 +88,11 @@ class CashMovementDataService
                     ->where('organization_id', $organizationId)
                     ->where('branch_id', $branchId);
             })
-            ->with(['tellerSession.teller', 'branchDay'])
+            ->with([
+                'tellerSession.teller',
+                'branchDay',
+                'financialTransaction.entries.financialAccount',
+            ])
             ->latest('requested_at');
 
         if (!empty($search)) {
@@ -120,29 +126,87 @@ class CashMovementDataService
             ->where('branch_id', $branchId)
             ->where('is_active', true)
             ->orderBy('name');
+        $branchDay = BranchDay::query()
+            ->where('organization_id', $organizationId)
+            ->where('branch_id', $branchId)
+            ->where('status', BranchDay::STATUS_OPEN)
+            ->latest('business_date')
+            ->first();
+        $tellerBalances = $branchDay
+            ? TellerSession::query()
+                ->where('branch_day_id', $branchDay->id)
+                ->where('status', 'OPEN')
+                ->get(['teller_id', 'opening_cash', 'expected_cash'])
+                ->keyBy('teller_id')
+            : collect();
+        $vaultBalances = $branchDay
+            ? VaultSession::query()
+                ->where('branch_day_id', $branchDay->id)
+                ->where('status', 'OPEN')
+                ->get(['vault_id', 'opening_cash', 'expected_cash'])
+                ->keyBy('vault_id')
+            : collect();
+        $locationsForType = fn (?string $type) => (clone $locations)
+            ->where('type', $type)
+            ->with([
+                'teller:id,cash_location_id',
+                'vault:id,cash_location_id',
+            ])
+            ->get(['id', 'code', 'name', 'type'])
+            ->map(function (CashLocation $location) use ($tellerBalances, $vaultBalances) {
+                if ($location->type === 'TELLER') {
+                    $session = $tellerBalances->get($location->teller?->id);
+                    $location->setAttribute(
+                        'current_balance',
+                        $session
+                            ? (float) ($session->expected_cash ?? $session->opening_cash)
+                            : null,
+                    );
+                } elseif ($location->type === 'VAULT') {
+                    $session = $vaultBalances->get($location->vault?->id);
+                    $location->setAttribute(
+                        'current_balance',
+                        $session
+                            ? (float) ($session->expected_cash ?? $session->opening_cash)
+                            : null,
+                    );
+                }
+
+                return $location;
+            });
+        $bankAccounts = in_array($transferType, ['BANK_TO_VAULT', 'VAULT_TO_BANK'], true)
+            ? BankAccount::query()
+                ->where('organization_id', $organizationId)
+                ->where('status', 'ACTIVE')
+                ->where(fn ($query) => $query->whereNull('branch_id')->orWhere('branch_id', $branchId))
+                ->orderBy('account_name')
+                ->get(['id', 'account_name', 'account_number', 'opening_balance'])
+            : collect();
+        $postedBankTransactions = $bankAccounts->isNotEmpty()
+            ? BankTransaction::query()
+                ->whereIn('bank_account_id', $bankAccounts->pluck('id'))
+                ->where('status', 'POSTED')
+                ->get(['bank_account_id', 'type', 'amount'])
+                ->groupBy('bank_account_id')
+            : collect();
+        $bankAccounts = $bankAccounts->map(function (BankAccount $account) use ($postedBankTransactions) {
+            $balance = (float) $account->opening_balance;
+            foreach ($postedBankTransactions->get($account->id, collect()) as $transaction) {
+                $balance += in_array($transaction->type, ['DEPOSIT', 'TRANSFER_IN', 'INTEREST'], true)
+                    ? (float) $transaction->amount
+                    : -(float) $transaction->amount;
+            }
+            $account->setAttribute('current_balance', $balance);
+
+            return $account;
+        });
 
         return [
             'transfer_type' => $transferType,
-            'branch_day' => BranchDay::query()
-                ->where('organization_id', $organizationId)
-                ->where('branch_id', $branchId)
-                ->where('status', BranchDay::STATUS_OPEN)
-                ->latest('business_date')
-                ->first(),
-            'from_cash_locations' => (clone $locations)
-                ->where('type', $sourceType)
-                ->get(['id', 'code', 'name', 'type']),
-            'to_cash_locations' => (clone $locations)
-                ->where('type', $destinationType)
-                ->get(['id', 'code', 'name', 'type']),
-            'bank_accounts' => in_array($transferType, ['BANK_TO_VAULT', 'VAULT_TO_BANK'], true)
-                ? BankAccount::query()
-                    ->where('organization_id', $organizationId)
-                    ->where('status', 'ACTIVE')
-                    ->where(fn($query) => $query->whereNull('branch_id')->orWhere('branch_id', $branchId))
-                    ->orderBy('account_name')
-                    ->get(['id', 'account_name', 'account_number'])
-                : [],
+            'branch_day' => $branchDay,
+            'from_cash_locations' => $locationsForType($sourceType),
+            'to_cash_locations' => $locationsForType($destinationType),
+            'bank_accounts' => $bankAccounts,
         ];
     }
 

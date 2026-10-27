@@ -74,6 +74,14 @@ export interface CashLocationOption {
     code: string;
     name: string;
     type?: string;
+    current_balance?: string | number | null;
+}
+
+export interface BankAccountOption {
+    id: number;
+    account_name: string;
+    account_number: string;
+    current_balance: string | number;
 }
 
 export interface CashBranchOption {
@@ -93,11 +101,7 @@ export interface TellerTransferPageProps extends SharedData {
         | 'VAULT_TO_BANK';
     from_cash_locations: CashLocationOption[];
     to_cash_locations: CashLocationOption[];
-    bank_accounts?: {
-        id: number;
-        account_name: string;
-        account_number: string;
-    }[];
+    bank_accounts?: BankAccountOption[];
 }
 
 export interface ChequeBookCreatePageProps extends SharedData {

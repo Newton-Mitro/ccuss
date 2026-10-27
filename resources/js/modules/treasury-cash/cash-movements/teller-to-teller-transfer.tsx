@@ -4,9 +4,10 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
-import type { BreadcrumbItem } from '@/types';
 import type { TellerTransferPageProps } from '@/modules/treasury-cash/types/treasury-cash/forms';
+import type { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowDownUp,
@@ -134,13 +135,22 @@ export default function TellerToTellerTransfer() {
     const destinationValue = isVaultToBank
         ? data.bank_account_id
         : data.to_cash_location_id;
+    const selectedSource = from_cash_locations.find(
+        (location) => String(location.id) === data.from_cash_location_id,
+    );
+    const selectedDestination = to_cash_locations.find(
+        (location) => String(location.id) === data.to_cash_location_id,
+    );
+    const selectedBankAccount = bank_accounts.find(
+        (account) => String(account.id) === data.bank_account_id,
+    );
 
     const sourceOptions = isBankToVault
         ? [
               { value: '', label: 'Select bank account' },
               ...bank_accounts.map((account) => ({
                   value: String(account.id),
-                  label: `${account.account_name} (${account.account_number})`,
+                  label: `${account.account_name} (${account.account_number}) · ${formatBDTCurrency(account.current_balance, false)}`,
               })),
           ]
         : [
@@ -152,7 +162,7 @@ export default function TellerToTellerTransfer() {
                   )
                   .map((location) => ({
                       value: String(location.id),
-                      label: `${location.name} (${location.code})`,
+                      label: `${location.name} (${location.code}) · ${location.current_balance == null ? 'No open session' : formatBDTCurrency(location.current_balance, false)}`,
                   })),
           ];
 
@@ -161,7 +171,7 @@ export default function TellerToTellerTransfer() {
               { value: '', label: 'Select bank account' },
               ...bank_accounts.map((account) => ({
                   value: String(account.id),
-                  label: `${account.account_name} (${account.account_number})`,
+                  label: `${account.account_name} (${account.account_number}) · ${formatBDTCurrency(account.current_balance, false)}`,
               })),
           ]
         : [
@@ -173,7 +183,7 @@ export default function TellerToTellerTransfer() {
                   )
                   .map((location) => ({
                       value: String(location.id),
-                      label: `${location.name} (${location.code})`,
+                      label: `${location.name} (${location.code}) · ${location.current_balance == null ? 'No open session' : formatBDTCurrency(location.current_balance, false)}`,
                   })),
           ];
 
@@ -290,6 +300,40 @@ export default function TellerToTellerTransfer() {
                                     </p>
                                 )}
 
+                                {selectedSource && (
+                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                        <span className="text-muted-foreground">
+                                            Current{' '}
+                                            {selectedSource.type === 'VAULT'
+                                                ? 'vault'
+                                                : 'teller'}{' '}
+                                            balance
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {selectedSource.current_balance ==
+                                            null
+                                                ? 'No open session'
+                                                : formatBDTCurrency(
+                                                      selectedSource.current_balance,
+                                                      false,
+                                                  )}
+                                        </span>
+                                    </p>
+                                )}
+                                {isBankToVault && selectedBankAccount && (
+                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                        <span className="text-muted-foreground">
+                                            Current bank balance
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {formatBDTCurrency(
+                                                selectedBankAccount.current_balance,
+                                                false,
+                                            )}
+                                        </span>
+                                    </p>
+                                )}
+
                                 {isBankToVault && errors.bank_account_id && (
                                     <p className="text-sm text-destructive">
                                         {errors.bank_account_id}
@@ -342,6 +386,41 @@ export default function TellerToTellerTransfer() {
                                 {errors.to_cash_location_id && (
                                     <p className="text-sm text-destructive">
                                         {errors.to_cash_location_id}
+                                    </p>
+                                )}
+
+                                {selectedDestination && (
+                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                        <span className="text-muted-foreground">
+                                            Current{' '}
+                                            {selectedDestination.type ===
+                                            'VAULT'
+                                                ? 'vault'
+                                                : 'teller'}{' '}
+                                            balance
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {selectedDestination.current_balance ==
+                                            null
+                                                ? 'No open session'
+                                                : formatBDTCurrency(
+                                                      selectedDestination.current_balance,
+                                                      false,
+                                                  )}
+                                        </span>
+                                    </p>
+                                )}
+                                {isVaultToBank && selectedBankAccount && (
+                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                        <span className="text-muted-foreground">
+                                            Current bank balance
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {formatBDTCurrency(
+                                                selectedBankAccount.current_balance,
+                                                false,
+                                            )}
+                                        </span>
                                     </p>
                                 )}
 

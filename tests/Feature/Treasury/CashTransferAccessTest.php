@@ -251,7 +251,9 @@ it('loads the teller-to-teller transfer form with scoped transfer data', functio
             ->where('transfer_type', 'TELLER_TO_TELLER')
             ->has('from_cash_locations', 2)
             ->has('to_cash_locations', 2)
-            ->where('from_cash_locations.0.type', 'TELLER'));
+            ->where('from_cash_locations.0.type', 'TELLER')
+            ->where('from_cash_locations.0.current_balance', 5000)
+            ->where('to_cash_locations.1.current_balance', 100));
 });
 
 it('filters vault transfer options to the correct source and destination types', function () {
@@ -266,8 +268,10 @@ it('filters vault transfer options to the correct source and destination types',
             ->where('transfer_type', 'VAULT_TO_TELLER')
             ->has('from_cash_locations', 1)
             ->where('from_cash_locations.0.type', 'VAULT')
+            ->where('from_cash_locations.0.current_balance', 1000)
             ->has('to_cash_locations', 2)
-            ->where('to_cash_locations.0.type', 'TELLER'));
+            ->where('to_cash_locations.0.type', 'TELLER')
+            ->where('to_cash_locations.0.current_balance', 5000));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -278,7 +282,8 @@ it('filters vault transfer options to the correct source and destination types',
             ->has('from_cash_locations', 2)
             ->where('from_cash_locations.0.type', 'TELLER')
             ->has('to_cash_locations', 1)
-            ->where('to_cash_locations.0.type', 'VAULT'));
+            ->where('to_cash_locations.0.type', 'VAULT')
+            ->where('to_cash_locations.0.current_balance', 1000));
 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
@@ -322,7 +327,9 @@ it('loads active bank accounts as the source for bank-to-vault funding', functio
             ->has('from_cash_locations', 0)
             ->has('to_cash_locations', 1)
             ->has('bank_accounts', 1)
-            ->where('bank_accounts.0.id', $bankAccount->id));
+            ->where('bank_accounts.0.id', $bankAccount->id)
+            ->where('bank_accounts.0.current_balance', 10000)
+            ->where('to_cash_locations.0.current_balance', 1000));
 });
 
 it('does not expose cash transfer forms without create permission', function () {
