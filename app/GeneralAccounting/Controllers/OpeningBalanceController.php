@@ -2,6 +2,7 @@
 
 namespace App\GeneralAccounting\Controllers;
 
+use App\GeneralAccounting\Application\CutoverBundleImportService;
 use App\GeneralAccounting\Application\MemberOpeningBalanceImportService;
 use App\GeneralAccounting\Application\OpeningBalanceService;
 use App\GeneralAccounting\Models\FiscalPeriod;
@@ -11,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use ZipArchive;
 
 class OpeningBalanceController extends Controller
 {
@@ -19,7 +21,7 @@ class OpeningBalanceController extends Controller
     ) {
         $this->middleware('permission:accounting.opening_balances.view')->only(['index']);
         $this->middleware('permission:accounting.opening_balances.create')
-            ->only(['create', 'store', 'memberImport', 'memberImportTemplate', 'storeMemberImport']);
+            ->only(['create', 'store', 'memberImport', 'memberImportTemplate', 'storeMemberImport', 'cutoverImport', 'cutoverImportTemplate', 'storeCutoverImport']);
     }
 
     public function index(Request $request): Response
@@ -100,6 +102,86 @@ class OpeningBalanceController extends Controller
             'success',
             "{$result['count']} member account balances imported. Opening voucher {$result['voucher']->voucher_no} was posted.",
         );
+    }
+
+    public function cutoverImport(Request $request): Response
+    {
+        return Inertia::render('general-accounting/opening-balances/cutover-import', [
+            'fiscalPeriods' => $this->fiscalPeriods($request),
+            'accounts' => $this->accounts($request),
+        ]);
+    }
+
+    public function cutoverImportTemplate(CutoverBundleImportService $importService)
+    {
+        $path = tempnam(sys_get_temp_dir(), 'cutover-template-');
+        if ($path === false) {
+            throw new \RuntimeException('Could not create the cutover template archive.');
+        }
+
+        $zip = new ZipArchive;
+        if ($zip->open($path, ZipArchive::OVERWRITE) !== true) {
+            unlink($path);
+            throw new \RuntimeException('Could not create the cutover template ZIP.');
+        }
+        foreach ($importService->templates() as $template) {
+            if (! $zip->addFromString($template['name'], $template['contents'])) {
+                $zip->close();
+                unlink($path);
+                throw new \RuntimeException("Could not add {$template['name']} to the template ZIP.");
+            }
+        }
+        $zip->close();
+
+        return response()->download($path, 'cutover-import-templates.zip', [
+            'Content-Type' => 'application/zip',
+        ])->deleteFileAfterSend(true);
+    }
+
+    public function storeCutoverImport(Request $request, CutoverBundleImportService $importService)
+    {
+        $organizationId = $request->attributes->get('active_organization')->id;
+        $payload = $request->validate([
+            'fiscal_period_id' => [
+                'required',
+                'integer',
+                Rule::exists('fiscal_periods', 'id')->where(function ($query) use ($organizationId) {
+                    $query->whereExists(function ($subquery) use ($organizationId) {
+                        $subquery->selectRaw('1')
+                            ->from('fiscal_years')
+                            ->whereColumn('fiscal_years.id', 'fiscal_periods.fiscal_year_id')
+                            ->where('organization_id', $organizationId);
+                    });
+                }),
+            ],
+            'cutover_date' => ['required', 'date_format:Y-m-d'],
+            'offset_account_id' => [
+                'required',
+                'integer',
+                Rule::exists('accounts', 'id')->where(fn ($query) => $query->where('organization_id', $organizationId)),
+            ],
+            'file' => ['required', 'file', 'mimes:zip', 'max:51200'],
+        ]);
+
+        try {
+            $result = $importService->import(
+                $payload['file'],
+                $organizationId,
+                $request->user()->id,
+                $payload['fiscal_period_id'],
+                $payload['offset_account_id'],
+                $payload['cutover_date'],
+            );
+        } catch (\InvalidArgumentException|\RuntimeException $exception) {
+            return back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        $message = "{$result['customers']} customers, {$result['accounts']} financial accounts, {$result['bank_accounts']} bank accounts, and {$result['cash_locations']} cash locations imported.";
+        if ($result['voucher']) {
+            $message .= " Opening voucher {$result['voucher']->voucher_no} was posted.";
+        }
+
+        return redirect()->route('financial-accounts.index')->with('success', $message);
     }
 
     public function store(Request $request)

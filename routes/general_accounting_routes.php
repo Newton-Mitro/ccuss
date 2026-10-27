@@ -160,4 +160,10 @@ Route::middleware(['auth', 'verified', 'organization'])->group(function () {
         ->name('opening-balances.member-import.template');
     Route::post('/opening-balances/member-import', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'storeMemberImport'])
         ->name('opening-balances.member-import.store');
+    Route::get('/opening-balances/cutover-import', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'cutoverImport'])
+        ->name('opening-balances.cutover-import');
+    Route::get('/opening-balances/cutover-import/template', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'cutoverImportTemplate'])
+        ->name('opening-balances.cutover-import.template');
+    Route::post('/opening-balances/cutover-import', [\App\GeneralAccounting\Controllers\OpeningBalanceController::class, 'storeCutoverImport'])
+        ->name('opening-balances.cutover-import.store');
 });

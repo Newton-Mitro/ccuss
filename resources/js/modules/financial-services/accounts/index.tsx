@@ -71,6 +71,13 @@ export default function FinancialAccountIndex() {
                         }
                     />
                     <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
+                        <Button asChild variant="outline">
+                            <Link
+                                href={route('opening-balances.cutover-import')}
+                            >
+                                Import cutover ZIP
+                            </Link>
+                        </Button>
                         {createRoute ? (
                             <Button asChild>
                                 <Link href={createRoute}>
