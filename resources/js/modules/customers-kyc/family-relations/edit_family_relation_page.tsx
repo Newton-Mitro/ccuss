@@ -7,41 +7,70 @@ import {
     UserRound,
     UsersRound,
 } from 'lucide-react';
-
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
+
 import BolderLessInfoBox from '@/components/borderless-info-box';
-import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem, SharedData } from '@/types';
+import { CustomerSearchBox } from '@/modules/customers-kyc/customers/components/customer-search-box';
+import { getRelations } from '@/modules/customers-kyc/family-relations/data/family_and_relative_relations';
 import type {
     Customer,
     CustomerFamilyRelation,
 } from '@/modules/customers-kyc/types/customer_kyc_module';
-import { CustomerSearchBox } from '@/modules/customers-kyc/customers/components/customer-search-box';
-import { getRelations } from '@/modules/customers-kyc/family-relations/data/family_and_relative_relations';
+import type { BreadcrumbItem, SharedData } from '@/types';
+
+const SectionHeader = ({
+    icon: Icon,
+    title,
+    description,
+    trailing,
+}: {
+    icon?: React.ElementType;
+    title: string;
+    description?: string;
+    trailing?: React.ReactNode;
+}) => (
+    <div className="flex items-center gap-2.5 border-b border-border bg-muted/20 px-3 py-2.5 sm:px-4">
+        {Icon && (
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <Icon className="size-4" />
+            </div>
+        )}
+        <div className="min-w-0 flex-1">
+            <h2 className="text-sm font-semibold">{title}</h2>
+            {description && (
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                    {description}
+                </p>
+            )}
+        </div>
+        {trailing}
+    </div>
+);
 
 const Edit = () => {
     const { family_relation } = usePage<
         SharedData & { family_relation: CustomerFamilyRelation }
     >().props;
+
     const customer = family_relation.customer;
 
     const [selectedRelative, setSelectedRelative] = useState<Customer | null>(
-        family_relation?.relative || null,
+        family_relation.relative || null,
     );
 
     useFlashToastHandler();
 
     const { data, setData, put, processing, errors } = useForm({
         customer_id: customer.id,
-        relative_id: family_relation?.relative_id || null,
-        relation_type: family_relation?.relation_type || '',
+        relative_id: family_relation.relative_id || null,
+        relation_type: family_relation.relation_type || '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -52,9 +81,7 @@ const Edit = () => {
                 family_relation.customer_id,
                 family_relation.id,
             ]),
-            {
-                preserveScroll: true,
-            },
+            { preserveScroll: true },
         );
     };
 
@@ -74,56 +101,68 @@ const Edit = () => {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Edit Family Relation" />
 
-            <div className="w-full max-w-6xl space-y-5 pb-8">
-                <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
+            <div className="w-full space-y-4 pb-6">
+                {/* Page header */}
+                <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
                             <GitBranch className="size-5" />
                         </div>
-                        <div>
-                            <HeadingSmall
-                                title="Edit Family Relation"
-                                description="Update the relative and relationship details for this customer."
-                            />
-                            <p className="mt-2 text-xs text-muted-foreground">
+
+                        <div className="min-w-0">
+                            <h1 className="text-lg font-semibold tracking-tight">
+                                Edit Family Relation
+                            </h1>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                Update the relative and relationship details.
+                                <span className="mx-1.5">·</span>
                                 Customer ID: #{customer.id}
                             </p>
                         </div>
                     </div>
-                    <Button variant="outline" asChild>
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        className="w-full sm:w-auto"
+                    >
                         <Link href={route('customers.show', customer.id)}>
-                            <ArrowLeft className="size-4" />
+                            <ArrowLeft className="mr-1.5 size-4" />
                             Back to customer
                         </Link>
                     </Button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                        <div className="flex items-center gap-2 border-b border-border bg-muted/30 px-4 py-3">
-                            <UserRound className="size-4 text-primary" />
-                            <h2 className="text-sm font-semibold">
-                                Customer Information
-                            </h2>
-                            <span className="ml-auto text-xs text-muted-foreground">
-                                {customer.customer_no}
-                            </span>
-                        </div>
-                        <div className="flex flex-col gap-4 p-4 sm:flex-row">
-                            <div className="flex items-center gap-3 sm:w-64 sm:shrink-0">
-                                <div className="size-14 shrink-0 overflow-hidden rounded-xl border border-border bg-muted">
-                                    {customer?.photo?.url ? (
+                <form onSubmit={handleSubmit} className="space-y-3.5">
+                    {/* Customer information */}
+                    <section className="overflow-hidden rounded-lg border border-border bg-card">
+                        <SectionHeader
+                            icon={UserRound}
+                            title="Customer Information"
+                            trailing={
+                                <span className="rounded-md border border-border bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground">
+                                    {customer.customer_no}
+                                </span>
+                            }
+                        />
+
+                        <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:p-3.5">
+                            <div className="flex min-w-0 items-center gap-3 sm:w-56 sm:shrink-0">
+                                <div className="size-11 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                                    {customer.photo?.url ? (
                                         <img
                                             src={customer.photo.url}
                                             alt={customer.name}
                                             className="size-full object-cover"
                                         />
                                     ) : (
-                                        <div className="flex size-full items-center justify-center text-lg font-semibold text-muted-foreground">
+                                        <div className="flex size-full items-center justify-center text-base font-semibold text-muted-foreground">
                                             {customer.name.charAt(0)}
                                         </div>
                                     )}
                                 </div>
+
                                 <div className="min-w-0">
                                     <Link
                                         href={route(
@@ -139,7 +178,8 @@ const Edit = () => {
                                     </p>
                                 </div>
                             </div>
-                            <div className="grid min-w-0 flex-1 grid-cols-1 gap-3 border-t border-border pt-4 text-xs sm:grid-cols-2 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 lg:grid-cols-4">
+
+                            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-4 gap-y-3 border-t border-border pt-3 sm:grid-cols-2 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 lg:grid-cols-4">
                                 <BolderLessInfoBox
                                     label="Phone"
                                     value={customer.primary_phone}
@@ -160,18 +200,22 @@ const Edit = () => {
                         </div>
                     </section>
 
-                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                        <div className="border-b border-border bg-muted/20 px-4 py-3">
-                            <h2 className="text-sm font-semibold">
-                                Relative Details
-                            </h2>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                Search and choose the customer to link as a
-                                relative.
-                            </p>
-                        </div>
-                        <div className="space-y-2 p-4">
-                            <Label htmlFor="relative">Relative</Label>
+                    {/* Relative selection */}
+                    <section className="overflow-hidden rounded-lg border border-border bg-card">
+                        <SectionHeader
+                            icon={UsersRound}
+                            title="Relative Details"
+                            description="Search for the customer to link as a relative."
+                        />
+
+                        <div className="space-y-2 p-3 sm:p-4">
+                            <Label
+                                htmlFor="relative"
+                                className="text-xs font-medium"
+                            >
+                                Relative
+                            </Label>
+
                             <CustomerSearchBox
                                 selectedCustomer={selectedRelative}
                                 onSelect={(relative: Customer) => {
@@ -179,19 +223,46 @@ const Edit = () => {
                                     setData('relative_id', relative.id);
                                 }}
                             />
+
                             <InputError message={errors.relative_id} />
+
+                            {selectedRelative && (
+                                <div className="flex items-center gap-2 rounded-md border border-primary/15 bg-primary/5 px-3 py-2">
+                                    <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                        <UserRound className="size-3.5" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-xs font-medium">
+                                            {selectedRelative.name}
+                                        </p>
+                                        <p className="text-[11px] text-muted-foreground">
+                                            {selectedRelative.customer_no}
+                                        </p>
+                                    </div>
+                                    <span className="shrink-0 text-[11px] text-muted-foreground">
+                                        Selected relative
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </section>
 
-                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                        <div className="flex items-center gap-2 border-b border-border bg-muted/20 px-4 py-3">
-                            <UsersRound className="size-4 text-primary" />
-                            <h2 className="text-sm font-semibold">
-                                Relationship
-                            </h2>
-                        </div>
-                        <div className="space-y-2 p-4">
-                            <Label htmlFor="relation_type">Relation Type</Label>
+                    {/* Relationship type */}
+                    <section className="overflow-hidden rounded-lg border border-border bg-card">
+                        <SectionHeader
+                            icon={GitBranch}
+                            title="Relationship"
+                            description="Choose the relationship between the customer and relative."
+                        />
+
+                        <div className="max-w-2xl space-y-2 p-3 sm:p-4">
+                            <Label
+                                htmlFor="relation_type"
+                                className="text-xs font-medium"
+                            >
+                                Relation Type
+                            </Label>
+
                             <Select
                                 id="relation_type"
                                 value={data.relation_type}
@@ -199,22 +270,35 @@ const Edit = () => {
                                     setData('relation_type', value)
                                 }
                                 options={relations}
+                                placeholder="Select relationship"
                             />
+
                             <InputError message={errors.relation_type} />
                         </div>
                     </section>
 
-                    <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
-                        <Button variant="outline" type="button" asChild>
+                    {/* Actions */}
+                    <div className="sticky bottom-0 z-10 -mx-1 flex flex-col-reverse gap-2 border-t border-border bg-background/95 px-1 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex-row sm:justify-end">
+                        <Button
+                            variant="outline"
+                            type="button"
+                            asChild
+                            className="w-full sm:w-auto"
+                        >
                             <Link href={route('customers.show', customer.id)}>
                                 Cancel
                             </Link>
                         </Button>
-                        <Button disabled={processing}>
+
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="w-full sm:w-auto"
+                        >
                             {processing ? (
-                                <Loader2 className="size-4 animate-spin" />
+                                <Loader2 className="mr-1.5 size-4 animate-spin" />
                             ) : (
-                                <CheckCheck className="size-4" />
+                                <CheckCheck className="mr-1.5 size-4" />
                             )}
                             Update Relation
                         </Button>

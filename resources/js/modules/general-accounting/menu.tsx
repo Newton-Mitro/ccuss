@@ -21,6 +21,20 @@ export const generalAccounting: SidebarItem[] = [
                 permission: ['accounting.view'],
                 children: [
                     {
+                        name: 'Fiscal Years',
+                        icon: <i className="fa-solid fa-calendar" />,
+                        path: '/fiscal-years',
+                        match_path: 'fiscal-years',
+                        permission: ['settings.fiscal_year.view'],
+                    },
+                    {
+                        name: 'Fiscal Periods',
+                        icon: <i className="fa-solid fa-calendar-days" />,
+                        path: '/fiscal-periods',
+                        match_path: 'fiscal-periods',
+                        permission: ['settings.fiscal.view'],
+                    },
+                    {
                         name: 'Chart of Accounts',
                         icon: <i className="fa-solid fa-list" />,
                         path: '/ledger-accounts',

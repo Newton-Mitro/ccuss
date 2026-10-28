@@ -20,9 +20,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDateTime } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type { CustomerIntroducer } from '@/modules/customers-kyc/types/customer_kyc_module';
 import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
+import type { CustomerIntroducer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { BreadcrumbItem, SharedData } from '@/types';
 
 export default function ShowIntroducer() {
     const { props } = usePage<
@@ -31,11 +31,10 @@ export default function ShowIntroducer() {
         }
     >();
 
-    const { introducer_request } = props;
+    const { introducer_request: record } = props;
 
     useFlashToastHandler();
 
-    const record = introducer_request;
     const introducedCustomer = record.introduced_customer;
     const introducerCustomer = record.introducer_customer;
 
@@ -87,11 +86,11 @@ export default function ShowIntroducer() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Introducer #${record.id}`} />
 
-            <div className="w-full max-w-7xl space-y-5 pb-6">
+            <div className="w-full space-y-4 pb-6">
                 {/* Page heading */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                             <GitBranch className="size-5" />
                         </div>
 
@@ -138,22 +137,25 @@ export default function ShowIntroducer() {
                     </div>
                 </div>
 
-                {/* Status overview */}
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {/* Summary */}
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     <SummaryTile
                         icon={<FileCheck2 className="size-4" />}
                         label="Record Reference"
                         value={`#${record.id}`}
                     />
+
                     <SummaryTile
                         icon={<UsersRound className="size-4" />}
                         label="Relationship"
                         value={record.relationship_type || 'Not specified'}
                     />
-                    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+
+                    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-3.5">
                         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                             <StatusIcon className="size-4" />
                         </div>
+
                         <div className="min-w-0 flex-1">
                             <p className="text-xs text-muted-foreground">
                                 Verification Status
@@ -171,33 +173,33 @@ export default function ShowIntroducer() {
                 </div>
 
                 {/* Main content */}
-                <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3">
-                    <div className="space-y-5 lg:col-span-2">
+                <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-3">
+                    <div className="min-w-0 space-y-4 xl:col-span-2">
                         {/* Relationship visualization */}
-                        <Card className="overflow-hidden rounded-xl border-border shadow-sm">
-                            <div className="flex items-center gap-2 border-b border-border bg-muted/20 px-4 py-3.5">
-                                <UsersRound className="size-4 text-primary" />
-                                <h2 className="text-sm font-semibold">
-                                    Customer Relationship
-                                </h2>
-                            </div>
+                        <Card className="overflow-hidden rounded-xl border-border shadow-none">
+                            <SectionHeading
+                                icon={<UsersRound className="size-4" />}
+                                title="Customer Relationship"
+                                description="Review the introducer and the customer they introduced."
+                            />
 
-                            <CardContent className="space-y-4 p-4 sm:p-5">
+                            <CardContent className="space-y-3 p-3 sm:p-4">
                                 <CustomerProfile
                                     title="Introducer"
                                     subtitle="Existing customer"
                                     customer={introducerCustomer}
                                 />
 
-                                <div className="flex items-center gap-3 pl-4 sm:pl-7">
+                                <div className="flex items-center gap-3 px-3 py-1 sm:px-5">
                                     <div className="flex size-9 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/5 text-primary">
                                         <ArrowRight className="size-4" />
                                     </div>
+
                                     <div className="min-w-0">
-                                        <p className="text-xs font-medium text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground">
                                             Relationship type
                                         </p>
-                                        <p className="mt-0.5 text-sm font-semibold text-foreground">
+                                        <p className="mt-0.5 text-sm font-semibold break-words text-foreground">
                                             {record.relationship_type ||
                                                 'Not specified'}
                                         </p>
@@ -212,16 +214,15 @@ export default function ShowIntroducer() {
                             </CardContent>
                         </Card>
 
-                        {/* Relationship details */}
-                        <Card className="overflow-hidden rounded-xl border-border shadow-sm">
-                            <div className="flex items-center gap-2 border-b border-border bg-muted/20 px-4 py-3.5">
-                                <ShieldCheck className="size-4 text-primary" />
-                                <h2 className="text-sm font-semibold">
-                                    Verification Details
-                                </h2>
-                            </div>
+                        {/* Verification details */}
+                        <Card className="overflow-hidden rounded-xl border-border shadow-none">
+                            <SectionHeading
+                                icon={<ShieldCheck className="size-4" />}
+                                title="Verification Details"
+                                description="Reference information for this relationship."
+                            />
 
-                            <CardContent className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5">
+                            <CardContent className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 sm:p-4">
                                 <BorderInfoBox
                                     label="Relationship Type"
                                     value={record.relationship_type}
@@ -246,89 +247,74 @@ export default function ShowIntroducer() {
                         </Card>
                     </div>
 
-                    {/* Right column */}
-                    <div className="space-y-5">
-                        {/* Approval panel */}
+                    {/* Review and audit sidebar */}
+                    <div className="min-w-0 space-y-4">
                         {status === 'PENDING' && (
-                            <Card className="overflow-hidden rounded-xl border-amber-500/30 shadow-sm">
-                                <div className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/5 px-4 py-3.5">
+                            <Card className="overflow-hidden rounded-xl border-amber-500/30 shadow-none">
+                                <div className="flex items-center gap-2 border-b border-amber-500/20 bg-amber-500/5 px-4 py-3">
                                     <Clock3 className="size-4 text-amber-600 dark:text-amber-400" />
-                                    <h2 className="text-sm font-semibold">
+                                    <h2 className="text-sm font-semibold text-foreground">
                                         Verification Review
                                     </h2>
                                 </div>
 
                                 <CardContent className="space-y-3 p-4">
                                     <p className="text-sm leading-relaxed text-muted-foreground">
-                                        Review the relationship details and
-                                        customer information before approving or
+                                        Review the customer information and
+                                        relationship before approving or
                                         rejecting this record.
                                     </p>
 
-                                    <div className="pt-1">
-                                        <ApprovalActions
-                                            approveUrl={route(
-                                                'customers.introducers.approve',
-                                                [
-                                                    record.introduced_customer_id,
-                                                    record.id,
-                                                ],
-                                            )}
-                                            rejectUrl={route(
-                                                'customers.introducers.reject',
-                                                [
-                                                    record.introduced_customer_id,
-                                                    record.id,
-                                                ],
-                                            )}
-                                            pending
-                                            maxRejectionLength={500}
-                                        />
-                                    </div>
+                                    <ApprovalActions
+                                        approveUrl={route(
+                                            'customers.introducers.approve',
+                                            [
+                                                record.introduced_customer_id,
+                                                record.id,
+                                            ],
+                                        )}
+                                        rejectUrl={route(
+                                            'customers.introducers.reject',
+                                            [
+                                                record.introduced_customer_id,
+                                                record.id,
+                                            ],
+                                        )}
+                                        pending
+                                        maxRejectionLength={500}
+                                    />
                                 </CardContent>
                             </Card>
                         )}
 
                         {status === 'VERIFIED' && (
-                            <div className="flex gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-4">
-                                <ShieldCheck className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                                <div>
-                                    <p className="text-sm font-semibold">
-                                        Verification Complete
-                                    </p>
-                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                        This introducer relationship has been
-                                        verified.
-                                    </p>
-                                </div>
-                            </div>
+                            <StatusNotice
+                                icon={<ShieldCheck className="size-5" />}
+                                title="Verification Complete"
+                                description="This introducer relationship has been verified."
+                                variant="success"
+                            />
                         )}
 
                         {status === 'REJECTED' && (
-                            <div className="flex gap-3 rounded-xl border border-destructive/25 bg-destructive/5 p-4">
-                                <XCircle className="mt-0.5 size-5 shrink-0 text-destructive" />
-                                <div>
-                                    <p className="text-sm font-semibold">
-                                        Record Rejected
-                                    </p>
-                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                        This introducer relationship was
-                                        rejected. Review the audit trail for
-                                        related activity.
-                                    </p>
-                                </div>
-                            </div>
+                            <StatusNotice
+                                icon={<XCircle className="size-5" />}
+                                title="Record Rejected"
+                                description="This introducer relationship was rejected. Review the audit trail for related activity."
+                                variant="danger"
+                            />
                         )}
 
                         {/* Audit trail */}
-                        <Card className="overflow-hidden rounded-xl border-border shadow-sm">
-                            <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/20 px-4 py-3.5">
+                        <Card className="overflow-hidden rounded-xl border-border shadow-none">
+                            <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/20 px-4 py-3">
                                 <div className="flex items-center gap-2">
                                     <History className="size-4 text-primary" />
-                                    <h2 className="text-sm font-semibold">
+                                    <h2 className="text-sm font-semibold text-foreground">
                                         Audit Trail
                                     </h2>
                                 </div>
+
                                 <span className="rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground">
                                     {record.audits?.length || 0} records
                                 </span>
@@ -336,32 +322,37 @@ export default function ShowIntroducer() {
 
                             <CardContent className="p-4">
                                 {record.audits?.length > 0 ? (
-                                    <div className="relative space-y-4">
+                                    <div className="space-y-4">
                                         {record.audits.map((audit, index) => (
                                             <div
                                                 key={audit.id}
-                                                className="relative flex gap-3"
+                                                className="flex gap-3"
                                             >
-                                                <div className="relative flex flex-col items-center">
-                                                    <div className="z-10 flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
+                                                <div className="relative flex shrink-0 flex-col items-center">
+                                                    <div className="z-10 flex size-8 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
                                                         <Clock3 className="size-3.5" />
                                                     </div>
+
                                                     {index <
                                                         record.audits.length -
                                                             1 && (
-                                                        <div className="absolute top-8 h-full w-px bg-border" />
+                                                        <div className="absolute top-8 bottom-[-1rem] w-px bg-border" />
                                                     )}
                                                 </div>
 
-                                                <div className="min-w-0 flex-1 pb-2">
-                                                    <p className="text-sm font-medium text-foreground capitalize">
+                                                <div className="min-w-0 flex-1 pb-1">
+                                                    <p className="text-sm font-medium break-words text-foreground capitalize">
                                                         {audit.event}
                                                     </p>
+
                                                     <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                                                        <UserRound className="size-3.5" />
-                                                        {audit.user?.name ??
-                                                            'System'}
+                                                        <UserRound className="size-3.5 shrink-0" />
+                                                        <span className="truncate">
+                                                            {audit.user?.name ??
+                                                                'System'}
+                                                        </span>
                                                     </p>
+
                                                     <p className="mt-1 text-xs text-muted-foreground">
                                                         {formatDateTime(
                                                             audit.created_at,
@@ -387,16 +378,16 @@ export default function ShowIntroducer() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                                    <div className="flex flex-col items-center justify-center py-7 text-center">
                                         <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
                                             <History className="size-5" />
                                         </div>
-                                        <p className="mt-3 text-sm font-medium">
+                                        <p className="mt-3 text-sm font-medium text-foreground">
                                             No audit records
                                         </p>
-                                        <p className="mt-1 text-xs text-muted-foreground">
+                                        <p className="mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">
                                             Activity for this record will appear
-                                            here.
+                                            here when available.
                                         </p>
                                     </div>
                                 )}
@@ -406,6 +397,33 @@ export default function ShowIntroducer() {
                 </div>
             </div>
         </CustomAuthLayout>
+    );
+}
+
+function SectionHeading({
+    icon,
+    title,
+    description,
+}: {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+}) {
+    return (
+        <div className="flex items-start gap-3 border-b border-border bg-muted/20 px-4 py-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+                {icon}
+            </div>
+
+            <div className="min-w-0">
+                <h2 className="text-sm font-semibold text-foreground">
+                    {title}
+                </h2>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {description}
+                </p>
+            </div>
+        </div>
     );
 }
 
@@ -419,13 +437,14 @@ function SummaryTile({
     value: string;
 }) {
     return (
-        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-card p-3.5">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 {icon}
             </div>
+
             <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">{label}</p>
-                <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                <p className="mt-1 text-sm font-semibold break-words text-foreground">
                     {value}
                 </p>
             </div>
@@ -443,9 +462,9 @@ function CustomerProfile({
     customer?: any;
 }) {
     return (
-        <div className="rounded-xl border border-border bg-background/50 p-3 sm:p-4">
+        <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
             <div className="flex items-start gap-3">
-                <div className="size-14 shrink-0 overflow-hidden rounded-xl border border-border bg-muted sm:size-16">
+                <div className="size-12 shrink-0 overflow-hidden rounded-xl border border-border bg-muted sm:size-14">
                     {customer?.photo?.url ? (
                         <img
                             src={customer.photo.url}
@@ -467,12 +486,12 @@ function CustomerProfile({
                     {customer?.id ? (
                         <Link
                             href={route('customers.show', customer.id)}
-                            className="mt-1 inline-block text-sm font-semibold wrap-break-word text-foreground hover:text-primary"
+                            className="mt-1 inline-block text-sm font-semibold break-words text-foreground hover:text-primary"
                         >
                             {customer.name}
                         </Link>
                     ) : (
-                        <p className="mt-1 text-sm font-semibold text-foreground">
+                        <p className="mt-1 text-sm font-semibold break-words text-foreground">
                             {customer?.name ||
                                 'Customer information unavailable'}
                         </p>
@@ -482,26 +501,47 @@ function CustomerProfile({
                         {customer?.customer_no || 'No customer number'}
                         {customer?.type ? ` · ${customer.type}` : ''}
                     </p>
-
-                    <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 border-t border-border pt-3 sm:grid-cols-2">
-                        <BorderInfoBox
-                            label="Phone"
-                            value={
-                                customer?.primary_phone ||
-                                customer?.phone ||
-                                '—'
-                            }
-                        />
-                        <BorderInfoBox
-                            label="Email"
-                            value={
-                                customer?.primary_email ||
-                                customer?.email ||
-                                '—'
-                            }
-                        />
-                    </div>
                 </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-3 border-t border-border pt-3 sm:grid-cols-2">
+                <BorderInfoBox
+                    label="Phone"
+                    value={customer?.primary_phone || customer?.phone || '—'}
+                />
+                <BorderInfoBox
+                    label="Email"
+                    value={customer?.primary_email || customer?.email || '—'}
+                />
+            </div>
+        </div>
+    );
+}
+
+function StatusNotice({
+    icon,
+    title,
+    description,
+    variant,
+}: {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    variant: 'success' | 'danger';
+}) {
+    const styles =
+        variant === 'success'
+            ? 'border-emerald-500/25 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400'
+            : 'border-destructive/25 bg-destructive/5 text-destructive';
+
+    return (
+        <div className={`flex gap-3 rounded-xl border p-4 ${styles}`}>
+            <div className="mt-0.5 shrink-0">{icon}</div>
+            <div className="min-w-0">
+                <p className="text-sm font-semibold">{title}</p>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {description}
+                </p>
             </div>
         </div>
     );

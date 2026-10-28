@@ -163,37 +163,37 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={isEdit ? `Edit User - ${user.name}` : 'Create User'} />
-            <div className="mx-auto max-w-7xl space-y-6 pb-8">
-                <header className="relative isolate overflow-hidden rounded-2xl border bg-card shadow-sm">
-                    <div className="absolute -top-24 right-8 -z-10 size-72 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="flex flex-col gap-5 p-5 sm:p-8 md:flex-row md:items-center">
-                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                            <Users className="size-7" />
+            <div className="w-full max-w-none space-y-4 pb-6">
+                <header className="relative isolate overflow-hidden rounded-xl border bg-card shadow-sm">
+                    <div className="absolute -top-24 right-8 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
+                    <div className="flex flex-col gap-3 p-4 sm:p-5 md:flex-row md:items-center">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                            <Users className="size-5" />
                         </div>
-                        <div className="min-w-0 flex-1 space-y-2">
+                        <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                <span className="text-[11px] font-semibold tracking-[0.14em] text-primary uppercase">
                                     User administration
                                 </span>
-                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                <span className="rounded-full border bg-background/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                                     {isEdit
                                         ? 'Profile settings'
                                         : 'New account'}
                                 </span>
                             </div>
-                            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                                 {isEdit
                                     ? `Edit ${user.name}`
                                     : 'Create a user account'}
                             </h1>
-                            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                            <p className="max-w-2xl text-sm leading-5 text-muted-foreground">
                                 Add profile details, choose organization access,
                                 and assign the roles this user needs.
                             </p>
                         </div>
                         <Link
                             href={route('users.index')}
-                            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border bg-background px-4 text-sm font-medium text-foreground transition hover:bg-muted"
+                            className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border bg-background px-3 text-sm font-medium text-foreground transition hover:bg-muted"
                         >
                             <ArrowLeft className="size-4" />
                             Back to users
@@ -202,25 +202,25 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                 </header>
 
                 <form onSubmit={handleSubmit}>
-                    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-                        <div className="space-y-6">
-                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                <div className="flex items-start gap-3 border-b px-5 py-5 sm:px-7">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                                        <UserRound className="size-5" />
+                    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                        <div className="space-y-4">
+                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                                <div className="flex items-start gap-2.5 border-b px-4 py-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                                        <UserRound className="size-4" />
                                     </div>
-                                    <div className="space-y-1">
-                                        <h2 className="font-semibold tracking-tight">
+                                    <div className="space-y-0.5">
+                                        <h2 className="text-sm font-semibold tracking-tight">
                                             Personal information
                                         </h2>
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground">
                                             Enter the name and login email for
                                             this account.
                                         </p>
                                     </div>
                                 </div>
-                                <div className="grid gap-x-5 gap-y-5 p-5 sm:grid-cols-2 sm:p-7">
-                                    <div className="space-y-2">
+                                <div className="grid gap-x-4 gap-y-3 p-4 sm:grid-cols-2">
+                                    <div className="space-y-1.5">
                                         <Label htmlFor="user-name">
                                             Full name
                                         </Label>
@@ -235,12 +235,12 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                             }
                                             placeholder="e.g. Jordan Lee"
                                             autoComplete="name"
-                                            className="h-11"
+                                            className="h-9"
                                             required
                                         />
                                         <InputError message={errors.name} />
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <Label htmlFor="user-email">
                                             Email address
                                         </Label>
@@ -258,7 +258,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                 }
                                                 placeholder="name@organization.com"
                                                 autoComplete="email"
-                                                className="h-11 pl-9"
+                                                className="h-9 pl-9"
                                                 required
                                             />
                                         </div>
@@ -267,23 +267,23 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                 </div>
                             </section>
 
-                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                <div className="flex items-start gap-3 border-b px-5 py-5 sm:px-7">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                                        <Building2 className="size-5" />
+                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                                <div className="flex items-start gap-2.5 border-b px-4 py-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                                        <Building2 className="size-4" />
                                     </div>
-                                    <div className="space-y-1">
-                                        <h2 className="font-semibold tracking-tight">
+                                    <div className="space-y-0.5">
+                                        <h2 className="text-sm font-semibold tracking-tight">
                                             Organization access
                                         </h2>
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground">
                                             Select where this user can work and
                                             choose their primary organization.
                                         </p>
                                     </div>
                                 </div>
-                                <div className="space-y-5 p-5 sm:p-7">
-                                    <div className="space-y-2">
+                                <div className="space-y-3 p-4">
+                                    <div className="space-y-1.5">
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <Label>
                                                 Available organizations
@@ -294,7 +294,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                             </span>
                                         </div>
                                         {organizations.length ? (
-                                            <div className="grid gap-2 sm:grid-cols-2">
+                                            <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
                                                 {organizations.map(
                                                     (organization) => {
                                                         const selected =
@@ -306,7 +306,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                                 key={
                                                                     organization.id
                                                                 }
-                                                                className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
+                                                                className={`flex min-h-10 cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 transition ${
                                                                     selected
                                                                         ? 'border-primary/40 bg-primary/5'
                                                                         : 'hover:bg-muted/50'
@@ -335,7 +335,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                 )}
                                             </div>
                                         ) : (
-                                            <div className="rounded-xl border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
+                                            <div className="rounded-lg border border-dashed px-4 py-4 text-center text-xs text-muted-foreground">
                                                 No organizations are available.
                                             </div>
                                         )}
@@ -344,7 +344,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                         />
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <Label htmlFor="primary-organization">
                                             Primary organization
                                         </Label>
@@ -374,26 +374,26 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                 </div>
                             </section>
 
-                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                <div className="flex items-start gap-3 border-b px-5 py-5 sm:px-7">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                                        <KeyRound className="size-5" />
+                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                                <div className="flex items-start gap-2.5 border-b px-4 py-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                                        <KeyRound className="size-4" />
                                     </div>
-                                    <div className="space-y-1">
-                                        <h2 className="font-semibold tracking-tight">
+                                    <div className="space-y-0.5">
+                                        <h2 className="text-sm font-semibold tracking-tight">
                                             {isEdit
                                                 ? 'Update password'
                                                 : 'Set a password'}
                                         </h2>
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground">
                                             {isEdit
                                                 ? 'Leave both fields blank to keep the current password.'
                                                 : 'Choose a secure password and enter it again to confirm.'}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="grid gap-x-5 gap-y-5 p-5 sm:grid-cols-2 sm:p-7">
-                                    <div className="space-y-2">
+                                <div className="grid gap-x-4 gap-y-3 p-4 sm:grid-cols-2">
+                                    <div className="space-y-1.5">
                                         <Label htmlFor="user-password">
                                             Password
                                         </Label>
@@ -408,12 +408,12 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                 )
                                             }
                                             autoComplete="new-password"
-                                            className="h-11"
+                                            className="h-9"
                                             required={!isEdit}
                                         />
                                         <InputError message={errors.password} />
                                     </div>
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <Label htmlFor="user-password-confirm">
                                             Confirm password
                                         </Label>
@@ -428,7 +428,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                 )
                                             }
                                             autoComplete="new-password"
-                                            className="h-11"
+                                            className="h-9"
                                             required={!isEdit}
                                         />
                                         <InputError
@@ -440,24 +440,24 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                 </div>
                             </section>
 
-                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                <div className="flex items-start gap-3 border-b px-5 py-5 sm:px-7">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                                        <ShieldCheck className="size-5" />
+                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                                <div className="flex items-start gap-2.5 border-b px-4 py-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                                        <ShieldCheck className="size-4" />
                                     </div>
-                                    <div className="space-y-1">
-                                        <h2 className="font-semibold tracking-tight">
+                                    <div className="space-y-0.5">
+                                        <h2 className="text-sm font-semibold tracking-tight">
                                             Roles and permissions
                                         </h2>
-                                        <p className="text-sm text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground">
                                             Roles determine which features and
                                             actions are available to the user.
                                         </p>
                                     </div>
                                 </div>
-                                <div className="space-y-4 p-5 sm:p-7">
+                                <div className="space-y-3 p-4">
                                     {allRoles.length ? (
-                                        <div className="grid gap-3 sm:grid-cols-2">
+                                        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                                             {allRoles.map((role) => {
                                                 const selected =
                                                     data.roles.includes(
@@ -466,7 +466,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                 return (
                                                     <label
                                                         key={role.id}
-                                                        className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                                                        className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 transition ${
                                                             selected
                                                                 ? 'border-primary/40 bg-primary/5'
                                                                 : 'hover:bg-muted/50'
@@ -520,8 +520,8 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                         </div>
 
                         <aside className="space-y-4 lg:sticky lg:top-6">
-                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                <div className="border-b px-5 py-4">
+                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                                <div className="border-b px-4 py-3">
                                     <div className="flex items-center gap-2 text-sm font-semibold">
                                         <Sparkles className="size-4 text-primary" />
                                         Account preview
@@ -530,21 +530,21 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                         A quick overview of the new profile.
                                     </p>
                                 </div>
-                                <div className="space-y-5 p-5">
+                                <div className="space-y-4 p-4">
                                     <div className="flex flex-col items-center text-center">
-                                        <label className="group relative mb-3 cursor-pointer">
+                                        <label className="group relative mb-2 cursor-pointer">
                                             {photoPreview ? (
                                                 <img
                                                     src={photoPreview}
                                                     alt="User profile preview"
-                                                    className="size-24 rounded-2xl border object-cover shadow-sm"
+                                                    className="size-20 rounded-xl border object-cover shadow-sm"
                                                 />
                                             ) : (
-                                                <div className="flex size-24 items-center justify-center rounded-2xl border bg-primary/10 text-2xl font-semibold text-primary shadow-sm">
+                                                <div className="flex size-20 items-center justify-center rounded-xl border bg-primary/10 text-xl font-semibold text-primary shadow-sm">
                                                     {initials}
                                                 </div>
                                             )}
-                                            <span className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/50 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100">
+                                            <span className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 text-xs font-medium text-white opacity-0 transition group-hover:opacity-100">
                                                 <Camera className="mr-1.5 size-4" />
                                                 Upload photo
                                             </span>
@@ -564,8 +564,8 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                         </p>
                                     </div>
 
-                                    <div className="space-y-3 border-t pt-4">
-                                        <div className="flex items-center justify-between gap-3 text-sm">
+                                    <div className="space-y-2.5 border-t pt-3">
+                                        <div className="flex items-center justify-between gap-3 text-xs">
                                             <span className="text-muted-foreground">
                                                 Organizations
                                             </span>
@@ -573,7 +573,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                 {selectedOrganizations.length}
                                             </span>
                                         </div>
-                                        <div className="flex items-center justify-between gap-3 text-sm">
+                                        <div className="flex items-center justify-between gap-3 text-xs">
                                             <span className="text-muted-foreground">
                                                 Assigned roles
                                             </span>
@@ -588,7 +588,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                     .map((role) => (
                                                         <span
                                                             key={role.id}
-                                                            className="block truncate rounded-lg bg-muted px-3 py-2 text-xs font-medium"
+                                                            className="block truncate rounded-md bg-muted px-2.5 py-1.5 text-xs font-medium"
                                                         >
                                                             {role.name}
                                                         </span>
@@ -608,7 +608,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                     </div>
                                 </div>
                             </section>
-                            <div className="rounded-xl border border-primary/15 bg-primary/5 p-4 text-sm">
+                            <div className="rounded-lg border border-primary/15 bg-primary/5 p-3 text-sm">
                                 <div className="flex items-start gap-2.5">
                                     <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
                                     <p className="text-xs leading-5 text-muted-foreground">
@@ -620,21 +620,21 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                         </aside>
                     </div>
 
-                    <div className="mt-6 flex flex-col-reverse gap-3 rounded-2xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div className="mt-4 flex flex-col-reverse gap-2 rounded-xl border bg-card p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-4">
                         <p className="text-xs text-muted-foreground">
                             Required fields must be completed before saving.
                         </p>
                         <div className="flex justify-end gap-3">
                             <Link
                                 href={route('users.index')}
-                                className="inline-flex h-10 items-center justify-center rounded-lg border px-4 text-sm font-medium transition hover:bg-muted"
+                                className="inline-flex h-9 items-center justify-center rounded-lg border px-3 text-sm font-medium transition hover:bg-muted"
                             >
                                 Cancel
                             </Link>
                             <Button
                                 type="submit"
                                 disabled={processing}
-                                className="h-10 gap-2 rounded-lg px-5"
+                                className="h-9 gap-2 rounded-lg px-4"
                             >
                                 {processing ? (
                                     <>

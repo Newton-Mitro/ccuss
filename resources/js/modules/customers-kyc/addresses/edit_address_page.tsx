@@ -21,11 +21,13 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem } from '@/types';
-import type { AddressType } from '@/modules/customers-kyc/types/customer_kyc_module';
 import { addressTypes } from '@/modules/customers-kyc/addresses/data/address_types';
-import type { InputFieldProps, Props } from '@/modules/customers-kyc/types/addresses/edit_address_page.interfaces';
-
+import type {
+    InputFieldProps,
+    Props,
+} from '@/modules/customers-kyc/types/addresses/edit_address_page.interfaces';
+import type { AddressType } from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { BreadcrumbItem } from '@/types';
 
 const Edit = () => {
     const { address } = usePage<Props>().props;
@@ -68,102 +70,89 @@ const Edit = () => {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Address - ${customer.name}`} />
 
-            <div className="w-full max-w-7xl space-y-5 pb-24">
-                {/* Page heading */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
-                            <MapPin className="size-5" />
+            <div className="w-full space-y-3 pb-24">
+                {/* Compact page header */}
+                <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+                            <MapPin className="size-4.5" />
                         </div>
 
-                        <div className="space-y-1">
-                            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                        <div className="min-w-0">
+                            <h1 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
                                 Edit Customer Address
                             </h1>
-                            <p className="max-w-2xl text-sm text-muted-foreground">
-                                Update the customer's address and location
-                                details. Changes will be saved to this address
-                                record.
+                            <p className="text-xs text-muted-foreground">
+                                Update address and location information.
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                    <div className="flex flex-wrap gap-2 sm:shrink-0">
                         <Button variant="outline" size="sm" asChild>
                             <Link href={route('customers.index', {})}>
-                                <ArrowLeft className="size-4" />
-                                Back to Customers
+                                <ArrowLeft className="size-3.5" />
+                                Customers
                             </Link>
                         </Button>
 
                         <Button size="sm" asChild>
                             <Link href={route('customers.show', customer.id)}>
-                                <Eye className="size-4" />
+                                <Eye className="size-3.5" />
                                 View Customer
                             </Link>
                         </Button>
                     </div>
                 </div>
 
-                {/* Customer profile */}
-                <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                    <div className="flex items-center gap-2 border-b border-border bg-muted/30 px-4 py-3">
+                {/* Compact customer information */}
+                <section className="overflow-hidden rounded-lg border border-border bg-card">
+                    <div className="flex items-center gap-2 border-b border-border bg-muted/30 px-3 py-2">
                         <UserRound className="size-4 text-primary" />
-                        <h2 className="text-sm font-semibold text-foreground">
+                        <h2 className="text-sm font-semibold">
                             Customer Information
                         </h2>
-                        <span className="ml-auto rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground">
+                        <span className="ml-auto rounded border border-border bg-background px-2 py-0.5 text-[11px] text-muted-foreground">
                             {customer.customer_no}
                         </span>
                     </div>
 
-                    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start">
-                        <div className="flex shrink-0 items-center gap-3 sm:block">
-                            <div className="size-16 overflow-hidden rounded-xl border border-border bg-muted sm:size-20">
-                                {customer.photo?.url ? (
-                                    <img
-                                        src={customer.photo.url}
-                                        alt={customer.name}
-                                        className="size-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex size-full items-center justify-center bg-primary/5 text-xl font-semibold text-primary">
-                                        {customer.name
-                                            ?.charAt(0)
-                                            ?.toUpperCase() || 'C'}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="min-w-0 sm:hidden">
-                                <Link
-                                    href={route('customers.show', customer.id)}
-                                    className="font-semibold text-foreground transition-colors hover:text-primary"
-                                >
-                                    {customer.name}
-                                </Link>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    {customer.type} · {customer.status}
-                                </p>
-                            </div>
+                    <div className="flex items-start gap-3 p-3">
+                        <div className="size-12 shrink-0 overflow-hidden rounded-lg border border-border bg-muted sm:size-14">
+                            {customer.photo?.url ? (
+                                <img
+                                    src={customer.photo.url}
+                                    alt={customer.name}
+                                    className="size-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex size-full items-center justify-center bg-primary/5 text-lg font-semibold text-primary">
+                                    {customer.name?.charAt(0)?.toUpperCase() ||
+                                        'C'}
+                                </div>
+                            )}
                         </div>
 
-                        <div className="min-w-0 flex-1 space-y-3">
-                            <div className="hidden sm:block">
+                        <div className="min-w-0 flex-1">
+                            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                                 <Link
                                     href={route('customers.show', customer.id)}
-                                    className="text-base font-semibold text-foreground transition-colors hover:text-primary"
+                                    className="truncate text-sm font-semibold text-foreground hover:text-primary"
                                 >
                                     {customer.name}
                                 </Link>
-                                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                    <span>{customer.type}</span>
-                                    <span>·</span>
-                                    <span>{customer.status}</span>
+
+                                <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                                    <span className="rounded bg-muted px-1.5 py-0.5">
+                                        {customer.type}
+                                    </span>
+                                    <span className="rounded bg-muted px-1.5 py-0.5">
+                                        {customer.status}
+                                    </span>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-x-5 gap-y-3 border-t border-border pt-3 sm:grid-cols-2 lg:grid-cols-4">
+                            <div className="mt-2 grid grid-cols-1 gap-x-4 gap-y-2 border-t border-border pt-2 sm:grid-cols-2 lg:grid-cols-4">
                                 <BolderLessInfoBox
                                     label="Primary Phone"
                                     value={customer.primary_phone}
@@ -185,19 +174,18 @@ const Edit = () => {
                     </div>
                 </section>
 
-                {/* Address form */}
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-3">
                     {/* Address details */}
-                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    <section className="overflow-hidden rounded-lg border border-border bg-card">
                         <SectionHeading
                             icon={<Home className="size-4" />}
                             title="Address Details"
-                            description="Select the address type and enter the street or house information."
+                            description="Address type, country, and street details."
                             step="01"
                         />
 
-                        <div className="grid grid-cols-1 gap-x-5 gap-y-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <div className="space-y-1.5">
+                        <div className="grid grid-cols-1 gap-x-4 gap-y-3 p-3 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="min-w-0 space-y-1">
                                 <Label htmlFor="type">
                                     Address Type
                                     <RequiredMark />
@@ -215,13 +203,13 @@ const Edit = () => {
                                 <InputError message={errors.type} />
                             </div>
 
-                            <div className="space-y-1.5">
+                            <div className="min-w-0 space-y-1">
                                 <Label htmlFor="country">
                                     Country
                                     <RequiredMark />
                                 </Label>
                                 <div className="relative">
-                                    <Globe2 className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Globe2 className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="country"
                                         value={data.country}
@@ -229,13 +217,13 @@ const Edit = () => {
                                             setData('country', e.target.value)
                                         }
                                         placeholder="Enter country"
-                                        className="h-10 pl-9"
+                                        className="h-9 pl-9"
                                     />
                                 </div>
                                 <InputError message={errors.country} />
                             </div>
 
-                            <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
+                            <div className="min-w-0 space-y-1 sm:col-span-2 lg:col-span-1">
                                 <Label htmlFor="line1">
                                     Address Line 1
                                     <RequiredMark />
@@ -247,15 +235,15 @@ const Edit = () => {
                                         setData('line1', e.target.value)
                                     }
                                     placeholder="House, road, or village"
-                                    className="h-10"
+                                    className="h-9"
                                 />
                                 <InputError message={errors.line1} />
                             </div>
 
-                            <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
+                            <div className="min-w-0 space-y-1 sm:col-span-2 lg:col-span-3">
                                 <Label htmlFor="line2">
                                     Address Line 2
-                                    <span className="ml-1 font-normal text-muted-foreground">
+                                    <span className="ml-1 text-xs font-normal text-muted-foreground">
                                         (Optional)
                                     </span>
                                 </Label>
@@ -266,7 +254,7 @@ const Edit = () => {
                                         setData('line2', e.target.value)
                                     }
                                     placeholder="Apartment, building, landmark, or additional details"
-                                    className="h-10"
+                                    className="h-9"
                                 />
                                 <InputError message={errors.line2} />
                             </div>
@@ -274,15 +262,15 @@ const Edit = () => {
                     </section>
 
                     {/* Location details */}
-                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    <section className="overflow-hidden rounded-lg border border-border bg-card">
                         <SectionHeading
                             icon={<MapPinned className="size-4" />}
                             title="Location Details"
-                            description="Provide the administrative location to keep the customer's address accurate."
+                            description="Administrative location and postal information."
                             step="02"
                         />
 
-                        <div className="grid grid-cols-1 gap-x-5 gap-y-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-x-4 gap-y-3 p-3 sm:grid-cols-2 lg:grid-cols-3">
                             <InputField
                                 id="division"
                                 label="Division"
@@ -335,17 +323,17 @@ const Edit = () => {
                     </section>
 
                     {/* Sticky form actions */}
-                    <div className="fixed right-0 bottom-0 left-(--app-sidebar-offset) z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-5 sm:py-4 sm:backdrop-blur-none">
-                        <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <p className="hidden text-xs text-muted-foreground sm:block">
-                                Review the address details before saving your
-                                changes.
+                    <div className="fixed right-0 bottom-0 left-(--app-sidebar-offset) z-30 border-t border-border bg-background/95 px-3 py-2.5 backdrop-blur-md sm:static sm:rounded-lg sm:border sm:bg-card sm:px-3 sm:py-2.5 sm:backdrop-blur-none">
+                        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="hidden text-xs text-muted-foreground md:block">
+                                Review the address details before saving.
                             </p>
 
-                            <div className="flex w-full items-center gap-2 sm:w-auto">
+                            <div className="flex items-center gap-2 sm:ml-auto">
                                 <Button
                                     type="button"
                                     variant="outline"
+                                    size="sm"
                                     disabled={processing}
                                     className="flex-1 sm:flex-none"
                                     asChild
@@ -362,17 +350,18 @@ const Edit = () => {
 
                                 <Button
                                     type="submit"
+                                    size="sm"
                                     disabled={processing}
-                                    className="flex-1 sm:min-w-40 sm:flex-none"
+                                    className="flex-1 sm:min-w-36 sm:flex-none"
                                 >
                                     {processing ? (
                                         <>
-                                            <Loader2 className="size-4 animate-spin" />
+                                            <Loader2 className="size-3.5 animate-spin" />
                                             Updating...
                                         </>
                                     ) : (
                                         <>
-                                            <Save className="size-4" />
+                                            <Save className="size-3.5" />
                                             Update Address
                                         </>
                                     )}
@@ -398,8 +387,8 @@ function SectionHeading({
     step: string;
 }) {
     return (
-        <div className="flex items-start gap-3 border-b border-border bg-muted/20 px-4 py-3.5">
-            <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+        <div className="flex items-center gap-2.5 border-b border-border bg-muted/20 px-3 py-2">
+            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                 {icon}
             </div>
 
@@ -412,7 +401,7 @@ function SectionHeading({
                         {step}
                     </span>
                 </div>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
                     {description}
                 </p>
             </div>
@@ -434,7 +423,7 @@ function InputField({
     required,
 }: InputFieldProps & { id: string }) {
     return (
-        <div className="min-w-0 space-y-1.5">
+        <div className="min-w-0 space-y-1">
             <Label htmlFor={id}>
                 {label}
                 {required && <RequiredMark />}
@@ -445,7 +434,7 @@ function InputField({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="h-10"
+                className="h-9"
             />
 
             <InputError message={error} />

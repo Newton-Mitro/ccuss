@@ -209,7 +209,7 @@ export default function TransactionWorkflow() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={detail.title} />
 
-            <div className="w-full max-w-5xl space-y-5 pb-24">
+            <div className="w-full max-w-none space-y-6 pb-24">
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title={detail.title}
@@ -218,12 +218,12 @@ export default function TransactionWorkflow() {
                 </div>
 
                 {/* Workflow overview */}
-                <div className="relative overflow-hidden rounded-xl border bg-card">
-                    <div className="absolute inset-y-0 left-0 w-1 bg-primary" />
+                <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-primary/10 via-card to-card shadow-sm">
+                    <div className="absolute inset-y-0 left-0 w-1.5 bg-primary" />
 
-                    <div className="flex flex-col gap-4 p-4 pl-5 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                    <div className="flex flex-col gap-5 p-5 pl-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
                         <div className="flex min-w-0 items-center gap-3">
-                            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-background/80 text-primary shadow-sm">
                                 <Icon className="size-6" />
                             </div>
 
@@ -239,7 +239,7 @@ export default function TransactionWorkflow() {
                                     </span>
                                 </div>
 
-                                <h2 className="mt-1 text-base font-semibold tracking-tight">
+                                <h2 className="mt-1 text-lg font-semibold tracking-tight">
                                     {detail.title}
                                 </h2>
 
@@ -250,7 +250,7 @@ export default function TransactionWorkflow() {
                             </div>
                         </div>
 
-                        <div className="flex shrink-0 items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+                        <div className="flex shrink-0 items-center gap-2 rounded-xl border bg-background/80 px-4 py-3 shadow-sm">
                             <ShieldCheck className="size-4 text-primary" />
                             <span className="text-xs font-medium">
                                 Controlled workflow
@@ -259,12 +259,12 @@ export default function TransactionWorkflow() {
                     </div>
                 </div>
 
-                <form onSubmit={submit} className="space-y-4">
+                <form onSubmit={submit} className="space-y-6">
                     {isTransfer ? (
                         <>
                             {/* Transfer accounts */}
-                            <section className="relative z-20 overflow-visible rounded-xl border bg-card">
-                                <div className="rounded-t-xl border-b bg-muted/20 px-4 py-4 sm:px-5">
+                            <section className="relative z-20 overflow-visible rounded-2xl border bg-card shadow-sm">
+                                <div className="rounded-t-2xl border-b bg-muted/30 px-5 py-5 sm:px-7">
                                     <SectionHeading
                                         icon={ArrowRightLeft}
                                         title="Transfer accounts"
@@ -272,7 +272,7 @@ export default function TransactionWorkflow() {
                                     />
                                 </div>
 
-                                <div className="grid gap-4 p-4 sm:grid-cols-2 sm:gap-5 sm:p-5">
+                                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7">
                                     <Field
                                         label="Source account"
                                         required
@@ -353,8 +353,8 @@ export default function TransactionWorkflow() {
                             </section>
 
                             {/* Transfer details */}
-                            <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="border-b bg-muted/20 px-4 py-4 sm:px-5">
+                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                                <div className="border-b bg-muted/30 px-5 py-5 sm:px-7">
                                     <SectionHeading
                                         icon={FileText}
                                         title="Transaction details"
@@ -362,7 +362,7 @@ export default function TransactionWorkflow() {
                                     />
                                 </div>
 
-                                <div className="grid gap-4 p-4 sm:grid-cols-2 sm:gap-5 sm:p-5">
+                                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7 lg:grid-cols-3">
                                     <Field
                                         label="Transfer date"
                                         required
@@ -521,8 +521,8 @@ export default function TransactionWorkflow() {
 
                                     {selectedLoan &&
                                         remainingAmount !== null && (
-                                            <div className="flex items-start gap-3 rounded-lg border bg-muted/30 p-3 sm:col-span-2">
-                                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                            <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-4 sm:col-span-2 lg:col-span-1">
+                                                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-background text-primary shadow-sm">
                                                     <Wallet className="size-4" />
                                                 </div>
 
@@ -532,7 +532,7 @@ export default function TransactionWorkflow() {
                                                         available for
                                                         disbursement
                                                     </p>
-                                                    <p className="mt-1 text-lg font-semibold tabular-nums">
+                                                    <p className="mt-1 text-xl font-semibold tracking-tight tabular-nums">
                                                         {formatBDTCurrency(
                                                             remainingAmount,
                                                         )}
@@ -544,8 +544,8 @@ export default function TransactionWorkflow() {
                             </section>
 
                             {/* Loan transaction details */}
-                            <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="border-b bg-muted/20 px-4 py-4 sm:px-5">
+                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                                <div className="border-b bg-muted/30 px-5 py-5 sm:px-7">
                                     <SectionHeading
                                         icon={CalendarDays}
                                         title="Transaction details"
@@ -553,7 +553,7 @@ export default function TransactionWorkflow() {
                                     />
                                 </div>
 
-                                <div className="grid gap-4 p-4 sm:grid-cols-2 sm:gap-5 sm:p-5">
+                                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7 xl:grid-cols-4">
                                     <Field
                                         label="Transaction amount"
                                         required
@@ -670,7 +670,7 @@ export default function TransactionWorkflow() {
                             </section>
                         </>
                     ) : (
-                        <section className="rounded-xl border bg-card p-6 text-center sm:p-10">
+                        <section className="rounded-2xl border bg-card p-6 text-center shadow-sm sm:p-10">
                             <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                                 <Icon className="size-7" />
                             </div>
@@ -698,8 +698,8 @@ export default function TransactionWorkflow() {
 
                     {/* Sticky form actions */}
                     {(isTransfer || isLoanWorkflow) && (
-                        <div className="sticky bottom-0 z-20 -mx-3 border-t bg-background/95 px-3 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-5 sm:px-5">
-                            <div className="mx-auto flex max-w-5xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="sticky bottom-0 z-20 -mx-4 border-t bg-background/95 px-4 py-4 shadow-[0_-8px_24px_-18px_hsl(var(--foreground)/0.3)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">
+                            <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                     <ShieldCheck className="size-4 shrink-0" />
                                     <span>

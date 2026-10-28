@@ -6,6 +6,7 @@ import {
     HeartHandshake,
     Loader2,
     Save,
+    ShieldCheck,
     UserRound,
     UsersRound,
 } from 'lucide-react';
@@ -20,10 +21,10 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem } from '@/types';
-import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
 import { CustomerSearchBox } from '@/modules/customers-kyc/customers/components/customer-search-box';
 import { relationshipTypes } from '@/modules/customers-kyc/introducers/data/relationship_types';
+import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { BreadcrumbItem } from '@/types';
 
 const Edit = () => {
     const { introducer } = usePage().props as any;
@@ -48,7 +49,7 @@ const Edit = () => {
             return;
         }
 
-        if (data.introducer_customer_id === customer.id) {
+        if (String(data.introducer_customer_id) === String(customer.id)) {
             toast.error('Customer cannot be their own introducer.');
             return;
         }
@@ -75,21 +76,27 @@ const Edit = () => {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Introducer - ${customer.name}`} />
 
-            <div className="w-full max-w-7xl space-y-5 pb-24">
+            <div className="w-full space-y-4 pb-28 sm:pb-6">
                 {/* Page heading */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
                             <HeartHandshake className="size-5" />
                         </div>
 
-                        <div>
-                            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-                                Edit Introducer
-                            </h1>
+                        <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+                                    Edit Introducer
+                                </h1>
+                                <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[11px] font-medium text-primary">
+                                    <ShieldCheck className="size-3.5" />
+                                    Relationship
+                                </span>
+                            </div>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                Update the customer's introducer and
-                                relationship details.
+                                Update the introducer and relationship details
+                                for this customer.
                             </p>
                         </div>
                     </div>
@@ -102,156 +109,143 @@ const Edit = () => {
                     </Button>
                 </div>
 
-                {/* Introduced customer profile */}
-                <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                {/* Customer information */}
+                <section className="overflow-hidden rounded-xl border border-border bg-card">
                     <div className="flex items-center gap-2 border-b border-border bg-muted/30 px-4 py-3">
                         <UserRound className="size-4 text-primary" />
                         <h2 className="text-sm font-semibold text-foreground">
                             Customer Information
                         </h2>
-                        <span className="ml-auto rounded-md border border-border bg-background px-2 py-1 text-xs text-muted-foreground">
-                            {customer.customer_no}
+                        <span className="ml-auto rounded-md border border-border bg-background px-2 py-1 text-xs font-medium text-muted-foreground">
+                            {customer.customer_no || 'No customer number'}
                         </span>
                     </div>
 
                     <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start">
-                        <div className="flex items-center gap-3 sm:block">
-                            <div className="size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-muted sm:size-20">
-                                {customer?.photo?.url ? (
-                                    <img
-                                        src={customer.photo.url}
-                                        alt={customer.name}
-                                        className="size-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="flex size-full items-center justify-center bg-primary/5 text-xl font-semibold text-primary">
-                                        {customer.name
-                                            ?.charAt(0)
-                                            ?.toUpperCase() || 'C'}
-                                    </div>
-                                )}
-                            </div>
+                        <div className="flex min-w-0 items-center gap-3 sm:w-56 sm:shrink-0 sm:items-start">
+                            <CustomerAvatar
+                                name={customer.name}
+                                photoUrl={customer?.photo?.url}
+                                className="size-14 sm:size-[4.5rem]"
+                            />
 
                             <div className="min-w-0 sm:hidden">
                                 <Link
                                     href={route('customers.show', customer.id)}
-                                    className="text-sm font-semibold text-foreground hover:text-primary"
+                                    className="line-clamp-2 text-sm font-semibold text-foreground hover:text-primary"
                                 >
                                     {customer.name}
                                 </Link>
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                    {customer.status} · {customer.type}
+                                    {customer.status || '—'} ·{' '}
+                                    {customer.type || '—'}
+                                </p>
+                            </div>
+
+                            <div className="hidden min-w-0 sm:block">
+                                <Link
+                                    href={route('customers.show', customer.id)}
+                                    className="line-clamp-2 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+                                >
+                                    {customer.name}
+                                </Link>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    {customer.status || '—'} ·{' '}
+                                    {customer.type || '—'}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="min-w-0 flex-1 space-y-3">
-                            <div className="hidden sm:block">
-                                <Link
-                                    href={route('customers.show', customer.id)}
-                                    className="text-base font-semibold text-foreground transition-colors hover:text-primary"
-                                >
-                                    {customer.name}
-                                </Link>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    {customer.status} · {customer.type}
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-x-5 gap-y-3 border-t border-border pt-3 sm:grid-cols-2 lg:grid-cols-4">
-                                <BolderLessInfoBox
-                                    label="Primary Phone"
-                                    value={customer.primary_phone}
-                                />
-                                <BolderLessInfoBox
-                                    label="Primary Email"
-                                    value={customer.primary_email}
-                                />
-                                <BolderLessInfoBox
-                                    label="Identification Type"
-                                    value={customer.identification_type}
-                                />
-                                <BolderLessInfoBox
-                                    label="Identification Number"
-                                    value={customer.identification_number}
-                                />
-                            </div>
+                        <div className="grid min-w-0 flex-1 grid-cols-1 gap-x-5 gap-y-3 border-t border-border pt-3 sm:grid-cols-2 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 lg:grid-cols-4">
+                            <BolderLessInfoBox
+                                label="Primary Phone"
+                                value={customer.primary_phone}
+                            />
+                            <BolderLessInfoBox
+                                label="Primary Email"
+                                value={customer.primary_email}
+                            />
+                            <BolderLessInfoBox
+                                label="Identification Type"
+                                value={customer.identification_type}
+                            />
+                            <BolderLessInfoBox
+                                label="Identification Number"
+                                value={customer.identification_number}
+                            />
                         </div>
                     </div>
                 </section>
 
-                {/* Introducer relationship form */}
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Introducer selection */}
+                    <section className="overflow-hidden rounded-xl border border-border bg-card">
                         <SectionHeading
                             icon={<UsersRound className="size-4" />}
                             step="01"
                             title="Introducer Details"
-                            description="Choose the existing customer who introduced this customer."
+                            description="Select the existing customer who introduced this customer."
                         />
 
-                        <div className="space-y-2 p-4 sm:p-5">
-                            <Label className="text-sm">
-                                Select Introducer
-                                <span className="ml-1 text-destructive">*</span>
-                            </Label>
+                        <div className="space-y-3 p-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-sm font-medium">
+                                    Select Introducer
+                                    <span className="ml-1 text-destructive">
+                                        *
+                                    </span>
+                                </Label>
 
-                            <CustomerSearchBox
-                                selectedCustomer={selectedIntroducer}
-                                onSelect={(c: Customer) => {
-                                    if (String(c.id) === String(customer.id)) {
-                                        toast.error(
-                                            'Customer cannot be their own introducer.',
-                                        );
-                                        return;
-                                    }
+                                <CustomerSearchBox
+                                    selectedCustomer={selectedIntroducer}
+                                    onSelect={(c: Customer) => {
+                                        if (
+                                            String(c.id) === String(customer.id)
+                                        ) {
+                                            toast.error(
+                                                'Customer cannot be their own introducer.',
+                                            );
+                                            return;
+                                        }
 
-                                    setSelectedIntroducer(c);
-                                    setData('introducer_customer_id', c.id);
-                                }}
-                            />
+                                        setSelectedIntroducer(c);
+                                        setData('introducer_customer_id', c.id);
+                                    }}
+                                />
 
-                            <p className="text-xs leading-relaxed text-muted-foreground">
-                                Search for a registered customer and select them
-                                as the introducer. The customer cannot introduce
-                                themselves.
-                            </p>
+                                <p className="text-xs leading-relaxed text-muted-foreground">
+                                    Search by customer name or available
+                                    customer details. A customer cannot
+                                    introduce themselves.
+                                </p>
 
-                            <InputError
-                                message={errors.introducer_customer_id}
-                            />
+                                <InputError
+                                    message={errors.introducer_customer_id}
+                                />
+                            </div>
 
                             {selectedIntroducer && (
-                                <div className="mt-3 flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-background text-sm font-semibold text-primary">
-                                        {selectedIntroducer.photo?.url ? (
-                                            <img
-                                                src={
-                                                    selectedIntroducer.photo.url
-                                                }
-                                                alt={selectedIntroducer.name}
-                                                className="size-full object-cover"
-                                            />
-                                        ) : (
-                                            selectedIntroducer.name
-                                                ?.charAt(0)
-                                                ?.toUpperCase() || 'C'
-                                        )}
-                                    </div>
+                                <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/[0.04] p-3 sm:flex-row sm:items-center">
+                                    <CustomerAvatar
+                                        name={selectedIntroducer.name}
+                                        photoUrl={selectedIntroducer.photo?.url}
+                                        className="size-11"
+                                    />
 
                                     <div className="min-w-0 flex-1">
                                         <p className="truncate text-sm font-semibold text-foreground">
                                             {selectedIntroducer.name}
                                         </p>
-                                        <p className="mt-0.5 text-xs text-muted-foreground">
-                                            {selectedIntroducer.customer_no}
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {selectedIntroducer.customer_no ||
+                                                'No customer number'}
                                             {selectedIntroducer.primary_phone
                                                 ? ` · ${selectedIntroducer.primary_phone}`
                                                 : ''}
                                         </p>
                                     </div>
 
-                                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/20 bg-background px-2 py-1 text-xs text-primary">
+                                    <span className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-primary/20 bg-background px-2.5 py-1 text-xs font-medium text-primary">
                                         <CheckCheck className="size-3.5" />
                                         Selected
                                     </span>
@@ -260,18 +254,19 @@ const Edit = () => {
                         </div>
                     </section>
 
-                    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    {/* Relationship details */}
+                    <section className="overflow-hidden rounded-xl border border-border bg-card">
                         <SectionHeading
                             icon={<GitBranch className="size-4" />}
                             step="02"
                             title="Relationship Details"
-                            description="Specify how the introducer is related to the customer."
+                            description="Specify the relationship between the customer and their introducer."
                         />
 
-                        <div className="max-w-xl space-y-2 p-4 sm:p-5">
+                        <div className="max-w-2xl space-y-2 p-4">
                             <Label
                                 htmlFor="relationship_type"
-                                className="text-sm"
+                                className="text-sm font-medium"
                             >
                                 Relationship Type
                                 <span className="ml-1 text-destructive">*</span>
@@ -285,9 +280,9 @@ const Edit = () => {
                                 options={relationshipTypes}
                             />
 
-                            <p className="text-xs text-muted-foreground">
-                                Choose the appropriate relationship from the
-                                available options.
+                            <p className="text-xs leading-relaxed text-muted-foreground">
+                                Choose the relationship that best describes the
+                                connection between these customers.
                             </p>
 
                             <InputError message={errors.relationship_type} />
@@ -295,12 +290,14 @@ const Edit = () => {
                     </section>
 
                     {/* Sticky action bar */}
-                    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-5 sm:py-4 sm:backdrop-blur-none">
-                        <div className="mx-auto flex w-full max-w-7xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <p className="hidden text-xs text-muted-foreground sm:block">
-                                Verify the introducer and relationship before
-                                saving.
-                            </p>
+                    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-4 sm:py-3 sm:backdrop-blur-none">
+                        <div className="mx-auto flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
+                                <ShieldCheck className="size-4 shrink-0" />
+                                <span>
+                                    Review the relationship before saving.
+                                </span>
+                            </div>
 
                             <div className="flex w-full gap-2 sm:w-auto">
                                 <Button
@@ -346,6 +343,34 @@ const Edit = () => {
     );
 };
 
+function CustomerAvatar({
+    name,
+    photoUrl,
+    className = '',
+}: {
+    name?: string | null;
+    photoUrl?: string | null;
+    className?: string;
+}) {
+    const initials = name?.trim()?.charAt(0)?.toUpperCase() || 'C';
+
+    return (
+        <div
+            className={`flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted text-lg font-semibold text-primary ${className}`}
+        >
+            {photoUrl ? (
+                <img
+                    src={photoUrl}
+                    alt={name || 'Customer'}
+                    className="size-full object-cover"
+                />
+            ) : (
+                <span>{initials}</span>
+            )}
+        </div>
+    );
+}
+
 function SectionHeading({
     icon,
     step,
@@ -358,8 +383,8 @@ function SectionHeading({
     description: string;
 }) {
     return (
-        <div className="flex items-start gap-3 border-b border-border bg-muted/20 px-4 py-3.5">
-            <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+        <div className="flex items-start gap-3 border-b border-border bg-muted/20 px-4 py-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
                 {icon}
             </div>
 

@@ -1,6 +1,5 @@
-import InputError from '@/components/input-error';
-
 import HeadingSmall from '@/components/heading-small';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -76,16 +75,20 @@ export default function Edit({
     const availableParents = parents.filter(
         (parent) => parent.id !== ledger.id,
     );
+
     const selectedGroup = accountGroups.find(
         (group) => String(group.id) === data.account_group_id,
     );
+
     const selectedParent = availableParents.find(
         (parent) => String(parent.id) === data.parent_id,
     );
+
     const selectedType = accountTypes.find((type) => type.value === data.type);
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
         put(route('ledger-accounts.update', ledger.id), {
             preserveScroll: true,
         });
@@ -101,58 +104,94 @@ export default function Edit({
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit ${ledger.code ?? 'Ledger Account'}`} />
 
-            <div className="mx-auto w-full max-w-6xl space-y-6 pb-8 text-foreground">
-                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
-                    <HeadingSmall
-                        title="Edit Ledger Account"
-                        description="Update the account’s classification, hierarchy, and reconciliation behavior."
-                    />
-                    <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
-                        <Button variant="outline" asChild>
-                            <Link href={route('ledger-accounts.index')}>
-                                <ArrowLeft className="mr-2 size-4" />
-                                Back to accounts
-                            </Link>
-                        </Button>
+            <div className="w-full min-w-0 space-y-5 pb-10 text-foreground sm:space-y-6">
+                {/* Page header */}
+                <div className="flex min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-4 shadow-sm sm:flex-row sm:items-center sm:p-6">
+                    <div className="flex min-w-0 items-start gap-3">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary sm:size-12">
+                            <Landmark className="size-5 sm:size-6" />
+                        </div>
+
+                        <div className="min-w-0">
+                            <HeadingSmall
+                                title="Edit Ledger Account"
+                                description="Update the account’s classification, hierarchy, and reconciliation behavior."
+                            />
+
+                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                                    <FolderTree className="size-3.5" />
+                                    Chart of Accounts
+                                </span>
+
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[11px] font-medium text-primary">
+                                    <Activity className="size-3.5" />
+                                    Editing account
+                                </span>
+                            </div>
+                        </div>
                     </div>
+
+                    <Button
+                        variant="outline"
+                        asChild
+                        className="w-full shrink-0 sm:w-auto"
+                    >
+                        <Link href={route('ledger-accounts.index')}>
+                            <ArrowLeft className="mr-2 size-4" />
+                            Back to accounts
+                        </Link>
+                    </Button>
                 </div>
 
                 <form
                     onSubmit={handleSubmit}
-                    className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]"
+                    className="grid min-w-0 items-start gap-5 xl:grid-cols-3"
                 >
-                    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                        <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-5 py-4 sm:px-6">
+                    {/* Main form */}
+                    <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm xl:col-span-2">
+                        <div className="flex min-w-0 items-start gap-3 border-b border-border bg-muted/20 px-4 py-4 sm:px-6">
                             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                 <Landmark className="size-5" />
                             </div>
+
                             <div className="min-w-0">
                                 <h2 className="text-sm font-semibold">
                                     Account configuration
                                 </h2>
-                                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+
+                                <p className="mt-1 text-xs leading-relaxed break-words text-muted-foreground">
                                     Editing {ledger.code || 'ledger account'}
                                     {ledger.name ? ` · ${ledger.name}` : ''}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="space-y-6 p-5 sm:p-6">
+                        <div className="space-y-7 p-4 sm:p-6">
+                            {/* Basic information */}
                             <section className="space-y-4">
-                                <div>
-                                    <h3 className="text-sm font-semibold">
-                                        Basic information
-                                    </h3>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        Update the account’s code and
-                                        description.
-                                    </p>
+                                <div className="flex items-start gap-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                                        <Landmark className="size-4" />
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-sm font-semibold">
+                                            Basic information
+                                        </h3>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            Update the account code and
+                                            descriptive name.
+                                        </p>
+                                    </div>
                                 </div>
+
                                 <div className="grid gap-4 sm:grid-cols-2">
-                                    <div className="space-y-1.5">
+                                    <div className="min-w-0 space-y-1.5">
                                         <Label htmlFor="ledger-code">
                                             Account code
                                         </Label>
+
                                         <Input
                                             id="ledger-code"
                                             value={data.code}
@@ -165,12 +204,15 @@ export default function Edit({
                                             className="h-10"
                                             aria-invalid={Boolean(errors.code)}
                                         />
+
                                         <InputError message={errors.code} />
                                     </div>
-                                    <div className="space-y-1.5">
+
+                                    <div className="min-w-0 space-y-1.5">
                                         <Label htmlFor="ledger-name">
                                             Account name
                                         </Label>
+
                                         <Input
                                             id="ledger-name"
                                             value={data.name}
@@ -183,25 +225,37 @@ export default function Edit({
                                             className="h-10"
                                             aria-invalid={Boolean(errors.name)}
                                         />
+
                                         <InputError message={errors.name} />
                                     </div>
                                 </div>
                             </section>
 
-                            <section className="space-y-4 border-t border-border pt-5">
-                                <div>
-                                    <h3 className="text-sm font-semibold">
-                                        Classification and hierarchy
-                                    </h3>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        Choose the account type, group, and
-                                        parent relationship.
-                                    </p>
+                            {/* Classification and hierarchy */}
+                            <section className="space-y-4 border-t border-border pt-6">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                                        <FolderTree className="size-4" />
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-sm font-semibold">
+                                            Classification and hierarchy
+                                        </h3>
+                                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                            Choose the account type, normal
+                                            balance, group, and parent
+                                            relationship.
+                                        </p>
+                                    </div>
                                 </div>
 
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <div className="space-y-1.5">
-                                        <Label>Account type</Label>
+                                <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+                                    <div className="min-w-0 space-y-1.5">
+                                        <Label htmlFor="ledger-type">
+                                            Account type
+                                        </Label>
+
                                         <Select
                                             value={data.type}
                                             onChange={(value) =>
@@ -216,11 +270,15 @@ export default function Edit({
                                             ]}
                                             error={errors.type}
                                         />
+
                                         <InputError message={errors.type} />
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Normal balance</Label>
+                                    <div className="min-w-0 space-y-1.5">
+                                        <Label htmlFor="normal-balance">
+                                            Normal balance
+                                        </Label>
+
                                         <Select
                                             value={data.normal_balance}
                                             onChange={(value) =>
@@ -238,13 +296,17 @@ export default function Edit({
                                             ]}
                                             error={errors.normal_balance}
                                         />
+
                                         <InputError
                                             message={errors.normal_balance}
                                         />
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Account group</Label>
+                                    <div className="min-w-0 space-y-1.5">
+                                        <Label htmlFor="account-group">
+                                            Account group
+                                        </Label>
+
                                         <Select
                                             value={data.account_group_id}
                                             onChange={(value) =>
@@ -267,13 +329,17 @@ export default function Edit({
                                             ]}
                                             error={errors.account_group_id}
                                         />
+
                                         <InputError
                                             message={errors.account_group_id}
                                         />
                                     </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Parent account</Label>
+                                    <div className="min-w-0 space-y-1.5">
+                                        <Label htmlFor="parent-account">
+                                            Parent account
+                                        </Label>
+
                                         <Select
                                             value={data.parent_id}
                                             onChange={(value) =>
@@ -295,23 +361,37 @@ export default function Edit({
                                             ]}
                                             error={errors.parent_id}
                                         />
+
                                         <InputError
                                             message={errors.parent_id}
                                         />
+
+                                        <p className="text-[11px] leading-relaxed text-muted-foreground">
+                                            Leave unselected to make this a
+                                            top-level account.
+                                        </p>
                                     </div>
                                 </div>
                             </section>
 
-                            <section className="space-y-4 border-t border-border pt-5">
-                                <div>
-                                    <h3 className="text-sm font-semibold">
-                                        Account settings
-                                    </h3>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        Configure how this account is used and
-                                        managed.
-                                    </p>
+                            {/* Account settings */}
+                            <section className="space-y-4 border-t border-border pt-6">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                                        <ShieldCheck className="size-4" />
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-sm font-semibold">
+                                            Account settings
+                                        </h3>
+                                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                            Configure how the account is used
+                                            and managed.
+                                        </p>
+                                    </div>
                                 </div>
+
                                 <div className="grid gap-3 sm:grid-cols-2">
                                     {settingOptions.map(
                                         ({
@@ -323,14 +403,14 @@ export default function Edit({
                                             <label
                                                 key={key}
                                                 htmlFor={`setting-${key}`}
-                                                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-colors ${
+                                                className={`flex min-w-0 cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-colors ${
                                                     data[key]
                                                         ? 'border-primary/30 bg-primary/5'
                                                         : 'border-border bg-background hover:bg-muted/30'
                                                 }`}
                                             >
                                                 <span
-                                                    className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg ${
+                                                    className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
                                                         data[key]
                                                             ? 'bg-primary/10 text-primary'
                                                             : 'bg-muted text-muted-foreground'
@@ -338,14 +418,17 @@ export default function Edit({
                                                 >
                                                     <Icon className="size-4" />
                                                 </span>
+
                                                 <span className="min-w-0 flex-1">
                                                     <span className="block text-sm font-medium">
                                                         {label}
                                                     </span>
-                                                    <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+
+                                                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
                                                         {description}
                                                     </span>
                                                 </span>
+
                                                 <Input
                                                     id={`setting-${key}`}
                                                     type="checkbox"
@@ -363,113 +446,141 @@ export default function Edit({
                                         ),
                                     )}
                                 </div>
+
                                 {errors.status && (
                                     <InputError message={errors.status} />
                                 )}
                             </section>
                         </div>
 
-                        <div className="flex flex-col-reverse gap-3 border-t border-border bg-muted/15 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                            <p className="text-xs text-muted-foreground">
-                                Changes are applied to this ledger account.
+                        {/* Sticky form actions */}
+                        <div className="sticky bottom-0 z-10 flex flex-col-reverse gap-3 border-t border-border bg-card/95 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                            <p className="text-xs leading-relaxed text-muted-foreground">
+                                Review your changes before saving.
                             </p>
-                            <div className="flex justify-end gap-2">
-                                <Button variant="outline" type="button" asChild>
+
+                            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                                <Button
+                                    variant="outline"
+                                    type="button"
+                                    asChild
+                                    className="w-full sm:w-auto"
+                                >
                                     <Link href={route('ledger-accounts.index')}>
                                         Cancel
                                     </Link>
                                 </Button>
-                                <Button type="submit" disabled={processing}>
+
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-full sm:w-auto"
+                                >
                                     {processing ? (
                                         <LoaderCircle className="mr-2 size-4 animate-spin" />
                                     ) : (
                                         <Check className="mr-2 size-4" />
                                     )}
+
                                     {processing ? 'Saving...' : 'Save changes'}
                                 </Button>
                             </div>
                         </div>
                     </div>
 
-                    <aside className="space-y-4">
+                    {/* Preview sidebar */}
+                    <aside className="min-w-0 space-y-4 xl:sticky xl:top-5">
                         <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                            <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
-                                <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <div className="flex items-center gap-3 border-b border-border px-4 py-4">
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                     <FolderTree className="size-4" />
                                 </div>
-                                <div>
+
+                                <div className="min-w-0">
                                     <h2 className="text-sm font-semibold">
                                         Live preview
                                     </h2>
-                                    <p className="text-xs text-muted-foreground">
-                                        Account appearance
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        Updated account details
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-4 p-4">
-                                <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-3.5">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                        <Landmark className="size-4" />
+                            <div className="space-y-5 p-4">
+                                <div className="flex min-w-0 items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-3.5">
+                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                        <Landmark className="size-5" />
                                     </div>
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-semibold">
+
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-semibold break-words">
                                             {data.name || 'Account name'}
                                         </p>
+
                                         <p className="mt-1 font-mono text-xs text-muted-foreground">
-                                            {data.code || 'CODE'}
+                                            {data.code || 'ACCOUNT-CODE'}
                                         </p>
                                     </div>
                                 </div>
 
-                                <dl className="space-y-3">
-                                    <div className="flex items-center justify-between gap-3">
+                                <dl className="divide-y divide-border">
+                                    <div className="flex items-center justify-between gap-3 py-3">
                                         <dt className="text-xs text-muted-foreground">
-                                            Type
+                                            Account type
                                         </dt>
-                                        <dd className="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary">
+
+                                        <dd className="max-w-[60%] truncate rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-right text-[11px] font-semibold text-primary">
                                             {selectedType?.label ??
                                                 'Not selected'}
                                         </dd>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
+
+                                    <div className="flex items-center justify-between gap-3 py-3">
                                         <dt className="text-xs text-muted-foreground">
                                             Normal balance
                                         </dt>
-                                        <dd className="flex items-center gap-1.5 text-xs font-medium">
+
+                                        <dd className="flex shrink-0 items-center gap-1.5 text-xs font-medium">
                                             {data.normal_balance ===
                                             'CREDIT' ? (
                                                 <ArrowUpRight className="size-3.5 text-sky-600" />
                                             ) : (
                                                 <ArrowDownLeft className="size-3.5 text-amber-600" />
                                             )}
+
                                             {data.normal_balance}
                                         </dd>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
-                                        <dt className="text-xs text-muted-foreground">
-                                            Group
+
+                                    <div className="flex items-start justify-between gap-3 py-3">
+                                        <dt className="pt-0.5 text-xs text-muted-foreground">
+                                            Account group
                                         </dt>
-                                        <dd className="max-w-40 truncate text-right text-xs font-medium">
+
+                                        <dd className="max-w-[60%] text-right text-xs leading-relaxed font-medium">
                                             {selectedGroup
                                                 ? `${selectedGroup.code} · ${selectedGroup.name}`
                                                 : 'Not assigned'}
                                         </dd>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
-                                        <dt className="text-xs text-muted-foreground">
-                                            Parent
+
+                                    <div className="flex items-start justify-between gap-3 py-3">
+                                        <dt className="pt-0.5 text-xs text-muted-foreground">
+                                            Parent account
                                         </dt>
-                                        <dd className="max-w-40 truncate text-right text-xs font-medium">
+
+                                        <dd className="max-w-[60%] text-right text-xs leading-relaxed font-medium">
                                             {selectedParent
                                                 ? `${selectedParent.code} · ${selectedParent.name}`
                                                 : 'Top-level'}
                                         </dd>
                                     </div>
-                                    <div className="flex items-center justify-between gap-3">
+
+                                    <div className="flex items-center justify-between gap-3 py-3">
                                         <dt className="text-xs text-muted-foreground">
                                             Status
                                         </dt>
+
                                         <dd
                                             className={`inline-flex items-center gap-1.5 text-xs font-medium ${
                                                 data.status
@@ -484,6 +595,7 @@ export default function Edit({
                                                         : 'bg-muted-foreground/50'
                                                 }`}
                                             />
+
                                             {data.status
                                                 ? 'Active'
                                                 : 'Inactive'}
@@ -491,39 +603,50 @@ export default function Edit({
                                     </div>
                                 </dl>
 
-                                <div className="flex flex-wrap gap-1.5 border-t border-border pt-3">
-                                    {settingOptions
-                                        .filter(({ key }) => data[key])
-                                        .map(({ key, label }) => (
-                                            <span
-                                                key={key}
-                                                className="rounded-full border border-border bg-muted/50 px-2 py-1 text-[10px] font-medium text-muted-foreground"
-                                            >
-                                                {label}
+                                <div className="border-t border-border pt-4">
+                                    <p className="mb-2.5 text-xs font-semibold">
+                                        Enabled settings
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {settingOptions
+                                            .filter(({ key }) => data[key])
+                                            .map(({ key, label }) => (
+                                                <span
+                                                    key={key}
+                                                    className="rounded-full border border-border bg-muted/50 px-2.5 py-1 text-[10px] font-medium text-muted-foreground"
+                                                >
+                                                    {label}
+                                                </span>
+                                            ))}
+
+                                        {settingOptions.every(
+                                            ({ key }) => !data[key],
+                                        ) && (
+                                            <span className="text-xs text-muted-foreground">
+                                                No additional settings enabled
                                             </span>
-                                        ))}
-                                    {settingOptions.every(
-                                        ({ key }) => !data[key],
-                                    ) && (
-                                        <span className="text-xs text-muted-foreground">
-                                            No additional settings enabled
-                                        </span>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </section>
 
                         <section className="rounded-2xl border border-border bg-muted/20 p-4">
-                            <div className="flex items-start gap-2.5">
-                                <CircleHelp className="mt-0.5 size-4 shrink-0 text-primary" />
-                                <div>
-                                    <h3 className="text-xs font-semibold">
+                            <div className="flex items-start gap-3">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <CircleHelp className="size-4" />
+                                </div>
+
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-semibold">
                                         Keep the hierarchy consistent
                                     </h3>
-                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                        Choose a group and parent that match
-                                        this account’s purpose. The normal
-                                        balance should reflect how its balance
+
+                                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                                        Select a group and parent that match the
+                                        account’s purpose. Its normal balance
+                                        should reflect how the balance typically
                                         increases.
                                     </p>
                                 </div>
