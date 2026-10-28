@@ -1,8 +1,11 @@
+import AppDatePicker from '@/components/ui/app_date_picker';
+import { Button } from '@/components/ui/button';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
-    CalendarCheck2,
     CalendarDays,
     CalendarPlus,
     Check,
@@ -13,10 +16,6 @@ import {
 } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import AppDatePicker from '@/components/ui/app_date_picker';
-import { Button } from '@/components/ui/button';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
 
 export default function CreateBranchDayPage() {
     const { auth } = usePage<any>().props;
@@ -51,37 +50,31 @@ export default function CreateBranchDayPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open Branch Day" />
 
-            <div className="mx-auto max-w-6xl space-y-6">
-                <header className="relative isolate overflow-hidden rounded-2xl border bg-card px-5 py-6 shadow-sm sm:px-8 sm:py-8">
-                    <div className="absolute -top-20 -right-12 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                            <CalendarCheck2 className="size-7" />
+            <div className="w-full max-w-none space-y-5">
+                <header className="flex flex-col gap-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                Treasury &amp; cash
+                            </span>
+                            <span className="px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                Branch operations
+                            </span>
                         </div>
-                        <div className="min-w-0 flex-1 space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                    Treasury &amp; cash
-                                </span>
-                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                                    Branch operations
-                                </span>
-                            </div>
-                            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                                Open a branch day
-                            </h1>
-                            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                                Start a new business-day record for your branch
-                                and prepare it for daily operations.
-                            </p>
-                        </div>
-                        <Button asChild variant="outline" className="shrink-0">
-                            <a href={route('branch-days.index')}>
-                                <ArrowLeft className="mr-2 size-4" />
-                                Back to branch days
-                            </a>
-                        </Button>
+                        <h1 className="text-xl leading-tight font-semibold tracking-tight text-foreground">
+                            Open a branch day
+                        </h1>
+                        <p className="max-w-2xl text-xs leading-5 text-muted-foreground">
+                            Start a new business-day record for your branch and
+                            prepare it for daily operations.
+                        </p>
                     </div>
+                    <Button asChild variant="outline" className="shrink-0">
+                        <a href={route('branch-days.index')}>
+                            <ArrowLeft className="mr-2 size-4" />
+                            Back to branch days
+                        </a>
+                    </Button>
                 </header>
 
                 {!userHasBranch && (

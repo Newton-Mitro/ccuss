@@ -109,53 +109,24 @@ export default function Form() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={isDeposit ? 'Cash Deposit' : 'Cash Withdrawal'} />
 
-            <div className="w-full max-w-4xl space-y-5 pb-8 text-foreground">
-                <header className="relative isolate overflow-hidden rounded-2xl border bg-card px-5 py-5 shadow-sm sm:px-7 sm:py-6">
-                    <div
-                        className={`absolute -top-20 -right-12 -z-10 size-56 rounded-full blur-3xl ${
-                            isDeposit ? 'bg-emerald-500/10' : 'bg-orange-500/10'
-                        }`}
-                    />
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                        <div
-                            className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ring-1 ${
-                                isDeposit
-                                    ? 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/15 dark:text-emerald-300'
-                                    : 'bg-orange-500/10 text-orange-700 ring-orange-500/15 dark:text-orange-300'
-                            }`}
-                        >
-                            {isDeposit ? (
-                                <ArrowDownToLine className="size-5" />
-                            ) : (
-                                <ArrowUpFromLine className="size-5" />
-                            )}
-                        </div>
-
-                        <div className="min-w-0 flex-1 space-y-1.5">
-                            <p
-                                className={`text-[10px] font-semibold tracking-[0.18em] uppercase ${
-                                    isDeposit
-                                        ? 'text-emerald-700 dark:text-emerald-300'
-                                        : 'text-orange-700 dark:text-orange-300'
-                                }`}
-                            >
-                                Teller · Cash operations
-                            </p>
-                            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
-                                {isDeposit ? 'Cash Deposit' : 'Cash Withdrawal'}
-                            </h1>
-
-                            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-                                {isDeposit
-                                    ? 'Record cash received from customers against their financial accounts.'
-                                    : 'Pay out cash to a customer and record the debit against their account.'}
-                            </p>
-                        </div>
-
-                        <StatusBadge tone={isDeposit ? 'success' : 'warning'}>
-                            {isDeposit ? 'DEPOSIT' : 'WITHDRAWAL'}
-                        </StatusBadge>
+            <div className="w-full max-w-none space-y-5 pb-8 text-foreground">
+                <header className="flex flex-col gap-2 py-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 space-y-1">
+                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                            Teller · Cash operations
+                        </p>
+                        <h1 className="text-xl leading-tight font-semibold tracking-tight sm:text-2xl">
+                            {isDeposit ? 'Cash Deposit' : 'Cash Withdrawal'}
+                        </h1>
+                        <p className="max-w-2xl text-xs leading-5 text-muted-foreground">
+                            {isDeposit
+                                ? 'Record cash received from customers against their financial accounts.'
+                                : 'Pay out cash to a customer and record the debit against their account.'}
+                        </p>
                     </div>
+                    <StatusBadge tone={isDeposit ? 'success' : 'warning'}>
+                        {isDeposit ? 'DEPOSIT' : 'WITHDRAWAL'}
+                    </StatusBadge>
                 </header>
 
                 <form

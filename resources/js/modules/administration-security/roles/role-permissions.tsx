@@ -368,32 +368,35 @@ const RolePermissionForm = ({
                 </DialogContent>
             </Dialog>
 
-            <div className="w-full min-w-0 space-y-3 pb-6 text-foreground">
-                {/* Compact full-width page header */}
-                <header className="flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="w-full min-w-0 space-y-4 pb-6 text-foreground">
+                <header className="relative isolate overflow-hidden rounded-xl border border-border bg-gradient-to-r from-primary/10 via-card to-card px-4 py-4 shadow-sm sm:flex sm:items-center sm:justify-between sm:px-5">
+                    <div className="absolute -top-20 right-24 -z-10 size-48 rounded-full bg-primary/10 blur-3xl" />
                     <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-background/80 text-primary shadow-sm">
                             <ShieldCheck className="size-5" />
                         </div>
                         <div className="min-w-0">
-                            <h1 className="text-lg leading-tight font-semibold tracking-tight">
+                            <p className="text-[10px] font-semibold tracking-[0.16em] text-primary uppercase">
+                                Access control
+                            </p>
+                            <h1 className="mt-0.5 text-xl leading-tight font-semibold tracking-tight">
                                 Role permissions
                             </h1>
-                            <p className="mt-1 text-xs text-muted-foreground">
+                            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                                 Manage role access and permissions by module.
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-                        <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/20 px-2.5 py-1.5 text-xs">
+                    <div className="mt-3 flex flex-wrap items-center gap-2 sm:mt-0 sm:justify-end">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-background/70 px-3 py-2 text-xs shadow-sm">
                             <UsersRound className="size-3.5 text-muted-foreground" />
                             <strong className="font-semibold">
                                 {allRoles.length}
                             </strong>
                             <span className="text-muted-foreground">roles</span>
                         </span>
-                        <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/20 px-2.5 py-1.5 text-xs">
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-background/70 px-3 py-2 text-xs shadow-sm">
                             <KeyRound className="size-3.5 text-muted-foreground" />
                             <strong className="font-semibold">
                                 {permissions.length}
@@ -402,18 +405,21 @@ const RolePermissionForm = ({
                                 permissions
                             </span>
                         </span>
-                        <Button size="sm" onClick={openCreateRole}>
+                        <Button
+                            size="sm"
+                            className="h-9 shadow-sm"
+                            onClick={openCreateRole}
+                        >
                             <Plus className="size-4" />
                             Add role
                         </Button>
                     </div>
                 </header>
 
-                {/* Full-width workspace */}
-                <div className="grid min-w-0 items-start gap-3 lg:grid-cols-[250px_minmax(0,1fr)] xl:grid-cols-[275px_minmax(0,1fr)]">
+                <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(240px,0.24fr)_minmax(0,1fr)]">
                     {/* Roles sidebar */}
-                    <aside className="min-w-0 overflow-hidden rounded-lg border border-border bg-card lg:sticky lg:top-3">
-                        <div className="border-b border-border px-3 py-3">
+                    <aside className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:sticky lg:top-3">
+                        <div className="border-b border-border bg-muted/15 px-3 py-3">
                             <div className="flex items-center justify-between gap-2">
                                 <div>
                                     <h2 className="text-sm font-semibold">
@@ -461,7 +467,7 @@ const RolePermissionForm = ({
                             </div>
                         </div>
 
-                        <div className="max-h-[40vh] space-y-1 overflow-y-auto p-1.5 lg:max-h-[calc(100vh-230px)]">
+                        <div className="max-h-[40vh] space-y-1 overflow-y-auto p-1.5 lg:max-h-[calc(100vh-250px)]">
                             {visibleRoles.map((role) => {
                                 const active = selectedRole?.id === role.id;
                                 const assignedCount =
@@ -576,13 +582,13 @@ const RolePermissionForm = ({
                     </aside>
 
                     {/* Permissions panel */}
-                    <section className="min-w-0 overflow-hidden rounded-lg border border-border bg-card">
+                    <section className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                         {selectedRole ? (
                             <form onSubmit={handleSubmit}>
                                 {/* Selected role summary */}
-                                <div className="flex flex-col gap-3 border-b border-border px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                                <div className="flex flex-col gap-3 border-b border-border bg-gradient-to-r from-primary/5 to-transparent px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                                     <div className="flex min-w-0 items-center gap-2.5">
-                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-background text-primary shadow-sm">
                                             {selectedRole.preset ? (
                                                 <LockKeyhole className="size-4" />
                                             ) : (
@@ -665,7 +671,7 @@ const RolePermissionForm = ({
                                 )}
 
                                 {/* Search and permission controls */}
-                                <div className="flex flex-col gap-2 border-b border-border bg-muted/10 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                                <div className="flex flex-col gap-2 border-b border-border bg-muted/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                                     <div className="flex items-center gap-2">
                                         <KeyRound className="size-4 text-primary" />
                                         <div>
@@ -708,7 +714,7 @@ const RolePermissionForm = ({
                                 </div>
 
                                 {/* Dense, scrollable permission groups */}
-                                <div className="max-h-[62vh] space-y-2 overflow-y-auto p-2.5 sm:p-3">
+                                <div className="max-h-[min(68vh,900px)] space-y-2 overflow-y-auto bg-muted/[0.03] p-3 sm:p-4">
                                     {visiblePermissionGroups.map(
                                         ([module, perms]) => {
                                             const ids = perms.map(
@@ -726,9 +732,9 @@ const RolePermissionForm = ({
                                             return (
                                                 <div
                                                     key={module}
-                                                    className="overflow-hidden rounded-md border border-border"
+                                                    className="overflow-hidden rounded-lg border border-border bg-card shadow-sm"
                                                 >
-                                                    <div className="flex min-h-9 items-center justify-between gap-2 border-b border-border bg-muted/30 px-2.5 py-1.5">
+                                                    <div className="flex min-h-10 items-center justify-between gap-2 border-b border-border bg-muted/30 px-3 py-2">
                                                         <div className="flex min-w-0 items-center gap-2">
                                                             <h4 className="truncate text-[11px] font-semibold tracking-wide uppercase">
                                                                 {module.replaceAll(
@@ -873,7 +879,7 @@ const RolePermissionForm = ({
 
                                 {/* Compact sticky save bar */}
                                 {!selectedRole.preset && (
-                                    <div className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-border bg-card/95 px-3 py-2.5 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                                    <div className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-border bg-card/95 px-4 py-3 shadow-[0_-8px_24px_-20px_hsl(var(--foreground)/0.4)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-5">
                                         <div className="flex min-w-0 items-center gap-2">
                                             <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                                                 <CheckCheck className="size-3.5" />

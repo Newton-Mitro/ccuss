@@ -130,7 +130,7 @@ export default function LoanApplicationForm() {
                         : 'New Loan Application'
                 }
             />
-            <div className="w-full max-w-5xl space-y-5 pb-4">
+            <div className="!w-full min-w-0 !max-w-none space-y-5 pb-4">
                 <LoanApplicationHeader
                     applicationNo={application?.application_no}
                     isEditing={Boolean(application)}
@@ -138,10 +138,10 @@ export default function LoanApplicationForm() {
 
                 <form
                     onSubmit={submit}
-                    className="overflow-hidden rounded-2xl border bg-card shadow-sm"
+                    className="w-full min-w-0 overflow-hidden rounded-2xl border bg-card shadow-sm"
                 >
-                    <div className="grid gap-6 p-4 sm:p-6 lg:p-7">
-                        <div className="space-y-3">
+                    <div className="grid w-full min-w-0 grid-cols-1 gap-6 p-4 sm:p-6 lg:p-7">
+                        <section className="col-span-full w-full min-w-0 space-y-3 rounded-xl border bg-muted/10 p-4 sm:p-5">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="font-medium">
                                     Step {activeStep + 1} of {steps.length}
@@ -167,7 +167,7 @@ export default function LoanApplicationForm() {
                             </div>
                             <nav
                                 aria-label="Application steps"
-                                className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7"
+                                className="grid w-full grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7"
                             >
                                 {steps.map((step, index) => (
                                     <Button
@@ -178,7 +178,7 @@ export default function LoanApplicationForm() {
                                                 ? 'default'
                                                 : 'outline'
                                         }
-                                        className="h-auto min-h-10 justify-start px-2 text-left"
+                                        className="h-auto min-h-10 w-full justify-start px-2 text-left"
                                         disabled={index > activeStep}
                                         aria-current={
                                             activeStep === index
@@ -198,7 +198,7 @@ export default function LoanApplicationForm() {
                                     </Button>
                                 ))}
                             </nav>
-                        </div>
+                        </section>
 
                         {activeStep === 0 && (
                             <LoanBasicDetails
@@ -287,11 +287,12 @@ export default function LoanApplicationForm() {
                             />
                         )}
 
-                        <div className="flex items-center justify-between border-t pt-4">
+                        <div className="col-span-full flex w-full items-center justify-between border-t pt-4">
                             <Button
                                 type="button"
                                 variant="outline"
                                 disabled={activeStep === 0}
+                                size="sm"
                                 onClick={() =>
                                     setActiveStep((step) =>
                                         Math.max(0, step - 1),
@@ -303,6 +304,7 @@ export default function LoanApplicationForm() {
                             <Button
                                 type="button"
                                 disabled={activeStep === steps.length - 1}
+                                size="sm"
                                 onClick={() =>
                                     setActiveStep((step) =>
                                         Math.min(steps.length - 1, step + 1),

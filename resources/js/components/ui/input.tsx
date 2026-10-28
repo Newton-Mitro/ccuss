@@ -35,7 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           isCheckable
             ? "size-4 shrink-0 accent-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
             : [
-                "flex h-8 w-full min-w-0 rounded-md border border-border",
+              "flex h-9 w-full min-w-0 rounded-md border border-border",
                 "bg-background text-foreground",
                 "px-3 py-1 text-sm outline-none",
                 "transition-[color,box-shadow,border-color,background-color]",

@@ -13,7 +13,6 @@ import {
     Banknote,
     Check,
     FileText,
-    Landmark,
     Percent,
     Sparkles,
 } from 'lucide-react';
@@ -165,24 +164,16 @@ export default function FinancialProductForm() {
                 }
             />
             <div className="mx-auto max-w-6xl space-y-6">
-                <header className="relative isolate overflow-hidden rounded-2xl border bg-card px-5 py-6 shadow-sm sm:px-8 sm:py-8">
-                    <div className="absolute -top-20 -right-12 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                            {family === 'loan' ? (
-                                <Banknote className="size-7" />
-                            ) : (
-                                <Landmark className="size-7" />
-                            )}
-                        </div>
-                        <div className="min-w-0 flex-1 space-y-2">
+                <header className="space-y-3 py-2">
+                    <div className="flex flex-col gap-4">
+                        <div className="min-w-0 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                     {family === 'loan'
                                         ? 'Lending'
                                         : 'Financial products'}
                                 </span>
-                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                <span className="rounded-full px-2.5 py-1 text-xs font-medium text-muted-foreground">
                                     {editing ? 'Edit product' : 'New setup'}
                                 </span>
                             </div>

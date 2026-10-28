@@ -137,8 +137,9 @@ const Select: React.FC<SelectSearchProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((prev) => !prev)}
+       data-slot="select-trigger"
        className={cn(
-        "flex h-8 w-full min-w-0 items-center justify-between",
+        "flex h-9 w-full min-w-0 items-center justify-between",
         "rounded-md border border-border",
         "bg-background text-foreground",
         "px-3 py-1 text-sm",

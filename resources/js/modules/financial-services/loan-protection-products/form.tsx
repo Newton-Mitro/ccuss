@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { BreadcrumbItem } from '@/types';
 
+import type { FormPageProps } from '@/modules/financial-services/types/loan-protection-products/form.interfaces';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -17,8 +18,6 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { FormPageProps } from '@/modules/financial-services/types/loan-protection-products/form.interfaces';
-
 
 export default function LoanProtectionProductForm() {
     const { product, can_manage: canManage } = usePage<FormPageProps>().props;
@@ -63,32 +62,26 @@ export default function LoanProtectionProductForm() {
                         : 'New Credit-life Product'
                 }
             />
-            <div className="max-w-6xl space-y-6">
-                <header className="relative isolate overflow-hidden rounded-2xl border bg-card px-5 py-6 shadow-sm sm:px-8 sm:py-8">
-                    <div className="absolute -top-20 -right-12 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                            <ShieldCheck className="size-7" />
+            <div className="w-full max-w-none space-y-5">
+                <header className="space-y-2 py-2">
+                    <div className="min-w-0 space-y-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                Protection products
+                            </span>
+                            <span className="rounded-full px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                {editing ? 'Edit product' : 'New setup'}
+                            </span>
                         </div>
-                        <div className="min-w-0 flex-1 space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                    Protection products
-                                </span>
-                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                                    {editing ? 'Edit product' : 'New setup'}
-                                </span>
-                            </div>
-                            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                                {editing
-                                    ? 'Edit credit-life product'
-                                    : 'Create a credit-life product'}
-                            </h1>
-                            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                                Set the premium rate and availability for the
-                                protection offered with loan applications.
-                            </p>
-                        </div>
+                        <h1 className="text-xl leading-tight font-semibold tracking-tight text-foreground">
+                            {editing
+                                ? 'Edit credit-life product'
+                                : 'Create a credit-life product'}
+                        </h1>
+                        <p className="max-w-2xl text-xs leading-5 text-muted-foreground">
+                            Set the premium rate and availability for the
+                            protection offered with loan applications.
+                        </p>
                     </div>
                 </header>
 

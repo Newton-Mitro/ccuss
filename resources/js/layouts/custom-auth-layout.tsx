@@ -664,7 +664,7 @@ export default function CustomAuthLayout({
                             : '[--app-sidebar-offset:18rem]',
                     )}
                 >
-                    {children}
+                    <div className="app-page-content">{children}</div>
                     <Toaster
                         position="top-center"
                         toastOptions={{

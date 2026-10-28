@@ -8,6 +8,70 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@layer utilities {
+    .app-page-content {
+        flex: 1 0 auto;
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+.app-page-content > * {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin-inline: 0;
+}
+
+.app-page-content > * > header:has(h1) {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+}
+
+.app-page-content > * > header:has(h1) > :is(div[class*='absolute']) {
+    display: none;
+}
+
+.app-page-content
+    > *
+    > header:has(h1)
+    > div
+    > div:first-child[class*='size-'][class*='bg-'] {
+    display: none;
+}
+
+.app-main
+    [data-slot='input']:not(
+        [type='checkbox'],
+        [type='radio'],
+        [type='hidden'],
+        [type='range'],
+        [type='file']
+    ),
+.app-main [data-slot='select-trigger'],
+.app-main select:not([multiple]) {
+    height: 2.25rem !important;
+    min-height: 2.25rem !important;
+    border-radius: 0.5rem;
+}
+
+.app-main
+    :is(
+        [class~='rounded-md'][class~='border'],
+        [class~='rounded-lg'][class~='border'],
+        [class~='rounded-2xl'][class~='border']
+    ) {
+    border-radius: 0.75rem;
+}
+
+.app-main [class~='bg-card'][class~='border'] {
+    box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 5%, transparent);
+}
+
 @theme {
     --font-sans:
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif,

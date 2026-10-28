@@ -10,12 +10,14 @@ export default function HeadingSmall({
     className?: string;
 }) {
     return (
-        <div className={cn('space-y-1', className)}>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+        <div className={cn('space-y-0.5', className)}>
+            <h1 className="text-xl leading-tight font-semibold tracking-tight text-foreground">
                 {title}
             </h1>
             {description && (
-                <p className="text-sm text-muted-foreground">{description}</p>
+                <p className="text-xs leading-5 text-muted-foreground">
+                    {description}
+                </p>
             )}
         </div>
     );
