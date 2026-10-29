@@ -1,4 +1,12 @@
+import { BorderInfoBox } from '@/components/border-info-box';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { formatDate, formatDateTime } from '@/lib/date_util';
+import formatUndersoreString from '@/lib/formatUnderscoreString';
+import statusConfig, { Status } from '@/modules/customers-kyc/lib/statusConfig';
 import type { CustomerPageProps } from '@/modules/customers-kyc/types/customer-kyc-pages';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import {
     Clock,
@@ -16,17 +24,9 @@ import {
     X,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import { BorderInfoBox } from '@/components/border-info-box';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { appSwal } from '@/lib/appSwal';
-import { formatDate, formatDateTime } from '@/lib/date_util';
-import formatUndersoreString from '@/lib/formatUnderscoreString';
-import statusConfig, { Status } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem } from '@/types';
 export default function Show({ customer }: CustomerPageProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'Customers', href: route('customers.index') },
         { title: customer.name, href: '' },
     ];

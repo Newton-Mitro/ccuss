@@ -118,7 +118,7 @@ export default function LoanApplicationForm() {
     ];
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Loan Applications', href: route('loan-applications.index') },
         { title: application ? 'Edit Draft' : 'New Application', href: '' },
     ];

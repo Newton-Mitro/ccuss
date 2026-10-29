@@ -72,7 +72,7 @@ export default function ShareAccountShow() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: 'Share Accounts',
             href: route('financial-accounts.share.index'),

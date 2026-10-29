@@ -96,7 +96,7 @@ export default function FinancialTransactionIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Transactions', href: route('financial-transactions.index') },
     ];
     return (

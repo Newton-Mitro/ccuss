@@ -16,7 +16,7 @@ export default function TransactionReport() {
     const { transactions, filters } =
         usePage<TransactionsReportPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Transaction Report', href: '' },
     ];
     const isEmpty = transactions.data.length === 0;

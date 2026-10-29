@@ -2,6 +2,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     CheckCheck,
+    Eye,
     GitBranch,
     HeartHandshake,
     Loader2,
@@ -63,7 +64,7 @@ const Edit = () => {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'Customers', href: route('customers.index') },
         {
             title: customer.name,
@@ -177,117 +178,232 @@ const Edit = () => {
                     </div>
                 </section>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Introducer selection */}
-                    <section className="overflow-hidden rounded-xl border border-border bg-card">
-                        <SectionHeading
-                            icon={<UsersRound className="size-4" />}
-                            step="01"
-                            title="Introducer Details"
-                            description="Select the existing customer who introduced this customer."
-                        />
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]"
+                >
+                    <div className="min-w-0 space-y-4 xl:col-start-1">
+                        {/* Introducer selection */}
+                        <section className="overflow-hidden rounded-xl border border-border bg-card">
+                            <SectionHeading
+                                icon={<UsersRound className="size-4" />}
+                                step="01"
+                                title="Introducer Details"
+                                description="Select the existing customer who introduced this customer."
+                            />
 
-                        <div className="space-y-3 p-4">
-                            <div className="space-y-1.5">
-                                <Label className="text-sm font-medium">
-                                    Select Introducer
+                            <div className="space-y-3 p-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-sm font-medium">
+                                        Select Introducer
+                                        <span className="ml-1 text-destructive">
+                                            *
+                                        </span>
+                                    </Label>
+
+                                    <CustomerSearchBox
+                                        selectedCustomer={selectedIntroducer}
+                                        onSelect={(c: Customer) => {
+                                            if (
+                                                String(c.id) ===
+                                                String(customer.id)
+                                            ) {
+                                                toast.error(
+                                                    'Customer cannot be their own introducer.',
+                                                );
+                                                return;
+                                            }
+
+                                            setSelectedIntroducer(c);
+                                            setData(
+                                                'introducer_customer_id',
+                                                c.id,
+                                            );
+                                        }}
+                                    />
+
+                                    <p className="text-xs leading-relaxed text-muted-foreground">
+                                        Search by customer name or available
+                                        customer details. A customer cannot
+                                        introduce themselves.
+                                    </p>
+
+                                    <InputError
+                                        message={errors.introducer_customer_id}
+                                    />
+                                </div>
+
+                                {selectedIntroducer && (
+                                    <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/[0.04] p-3 sm:flex-row sm:items-center">
+                                        <CustomerAvatar
+                                            name={selectedIntroducer.name}
+                                            photoUrl={
+                                                selectedIntroducer.photo?.url
+                                            }
+                                            className="size-11"
+                                        />
+
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-sm font-semibold text-foreground">
+                                                {selectedIntroducer.name}
+                                            </p>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {selectedIntroducer.customer_no ||
+                                                    'No customer number'}
+                                                {selectedIntroducer.primary_phone
+                                                    ? ` · ${selectedIntroducer.primary_phone}`
+                                                    : ''}
+                                            </p>
+                                        </div>
+
+                                        <span className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-primary/20 bg-background px-2.5 py-1 text-xs font-medium text-primary">
+                                            <CheckCheck className="size-3.5" />
+                                            Selected
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Relationship details */}
+                        <section className="overflow-hidden rounded-xl border border-border bg-card">
+                            <SectionHeading
+                                icon={<GitBranch className="size-4" />}
+                                step="02"
+                                title="Relationship Details"
+                                description="Specify the relationship between the customer and their introducer."
+                            />
+
+                            <div className="max-w-2xl space-y-2 p-4">
+                                <Label
+                                    htmlFor="relationship_type"
+                                    className="text-sm font-medium"
+                                >
+                                    Relationship Type
                                     <span className="ml-1 text-destructive">
                                         *
                                     </span>
                                 </Label>
 
-                                <CustomerSearchBox
-                                    selectedCustomer={selectedIntroducer}
-                                    onSelect={(c: Customer) => {
-                                        if (
-                                            String(c.id) === String(customer.id)
-                                        ) {
-                                            toast.error(
-                                                'Customer cannot be their own introducer.',
-                                            );
-                                            return;
-                                        }
-
-                                        setSelectedIntroducer(c);
-                                        setData('introducer_customer_id', c.id);
-                                    }}
+                                <Select
+                                    value={data.relationship_type}
+                                    onChange={(value) =>
+                                        setData('relationship_type', value)
+                                    }
+                                    options={relationshipTypes}
                                 />
 
                                 <p className="text-xs leading-relaxed text-muted-foreground">
-                                    Search by customer name or available
-                                    customer details. A customer cannot
-                                    introduce themselves.
+                                    Choose the relationship that best describes
+                                    the connection between these customers.
                                 </p>
 
                                 <InputError
-                                    message={errors.introducer_customer_id}
+                                    message={errors.relationship_type}
                                 />
                             </div>
+                        </section>
+                    </div>
 
-                            {selectedIntroducer && (
-                                <div className="flex flex-col gap-3 rounded-lg border border-primary/20 bg-primary/[0.04] p-3 sm:flex-row sm:items-center">
-                                    <CustomerAvatar
-                                        name={selectedIntroducer.name}
-                                        photoUrl={selectedIntroducer.photo?.url}
-                                        className="size-11"
-                                    />
-
+                    <aside className="min-w-0 xl:sticky xl:top-4 xl:col-start-2 xl:row-start-1 xl:self-start">
+                        <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
+                            <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-4">
+                                <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
+                                <div className="relative flex items-center gap-2.5">
+                                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                                        <Eye className="size-4" />
+                                    </span>
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-semibold text-foreground">
-                                            {selectedIntroducer.name}
+                                        <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
+                                            Customer relationship
                                         </p>
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            {selectedIntroducer.customer_no ||
-                                                'No customer number'}
-                                            {selectedIntroducer.primary_phone
-                                                ? ` · ${selectedIntroducer.primary_phone}`
-                                                : ''}
-                                        </p>
+                                        <h2 className="text-sm font-semibold">
+                                            Introducer preview
+                                        </h2>
                                     </div>
-
-                                    <span className="inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-primary/20 bg-background px-2.5 py-1 text-xs font-medium text-primary">
-                                        <CheckCheck className="size-3.5" />
-                                        Selected
+                                    <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[10px] font-semibold text-primary">
+                                        LIVE
                                     </span>
                                 </div>
-                            )}
-                        </div>
-                    </section>
+                            </div>
 
-                    {/* Relationship details */}
-                    <section className="overflow-hidden rounded-xl border border-border bg-card">
-                        <SectionHeading
-                            icon={<GitBranch className="size-4" />}
-                            step="02"
-                            title="Relationship Details"
-                            description="Specify the relationship between the customer and their introducer."
-                        />
+                            <div className="space-y-3 p-3">
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                                    <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        Introduced customer
+                                    </p>
+                                    <div className="mt-2 flex items-center gap-3">
+                                        <CustomerAvatar
+                                            name={customer.name}
+                                            photoUrl={customer?.photo?.url}
+                                            className="size-11"
+                                        />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold break-words">
+                                                {customer.name}
+                                            </p>
+                                            <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                                {customer.customer_no ||
+                                                    'No customer number'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <div className="max-w-2xl space-y-2 p-4">
-                            <Label
-                                htmlFor="relationship_type"
-                                className="text-sm font-medium"
-                            >
-                                Relationship Type
-                                <span className="ml-1 text-destructive">*</span>
-                            </Label>
+                                <div className="flex items-center justify-center rounded-xl border border-primary/15 bg-primary/[0.06] px-3 py-2.5 text-xs font-medium text-primary">
+                                    <GitBranch className="mr-2 size-3.5 shrink-0" />
+                                    {relationshipTypes.find(
+                                        (item) =>
+                                            item.value ===
+                                            data.relationship_type,
+                                    )?.label || 'Relationship not selected'}
+                                </div>
 
-                            <Select
-                                value={data.relationship_type}
-                                onChange={(value) =>
-                                    setData('relationship_type', value)
-                                }
-                                options={relationshipTypes}
-                            />
+                                <div className="rounded-xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3.5 ring-1 ring-primary/10">
+                                    <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        Introducer
+                                    </p>
+                                    {selectedIntroducer ? (
+                                        <div className="mt-2 flex items-center gap-3">
+                                            <CustomerAvatar
+                                                name={selectedIntroducer.name}
+                                                photoUrl={
+                                                    selectedIntroducer.photo
+                                                        ?.url
+                                                }
+                                                className="size-11"
+                                            />
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold break-words">
+                                                    {selectedIntroducer.name}
+                                                </p>
+                                                <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                                    {selectedIntroducer.customer_no ||
+                                                        'No customer number'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="mt-2 text-xs text-muted-foreground">
+                                            Select a customer to preview the
+                                            introducer.
+                                        </p>
+                                    )}
+                                </div>
 
-                            <p className="text-xs leading-relaxed text-muted-foreground">
-                                Choose the relationship that best describes the
-                                connection between these customers.
-                            </p>
-
-                            <InputError message={errors.relationship_type} />
-                        </div>
-                    </section>
+                                {selectedIntroducer?.primary_phone && (
+                                    <div className="rounded-xl border border-border/60 px-3 py-2.5">
+                                        <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            Introducer phone
+                                        </p>
+                                        <p className="mt-1 text-xs font-medium">
+                                            {selectedIntroducer.primary_phone}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    </aside>
 
                     {/* Sticky action bar */}
                     <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-4 sm:py-3 sm:backdrop-blur-none">

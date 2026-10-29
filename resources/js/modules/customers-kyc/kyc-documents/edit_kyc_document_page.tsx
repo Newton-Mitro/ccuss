@@ -132,7 +132,7 @@ export default function EditKycDocument() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'Customers', href: route('customers.index') },
         {
             title: customer?.name || 'Customer',

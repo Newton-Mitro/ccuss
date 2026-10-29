@@ -30,7 +30,7 @@ export default function FinancialTransactionForm() {
         post(route('financial-transactions.store'));
     };
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Transactions', href: route('financial-transactions.index') },
         { title: 'New Transaction', href: '' },
     ];

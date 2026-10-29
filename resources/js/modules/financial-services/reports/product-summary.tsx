@@ -17,7 +17,7 @@ export default function ProductSummaryReport() {
             title="Product summary"
             description="Accounts and balances grouped by financial product."
             breadcrumbs={[
-                { title: 'Financial Services', href: '' },
+                { title: 'Financial Services', href: '/financial-services' },
                 { title: 'Product Summary', href: '' },
             ]}
             products={products}

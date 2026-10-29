@@ -44,7 +44,7 @@ export default function FinancialAccountIndex() {
     }, [search, indexRoute]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: category
                 ? `${categoryLabel} Management`

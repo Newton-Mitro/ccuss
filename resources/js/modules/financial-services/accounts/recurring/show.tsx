@@ -239,7 +239,7 @@ export default function RecurringDepositAccountShow() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: 'Recurring Deposits',
             href: route('financial-accounts.recurring.index'),

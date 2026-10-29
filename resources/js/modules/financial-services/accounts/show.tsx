@@ -101,7 +101,7 @@ export default function FinancialAccountShow() {
         grace_days: '0',
     });
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: 'Financial Accounts',
             href: getIndexRoute(account.account_type),

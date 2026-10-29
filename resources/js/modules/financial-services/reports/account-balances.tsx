@@ -13,7 +13,7 @@ export default function AccountBalancesReport() {
     const { accounts, products, filters } =
         usePage<AccountBalancesReportPageProps>().props;
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Account Balances', href: '' },
     ];
     const isEmpty = accounts.data.length === 0;

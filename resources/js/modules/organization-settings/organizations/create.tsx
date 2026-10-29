@@ -1,17 +1,3 @@
-import { Head, useForm } from '@inertiajs/react';
-import {
-    Building2,
-    CheckCheck,
-    FileText,
-    Globe,
-    ImagePlus,
-    Loader2,
-    MapPin,
-    Trash2,
-    Upload,
-} from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
-import { route } from 'ziggy-js';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -20,6 +6,22 @@ import { Label } from '@/components/ui/label';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { BreadcrumbItem } from '@/types';
+import { Head, useForm } from '@inertiajs/react';
+import {
+    Building2,
+    CheckCheck,
+    Eye,
+    FileText,
+    Globe,
+    ImagePlus,
+    Loader2,
+    MapPin,
+    Phone,
+    Trash2,
+    Upload,
+} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { route } from 'ziggy-js';
 
 function CreateOrganization() {
     useFlashToastHandler();
@@ -153,314 +155,442 @@ function CreateOrganization() {
                     description="Configure your organization's identity, contact information, and reporting preferences."
                 />
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Organization details */}
-                    <section className={sectionClass}>
-                        <div className={sectionHeaderClass}>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <Building2 className="size-4.5" />
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]"
+                >
+                    <div className="min-w-0 space-y-4 xl:col-start-1">
+                        {/* Organization details */}
+                        <section className={sectionClass}>
+                            <div className={sectionHeaderClass}>
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <Building2 className="size-4.5" />
+                                </div>
+
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-semibold">
+                                        Organization Details
+                                    </h3>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        Basic identity and registration
+                                        information
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="min-w-0">
-                                <h3 className="text-sm font-semibold">
-                                    Organization Details
-                                </h3>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    Basic identity and registration information
-                                </p>
+                            <div className={sectionBodyClass}>
+                                {renderField(
+                                    'name',
+                                    'Organization Name',
+                                    'e.g. Acme Corporation',
+                                    { className: 'md:col-span-2' },
+                                )}
+
+                                {renderField(
+                                    'short_name',
+                                    'Short Name',
+                                    'e.g. Acme',
+                                )}
+
+                                {renderField(
+                                    'code',
+                                    'Organization Code',
+                                    'e.g. ORG-001',
+                                )}
+
+                                {renderField(
+                                    'registration_no',
+                                    'Registration Number',
+                                    'Enter registration number',
+                                )}
+
+                                {renderField(
+                                    'tax_id',
+                                    'Tax Identification Number',
+                                    'Enter tax ID',
+                                )}
                             </div>
-                        </div>
+                        </section>
 
-                        <div className={sectionBodyClass}>
-                            {renderField(
-                                'name',
-                                'Organization Name',
-                                'e.g. Acme Corporation',
-                                { className: 'md:col-span-2' },
-                            )}
+                        {/* Logo and branding */}
+                        <section className={sectionClass}>
+                            <div className={sectionHeaderClass}>
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <ImagePlus className="size-4.5" />
+                                </div>
 
-                            {renderField(
-                                'short_name',
-                                'Short Name',
-                                'e.g. Acme',
-                            )}
-
-                            {renderField(
-                                'code',
-                                'Organization Code',
-                                'e.g. ORG-001',
-                            )}
-
-                            {renderField(
-                                'registration_no',
-                                'Registration Number',
-                                'Enter registration number',
-                            )}
-
-                            {renderField(
-                                'tax_id',
-                                'Tax Identification Number',
-                                'Enter tax ID',
-                            )}
-                        </div>
-                    </section>
-
-                    {/* Logo and branding */}
-                    <section className={sectionClass}>
-                        <div className={sectionHeaderClass}>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <ImagePlus className="size-4.5" />
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-semibold">
+                                        Organization Branding
+                                    </h3>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        Upload a logo or provide an existing
+                                        logo URL
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="min-w-0">
-                                <h3 className="text-sm font-semibold">
-                                    Organization Branding
-                                </h3>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    Upload a logo or provide an existing logo
-                                    URL
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-5 p-4 sm:p-5 md:grid-cols-[180px_minmax(0,1fr)]">
-                            <div className="space-y-2">
-                                <div
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() =>
-                                        fileInputRef.current?.click()
-                                    }
-                                    onKeyDown={(event) => {
-                                        if (
-                                            event.key === 'Enter' ||
-                                            event.key === ' '
-                                        ) {
-                                            event.preventDefault();
-                                            fileInputRef.current?.click();
+                            <div className="grid grid-cols-1 gap-5 p-4 sm:p-5 md:grid-cols-[180px_minmax(0,1fr)]">
+                                <div className="space-y-2">
+                                    <div
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() =>
+                                            fileInputRef.current?.click()
                                         }
-                                    }}
-                                    className="group relative flex h-36 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-muted/30 transition-colors hover:border-primary/60 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
-                                >
-                                    {photoPreview ? (
-                                        <>
-                                            <img
-                                                src={photoPreview}
-                                                alt="Organization logo preview"
-                                                className="size-full object-contain p-3"
-                                            />
+                                        onKeyDown={(event) => {
+                                            if (
+                                                event.key === 'Enter' ||
+                                                event.key === ' '
+                                            ) {
+                                                event.preventDefault();
+                                                fileInputRef.current?.click();
+                                            }
+                                        }}
+                                        className="group relative flex h-36 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-muted/30 transition-colors hover:border-primary/60 hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+                                    >
+                                        {photoPreview ? (
+                                            <>
+                                                <img
+                                                    src={photoPreview}
+                                                    alt="Organization logo preview"
+                                                    className="size-full object-contain p-3"
+                                                />
 
-                                            <div className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 transition-opacity group-hover:opacity-100">
-                                                <span className="flex items-center gap-2 text-xs font-semibold">
-                                                    <Upload className="size-4" />
-                                                    Change logo
+                                                <div className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 transition-opacity group-hover:opacity-100">
+                                                    <span className="flex items-center gap-2 text-xs font-semibold">
+                                                        <Upload className="size-4" />
+                                                        Change logo
+                                                    </span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                                    <Upload className="size-5" />
+                                                </div>
+                                                <span className="text-xs font-semibold">
+                                                    Upload logo
                                                 </span>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                                <Upload className="size-5" />
-                                            </div>
-                                            <span className="text-xs font-semibold">
-                                                Upload logo
-                                            </span>
-                                            <span className="mt-1 text-[11px] text-muted-foreground">
-                                                PNG, JPG or WebP
-                                            </span>
-                                        </>
+                                                <span className="mt-1 text-[11px] text-muted-foreground">
+                                                    PNG, JPG or WebP
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    <input
+                                        ref={fileInputRef}
+                                        id="photoInput"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handlePhotoChange}
+                                        className="hidden"
+                                    />
+
+                                    <p className="text-center text-[11px] text-muted-foreground">
+                                        Maximum file size: 3 MB
+                                    </p>
+
+                                    <InputError message={errors.logo} />
+
+                                    {photoPreview && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={removeLogo}
+                                            className="h-8 w-full gap-2 text-xs text-destructive hover:text-destructive"
+                                        >
+                                            <Trash2 className="size-3.5" />
+                                            Remove logo
+                                        </Button>
                                     )}
                                 </div>
 
-                                <input
-                                    ref={fileInputRef}
-                                    id="photoInput"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handlePhotoChange}
-                                    className="hidden"
-                                />
+                                <div className="space-y-4">
+                                    <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground">
+                                                <ImagePlus className="size-4" />
+                                            </div>
 
-                                <p className="text-center text-[11px] text-muted-foreground">
-                                    Maximum file size: 3 MB
-                                </p>
-
-                                <InputError message={errors.logo} />
-
-                                {photoPreview && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={removeLogo}
-                                        className="h-8 w-full gap-2 text-xs text-destructive hover:text-destructive"
-                                    >
-                                        <Trash2 className="size-3.5" />
-                                        Remove logo
-                                    </Button>
-                                )}
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground">
-                                            <ImagePlus className="size-4" />
-                                        </div>
-
-                                        <div>
-                                            <p className="text-xs font-semibold">
-                                                Logo guidelines
-                                            </p>
-                                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                                                Use a clear, high-quality image
-                                                with a transparent background
-                                                where possible. A square logo
-                                                works well across reports and
-                                                organization screens.
-                                            </p>
+                                            <div>
+                                                <p className="text-xs font-semibold">
+                                                    Logo guidelines
+                                                </p>
+                                                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                                    Use a clear, high-quality
+                                                    image with a transparent
+                                                    background where possible. A
+                                                    square logo works well
+                                                    across reports and
+                                                    organization screens.
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    {renderField(
+                                        'logo_url',
+                                        'Logo URL',
+                                        'https://example.com/logo.png',
+                                        { type: 'url' },
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Contact information */}
+                        <section className={sectionClass}>
+                            <div className={sectionHeaderClass}>
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <Globe className="size-4.5" />
                                 </div>
 
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-semibold">
+                                        Contact Information
+                                    </h3>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        Official communication channels
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className={sectionBodyClass}>
                                 {renderField(
-                                    'logo_url',
-                                    'Logo URL',
-                                    'https://example.com/logo.png',
+                                    'phone',
+                                    'Phone Number',
+                                    '+880 1XXX-XXXXXX',
+                                    { type: 'tel' },
+                                )}
+
+                                {renderField(
+                                    'email',
+                                    'Email Address',
+                                    'contact@example.com',
+                                    { type: 'email' },
+                                )}
+
+                                {renderField(
+                                    'website',
+                                    'Website',
+                                    'https://example.com',
                                     { type: 'url' },
                                 )}
                             </div>
-                        </div>
-                    </section>
+                        </section>
 
-                    {/* Contact information */}
-                    <section className={sectionClass}>
-                        <div className={sectionHeaderClass}>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <Globe className="size-4.5" />
+                        {/* Address */}
+                        <section className={sectionClass}>
+                            <div className={sectionHeaderClass}>
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <MapPin className="size-4.5" />
+                                </div>
+
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-semibold">
+                                        Registered Address
+                                    </h3>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        Official mailing and business address
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="min-w-0">
-                                <h3 className="text-sm font-semibold">
-                                    Contact Information
-                                </h3>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    Official communication channels
+                            <div className={sectionBodyClass}>
+                                {renderField(
+                                    'address_line1',
+                                    'Address Line 1',
+                                    'Street address, building',
+                                    { className: 'md:col-span-2' },
+                                )}
+
+                                {renderField(
+                                    'address_line2',
+                                    'Address Line 2',
+                                    'Floor, suite, landmark (optional)',
+                                    { className: 'md:col-span-2' },
+                                )}
+
+                                {renderField('city', 'City', 'e.g. Dhaka')}
+
+                                {renderField(
+                                    'state',
+                                    'State / Division',
+                                    'e.g. Dhaka Division',
+                                )}
+
+                                {renderField(
+                                    'postal_code',
+                                    'Postal Code',
+                                    'e.g. 1207',
+                                )}
+
+                                {renderField(
+                                    'country',
+                                    'Country',
+                                    'e.g. Bangladesh',
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Report configuration */}
+                        <section className={sectionClass}>
+                            <div className={sectionHeaderClass}>
+                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <FileText className="size-4.5" />
+                                </div>
+
+                                <div className="min-w-0">
+                                    <h3 className="text-sm font-semibold">
+                                        Report Configuration
+                                    </h3>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        Customize the footer displayed on
+                                        reports
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="p-4 sm:p-5">
+                                {renderField(
+                                    'report_footer',
+                                    'Report Footer Text',
+                                    '© 2026 Your Organization. All rights reserved.',
+                                )}
+
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                    This text can be used as the closing line on
+                                    printed reports and statements.
                                 </p>
                             </div>
-                        </div>
-
-                        <div className={sectionBodyClass}>
-                            {renderField(
-                                'phone',
-                                'Phone Number',
-                                '+880 1XXX-XXXXXX',
-                                { type: 'tel' },
-                            )}
-
-                            {renderField(
-                                'email',
-                                'Email Address',
-                                'contact@example.com',
-                                { type: 'email' },
-                            )}
-
-                            {renderField(
-                                'website',
-                                'Website',
-                                'https://example.com',
-                                { type: 'url' },
-                            )}
-                        </div>
-                    </section>
-
-                    {/* Address */}
-                    <section className={sectionClass}>
-                        <div className={sectionHeaderClass}>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <MapPin className="size-4.5" />
+                        </section>
+                    </div>
+                    <aside className="min-w-0 xl:sticky xl:top-4 xl:col-start-2 xl:row-start-1 xl:self-start">
+                        <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
+                            <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-4">
+                                <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
+                                <div className="relative flex items-center gap-2.5">
+                                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                                        <Eye className="size-4" />
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
+                                            Organization profile
+                                        </p>
+                                        <h2 className="text-sm font-semibold">
+                                            Organization preview
+                                        </h2>
+                                    </div>
+                                    <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[10px] font-semibold text-primary">
+                                        LIVE
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="min-w-0">
-                                <h3 className="text-sm font-semibold">
-                                    Registered Address
-                                </h3>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    Official mailing and business address
+                            <div className="space-y-3 p-3">
+                                <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3.5 ring-1 ring-primary/10">
+                                    <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-background">
+                                        {photoPreview ? (
+                                            <img
+                                                src={photoPreview}
+                                                alt="Organization logo preview"
+                                                className="size-full object-contain p-1.5"
+                                            />
+                                        ) : (
+                                            <Building2 className="size-6 text-primary" />
+                                        )}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold break-words">
+                                            {data.name || 'Organization name'}
+                                        </p>
+                                        <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                            {data.code || 'Organization code'}
+                                        </p>
+                                        {data.short_name && (
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {data.short_name}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                                    <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        Registration
+                                    </p>
+                                    <p className="mt-1 text-xs font-medium break-words">
+                                        {data.registration_no ||
+                                            'Registration number not provided'}
+                                    </p>
+                                    {data.tax_id && (
+                                        <p className="mt-2 border-t border-border/60 pt-2 text-xs text-muted-foreground">
+                                            Tax ID: {data.tax_id}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-2 rounded-xl border border-border/60 px-3 py-2.5">
+                                    <div className="flex items-start gap-2 text-xs">
+                                        <Phone className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                                        <span className="break-all">
+                                            {data.phone || 'Phone not provided'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs">
+                                        <Globe className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                                        <span className="break-all">
+                                            {data.email || 'Email not provided'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs">
+                                        <Globe className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                                        <span className="break-all">
+                                            {data.website ||
+                                                'Website not provided'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-xs">
+                                        <MapPin className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                                        <span className="break-words">
+                                            {[
+                                                data.address_line1,
+                                                data.address_line2,
+                                                data.city,
+                                                data.state,
+                                                data.postal_code,
+                                                data.country,
+                                            ]
+                                                .filter(Boolean)
+                                                .join(', ') ||
+                                                'Address not provided'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="rounded-xl border border-border/60 px-3 py-2.5">
+                                    <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        Report footer
+                                    </p>
+                                    <p className="mt-1 text-xs leading-relaxed break-words">
+                                        {data.report_footer || 'Not configured'}
+                                    </p>
+                                </div>
+
+                                <p className="flex items-start gap-2 rounded-xl border border-border/60 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+                                    <Eye className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                                    This preview updates as you enter
+                                    organization details.
                                 </p>
                             </div>
-                        </div>
-
-                        <div className={sectionBodyClass}>
-                            {renderField(
-                                'address_line1',
-                                'Address Line 1',
-                                'Street address, building',
-                                { className: 'md:col-span-2' },
-                            )}
-
-                            {renderField(
-                                'address_line2',
-                                'Address Line 2',
-                                'Floor, suite, landmark (optional)',
-                                { className: 'md:col-span-2' },
-                            )}
-
-                            {renderField('city', 'City', 'e.g. Dhaka')}
-
-                            {renderField(
-                                'state',
-                                'State / Division',
-                                'e.g. Dhaka Division',
-                            )}
-
-                            {renderField(
-                                'postal_code',
-                                'Postal Code',
-                                'e.g. 1207',
-                            )}
-
-                            {renderField(
-                                'country',
-                                'Country',
-                                'e.g. Bangladesh',
-                            )}
-                        </div>
-                    </section>
-
-                    {/* Report configuration */}
-                    <section className={sectionClass}>
-                        <div className={sectionHeaderClass}>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <FileText className="size-4.5" />
-                            </div>
-
-                            <div className="min-w-0">
-                                <h3 className="text-sm font-semibold">
-                                    Report Configuration
-                                </h3>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    Customize the footer displayed on reports
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="p-4 sm:p-5">
-                            {renderField(
-                                'report_footer',
-                                'Report Footer Text',
-                                '© 2026 Your Organization. All rights reserved.',
-                            )}
-
-                            <p className="mt-2 text-xs text-muted-foreground">
-                                This text can be used as the closing line on
-                                printed reports and statements.
-                            </p>
-                        </div>
-                    </section>
+                        </section>
+                    </aside>
 
                     {/* Sticky form actions */}
-                    <div className="sticky bottom-0 z-20 -mx-3 border-t border-border/70 bg-background/95 px-3 py-3 backdrop-blur-md sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6">
+                    <div className="sticky bottom-0 z-20 -mx-3 border-t border-border/70 bg-background/95 px-3 py-3 backdrop-blur-md sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 xl:col-span-2">
                         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-xs text-muted-foreground">
                                 Review your organization's details before

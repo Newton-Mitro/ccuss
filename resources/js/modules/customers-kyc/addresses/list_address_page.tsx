@@ -6,20 +6,19 @@ import {
     ResourceTableViewport,
 } from '@/components/resource-page-shell';
 import { Input } from '@/components/ui/input';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
-import { route } from 'ziggy-js';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem } from '@/types';
 import { CustomerAddress } from '@/modules/customers-kyc/types/customer_kyc_module';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { route } from 'ziggy-js';
 
 import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 import type { Props } from '@/modules/customers-kyc/types/addresses/list_address_page.interfaces';
-
 
 export default function AddressIndex() {
     const { paginated_data, filters } = usePage<Props>().props;
@@ -68,7 +67,7 @@ export default function AddressIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'Addresses', href: route('addresses.index') },
     ];
 

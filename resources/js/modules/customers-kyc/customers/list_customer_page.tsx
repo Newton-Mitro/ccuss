@@ -65,7 +65,7 @@ export default function Index() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'Customers', href: route('customers.index') },
     ];
 

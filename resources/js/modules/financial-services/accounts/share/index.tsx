@@ -34,7 +34,7 @@ export default function ShareAccountIndex() {
         return () => clearTimeout(delay);
     }, [data.search, data.per_page, data.page]);
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Share Accounts', href: '' },
     ];
     return (

@@ -35,7 +35,7 @@ export default function FixedDepositAccountIndex() {
         return () => clearTimeout(delay);
     }, [data.search, data.per_page, data.page]);
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Fixed Deposits', href: '' },
     ];
     return (

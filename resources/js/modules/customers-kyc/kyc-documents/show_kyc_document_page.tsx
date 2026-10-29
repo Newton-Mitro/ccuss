@@ -1,3 +1,10 @@
+import { Button } from '@/components/ui/button';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDateTime } from '@/lib/date_util';
+import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
+import type { KycDocument } from '@/modules/customers-kyc/types/customer_kyc_module';
+import type { BreadcrumbItem, SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -5,10 +12,10 @@ import {
     CheckCheck,
     Clock,
     ExternalLink,
-    FlipHorizontal2,
     FileCheck2,
     FileImage,
     FileText,
+    FlipHorizontal2,
     History,
     Maximize2,
     Minus,
@@ -22,13 +29,6 @@ import {
 import { useState } from 'react';
 import { PanViewer } from 'react-image-pan-zoom-rotate';
 import { route } from 'ziggy-js';
-import { Button } from '@/components/ui/button';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { formatDateTime } from '@/lib/date_util';
-import type { BreadcrumbItem, SharedData } from '@/types';
-import type { KycDocument } from '@/modules/customers-kyc/types/customer_kyc_module';
-import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 
 const Show = () => {
     const [zoom, setZoom] = useState(1);
@@ -47,7 +47,7 @@ const Show = () => {
     useFlashToastHandler();
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'Customers', href: route('customers.index') },
         {
             title: document.customer?.name || `Document #${document.id}`,
@@ -255,7 +255,8 @@ const Show = () => {
                                             title="Rotate image"
                                             onClick={() =>
                                                 setRotation(
-                                                    (value) => (value + 90) % 360,
+                                                    (value) =>
+                                                        (value + 90) % 360,
                                                 )
                                             }
                                         >

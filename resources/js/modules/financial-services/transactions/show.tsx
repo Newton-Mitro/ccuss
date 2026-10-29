@@ -37,7 +37,7 @@ export default function FinancialTransactionShow() {
         { debit: 0, credit: 0 },
     );
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Transactions', href: route('financial-transactions.index') },
         { title: transaction.transaction_no, href: '' },
     ];

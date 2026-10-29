@@ -101,7 +101,7 @@ export default function LoanApplicationsIndex() {
     }, [data.search, data.status, data.per_page, data.page]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Loan Applications', href: '' },
     ];
     const isEmpty = applications.data.length === 0;

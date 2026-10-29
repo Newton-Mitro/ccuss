@@ -38,7 +38,7 @@ export default function FinesIndex() {
     }, [data.search, data.per_page, data.page]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Fines', href: route('account-fines.index') },
     ];
     return (

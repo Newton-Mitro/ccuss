@@ -43,7 +43,7 @@ export default function LoanAccountEdit() {
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Loan Accounts', href: route('loan-accounts.index') },
         { title: loanNumber, href: '' },
     ];

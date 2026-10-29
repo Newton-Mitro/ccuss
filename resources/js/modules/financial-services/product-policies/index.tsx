@@ -43,7 +43,7 @@ export default function ProductPoliciesIndex() {
     }, [data.search, data.page, data.per_page, get, policyRoute]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title:
                 family === 'loan'

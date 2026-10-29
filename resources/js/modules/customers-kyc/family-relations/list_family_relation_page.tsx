@@ -19,12 +19,11 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem } from '@/types';
 import { CustomerFamilyRelation } from '@/modules/customers-kyc/types/customer_kyc_module';
+import { BreadcrumbItem } from '@/types';
 
 import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 import type { Props } from '@/modules/customers-kyc/types/family-relations/list_family_relation_page.interfaces';
-
 
 export default function FamilyRelationIndex() {
     const { paginated_data, filters } = usePage<Props>().props;
@@ -76,7 +75,7 @@ export default function FamilyRelationIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         {
             title: 'Family Relations',
             href: route('family-relations.index'),

@@ -73,7 +73,7 @@ export default function FinancialProductAccountMappings() {
         );
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title:
                 family === 'loan'

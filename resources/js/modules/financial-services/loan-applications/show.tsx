@@ -180,7 +180,7 @@ export default function LoanApplicationShow() {
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: 'Loan Applications',
             href: route('loan-applications.index'),

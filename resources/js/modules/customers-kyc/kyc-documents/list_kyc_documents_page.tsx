@@ -17,13 +17,12 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem } from '@/types';
 import { KycDocument } from '@/modules/customers-kyc/types/customer_kyc_module';
+import { BreadcrumbItem } from '@/types';
 
 import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 import { documentTypes } from '@/modules/customers-kyc/kyc-documents/data/document_types';
 import type { Props } from '@/modules/customers-kyc/types/kyc-documents/list_kyc_documents_page.interfaces';
-
 
 export default function KycDocumentsIndex() {
     const { paginated_data, filters } = usePage<Props>().props;
@@ -72,7 +71,7 @@ export default function KycDocumentsIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'KYC Documents', href: route('kyc-documents.index') },
     ];
 

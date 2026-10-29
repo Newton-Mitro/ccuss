@@ -17,12 +17,11 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import formatUndersoreString from '@/lib/formatUnderscoreString';
 import { Badge } from '@/modules/customers-kyc/lib/statusConfig';
-import { BreadcrumbItem } from '@/types';
 import { CustomerIntroducer } from '@/modules/customers-kyc/types/customer_kyc_module';
+import { BreadcrumbItem } from '@/types';
 
 import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 import type { Props } from '@/modules/customers-kyc/types/introducers/list_introducer_page.interfaces';
-
 
 export default function IntroducersIndex() {
     const { paginated_data, filters } = usePage<Props>().props;
@@ -70,7 +69,7 @@ export default function IntroducersIndex() {
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'Introducers', href: route('introducers.index') },
     ];
 

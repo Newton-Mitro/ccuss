@@ -57,7 +57,7 @@ export default function InterestProvisionsIndex() {
     }, [search, perPage, page]);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: 'Interest Provisions',
             href: route('interest-provisions.index'),

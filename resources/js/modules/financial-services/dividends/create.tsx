@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
+import type { Props } from '@/modules/financial-services/types/dividends/create.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
@@ -17,8 +18,6 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/financial-services/types/dividends/create.types';
-
 
 export default function DividendDeclarationCreate() {
     const { fiscalYears } = usePage<Props>().props;
@@ -33,7 +32,7 @@ export default function DividendDeclarationCreate() {
     );
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         { title: 'Dividends', href: route('dividends.index') },
         { title: 'Create declaration', href: route('dividends.create') },
     ];

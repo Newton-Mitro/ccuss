@@ -26,7 +26,6 @@ import type { BreadcrumbItem } from '@/types';
 import ApprovalActions from '@/modules/customers-kyc/components/approval-actions';
 import type { Props } from '@/modules/customers-kyc/types/addresses/show_address_page.interfaces';
 
-
 export default function ViewAddress({ address }: Props) {
     useFlashToastHandler();
 
@@ -58,7 +57,7 @@ export default function ViewAddress({ address }: Props) {
     const StatusIcon = statusConfig.icon;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customer & KYC', href: '' },
+        { title: 'Customer & KYC', href: '/customer-kyc' },
         { title: 'Customers', href: route('customers.index') },
         {
             title: address.customer?.name || 'Customer',

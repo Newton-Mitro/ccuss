@@ -31,7 +31,7 @@ export default function LoanProtectionProductForm() {
     });
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: 'Loan Protection Products',
             href: route('loan-protection-products.index'),

@@ -37,7 +37,7 @@ export default function SavingsAccountShow() {
     >().props;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: 'Savings Accounts',
             href: route('financial-accounts.savings.index'),

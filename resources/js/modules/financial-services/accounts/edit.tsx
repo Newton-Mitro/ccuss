@@ -21,7 +21,7 @@ export default function FinancialAccountEdit() {
     const indexHref = getIndexRoute(product);
     const showHref = getShowRoute(product, account.id);
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: `${account.account_type.replaceAll('_', ' ')} Accounts`,
             href: indexHref,

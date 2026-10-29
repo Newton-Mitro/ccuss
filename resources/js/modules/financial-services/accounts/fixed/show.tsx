@@ -114,7 +114,7 @@ export default function FixedDepositAccountShow() {
     const deposit = account.fixed_deposit;
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
+        { title: 'Financial Services', href: '/financial-services' },
         {
             title: 'Fixed Deposits',
             href: route('financial-accounts.fixed.index'),
