@@ -17,6 +17,7 @@ import {
     CalendarDays,
     CheckCircle2,
     CircleDollarSign,
+    Eye,
     FileText,
     Landmark,
     LoaderCircle,
@@ -144,6 +145,36 @@ export default function TellerToTellerTransfer() {
     const selectedBankAccount = bank_accounts.find(
         (account) => String(account.id) === data.bank_account_id,
     );
+    const previewSource = isBankToVault
+        ? selectedBankAccount
+            ? {
+                  name: selectedBankAccount.account_name,
+                  code: selectedBankAccount.account_number,
+                  balance: selectedBankAccount.current_balance,
+              }
+            : null
+        : selectedSource
+          ? {
+                name: selectedSource.name,
+                code: selectedSource.code,
+                balance: selectedSource.current_balance ?? null,
+            }
+          : null;
+    const previewDestination = isVaultToBank
+        ? selectedBankAccount
+            ? {
+                  name: selectedBankAccount.account_name,
+                  code: selectedBankAccount.account_number,
+                  balance: selectedBankAccount.current_balance,
+              }
+            : null
+        : selectedDestination
+          ? {
+                name: selectedDestination.name,
+                code: selectedDestination.code,
+                balance: selectedDestination.current_balance ?? null,
+            }
+          : null;
 
     const sourceOptions = isBankToVault
         ? [
@@ -191,7 +222,7 @@ export default function TellerToTellerTransfer() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={transferConfig.title} />
 
-            <div className="w-full max-w-5xl space-y-5 pb-24 text-foreground">
+            <div className="w-full max-w-7xl space-y-5 pb-24 text-foreground">
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title={transferConfig.title}
@@ -245,331 +276,463 @@ export default function TellerToTellerTransfer() {
                     </div>
                 )}
 
-                <form onSubmit={submit} className="space-y-5">
-                    {/* Transfer route */}
-                    <section className="overflow-hidden rounded-xl border bg-card">
-                        <div className="flex items-center justify-between border-b px-4 py-3 sm:px-5">
-                            <div>
-                                <h2 className="text-sm font-semibold">
-                                    Transfer route
-                                </h2>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    Choose the source and destination.
-                                </p>
-                            </div>
-                            <ArrowDownUp className="size-5 text-muted-foreground" />
-                        </div>
-
-                        <div className="grid gap-4 p-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:p-5">
-                            {/* Source */}
-                            <div className="min-w-0 space-y-3 rounded-xl border bg-muted/20 p-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex size-9 items-center justify-center rounded-lg border bg-background">
-                                        <LocationIcon
-                                            label={transferConfig.fromLabel}
-                                            className="size-4 text-muted-foreground"
-                                        />
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-medium text-muted-foreground">
-                                            TRANSFER FROM
-                                        </p>
-                                        <p className="text-sm font-semibold">
-                                            {transferConfig.fromLabel}
-                                        </p>
-                                    </div>
+                <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+                    <form onSubmit={submit} className="min-w-0 space-y-5">
+                        {/* Transfer route */}
+                        <section className="overflow-hidden rounded-xl border bg-card">
+                            <div className="flex items-center justify-between border-b px-4 py-3 sm:px-5">
+                                <div>
+                                    <h2 className="text-sm font-semibold">
+                                        Transfer route
+                                    </h2>
+                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                        Choose the source and destination.
+                                    </p>
                                 </div>
-
-                                <Select
-                                    id={sourceId}
-                                    className="h-10 w-full"
-                                    value={sourceValue}
-                                    onChange={(value) =>
-                                        setData(
-                                            isBankToVault
-                                                ? 'bank_account_id'
-                                                : 'from_cash_location_id',
-                                            value,
-                                        )
-                                    }
-                                    placeholder="Select source"
-                                    options={sourceOptions}
-                                />
-
-                                {errors.from_cash_location_id && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.from_cash_location_id}
-                                    </p>
-                                )}
-
-                                {selectedSource && (
-                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                                        <span className="text-muted-foreground">
-                                            Current{' '}
-                                            {selectedSource.type === 'VAULT'
-                                                ? 'vault'
-                                                : 'teller'}{' '}
-                                            balance
-                                        </span>
-                                        <span className="font-semibold tabular-nums">
-                                            {selectedSource.current_balance ==
-                                            null
-                                                ? 'No open session'
-                                                : formatBDTCurrency(
-                                                      selectedSource.current_balance,
-                                                      false,
-                                                  )}
-                                        </span>
-                                    </p>
-                                )}
-                                {isBankToVault && selectedBankAccount && (
-                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                                        <span className="text-muted-foreground">
-                                            Current bank balance
-                                        </span>
-                                        <span className="font-semibold tabular-nums">
-                                            {formatBDTCurrency(
-                                                selectedBankAccount.current_balance,
-                                                false,
-                                            )}
-                                        </span>
-                                    </p>
-                                )}
-
-                                {isBankToVault && errors.bank_account_id && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.bank_account_id}
-                                    </p>
-                                )}
+                                <ArrowDownUp className="size-5 text-muted-foreground" />
                             </div>
 
-                            {/* Direction indicator */}
-                            <div className="flex justify-center">
-                                <div className="flex size-10 items-center justify-center rounded-full border bg-background">
-                                    <ArrowRightLeft className="size-5 text-muted-foreground" />
-                                </div>
-                            </div>
-
-                            {/* Destination */}
-                            <div className="min-w-0 space-y-3 rounded-xl border bg-muted/20 p-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex size-9 items-center justify-center rounded-lg border bg-background">
-                                        <LocationIcon
-                                            label={transferConfig.toLabel}
-                                            className="size-4 text-muted-foreground"
-                                        />
+                            <div className="grid gap-4 p-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:p-5">
+                                {/* Source */}
+                                <div className="min-w-0 space-y-3 rounded-xl border bg-muted/20 p-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex size-9 items-center justify-center rounded-lg border bg-background">
+                                            <LocationIcon
+                                                label={transferConfig.fromLabel}
+                                                className="size-4 text-muted-foreground"
+                                            />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-medium text-muted-foreground">
+                                                TRANSFER FROM
+                                            </p>
+                                            <p className="text-sm font-semibold">
+                                                {transferConfig.fromLabel}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-medium text-muted-foreground">
-                                            TRANSFER TO
-                                        </p>
-                                        <p className="text-sm font-semibold">
-                                            {transferConfig.toLabel}
-                                        </p>
-                                    </div>
-                                </div>
 
-                                <Select
-                                    id={destinationId}
-                                    className="h-10 w-full"
-                                    value={destinationValue}
-                                    onChange={(value) =>
-                                        setData(
-                                            isVaultToBank
-                                                ? 'bank_account_id'
-                                                : 'to_cash_location_id',
-                                            value,
-                                        )
-                                    }
-                                    placeholder="Select destination"
-                                    options={destinationOptions}
-                                />
-
-                                {errors.to_cash_location_id && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.to_cash_location_id}
-                                    </p>
-                                )}
-
-                                {selectedDestination && (
-                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                                        <span className="text-muted-foreground">
-                                            Current{' '}
-                                            {selectedDestination.type ===
-                                            'VAULT'
-                                                ? 'vault'
-                                                : 'teller'}{' '}
-                                            balance
-                                        </span>
-                                        <span className="font-semibold tabular-nums">
-                                            {selectedDestination.current_balance ==
-                                            null
-                                                ? 'No open session'
-                                                : formatBDTCurrency(
-                                                      selectedDestination.current_balance,
-                                                      false,
-                                                  )}
-                                        </span>
-                                    </p>
-                                )}
-                                {isVaultToBank && selectedBankAccount && (
-                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                                        <span className="text-muted-foreground">
-                                            Current bank balance
-                                        </span>
-                                        <span className="font-semibold tabular-nums">
-                                            {formatBDTCurrency(
-                                                selectedBankAccount.current_balance,
-                                                false,
-                                            )}
-                                        </span>
-                                    </p>
-                                )}
-
-                                {isVaultToBank && errors.bank_account_id && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.bank_account_id}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Transfer details */}
-                    <section className="overflow-hidden rounded-xl border bg-card">
-                        <div className="border-b px-4 py-3 sm:px-5">
-                            <h2 className="text-sm font-semibold">
-                                Transfer details
-                            </h2>
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                                Enter the amount and any supporting note.
-                            </p>
-                        </div>
-
-                        <div className="grid gap-5 p-4 sm:grid-cols-2 sm:p-5">
-                            <div className="space-y-2">
-                                <label
-                                    htmlFor="amount"
-                                    className="flex items-center gap-2 text-sm font-medium"
-                                >
-                                    <CircleDollarSign className="size-4 text-muted-foreground" />
-                                    Transfer amount
-                                    <span className="text-destructive">*</span>
-                                </label>
-
-                                <div className="relative">
-                                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-semibold text-muted-foreground">
-                                        ৳
-                                    </span>
-                                    <Input
-                                        id="amount"
-                                        type="number"
-                                        min="0.01"
-                                        step="0.0001"
-                                        value={data.amount}
-                                        onChange={(event) =>
+                                    <Select
+                                        id={sourceId}
+                                        className="h-10 w-full"
+                                        value={sourceValue}
+                                        onChange={(value) =>
                                             setData(
-                                                'amount',
-                                                event.target.value,
+                                                isBankToVault
+                                                    ? 'bank_account_id'
+                                                    : 'from_cash_location_id',
+                                                value,
                                             )
                                         }
-                                        className="h-11 pl-8 text-base font-semibold tabular-nums"
-                                        placeholder="0.00"
-                                        required
-                                        aria-invalid={Boolean(errors.amount)}
+                                        placeholder="Select source"
+                                        options={sourceOptions}
                                     />
-                                </div>
 
-                                {errors.amount && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.amount}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <label
-                                    htmlFor="note"
-                                    className="flex items-center gap-2 text-sm font-medium"
-                                >
-                                    <FileText className="size-4 text-muted-foreground" />
-                                    Transfer note
-                                    <span className="text-xs font-normal text-muted-foreground">
-                                        (Optional)
-                                    </span>
-                                </label>
-
-                                <Input
-                                    id="note"
-                                    value={data.note}
-                                    onChange={(event) =>
-                                        setData('note', event.target.value)
-                                    }
-                                    maxLength={2000}
-                                    placeholder="Enter a reference or reason"
-                                    className="h-11"
-                                    aria-invalid={Boolean(errors.note)}
-                                />
-
-                                <div className="flex justify-between gap-2">
-                                    {errors.note ? (
+                                    {errors.from_cash_location_id && (
                                         <p className="text-sm text-destructive">
-                                            {errors.note}
-                                        </p>
-                                    ) : (
-                                        <p className="text-xs text-muted-foreground">
-                                            Add context for audit purposes.
+                                            {errors.from_cash_location_id}
                                         </p>
                                     )}
-                                    <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                                        {data.note.length}/2000
-                                    </span>
+
+                                    {selectedSource && (
+                                        <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                            <span className="text-muted-foreground">
+                                                Current{' '}
+                                                {selectedSource.type === 'VAULT'
+                                                    ? 'vault'
+                                                    : 'teller'}{' '}
+                                                balance
+                                            </span>
+                                            <span className="font-semibold tabular-nums">
+                                                {selectedSource.current_balance ==
+                                                null
+                                                    ? 'No open session'
+                                                    : formatBDTCurrency(
+                                                          selectedSource.current_balance,
+                                                          false,
+                                                      )}
+                                            </span>
+                                        </p>
+                                    )}
+                                    {isBankToVault && selectedBankAccount && (
+                                        <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                            <span className="text-muted-foreground">
+                                                Current bank balance
+                                            </span>
+                                            <span className="font-semibold tabular-nums">
+                                                {formatBDTCurrency(
+                                                    selectedBankAccount.current_balance,
+                                                    false,
+                                                )}
+                                            </span>
+                                        </p>
+                                    )}
+
+                                    {isBankToVault &&
+                                        errors.bank_account_id && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.bank_account_id}
+                                            </p>
+                                        )}
+                                </div>
+
+                                {/* Direction indicator */}
+                                <div className="flex justify-center">
+                                    <div className="flex size-10 items-center justify-center rounded-full border bg-background">
+                                        <ArrowRightLeft className="size-5 text-muted-foreground" />
+                                    </div>
+                                </div>
+
+                                {/* Destination */}
+                                <div className="min-w-0 space-y-3 rounded-xl border bg-muted/20 p-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex size-9 items-center justify-center rounded-lg border bg-background">
+                                            <LocationIcon
+                                                label={transferConfig.toLabel}
+                                                className="size-4 text-muted-foreground"
+                                            />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-medium text-muted-foreground">
+                                                TRANSFER TO
+                                            </p>
+                                            <p className="text-sm font-semibold">
+                                                {transferConfig.toLabel}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <Select
+                                        id={destinationId}
+                                        className="h-10 w-full"
+                                        value={destinationValue}
+                                        onChange={(value) =>
+                                            setData(
+                                                isVaultToBank
+                                                    ? 'bank_account_id'
+                                                    : 'to_cash_location_id',
+                                                value,
+                                            )
+                                        }
+                                        placeholder="Select destination"
+                                        options={destinationOptions}
+                                    />
+
+                                    {errors.to_cash_location_id && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.to_cash_location_id}
+                                        </p>
+                                    )}
+
+                                    {selectedDestination && (
+                                        <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                            <span className="text-muted-foreground">
+                                                Current{' '}
+                                                {selectedDestination.type ===
+                                                'VAULT'
+                                                    ? 'vault'
+                                                    : 'teller'}{' '}
+                                                balance
+                                            </span>
+                                            <span className="font-semibold tabular-nums">
+                                                {selectedDestination.current_balance ==
+                                                null
+                                                    ? 'No open session'
+                                                    : formatBDTCurrency(
+                                                          selectedDestination.current_balance,
+                                                          false,
+                                                      )}
+                                            </span>
+                                        </p>
+                                    )}
+                                    {isVaultToBank && selectedBankAccount && (
+                                        <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                            <span className="text-muted-foreground">
+                                                Current bank balance
+                                            </span>
+                                            <span className="font-semibold tabular-nums">
+                                                {formatBDTCurrency(
+                                                    selectedBankAccount.current_balance,
+                                                    false,
+                                                )}
+                                            </span>
+                                        </p>
+                                    )}
+
+                                    {isVaultToBank &&
+                                        errors.bank_account_id && (
+                                            <p className="text-sm text-destructive">
+                                                {errors.bank_account_id}
+                                            </p>
+                                        )}
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Transfer details */}
+                        <section className="overflow-hidden rounded-xl border bg-card">
+                            <div className="border-b px-4 py-3 sm:px-5">
+                                <h2 className="text-sm font-semibold">
+                                    Transfer details
+                                </h2>
+                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                    Enter the amount and any supporting note.
+                                </p>
+                            </div>
+
+                            <div className="grid gap-5 p-4 sm:grid-cols-2 sm:p-5">
+                                <div className="space-y-2">
+                                    <label
+                                        htmlFor="amount"
+                                        className="flex items-center gap-2 text-sm font-medium"
+                                    >
+                                        <CircleDollarSign className="size-4 text-muted-foreground" />
+                                        Transfer amount
+                                        <span className="text-destructive">
+                                            *
+                                        </span>
+                                    </label>
+
+                                    <div className="relative">
+                                        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-semibold text-muted-foreground">
+                                            ৳
+                                        </span>
+                                        <Input
+                                            id="amount"
+                                            type="number"
+                                            min="0.01"
+                                            step="0.0001"
+                                            value={data.amount}
+                                            onChange={(event) =>
+                                                setData(
+                                                    'amount',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className="h-11 pl-8 text-base font-semibold tabular-nums"
+                                            placeholder="0.00"
+                                            required
+                                            aria-invalid={Boolean(
+                                                errors.amount,
+                                            )}
+                                        />
+                                    </div>
+
+                                    {errors.amount && (
+                                        <p className="text-sm text-destructive">
+                                            {errors.amount}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label
+                                        htmlFor="note"
+                                        className="flex items-center gap-2 text-sm font-medium"
+                                    >
+                                        <FileText className="size-4 text-muted-foreground" />
+                                        Transfer note
+                                        <span className="text-xs font-normal text-muted-foreground">
+                                            (Optional)
+                                        </span>
+                                    </label>
+
+                                    <Input
+                                        id="note"
+                                        value={data.note}
+                                        onChange={(event) =>
+                                            setData('note', event.target.value)
+                                        }
+                                        maxLength={2000}
+                                        placeholder="Enter a reference or reason"
+                                        className="h-11"
+                                        aria-invalid={Boolean(errors.note)}
+                                    />
+
+                                    <div className="flex justify-between gap-2">
+                                        {errors.note ? (
+                                            <p className="text-sm text-destructive">
+                                                {errors.note}
+                                            </p>
+                                        ) : (
+                                            <p className="text-xs text-muted-foreground">
+                                                Add context for audit purposes.
+                                            </p>
+                                        )}
+                                        <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                                            {data.note.length}/2000
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Sticky actions */}
+                        <div className="sticky bottom-0 z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
+                            <div className="mx-auto flex max-w-5xl flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <CheckCircle2 className="size-4 shrink-0" />
+                                    Transfer will be created as pending.
+                                </p>
+
+                                <div className="flex items-center justify-end gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => window.history.back()}
+                                        disabled={processing}
+                                    >
+                                        <ArrowLeft className="mr-2 size-4" />
+                                        Back
+                                    </Button>
+
+                                    <Button
+                                        type="submit"
+                                        disabled={
+                                            processing ||
+                                            !branch_day ||
+                                            !hasSource ||
+                                            !hasDestination
+                                        }
+                                    >
+                                        {processing ? (
+                                            <LoaderCircle className="mr-2 size-4 animate-spin" />
+                                        ) : (
+                                            <ArrowRightLeft className="mr-2 size-4" />
+                                        )}
+                                        {processing
+                                            ? 'Creating transfer...'
+                                            : 'Create pending transfer'}
+                                    </Button>
                                 </div>
                             </div>
                         </div>
-                    </section>
+                    </form>
 
-                    {/* Sticky actions */}
-                    <div className="sticky bottom-0 z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
-                        <div className="mx-auto flex max-w-5xl flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <CheckCircle2 className="size-4 shrink-0" />
-                                Transfer will be created as pending.
-                            </p>
-
-                            <div className="flex items-center justify-end gap-2">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => window.history.back()}
-                                    disabled={processing}
-                                >
-                                    <ArrowLeft className="mr-2 size-4" />
-                                    Back
-                                </Button>
-
-                                <Button
-                                    type="submit"
-                                    disabled={
-                                        processing ||
-                                        !branch_day ||
-                                        !hasSource ||
-                                        !hasDestination
-                                    }
-                                >
-                                    {processing ? (
-                                        <LoaderCircle className="mr-2 size-4 animate-spin" />
-                                    ) : (
-                                        <ArrowRightLeft className="mr-2 size-4" />
-                                    )}
-                                    {processing
-                                        ? 'Creating transfer...'
-                                        : 'Create pending transfer'}
-                                </Button>
+                    <aside className="min-w-0 xl:sticky xl:top-4 xl:self-start">
+                        <section className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
+                            <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-4">
+                                <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
+                                <div className="relative flex items-center gap-2.5">
+                                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                                        <Eye className="size-4" />
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
+                                            Transfer overview
+                                        </p>
+                                        <h2 className="text-sm font-semibold">
+                                            Live preview
+                                        </h2>
+                                    </div>
+                                    <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[10px] font-semibold text-primary">
+                                        LIVE
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </form>
+
+                            <div className="space-y-3 p-3">
+                                <div className="rounded-xl border border-primary/15 bg-primary/[0.06] p-3.5">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <CircleDollarSign className="size-4 text-primary" />
+                                        Transfer amount
+                                    </div>
+                                    <p className="mt-1.5 text-2xl font-semibold tracking-tight text-primary tabular-nums">
+                                        {formatBDTCurrency(data.amount || 0)}
+                                    </p>
+                                </div>
+
+                                {[
+                                    {
+                                        label: transferConfig.fromLabel,
+                                        location: previewSource,
+                                        iconLabel: transferConfig.fromLabel,
+                                    },
+                                    {
+                                        label: transferConfig.toLabel,
+                                        location: previewDestination,
+                                        iconLabel: transferConfig.toLabel,
+                                    },
+                                ].map((item) => (
+                                    <div
+                                        key={item.label}
+                                        className="rounded-xl border border-border/60 bg-muted/20 p-3"
+                                    >
+                                        <div className="flex items-center gap-2 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            <LocationIcon
+                                                label={item.iconLabel}
+                                                className="size-3.5"
+                                            />
+                                            {item.label}
+                                        </div>
+                                        {item.location ? (
+                                            <div className="mt-2 min-w-0">
+                                                <p className="text-sm font-semibold">
+                                                    {item.location.name}
+                                                </p>
+                                                <p className="mt-0.5 font-mono text-xs break-all text-muted-foreground">
+                                                    {item.location.code}
+                                                </p>
+                                                <div className="mt-2 flex items-center justify-between gap-2 border-t pt-2 text-[11px]">
+                                                    <span className="text-muted-foreground">
+                                                        Current balance
+                                                    </span>
+                                                    <span className="font-medium tabular-nums">
+                                                        {item.location
+                                                            .balance == null
+                                                            ? 'No open session'
+                                                            : formatBDTCurrency(
+                                                                  item.location
+                                                                      .balance,
+                                                                  false,
+                                                              )}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="mt-2 text-xs text-muted-foreground">
+                                                Select a{' '}
+                                                {item.label.toLowerCase()} to
+                                                preview it.
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                                    <div className="flex items-center gap-2 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        <CalendarDays className="size-3.5" />
+                                        Business day
+                                    </div>
+                                    <p className="mt-2 text-sm font-medium">
+                                        {branch_day
+                                            ? formatDate(
+                                                  branch_day.business_date,
+                                              )
+                                            : 'No open branch day'}
+                                    </p>
+                                </div>
+
+                                {data.note && (
+                                    <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                                        <div className="flex items-center gap-2 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            <FileText className="size-3.5" />
+                                            Transfer note
+                                        </div>
+                                        <p className="mt-2 text-sm break-words">
+                                            {data.note}
+                                        </p>
+                                    </div>
+                                )}
+
+                                <p className="flex items-center gap-2 rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2.5 text-xs text-muted-foreground">
+                                    <CheckCircle2 className="size-4 shrink-0 text-amber-600" />
+                                    This transfer will be created as pending.
+                                </p>
+                            </div>
+                        </section>
+                    </aside>
+                </div>
             </div>
         </CustomAuthLayout>
     );

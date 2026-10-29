@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { FinancialAccountSearchResult } from '@/modules/financial-services/components/financial-account-search-input';
 import { FinancialAccountSearchInput } from '@/modules/financial-services/components/financial-account-search-input';
 import type { FinancialTransactionWorkflowPageProps } from '@/modules/financial-services/types/financial-services';
 import type { BreadcrumbItem } from '@/types';
@@ -16,6 +17,7 @@ import {
     CalendarDays,
     CheckCircle2,
     CircleDollarSign,
+    Eye,
     FileText,
     Landmark,
     LoaderCircle,
@@ -133,6 +135,10 @@ function SectionHeading({
 export default function TransactionWorkflow() {
     const [destinationSearchResetKey, setDestinationSearchResetKey] =
         useState(0);
+    const [selectedSource, setSelectedSource] =
+        useState<FinancialAccountSearchResult | null>(null);
+    const [selectedDestination, setSelectedDestination] =
+        useState<FinancialAccountSearchResult | null>(null);
     const {
         workflow,
         accounts = [],
@@ -261,190 +267,361 @@ export default function TransactionWorkflow() {
 
                 <form onSubmit={submit} className="space-y-6">
                     {isTransfer ? (
-                        <>
-                            {/* Transfer accounts */}
-                            <section className="relative z-20 overflow-visible rounded-2xl border bg-card shadow-sm">
-                                <div className="rounded-t-2xl border-b bg-muted/30 px-5 py-5 sm:px-7">
-                                    <SectionHeading
-                                        icon={ArrowRightLeft}
-                                        title="Transfer accounts"
-                                        description="Choose the account to debit and the account to credit."
-                                    />
-                                </div>
+                        <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+                            <div className="min-w-0 space-y-6">
+                                {/* Transfer accounts */}
+                                <section className="relative z-20 overflow-visible rounded-2xl border bg-card shadow-sm">
+                                    <div className="rounded-t-2xl border-b bg-muted/30 px-5 py-5 sm:px-7">
+                                        <SectionHeading
+                                            icon={ArrowRightLeft}
+                                            title="Transfer accounts"
+                                            description="Choose the account to debit and the account to credit."
+                                        />
+                                    </div>
 
-                                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7">
-                                    <Field
-                                        label="Source account"
-                                        required
-                                        error={errors.source_account_id}
-                                        hint="Funds will be deducted from this account."
-                                    >
-                                        <FinancialAccountSearchInput
-                                            placeholder="Search source account"
-                                            onSelect={(account) => {
-                                                const sourceAccountId = String(
-                                                    account.id,
-                                                );
-                                                setData(
-                                                    'source_account_id',
-                                                    sourceAccountId,
-                                                );
+                                    <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7">
+                                        <Field
+                                            label="Source account"
+                                            required
+                                            error={errors.source_account_id}
+                                            hint="Funds will be deducted from this account."
+                                        >
+                                            <FinancialAccountSearchInput
+                                                placeholder="Search source account"
+                                                onSelect={(account) => {
+                                                    const sourceAccountId =
+                                                        String(account.id);
+                                                    setData(
+                                                        'source_account_id',
+                                                        sourceAccountId,
+                                                    );
+                                                    setSelectedSource(account);
 
-                                                if (
-                                                    sourceAccountId ===
-                                                    data.destination_account_id
-                                                ) {
+                                                    if (
+                                                        sourceAccountId ===
+                                                        data.destination_account_id
+                                                    ) {
+                                                        setData(
+                                                            'destination_account_id',
+                                                            '',
+                                                        );
+                                                        setSelectedDestination(
+                                                            null,
+                                                        );
+                                                        setDestinationSearchResetKey(
+                                                            (key) => key + 1,
+                                                        );
+                                                    }
+                                                }}
+                                                clearSelectedAccount={() => {
+                                                    setData(
+                                                        'source_account_id',
+                                                        '',
+                                                    );
+                                                    setSelectedSource(null);
+                                                }}
+                                            />
+                                        </Field>
+
+                                        <Field
+                                            label="Destination account"
+                                            required
+                                            error={
+                                                errors.destination_account_id
+                                            }
+                                            hint="Funds will be credited to this account."
+                                        >
+                                            <FinancialAccountSearchInput
+                                                key={destinationSearchResetKey}
+                                                placeholder="Search destination account"
+                                                excludeAccountIds={
+                                                    data.source_account_id
+                                                        ? [
+                                                              Number(
+                                                                  data.source_account_id,
+                                                              ),
+                                                          ]
+                                                        : []
+                                                }
+                                                onSelect={(account) => {
+                                                    setData(
+                                                        'destination_account_id',
+                                                        String(account.id),
+                                                    );
+                                                    setSelectedDestination(
+                                                        account,
+                                                    );
+                                                }}
+                                                clearSelectedAccount={() => {
                                                     setData(
                                                         'destination_account_id',
                                                         '',
                                                     );
-                                                    setDestinationSearchResetKey(
-                                                        (key) => key + 1,
+                                                    setSelectedDestination(
+                                                        null,
                                                     );
-                                                }
-                                            }}
-                                            clearSelectedAccount={() =>
-                                                setData('source_account_id', '')
-                                            }
+                                                }}
+                                            />
+                                        </Field>
+
+                                        {noTransferAccounts && (
+                                            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-muted-foreground sm:col-span-2">
+                                                At least two eligible financial
+                                                accounts are required to create
+                                                a transfer.
+                                            </div>
+                                        )}
+                                    </div>
+                                </section>
+
+                                {/* Transfer details */}
+                                <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                                    <div className="border-b bg-muted/30 px-5 py-5 sm:px-7">
+                                        <SectionHeading
+                                            icon={FileText}
+                                            title="Transaction details"
+                                            description="Specify the transfer amount, effective date, and supporting information."
                                         />
-                                    </Field>
+                                    </div>
 
-                                    <Field
-                                        label="Destination account"
-                                        required
-                                        error={errors.destination_account_id}
-                                        hint="Funds will be credited to this account."
-                                    >
-                                        <FinancialAccountSearchInput
-                                            key={destinationSearchResetKey}
-                                            placeholder="Search destination account"
-                                            excludeAccountIds={
-                                                data.source_account_id
-                                                    ? [
-                                                          Number(
-                                                              data.source_account_id,
-                                                          ),
-                                                      ]
-                                                    : []
-                                            }
-                                            onSelect={(account) =>
-                                                setData(
-                                                    'destination_account_id',
-                                                    String(account.id),
-                                                )
-                                            }
-                                            clearSelectedAccount={() =>
-                                                setData(
-                                                    'destination_account_id',
-                                                    '',
-                                                )
-                                            }
-                                        />
-                                    </Field>
-
-                                    {noTransferAccounts && (
-                                        <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-muted-foreground sm:col-span-2">
-                                            At least two eligible financial
-                                            accounts are required to create a
-                                            transfer.
-                                        </div>
-                                    )}
-                                </div>
-                            </section>
-
-                            {/* Transfer details */}
-                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                <div className="border-b bg-muted/30 px-5 py-5 sm:px-7">
-                                    <SectionHeading
-                                        icon={FileText}
-                                        title="Transaction details"
-                                        description="Specify the transfer amount, effective date, and supporting information."
-                                    />
-                                </div>
-
-                                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7 lg:grid-cols-3">
-                                    <Field
-                                        label="Transfer date"
-                                        required
-                                        error={errors.transaction_date}
-                                    >
-                                        <AppDatePicker
-                                            value={data.transaction_date}
-                                            onChange={(value) =>
-                                                setData(
-                                                    'transaction_date',
-                                                    value,
-                                                )
-                                            }
-                                        />
-                                    </Field>
-
-                                    <Field
-                                        label="Transfer amount"
-                                        required
-                                        error={errors.amount}
-                                        hint="Enter an amount greater than zero."
-                                    >
-                                        <div className="relative">
-                                            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-semibold text-muted-foreground">
-                                                ৳
-                                            </span>
-                                            <Input
-                                                type="number"
-                                                min="0.0001"
-                                                step="0.0001"
-                                                required
-                                                className="pl-8 tabular-nums"
-                                                placeholder="0.00"
-                                                value={data.amount}
-                                                onChange={(event) =>
+                                    <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7 lg:grid-cols-3">
+                                        <Field
+                                            label="Transfer date"
+                                            required
+                                            error={errors.transaction_date}
+                                        >
+                                            <AppDatePicker
+                                                value={data.transaction_date}
+                                                onChange={(value) =>
                                                     setData(
-                                                        'amount',
-                                                        event.target.value,
+                                                        'transaction_date',
+                                                        value,
                                                     )
                                                 }
                                             />
+                                        </Field>
+
+                                        <Field
+                                            label="Transfer amount"
+                                            required
+                                            error={errors.amount}
+                                            hint="Enter an amount greater than zero."
+                                        >
+                                            <div className="relative">
+                                                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-semibold text-muted-foreground">
+                                                    ৳
+                                                </span>
+                                                <Input
+                                                    type="number"
+                                                    min="0.0001"
+                                                    step="0.0001"
+                                                    required
+                                                    className="pl-8 tabular-nums"
+                                                    placeholder="0.00"
+                                                    value={data.amount}
+                                                    onChange={(event) =>
+                                                        setData(
+                                                            'amount',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
+                                        </Field>
+
+                                        <Field
+                                            label="Reference number"
+                                            error={errors.reference}
+                                            hint="Optional cheque, voucher, or external reference."
+                                        >
+                                            <Input
+                                                value={data.reference}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'reference',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="Enter reference number"
+                                                maxLength={100}
+                                            />
+                                        </Field>
+
+                                        <Field
+                                            label="Description"
+                                            error={errors.description}
+                                            hint="Optional explanation for the transfer."
+                                        >
+                                            <Input
+                                                value={data.description}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'description',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="e.g. Internal account transfer"
+                                                maxLength={255}
+                                            />
+                                        </Field>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <aside className="min-w-0 xl:sticky xl:top-4 xl:self-start">
+                                <section className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
+                                    <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-4">
+                                        <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
+                                        <div className="relative flex items-center gap-2.5">
+                                            <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                                                <Eye className="size-4" />
+                                            </span>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
+                                                    Transfer overview
+                                                </p>
+                                                <h2 className="text-sm font-semibold">
+                                                    Live preview
+                                                </h2>
+                                            </div>
+                                            <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[10px] font-semibold text-primary">
+                                                LIVE
+                                            </span>
                                         </div>
-                                    </Field>
+                                    </div>
 
-                                    <Field
-                                        label="Reference number"
-                                        error={errors.reference}
-                                        hint="Optional cheque, voucher, or external reference."
-                                    >
-                                        <Input
-                                            value={data.reference}
-                                            onChange={(event) =>
-                                                setData(
-                                                    'reference',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="Enter reference number"
-                                            maxLength={100}
-                                        />
-                                    </Field>
+                                    <div className="space-y-3 p-3">
+                                        <div className="rounded-xl border border-primary/15 bg-primary/[0.06] p-3.5">
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <CircleDollarSign className="size-4 text-primary" />
+                                                Transfer amount
+                                            </div>
+                                            <p className="mt-1.5 text-2xl font-semibold tracking-tight text-primary tabular-nums">
+                                                {formatBDTCurrency(
+                                                    data.amount || 0,
+                                                )}
+                                            </p>
+                                            <p className="mt-1 text-[11px] text-muted-foreground">
+                                                {data.currency}
+                                            </p>
+                                        </div>
 
-                                    <Field
-                                        label="Description"
-                                        error={errors.description}
-                                        hint="Optional explanation for the transfer."
-                                    >
-                                        <Input
-                                            value={data.description}
-                                            onChange={(event) =>
-                                                setData(
-                                                    'description',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="e.g. Internal account transfer"
-                                            maxLength={255}
-                                        />
-                                    </Field>
-                                </div>
-                            </section>
-                        </>
+                                        {[
+                                            {
+                                                label: 'From account',
+                                                account: selectedSource,
+                                                icon: Wallet,
+                                            },
+                                            {
+                                                label: 'To account',
+                                                account: selectedDestination,
+                                                icon: Landmark,
+                                            },
+                                        ].map((item) => {
+                                            const AccountIcon = item.icon;
+                                            return (
+                                                <div
+                                                    key={item.label}
+                                                    className="rounded-xl border border-border/60 bg-muted/20 p-3"
+                                                >
+                                                    <div className="flex items-center gap-2 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                                        <AccountIcon className="size-3.5" />
+                                                        {item.label}
+                                                    </div>
+                                                    {item.account ? (
+                                                        <div className="mt-2 min-w-0">
+                                                            <p className="font-mono text-sm font-semibold break-all">
+                                                                {
+                                                                    item.account
+                                                                        .account_no
+                                                                }
+                                                            </p>
+                                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                                                {item.account
+                                                                    .name ||
+                                                                    item.account.account_type.replaceAll(
+                                                                        '_',
+                                                                        ' ',
+                                                                    )}
+                                                            </p>
+                                                            <div className="mt-2 flex items-center justify-between gap-2 border-t pt-2 text-[11px]">
+                                                                <span className="text-muted-foreground">
+                                                                    Available
+                                                                </span>
+                                                                <span className="font-medium tabular-nums">
+                                                                    {formatBDTCurrency(
+                                                                        item
+                                                                            .account
+                                                                            .available_balance,
+                                                                    )}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="mt-2 text-xs text-muted-foreground">
+                                                            Select an account to
+                                                            preview it.
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+
+                                        <div className="space-y-2">
+                                            {[
+                                                {
+                                                    label: 'Transfer date',
+                                                    value: data.transaction_date
+                                                        ? new Intl.DateTimeFormat(
+                                                              'en-BD',
+                                                              {
+                                                                  dateStyle:
+                                                                      'medium',
+                                                              },
+                                                          ).format(
+                                                              new Date(
+                                                                  `${data.transaction_date}T00:00:00`,
+                                                              ),
+                                                          )
+                                                        : 'Not set',
+                                                },
+                                                {
+                                                    label: 'Reference',
+                                                    value:
+                                                        data.reference ||
+                                                        'Not provided',
+                                                },
+                                                {
+                                                    label: 'Description',
+                                                    value:
+                                                        data.description ||
+                                                        'Not provided',
+                                                },
+                                            ].map((item) => (
+                                                <div
+                                                    key={item.label}
+                                                    className="flex min-w-0 items-start justify-between gap-3 rounded-xl border border-border/60 px-3 py-2.5"
+                                                >
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {item.label}
+                                                    </span>
+                                                    <span className="min-w-0 text-right text-xs font-medium break-words">
+                                                        {item.value}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {sameTransferAccount && (
+                                            <p className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+                                                Choose two different accounts to
+                                                continue.
+                                            </p>
+                                        )}
+                                    </div>
+                                </section>
+                            </aside>
+                        </div>
                     ) : isLoanWorkflow ? (
                         <>
                             {/* Loan selection */}
@@ -698,7 +875,13 @@ export default function TransactionWorkflow() {
 
                     {/* Sticky form actions */}
                     {(isTransfer || isLoanWorkflow) && (
-                        <div className="sticky bottom-0 z-20 -mx-4 border-t bg-background/95 px-4 py-4 shadow-[0_-8px_24px_-18px_hsl(var(--foreground)/0.3)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6">
+                        <div
+                            className={
+                                isTransfer
+                                    ? 'border-t bg-background/95 px-4 py-4 md:px-6'
+                                    : 'sticky bottom-0 z-20 -mx-4 border-t bg-background/95 px-4 py-4 shadow-[0_-8px_24px_-18px_hsl(var(--foreground)/0.3)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:-mx-6 md:px-6'
+                            }
+                        >
                             <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                     <ShieldCheck className="size-4 shrink-0" />

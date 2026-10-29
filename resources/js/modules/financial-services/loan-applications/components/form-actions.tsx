@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import type { Props } from '@/modules/financial-services/types/loan-applications/components/form-actions.types';
 import { Link } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -7,8 +8,6 @@ import {
     Save,
     ShieldCheck,
 } from 'lucide-react';
-import type { Props } from '@/modules/financial-services/types/loan-applications/components/form-actions.types';
-
 
 export default function FormActions({
     cancelHref,
@@ -16,7 +15,7 @@ export default function FormActions({
     isEditing,
 }: Props) {
     return (
-        <div className="sticky bottom-0 z-20 -mx-4 mt-6 w-full border-t bg-background/95 px-4 py-3 shadow-[0_-4px_16px_-12px_rgba(0,0,0,0.18)] backdrop-blur-xl sm:-mx-6 sm:px-6">
+        <div className="mt-0 w-full border-t bg-background/95 px-4 py-3 sm:px-6">
             <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 {/* Save guidance */}
                 <div className="hidden items-center gap-3 sm:flex">
