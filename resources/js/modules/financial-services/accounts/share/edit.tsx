@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import { formatDate } from '@/lib/date_util';
+import AccountEditPreview from '@/modules/financial-services/accounts/account-edit-preview';
 import type { Props } from '@/modules/financial-services/types/accounts/share/edit.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -129,9 +131,8 @@ export default function ShareAccountEdit() {
         if (canManageProductDetails) {
             put(url);
         } else {
-            transform((formData) => ({
-                name: formData.name,
-            })).put(url);
+            transform((formData) => ({ name: formData.name }));
+            put(url);
         }
     }
 
@@ -139,7 +140,7 @@ export default function ShareAccountEdit() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit ${account.account_no}`} />
 
-            <div className="w-full max-w-5xl space-y-6 pb-24">
+            <div className="w-full max-w-screen-xl space-y-6 pb-24">
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title="Edit share account"
@@ -228,197 +229,252 @@ export default function ShareAccountEdit() {
                 </section>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Protected account information */}
-                    <section className="space-y-4 rounded-xl border bg-card p-4 sm:p-5">
-                        <SectionHeading
-                            icon={ShieldCheck}
-                            title="Account information"
-                            description="These details are read-only and cannot be changed from this form."
-                        />
+                    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+                        <div className="min-w-0 space-y-5">
+                            {/* Protected account information */}
+                            <section className="space-y-4 rounded-xl border bg-card p-4 sm:p-5">
+                                <SectionHeading
+                                    icon={ShieldCheck}
+                                    title="Account information"
+                                    description="These details are read-only and cannot be changed from this form."
+                                />
 
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <ReadOnlyField
-                                label="Account number"
-                                value={account.account_no}
-                                icon={CreditCard}
-                            />
-                            <ReadOnlyField
-                                label="Financial product"
-                                value={productName}
-                                icon={FileText}
-                            />
-                            <ReadOnlyField
-                                label="Account holder"
-                                value={account.holder?.name ?? '-'}
-                                icon={CircleUserRound}
-                            />
-                            <ReadOnlyField
-                                label="Account type"
-                                value={account.account_type ?? 'SHARE'}
-                                icon={Wallet}
-                            />
-                            <ReadOnlyField
-                                label="Current balance"
-                                value={formatBDTCurrency(account.balance)}
-                                icon={CreditCard}
-                            />
-                            <ReadOnlyField
-                                label="Account status"
-                                value={account.status ?? '-'}
-                                icon={BadgeCheck}
-                            />
-                        </div>
-                    </section>
-
-                    {/* Editable account details */}
-                    <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-5">
-                        <SectionHeading
-                            icon={FileText}
-                            title="Account display details"
-                            description="Choose a meaningful name to help identify this account throughout the system."
-                        />
-
-                        <div className="space-y-2">
-                            <Label htmlFor="account-name">
-                                Account display name
-                            </Label>
-                            <Input
-                                id="account-name"
-                                value={data.name}
-                                onChange={(event) =>
-                                    setData('name', event.target.value)
-                                }
-                                placeholder="Enter account display name"
-                                aria-invalid={Boolean(errors.name)}
-                            />
-                            <InputError message={errors.name} />
-                            <p className="text-xs text-muted-foreground">
-                                This name is used to identify the account in
-                                account listings and related screens.
-                            </p>
-                        </div>
-                    </section>
-
-                    {/* Membership details */}
-                    <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-5">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <SectionHeading
-                                icon={CircleUserRound}
-                                title="Membership details"
-                                description="Manage the member's registration information and current membership status."
-                            />
-
-                            <span
-                                className={`inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
-                                    canManageProductDetails
-                                        ? 'border-primary/20 bg-primary/5 text-primary'
-                                        : 'border-muted bg-muted text-muted-foreground'
-                                }`}
-                            >
-                                {canManageProductDetails ? (
-                                    <Check className="size-3.5" />
-                                ) : (
-                                    <ShieldCheck className="size-3.5" />
-                                )}
-                                {canManageProductDetails
-                                    ? 'Editable'
-                                    : 'Read-only'}
-                            </span>
-                        </div>
-
-                        {canManageProductDetails ? (
-                            <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="membership-no">
-                                        Membership number
-                                    </Label>
-                                    <div className="relative">
-                                        <Hash className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                                        <Input
-                                            id="membership-no"
-                                            className="pl-9"
-                                            value={data.membership_no}
-                                            onChange={(event) =>
-                                                setData(
-                                                    'membership_no',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="Enter membership number"
-                                            aria-invalid={Boolean(
-                                                errors.membership_no,
-                                            )}
-                                        />
-                                    </div>
-                                    <InputError
-                                        message={errors.membership_no}
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    <ReadOnlyField
+                                        label="Account number"
+                                        value={account.account_no}
+                                        icon={CreditCard}
+                                    />
+                                    <ReadOnlyField
+                                        label="Financial product"
+                                        value={productName}
+                                        icon={FileText}
+                                    />
+                                    <ReadOnlyField
+                                        label="Account holder"
+                                        value={account.holder?.name ?? '-'}
+                                        icon={CircleUserRound}
+                                    />
+                                    <ReadOnlyField
+                                        label="Account type"
+                                        value={account.account_type ?? 'SHARE'}
+                                        icon={Wallet}
+                                    />
+                                    <ReadOnlyField
+                                        label="Current balance"
+                                        value={formatBDTCurrency(
+                                            account.balance,
+                                        )}
+                                        icon={CreditCard}
+                                    />
+                                    <ReadOnlyField
+                                        label="Account status"
+                                        value={account.status ?? '-'}
+                                        icon={BadgeCheck}
                                     />
                                 </div>
+                            </section>
+
+                            {/* Editable account details */}
+                            <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-5">
+                                <SectionHeading
+                                    icon={FileText}
+                                    title="Account display details"
+                                    description="Choose a meaningful name to help identify this account throughout the system."
+                                />
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="member-since">
-                                        Member since
+                                    <Label htmlFor="account-name">
+                                        Account display name
                                     </Label>
-                                    <div className="relative">
-                                        <CalendarDays className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-                                        <div className="[&_button]:pl-9 [&>*]:w-full">
-                                            <AppDatePicker
-                                                value={data.member_since}
+                                    <Input
+                                        id="account-name"
+                                        value={data.name}
+                                        onChange={(event) =>
+                                            setData('name', event.target.value)
+                                        }
+                                        placeholder="Enter account display name"
+                                        aria-invalid={Boolean(errors.name)}
+                                    />
+                                    <InputError message={errors.name} />
+                                    <p className="text-xs text-muted-foreground">
+                                        This name is used to identify the
+                                        account in account listings and related
+                                        screens.
+                                    </p>
+                                </div>
+                            </section>
+
+                            {/* Membership details */}
+                            <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-5">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                    <SectionHeading
+                                        icon={CircleUserRound}
+                                        title="Membership details"
+                                        description="Manage the member's registration information and current membership status."
+                                    />
+
+                                    <span
+                                        className={`inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                            canManageProductDetails
+                                                ? 'border-primary/20 bg-primary/5 text-primary'
+                                                : 'border-muted bg-muted text-muted-foreground'
+                                        }`}
+                                    >
+                                        {canManageProductDetails ? (
+                                            <Check className="size-3.5" />
+                                        ) : (
+                                            <ShieldCheck className="size-3.5" />
+                                        )}
+                                        {canManageProductDetails
+                                            ? 'Editable'
+                                            : 'Read-only'}
+                                    </span>
+                                </div>
+
+                                {canManageProductDetails ? (
+                                    <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="membership-no">
+                                                Membership number
+                                            </Label>
+                                            <div className="relative">
+                                                <Hash className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                                <Input
+                                                    id="membership-no"
+                                                    className="pl-9"
+                                                    value={data.membership_no}
+                                                    onChange={(event) =>
+                                                        setData(
+                                                            'membership_no',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    placeholder="Enter membership number"
+                                                    aria-invalid={Boolean(
+                                                        errors.membership_no,
+                                                    )}
+                                                />
+                                            </div>
+                                            <InputError
+                                                message={errors.membership_no}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="member-since">
+                                                Member since
+                                            </Label>
+                                            <div className="relative">
+                                                <CalendarDays className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
+                                                <div className="[&_button]:pl-9 [&>*]:w-full">
+                                                    <AppDatePicker
+                                                        value={
+                                                            data.member_since
+                                                        }
+                                                        onChange={(value) =>
+                                                            setData(
+                                                                'member_since',
+                                                                value,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                            <InputError
+                                                message={errors.member_since}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2 sm:col-span-2">
+                                            <Label htmlFor="membership-status">
+                                                Membership status
+                                            </Label>
+                                            <Select
+                                                value={data.membership_status}
                                                 onChange={(value) =>
                                                     setData(
-                                                        'member_since',
+                                                        'membership_status',
                                                         value,
                                                     )
                                                 }
+                                                options={membershipStatuses}
                                             />
+                                            <InputError
+                                                message={
+                                                    errors.membership_status
+                                                }
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Changing membership status may
+                                                affect how this membership is
+                                                treated in operational
+                                                workflows.
+                                            </p>
                                         </div>
                                     </div>
-                                    <InputError message={errors.member_since} />
-                                </div>
+                                ) : (
+                                    <div className="flex items-start gap-3 rounded-lg border border-dashed bg-muted/20 p-4">
+                                        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium">
+                                                Membership management permission
+                                                required
+                                            </p>
+                                            <p className="text-sm leading-relaxed text-muted-foreground">
+                                                You can update the account
+                                                display name, but membership
+                                                number, member since date, and
+                                                membership status require
+                                                membership-management
+                                                permission.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </section>
+                        </div>
 
-                                <div className="space-y-2 sm:col-span-2">
-                                    <Label htmlFor="membership-status">
-                                        Membership status
-                                    </Label>
-                                    <Select
-                                        value={data.membership_status}
-                                        onChange={(value) =>
-                                            setData('membership_status', value)
-                                        }
-                                        options={membershipStatuses}
-                                    />
-                                    <InputError
-                                        message={errors.membership_status}
-                                    />
-                                    <p className="text-xs text-muted-foreground">
-                                        Changing membership status may affect
-                                        how this membership is treated in
-                                        operational workflows.
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex items-start gap-3 rounded-lg border border-dashed bg-muted/20 p-4">
-                                <ShieldCheck className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium">
-                                        Membership management permission
-                                        required
-                                    </p>
-                                    <p className="text-sm leading-relaxed text-muted-foreground">
-                                        You can update the account display name,
-                                        but membership number, member since
-                                        date, and membership status require
-                                        membership-management permission.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                    </section>
+                        <aside className="min-w-0 xl:sticky xl:top-4 xl:self-start">
+                            <AccountEditPreview
+                                accountType={account.account_type ?? 'SHARE'}
+                                accountNumber={account.account_no}
+                                accountName={data.name}
+                                productName={productName}
+                                accountStatus={
+                                    account.status ?? 'Not specified'
+                                }
+                                featuredLabel="Current balance"
+                                featuredValue={formatBDTCurrency(
+                                    account.balance,
+                                )}
+                                details={[
+                                    {
+                                        label: 'Account holder',
+                                        value: account.holder?.name ?? '-',
+                                    },
+                                    {
+                                        label: 'Membership number',
+                                        value:
+                                            data.membership_no ||
+                                            'Not assigned',
+                                    },
+                                    {
+                                        label: 'Member since',
+                                        value: formatDate(data.member_since),
+                                    },
+                                    {
+                                        label: 'Membership status',
+                                        value: data.membership_status,
+                                    },
+                                ]}
+                            />
+                        </aside>
+                    </div>
 
-                    {/* Sticky form actions */}
-                    <div className="sticky bottom-0 z-20 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
-                        <div className="mx-auto flex max-w-5xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    {/* Form actions */}
+                    <div className="border-t bg-background/95 py-3">
+                        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <Button
                                 asChild
                                 type="button"

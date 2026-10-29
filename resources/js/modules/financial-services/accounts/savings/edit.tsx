@@ -210,145 +210,272 @@ export default function SavingsAccountEdit() {
                 </section>
 
                 <form onSubmit={submit} className="space-y-5">
-                    {/* Protected information */}
-                    <section className="space-y-4 rounded-xl border bg-card p-4 sm:p-5">
-                        <SectionHeading
-                            icon={ShieldCheck}
-                            title="Account information"
-                            description="These details are read-only and cannot be changed from this form."
-                        />
+                    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+                        <div className="min-w-0 space-y-5">
+                            {/* Protected information */}
+                            <section className="space-y-4 rounded-xl border bg-card p-4 sm:p-5">
+                                <SectionHeading
+                                    icon={ShieldCheck}
+                                    title="Account information"
+                                    description="These details are read-only and cannot be changed from this form."
+                                />
 
-                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <ReadOnlyField
-                                label="Account number"
-                                value={account.account_no}
-                                icon={CreditCard}
-                            />
-
-                            <ReadOnlyField
-                                label="Savings product"
-                                value={productName}
-                                icon={Landmark}
-                            />
-
-                            <ReadOnlyField
-                                label="Account holder"
-                                value={account.holder?.name ?? '-'}
-                                icon={UserRound}
-                            />
-
-                            <ReadOnlyField
-                                label="Account type"
-                                value={account.account_type ?? 'SAVINGS'}
-                                icon={Wallet}
-                            />
-
-                            <ReadOnlyField
-                                label="Current balance"
-                                value={formatBDTCurrency(account.balance)}
-                                icon={CircleDollarSign}
-                            />
-
-                            <ReadOnlyField
-                                label="Account status"
-                                value={accountStatus}
-                                icon={BadgeCheck}
-                            />
-                        </div>
-                    </section>
-
-                    {/* Editable details */}
-                    <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-5">
-                        <SectionHeading
-                            icon={FileText}
-                            title="Account settings"
-                            description="Update the account display name and the minimum balance requirement."
-                        />
-
-                        <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="account-name">
-                                    Account display name
-                                    <span className="ml-1 text-destructive">
-                                        *
-                                    </span>
-                                </Label>
-
-                                <div className="relative">
-                                    <FileText className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        id="account-name"
-                                        className="pl-9"
-                                        value={data.name}
-                                        onChange={(event) =>
-                                            setData('name', event.target.value)
-                                        }
-                                        placeholder="Enter account display name"
-                                        aria-invalid={Boolean(errors.name)}
+                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                    <ReadOnlyField
+                                        label="Account number"
+                                        value={account.account_no}
+                                        icon={CreditCard}
                                     />
-                                </div>
 
-                                <InputError message={errors.name} />
+                                    <ReadOnlyField
+                                        label="Savings product"
+                                        value={productName}
+                                        icon={Landmark}
+                                    />
 
-                                <p className="text-xs text-muted-foreground">
-                                    A recognizable name for account listings and
-                                    related screens.
-                                </p>
-                            </div>
+                                    <ReadOnlyField
+                                        label="Account holder"
+                                        value={account.holder?.name ?? '-'}
+                                        icon={UserRound}
+                                    />
 
-                            <div className="space-y-2">
-                                <Label htmlFor="minimum-balance">
-                                    Minimum balance
-                                    <span className="ml-1 text-destructive">
-                                        *
-                                    </span>
-                                </Label>
-
-                                <div className="relative">
-                                    <CircleDollarSign className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input
-                                        id="minimum-balance"
-                                        type="number"
-                                        min="0"
-                                        step="0.0001"
-                                        className="pl-9 tabular-nums"
-                                        value={data.minimum_balance}
-                                        onChange={(event) =>
-                                            setData(
-                                                'minimum_balance',
-                                                event.target.value,
-                                            )
+                                    <ReadOnlyField
+                                        label="Account type"
+                                        value={
+                                            account.account_type ?? 'SAVINGS'
                                         }
-                                        placeholder="0.00"
-                                        aria-invalid={Boolean(
-                                            errors.minimum_balance,
+                                        icon={Wallet}
+                                    />
+
+                                    <ReadOnlyField
+                                        label="Current balance"
+                                        value={formatBDTCurrency(
+                                            account.balance,
                                         )}
+                                        icon={CircleDollarSign}
+                                    />
+
+                                    <ReadOnlyField
+                                        label="Account status"
+                                        value={accountStatus}
+                                        icon={BadgeCheck}
                                     />
                                 </div>
+                            </section>
 
-                                <InputError message={errors.minimum_balance} />
+                            {/* Editable details */}
+                            <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-5">
+                                <SectionHeading
+                                    icon={FileText}
+                                    title="Account settings"
+                                    description="Update the account display name and the minimum balance requirement."
+                                />
 
-                                <p className="text-xs text-muted-foreground">
-                                    The minimum balance requirement configured
-                                    for this account.
-                                </p>
-                            </div>
+                                <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="account-name">
+                                            Account display name
+                                            <span className="ml-1 text-destructive">
+                                                *
+                                            </span>
+                                        </Label>
+
+                                        <div className="relative">
+                                            <FileText className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                            <Input
+                                                id="account-name"
+                                                className="pl-9"
+                                                value={data.name}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'name',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="Enter account display name"
+                                                aria-invalid={Boolean(
+                                                    errors.name,
+                                                )}
+                                            />
+                                        </div>
+
+                                        <InputError message={errors.name} />
+
+                                        <p className="text-xs text-muted-foreground">
+                                            A recognizable name for account
+                                            listings and related screens.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="minimum-balance">
+                                            Minimum balance
+                                            <span className="ml-1 text-destructive">
+                                                *
+                                            </span>
+                                        </Label>
+
+                                        <div className="relative">
+                                            <CircleDollarSign className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                            <Input
+                                                id="minimum-balance"
+                                                type="number"
+                                                min="0"
+                                                step="0.0001"
+                                                className="pl-9 tabular-nums"
+                                                value={data.minimum_balance}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'minimum_balance',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="0.00"
+                                                aria-invalid={Boolean(
+                                                    errors.minimum_balance,
+                                                )}
+                                            />
+                                        </div>
+
+                                        <InputError
+                                            message={errors.minimum_balance}
+                                        />
+
+                                        <p className="text-xs text-muted-foreground">
+                                            The minimum balance requirement
+                                            configured for this account.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/[0.04] p-3.5">
+                                    <InfoIcon />
+                                    <p className="text-xs leading-relaxed text-muted-foreground">
+                                        Changes to the minimum balance should
+                                        follow your institution's
+                                        savings-account policies. The current
+                                        account balance is displayed for
+                                        reference and is not editable here.
+                                    </p>
+                                </div>
+                            </section>
                         </div>
 
-                        <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/[0.04] p-3.5">
-                            <InfoIcon />
-                            <p className="text-xs leading-relaxed text-muted-foreground">
-                                Changes to the minimum balance should follow
-                                your institution's savings-account policies. The
-                                current account balance is displayed for
-                                reference and is not editable here.
-                            </p>
-                        </div>
-                    </section>
+                        <aside className="min-w-0 space-y-4 xl:sticky xl:top-4 xl:self-start">
+                            <section className="overflow-hidden rounded-3xl border border-border/70 bg-card shadow-xl ring-1 shadow-primary/[0.05] ring-foreground/[0.02]">
+                                <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-5 py-5">
+                                    <div className="pointer-events-none absolute -top-12 right-0 size-36 rounded-full bg-primary/10 blur-3xl" />
+                                    <div className="relative flex items-center gap-3">
+                                        <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                                            <Wallet className="size-5" />
+                                        </span>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-[10px] font-semibold tracking-[0.16em] text-primary uppercase">
+                                                Account summary
+                                            </p>
+                                            <h2 className="text-base font-semibold">
+                                                Live preview
+                                            </h2>
+                                        </div>
+                                        <span className="rounded-full border border-primary/15 bg-background/80 px-2.5 py-1 text-[10px] font-semibold text-primary">
+                                            LIVE
+                                        </span>
+                                    </div>
+                                </div>
 
-                    {/* Sticky actions */}
-                    <div className="sticky bottom-0 z-20 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
-                        <div className="mx-auto flex max-w-5xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="space-y-3 p-4">
+                                    <div className="rounded-2xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-4 ring-1 ring-primary/10">
+                                        <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            Account display name
+                                        </p>
+                                        <p className="mt-1 text-lg font-semibold tracking-tight break-words">
+                                            {data.name || 'Account name'}
+                                        </p>
+                                        <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                            {account.account_no}
+                                        </p>
+                                    </div>
+
+                                    <div className="rounded-2xl border border-primary/15 bg-primary/[0.06] p-4">
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <CircleDollarSign className="size-4 text-primary" />
+                                            Minimum balance requirement
+                                        </div>
+                                        <p className="mt-2 text-2xl font-semibold tracking-tight text-primary tabular-nums">
+                                            {formatBDTCurrency(
+                                                data.minimum_balance || 0,
+                                            )}
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {[
+                                            {
+                                                label: 'Savings product',
+                                                value: productName,
+                                                icon: Landmark,
+                                            },
+                                            {
+                                                label: 'Account holder',
+                                                value:
+                                                    account.holder?.name ?? '-',
+                                                icon: UserRound,
+                                            },
+                                            {
+                                                label: 'Account type',
+                                                value:
+                                                    account.account_type ??
+                                                    'SAVINGS',
+                                                icon: ShieldCheck,
+                                            },
+                                            {
+                                                label: 'Current balance',
+                                                value: formatBDTCurrency(
+                                                    account.balance,
+                                                ),
+                                                icon: CircleDollarSign,
+                                            },
+                                        ].map((item) => {
+                                            const Icon = item.icon;
+
+                                            return (
+                                                <div
+                                                    key={item.label}
+                                                    className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5"
+                                                >
+                                                    <span className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+                                                        <Icon className="size-3.5 shrink-0" />
+                                                        <span className="truncate">
+                                                            {item.label}
+                                                        </span>
+                                                    </span>
+                                                    <span className="min-w-0 text-right text-xs font-medium break-words">
+                                                        {item.value || '-'}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div
+                                        className={`flex items-center gap-2 rounded-xl border px-3.5 py-3 text-xs font-medium ${
+                                            statusStyles[
+                                                accountStatus.toUpperCase()
+                                            ] ??
+                                            'border-muted-foreground/20 bg-muted text-muted-foreground'
+                                        }`}
+                                    >
+                                        <BadgeCheck className="size-4 shrink-0" />
+                                        Account status: {accountStatus}
+                                    </div>
+                                </div>
+                            </section>
+                        </aside>
+                    </div>
+
+                    {/* Form actions */}
+                    <div className="border-t bg-background/95 py-3">
+                        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <Button
                                 asChild
                                 type="button"

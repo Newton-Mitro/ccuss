@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import { formatDate } from '@/lib/date_util';
+import AccountEditPreview from '@/modules/financial-services/accounts/account-edit-preview';
 import type { Props } from '@/modules/financial-services/types/accounts/fixed/edit.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -136,7 +138,7 @@ export default function FixedDepositAccountEdit() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit ${account.account_no}`} />
 
-            <div className="max-w-4xl space-y-5 pb-8">
+            <div className="w-full max-w-screen-xl space-y-5 pb-8">
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title="Edit fixed deposit account"
@@ -217,299 +219,376 @@ export default function FixedDepositAccountEdit() {
                     </div>
                 </section>
 
-                <form
-                    onSubmit={submit}
-                    className="overflow-hidden rounded-xl border bg-card"
-                >
-                    <div className="space-y-6 p-4 sm:p-6">
-                        {/* Account name */}
-                        <section className="space-y-4">
-                            <div className="flex items-start gap-3">
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                    <FileText className="size-4" />
-                                </div>
-                                <div className="pt-0.5">
-                                    <h2 className="text-sm font-semibold">
-                                        Account information
-                                    </h2>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        Update the internal display name for
-                                        this account.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <FormField
-                                    label="Account display name"
-                                    error={errors.name}
-                                    hint="Optional name used to identify the account."
-                                >
-                                    <Input
-                                        value={data.name}
-                                        onChange={(event) =>
-                                            setData('name', event.target.value)
-                                        }
-                                        placeholder="Enter account display name"
-                                        autoComplete="off"
-                                    />
-                                </FormField>
-                            </div>
-                        </section>
-
-                        {/* Contract terms */}
-                        {canManageProductDetails ? (
-                            <>
-                                <div className="border-t" />
-
-                                <section className="space-y-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                            <Wallet className="size-4" />
-                                        </div>
-                                        <div className="pt-0.5">
-                                            <h2 className="text-sm font-semibold">
-                                                Contract terms
-                                            </h2>
-                                            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                                Changes may affect the maturity
-                                                date and interest calculation.
-                                                Verify the agreed terms before
-                                                saving.
-                                            </p>
-                                        </div>
+                <form onSubmit={submit} className="space-y-5">
+                    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
+                        <div className="min-w-0 space-y-6 overflow-hidden rounded-xl border bg-card p-4 sm:p-6">
+                            {/* Account name */}
+                            <section className="space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <FileText className="size-4" />
                                     </div>
-
-                                    <div className="grid gap-4 sm:grid-cols-2">
-                                        <FormField
-                                            label="Principal amount (৳)"
-                                            required
-                                            error={errors.principal_amount}
-                                        >
-                                            <Input
-                                                type="number"
-                                                min="0"
-                                                step="0.0001"
-                                                value={data.principal_amount}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'principal_amount',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder="0.00"
-                                                inputMode="decimal"
-                                            />
-                                        </FormField>
-
-                                        <FormField
-                                            label="Contractual annual rate (%)"
-                                            required
-                                            error={errors.contractual_rate}
-                                            hint="The agreed annual interest rate."
-                                        >
-                                            <Input
-                                                type="number"
-                                                min="0"
-                                                step="0.000001"
-                                                value={data.contractual_rate}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'contractual_rate',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder="e.g. 8.50"
-                                                inputMode="decimal"
-                                            />
-                                        </FormField>
-
-                                        <FormField
-                                            label="Term duration"
-                                            required
-                                            error={
-                                                errors.term_value ||
-                                                errors.term_unit
-                                            }
-                                            hint="Specify the contract duration and unit."
-                                        >
-                                            <div className="grid grid-cols-[minmax(0,1fr)_minmax(110px,0.8fr)] gap-2">
-                                                <Input
-                                                    type="number"
-                                                    min="1"
-                                                    value={data.term_value}
-                                                    onChange={(event) =>
-                                                        setData(
-                                                            'term_value',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    placeholder="Duration"
-                                                />
-                                                <Select
-                                                    value={data.term_unit}
-                                                    onChange={(value) =>
-                                                        setData(
-                                                            'term_unit',
-                                                            value,
-                                                        )
-                                                    }
-                                                    options={termUnits}
-                                                />
-                                            </div>
-                                            {errors.term_value && (
-                                                <InputError
-                                                    message={errors.term_value}
-                                                />
-                                            )}
-                                            {errors.term_unit && (
-                                                <InputError
-                                                    message={errors.term_unit}
-                                                />
-                                            )}
-                                        </FormField>
-
-                                        <FormField
-                                            label="Start date"
-                                            required
-                                            error={errors.started_at}
-                                        >
-                                            <AppDatePicker
-                                                value={data.started_at}
-                                                onChange={(value) =>
-                                                    setData('started_at', value)
-                                                }
-                                            />
-                                        </FormField>
-
-                                        <FormField
-                                            label="Maturity instruction"
-                                            required
-                                            error={errors.maturity_instruction}
-                                            hint="Defines how the deposit is handled at maturity."
-                                        >
-                                            <Select
-                                                value={
-                                                    data.maturity_instruction
-                                                }
-                                                onChange={(value) =>
-                                                    setData(
-                                                        'maturity_instruction',
-                                                        value,
-                                                    )
-                                                }
-                                                options={maturityInstructions}
-                                            />
-                                        </FormField>
-                                    </div>
-                                </section>
-                            </>
-                        ) : (
-                            <>
-                                <div className="border-t" />
-
-                                <div className="flex items-start gap-3 rounded-lg border bg-muted/20 p-4">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground">
-                                        <LockKeyhole className="size-4" />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h3 className="text-sm font-medium">
-                                            Contract terms are protected
-                                        </h3>
-                                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                            Fixed deposit management permission
-                                            is required to change the principal,
-                                            interest rate, tenure, start date,
-                                            or maturity instruction. You can
-                                            still update the account display
-                                            name.
+                                    <div className="pt-0.5">
+                                        <h2 className="text-sm font-semibold">
+                                            Account information
+                                        </h2>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            Update the internal display name for
+                                            this account.
                                         </p>
                                     </div>
                                 </div>
-                            </>
-                        )}
 
-                        {/* Protected fields */}
-                        <div className="border-t" />
-
-                        <section className="space-y-4">
-                            <div className="flex items-start gap-3">
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                                    <ShieldCheck className="size-4" />
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <FormField
+                                        label="Account display name"
+                                        error={errors.name}
+                                        hint="Optional name used to identify the account."
+                                    >
+                                        <Input
+                                            value={data.name}
+                                            onChange={(event) =>
+                                                setData(
+                                                    'name',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Enter account display name"
+                                            autoComplete="off"
+                                        />
+                                    </FormField>
                                 </div>
-                                <div className="pt-0.5">
-                                    <h2 className="text-sm font-semibold">
-                                        Protected account details
-                                    </h2>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        These values cannot be changed from this
-                                        form.
-                                    </p>
+                            </section>
+
+                            {/* Contract terms */}
+                            {canManageProductDetails ? (
+                                <>
+                                    <div className="border-t" />
+
+                                    <section className="space-y-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                                <Wallet className="size-4" />
+                                            </div>
+                                            <div className="pt-0.5">
+                                                <h2 className="text-sm font-semibold">
+                                                    Contract terms
+                                                </h2>
+                                                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                                    Changes may affect the
+                                                    maturity date and interest
+                                                    calculation. Verify the
+                                                    agreed terms before saving.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid gap-4 sm:grid-cols-2">
+                                            <FormField
+                                                label="Principal amount (৳)"
+                                                required
+                                                error={errors.principal_amount}
+                                            >
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.0001"
+                                                    value={
+                                                        data.principal_amount
+                                                    }
+                                                    onChange={(event) =>
+                                                        setData(
+                                                            'principal_amount',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    placeholder="0.00"
+                                                    inputMode="decimal"
+                                                />
+                                            </FormField>
+
+                                            <FormField
+                                                label="Contractual annual rate (%)"
+                                                required
+                                                error={errors.contractual_rate}
+                                                hint="The agreed annual interest rate."
+                                            >
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.000001"
+                                                    value={
+                                                        data.contractual_rate
+                                                    }
+                                                    onChange={(event) =>
+                                                        setData(
+                                                            'contractual_rate',
+                                                            event.target.value,
+                                                        )
+                                                    }
+                                                    placeholder="e.g. 8.50"
+                                                    inputMode="decimal"
+                                                />
+                                            </FormField>
+
+                                            <FormField
+                                                label="Term duration"
+                                                required
+                                                error={
+                                                    errors.term_value ||
+                                                    errors.term_unit
+                                                }
+                                                hint="Specify the contract duration and unit."
+                                            >
+                                                <div className="grid grid-cols-[minmax(0,1fr)_minmax(110px,0.8fr)] gap-2">
+                                                    <Input
+                                                        type="number"
+                                                        min="1"
+                                                        value={data.term_value}
+                                                        onChange={(event) =>
+                                                            setData(
+                                                                'term_value',
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                        placeholder="Duration"
+                                                    />
+                                                    <Select
+                                                        value={data.term_unit}
+                                                        onChange={(value) =>
+                                                            setData(
+                                                                'term_unit',
+                                                                value,
+                                                            )
+                                                        }
+                                                        options={termUnits}
+                                                    />
+                                                </div>
+                                                {errors.term_value && (
+                                                    <InputError
+                                                        message={
+                                                            errors.term_value
+                                                        }
+                                                    />
+                                                )}
+                                                {errors.term_unit && (
+                                                    <InputError
+                                                        message={
+                                                            errors.term_unit
+                                                        }
+                                                    />
+                                                )}
+                                            </FormField>
+
+                                            <FormField
+                                                label="Start date"
+                                                required
+                                                error={errors.started_at}
+                                            >
+                                                <AppDatePicker
+                                                    value={data.started_at}
+                                                    onChange={(value) =>
+                                                        setData(
+                                                            'started_at',
+                                                            value,
+                                                        )
+                                                    }
+                                                />
+                                            </FormField>
+
+                                            <FormField
+                                                label="Maturity instruction"
+                                                required
+                                                error={
+                                                    errors.maturity_instruction
+                                                }
+                                                hint="Defines how the deposit is handled at maturity."
+                                            >
+                                                <Select
+                                                    value={
+                                                        data.maturity_instruction
+                                                    }
+                                                    onChange={(value) =>
+                                                        setData(
+                                                            'maturity_instruction',
+                                                            value,
+                                                        )
+                                                    }
+                                                    options={
+                                                        maturityInstructions
+                                                    }
+                                                />
+                                            </FormField>
+                                        </div>
+                                    </section>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="border-t" />
+
+                                    <div className="flex items-start gap-3 rounded-lg border bg-muted/20 p-4">
+                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-background text-muted-foreground">
+                                            <LockKeyhole className="size-4" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h3 className="text-sm font-medium">
+                                                Contract terms are protected
+                                            </h3>
+                                            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                                Fixed deposit management
+                                                permission is required to change
+                                                the principal, interest rate,
+                                                tenure, start date, or maturity
+                                                instruction. You can still
+                                                update the account display name.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Protected fields */}
+                            <div className="border-t" />
+
+                            <section className="space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                                        <ShieldCheck className="size-4" />
+                                    </div>
+                                    <div className="pt-0.5">
+                                        <h2 className="text-sm font-semibold">
+                                            Protected account details
+                                        </h2>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            These values cannot be changed from
+                                            this form.
+                                        </p>
+                                    </div>
                                 </div>
+
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <FormField label="Account number">
+                                        <Input
+                                            value={account.account_no}
+                                            disabled
+                                        />
+                                    </FormField>
+
+                                    <FormField label="Deposit product">
+                                        <Input value={productName} disabled />
+                                    </FormField>
+
+                                    <FormField label="Depositor">
+                                        <Input
+                                            value={
+                                                account.holder?.name ??
+                                                'Unassigned'
+                                            }
+                                            disabled
+                                        />
+                                    </FormField>
+
+                                    <FormField label="Account type">
+                                        <Input
+                                            value={
+                                                account.account_type ??
+                                                'FIXED_DEPOSIT'
+                                            }
+                                            disabled
+                                        />
+                                    </FormField>
+
+                                    <FormField label="Current balance">
+                                        <Input
+                                            value={formatBDTCurrency(
+                                                account.balance ?? 0,
+                                                false,
+                                            )}
+                                            disabled
+                                        />
+                                    </FormField>
+
+                                    <FormField label="Account status">
+                                        <Input
+                                            value={account.status ?? 'Unknown'}
+                                            disabled
+                                        />
+                                    </FormField>
+                                </div>
+                            </section>
+
+                            <div className="flex items-start gap-2 rounded-lg border bg-muted/20 p-3">
+                                <CalendarDays className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                <p className="text-xs leading-relaxed text-muted-foreground">
+                                    {canManageProductDetails
+                                        ? 'The maturity date may be recalculated when contract terms change. Confirm your backend recalculation rules and any applicable approval requirements.'
+                                        : 'Only the display name can be updated with your current permissions.'}
+                                </p>
                             </div>
-
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <FormField label="Account number">
-                                    <Input
-                                        value={account.account_no}
-                                        disabled
-                                    />
-                                </FormField>
-
-                                <FormField label="Deposit product">
-                                    <Input value={productName} disabled />
-                                </FormField>
-
-                                <FormField label="Depositor">
-                                    <Input
-                                        value={
-                                            account.holder?.name ?? 'Unassigned'
-                                        }
-                                        disabled
-                                    />
-                                </FormField>
-
-                                <FormField label="Account type">
-                                    <Input
-                                        value={
-                                            account.account_type ??
-                                            'FIXED_DEPOSIT'
-                                        }
-                                        disabled
-                                    />
-                                </FormField>
-
-                                <FormField label="Current balance">
-                                    <Input
-                                        value={formatBDTCurrency(
-                                            account.balance ?? 0,
-                                            false,
-                                        )}
-                                        disabled
-                                    />
-                                </FormField>
-
-                                <FormField label="Account status">
-                                    <Input
-                                        value={account.status ?? 'Unknown'}
-                                        disabled
-                                    />
-                                </FormField>
-                            </div>
-                        </section>
-
-                        <div className="flex items-start gap-2 rounded-lg border bg-muted/20 p-3">
-                            <CalendarDays className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                            <p className="text-xs leading-relaxed text-muted-foreground">
-                                {canManageProductDetails
-                                    ? 'The maturity date may be recalculated when contract terms change. Confirm your backend recalculation rules and any applicable approval requirements.'
-                                    : 'Only the display name can be updated with your current permissions.'}
-                            </p>
                         </div>
+
+                        <aside className="min-w-0 xl:sticky xl:top-4 xl:self-start">
+                            <AccountEditPreview
+                                accountType={
+                                    account.account_type ?? 'FIXED_DEPOSIT'
+                                }
+                                accountNumber={account.account_no}
+                                accountName={data.name}
+                                productName={productName}
+                                accountStatus={account.status ?? 'Unknown'}
+                                featuredLabel="Principal amount"
+                                featuredValue={formatBDTCurrency(
+                                    data.principal_amount || 0,
+                                )}
+                                details={[
+                                    {
+                                        label: 'Depositor',
+                                        value:
+                                            account.holder?.name ??
+                                            'Unassigned',
+                                    },
+                                    {
+                                        label: 'Contractual annual rate',
+                                        value: `${Number(data.contractual_rate || 0).toFixed(2)}%`,
+                                    },
+                                    {
+                                        label: 'Term',
+                                        value: `${data.term_value || 'Not set'} ${data.term_unit.toLowerCase()}`,
+                                    },
+                                    {
+                                        label: 'Start date',
+                                        value: formatDate(data.started_at),
+                                    },
+                                    {
+                                        label: 'Maturity date',
+                                        value: formatDate(
+                                            deposit?.maturity_date,
+                                        ),
+                                    },
+                                    {
+                                        label: 'Maturity instruction',
+                                        value:
+                                            maturityInstructions.find(
+                                                (option) =>
+                                                    option.value ===
+                                                    data.maturity_instruction,
+                                            )?.label ??
+                                            data.maturity_instruction,
+                                    },
+                                    {
+                                        label: 'Current balance',
+                                        value: formatBDTCurrency(
+                                            account.balance ?? 0,
+                                        ),
+                                    },
+                                ]}
+                            />
+                        </aside>
                     </div>
 
-                    {/* Sticky form actions */}
-                    <div className="sticky bottom-0 z-10 flex flex-col-reverse gap-2 border-t bg-card/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    {/* Form actions */}
+                    <div className="flex flex-col-reverse gap-2 border-t bg-card/95 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                         <Button asChild type="button" variant="outline">
                             <Link
                                 href={route(
