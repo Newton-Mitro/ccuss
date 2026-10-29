@@ -15,7 +15,7 @@ function parseDate(value: string): Date {
 function formatDate(value?: string | null) {
     if (!value) return '—';
 
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat('en-BD', {
         dateStyle: 'medium',
     }).format(parseDate(value));
 }
@@ -23,7 +23,7 @@ function formatDate(value?: string | null) {
 function formatDateTime(value?: string | null) {
     if (!value) return '—';
 
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat('en-BD', {
         dateStyle: 'medium',
         timeStyle: 'short',
     }).format(parseDate(value));

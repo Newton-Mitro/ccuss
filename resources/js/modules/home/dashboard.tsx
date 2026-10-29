@@ -5,6 +5,7 @@ import {
 import HeadingSmall from '@/components/heading-small';
 import { StatusBadge } from '@/components/resource-page-shell';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDateTime } from '@/lib/date_util';
 import type { DashboardProps } from '@/modules/home/types/dashboard.interfaces';
 import type { BreadcrumbItem } from '@/types';
@@ -30,14 +31,7 @@ const compactNumberFormat = new Intl.NumberFormat('en-BD', {
     notation: 'compact',
     maximumFractionDigits: 1,
 });
-const moneyFormat = new Intl.NumberFormat('en-BD', {
-    style: 'currency',
-    currency: 'BDT',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-});
-
-const formatMoney = (amount: number) => moneyFormat.format(amount || 0);
+const formatMoney = (amount: number) => formatBDTCurrency(amount);
 const formatType = (value: string) => value.replaceAll('_', ' ');
 
 export default function DashboardPage() {

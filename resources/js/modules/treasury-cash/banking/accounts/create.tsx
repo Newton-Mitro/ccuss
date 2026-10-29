@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem } from '@/types';
 import type { BankAccountCreatePageProps } from '@/modules/treasury-cash/types/forms';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -13,8 +13,6 @@ import {
     CheckCircle2,
     ChevronRight,
     CircleDollarSign,
-    FileCheck2,
-    Landmark,
     LoaderCircle,
     ShieldCheck,
     Wallet,
@@ -65,9 +63,9 @@ export default function Create() {
     const sectionClass = 'rounded-xl border bg-card shadow-sm';
 
     const sectionHeaderClass =
-        'flex items-start gap-3 border-b px-4 py-4 sm:px-5';
+        'flex items-center gap-3 border-b px-3 py-2.5 sm:px-4';
 
-    const fieldClass = 'h-10 w-full';
+    const fieldClass = 'h-9 w-full';
 
     const labelClass = 'text-sm font-medium';
 
@@ -75,71 +73,42 @@ export default function Create() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`${editing ? 'Edit' : 'Create'} Bank Account`} />
 
-            <div className="w-full max-w-5xl space-y-5 pb-24 text-foreground">
-                {/* Page heading */}
-                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                    <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border bg-muted/50">
-                            <Landmark className="size-5 text-primary" />
-                        </div>
-
-                        <div className="min-w-0 space-y-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <h1 className="text-xl font-semibold tracking-tight">
-                                    {editing
-                                        ? 'Edit Bank Account'
-                                        : 'Create Bank Account'}
-                                </h1>
-
-                                <span className="inline-flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                                    <ShieldCheck className="size-3.5" />
-                                    Bank setup
-                                </span>
-                            </div>
-
-                            <p className="max-w-2xl text-sm leading-5 text-muted-foreground">
-                                {editing
-                                    ? 'Update bank account details, branch assignment, and reconciliation settings.'
-                                    : 'Register a bank account, link it to your financial ledger, and configure its branch and reconciliation settings.'}
-                            </p>
-                        </div>
+            <div className="w-full max-w-none space-y-3 pb-20 text-foreground">
+                <header className="flex flex-col gap-2 py-1 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0 space-y-1">
+                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                            Treasury &amp; cash · Banking
+                        </p>
+                        <h1 className="text-xl leading-tight font-semibold tracking-tight">
+                            {editing
+                                ? 'Edit bank account'
+                                : 'Create bank account'}
+                        </h1>
+                        <p className="text-xs leading-5 text-muted-foreground">
+                            {editing
+                                ? 'Update account details and reconciliation settings.'
+                                : 'Register an account, assign its branch, and configure opening balance settings.'}
+                        </p>
                     </div>
 
                     <Button
                         asChild
                         variant="outline"
-                        className="w-full shrink-0 sm:w-auto"
+                        size="sm"
+                        className="shrink-0"
                     >
                         <Link href={route('bank-accounts.index')}>
-                            <ArrowLeft className="mr-2 size-4" />
-                            Back to bank accounts
+                            <ArrowLeft className="size-4" />
+                            Bank accounts
                         </Link>
                     </Button>
-                </div>
+                </header>
 
-                {/* Informational banner */}
-                <div className="flex items-start gap-3 rounded-xl border bg-muted/30 p-4">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background">
-                        <FileCheck2 className="size-4 text-muted-foreground" />
-                    </div>
-
-                    <div className="min-w-0 space-y-1">
-                        <p className="text-sm font-medium">
-                            Bank account configuration
-                        </p>
-                        <p className="text-xs leading-5 text-muted-foreground">
-                            Link the bank account to the appropriate financial
-                            account. A positive opening balance queues a deposit
-                            for posting and voucher creation.
-                        </p>
-                    </div>
-                </div>
-
-                <form onSubmit={submit} className="space-y-4">
+                <form onSubmit={submit} className="space-y-3">
                     {/* Section 2: Branch assignment */}
                     <section className={sectionClass}>
                         <div className={sectionHeaderClass}>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                 <Building2 className="size-4" />
                             </div>
 
@@ -147,18 +116,14 @@ export default function Create() {
                                 <h2 className="text-sm font-semibold">
                                     Branch assignment
                                 </h2>
-                                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                <p className="text-xs leading-4 text-muted-foreground">
                                     Specify the branch responsible for this bank
                                     account.
                                 </p>
                             </div>
-
-                            <span className="hidden text-xs text-muted-foreground sm:block">
-                                Section 02
-                            </span>
                         </div>
 
-                        <div className="p-4 sm:p-5">
+                        <div className="p-3 sm:p-4">
                             <div className="max-w-xl space-y-1.5">
                                 <label
                                     htmlFor="branch_id"
@@ -198,7 +163,7 @@ export default function Create() {
                     {/* Section 3: Bank account details */}
                     <section className={sectionClass}>
                         <div className={sectionHeaderClass}>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                 <Wallet className="size-4" />
                             </div>
 
@@ -206,18 +171,14 @@ export default function Create() {
                                 <h2 className="text-sm font-semibold">
                                     Bank account details
                                 </h2>
-                                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                <p className="text-xs leading-4 text-muted-foreground">
                                     Enter the account identification and banking
                                     information.
                                 </p>
                             </div>
-
-                            <span className="hidden text-xs text-muted-foreground sm:block">
-                                Section 03
-                            </span>
                         </div>
 
-                        <div className="grid gap-x-5 gap-y-4 p-4 sm:grid-cols-2 sm:p-5">
+                        <div className="grid gap-x-4 gap-y-3 p-3 sm:grid-cols-2 sm:p-4">
                             <div className="min-w-0 space-y-1.5">
                                 <label
                                     htmlFor="account_name"
@@ -351,7 +312,7 @@ export default function Create() {
                     {/* Section 4: Financial controls */}
                     <section className={sectionClass}>
                         <div className={sectionHeaderClass}>
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                 <CircleDollarSign className="size-4" />
                             </div>
 
@@ -361,22 +322,18 @@ export default function Create() {
                                         ? 'Financial controls'
                                         : 'Opening balance & controls'}
                                 </h2>
-                                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                <p className="text-xs leading-4 text-muted-foreground">
                                     {editing
                                         ? 'Configure reconciliation preferences. Opening deposits are managed through bank transactions.'
                                         : 'Set the opening deposit and configure reconciliation preferences.'}
                                 </p>
                             </div>
-
-                            <span className="hidden text-xs text-muted-foreground sm:block">
-                                Section 04
-                            </span>
                         </div>
 
-                        <div className="space-y-5 p-4 sm:p-5">
+                        <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
                             {!editing && (
                                 <>
-                                    <div className="max-w-xl space-y-1.5">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="opening_balance"
                                             className={labelClass}
@@ -387,7 +344,7 @@ export default function Create() {
                                             </span>
                                         </label>
 
-                                        <div className="flex h-11 items-center rounded-lg border bg-background transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring">
+                                        <div className="flex h-9 items-center rounded-lg border bg-background transition-colors focus-within:border-ring focus-within:ring-1 focus-within:ring-ring">
                                             <div className="flex h-full items-center border-r bg-muted/40 px-3">
                                                 <span className="text-sm font-semibold text-muted-foreground">
                                                     ৳
@@ -425,7 +382,7 @@ export default function Create() {
                                         </p>
                                     </div>
 
-                                    <div className="max-w-xl space-y-1.5">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="opening_counterpart_account_id"
                                             className={labelClass}
@@ -488,7 +445,7 @@ export default function Create() {
                                 </>
                             )}
 
-                            <div className="rounded-lg border bg-muted/20 p-3.5">
+                            <div className="rounded-lg border bg-muted/20 p-3">
                                 <label
                                     htmlFor="is_reconcilable"
                                     className="flex cursor-pointer items-start gap-3"
@@ -521,7 +478,7 @@ export default function Create() {
                                 </label>
                             </div>
 
-                            <div className="max-w-xl space-y-1.5">
+                            <div className="space-y-1.5">
                                 <label htmlFor="status" className={labelClass}>
                                     Account status
                                     <span className="ml-1 text-destructive">
@@ -563,8 +520,8 @@ export default function Create() {
                     </section>
 
                     {/* Form actions */}
-                    <div className="fixed inset-x-4 bottom-0 z-30 w-auto max-w-5xl border-t bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)] md:w-[calc(100%-var(--app-sidebar-offset,0px)-3rem)]">
-                        <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="fixed inset-x-4 bottom-0 z-30 w-auto border-t bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)] md:w-[calc(100%-var(--app-sidebar-offset,0px)-3rem)]">
+                        <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-2 text-xs text-muted-foreground md:flex">
                                 <ShieldCheck className="size-4 shrink-0" />
                                 Review account details before submitting.

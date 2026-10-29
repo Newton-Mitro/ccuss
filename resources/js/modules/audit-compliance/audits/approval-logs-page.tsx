@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDateTime } from '@/lib/date_util';
 import type { Props } from '@/modules/audit-compliance/types/audits/approval-logs-page.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -174,14 +175,8 @@ export default function ApprovalLogsPage() {
                                                 className="hover:bg-muted/30"
                                             >
                                                 <td className="px-4 py-3.5 pl-5 text-xs whitespace-nowrap text-muted-foreground">
-                                                    {new Intl.DateTimeFormat(
-                                                        undefined,
-                                                        {
-                                                            dateStyle: 'medium',
-                                                            timeStyle: 'short',
-                                                        },
-                                                    ).format(
-                                                        new Date(log.acted_at),
+                                                    {formatDateTime(
+                                                        log.acted_at,
                                                     )}
                                                 </td>
                                                 <td className="max-w-80 px-4 py-3.5">

@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
+import { formatDate } from '@/lib/date_util';
 import type { ProductPolicyFormPageProps } from '@/modules/financial-services/types/financial-services';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     BadgeCheck,
@@ -23,6 +24,13 @@ import { route } from 'ziggy-js';
 const jsonValue = (value: unknown) =>
     value ? JSON.stringify(value, null, 2) : '';
 
+const formatDecimal = (value: string | number | null | undefined) => {
+    if (value == null || value === '') return '';
+
+    const number = Number(value);
+    return Number.isFinite(number) ? number.toFixed(2) : String(value);
+};
+
 export default function FinancialProductPolicyForm() {
     const {
         product,
@@ -34,12 +42,12 @@ export default function FinancialProductPolicyForm() {
             ? 'loan-product-policies'
             : 'deposit-product-policies';
     const { data, setData, post, transform, processing, errors } = useForm({
-        minimum_opening_amount: String(policy?.minimum_opening_amount ?? ''),
-        minimum_deposit_amount: String(policy?.minimum_deposit_amount ?? ''),
-        maximum_deposit_amount: String(policy?.maximum_deposit_amount ?? ''),
-        maximum_loan_amount: String(policy?.maximum_loan_amount ?? ''),
-        loan_to_value_percent: String(policy?.loan_to_value_percent ?? ''),
-        interest_rebate_percent: String(policy?.interest_rebate_percent ?? ''),
+        minimum_opening_amount: formatDecimal(policy?.minimum_opening_amount),
+        minimum_deposit_amount: formatDecimal(policy?.minimum_deposit_amount),
+        maximum_deposit_amount: formatDecimal(policy?.maximum_deposit_amount),
+        maximum_loan_amount: formatDecimal(policy?.maximum_loan_amount),
+        loan_to_value_percent: formatDecimal(policy?.loan_to_value_percent),
+        interest_rebate_percent: formatDecimal(policy?.interest_rebate_percent),
         source_url: policy?.source_url ?? '',
         source_checked_at: policy?.source_checked_at ?? '',
         effective_from: policy?.effective_from ?? '',
@@ -89,30 +97,30 @@ export default function FinancialProductPolicyForm() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Policy: ${product.name}`} />
-            <div className="mx-auto max-w-6xl space-y-6">
-                <header className="relative isolate overflow-hidden rounded-2xl border bg-card px-5 py-6 shadow-sm sm:px-8 sm:py-8">
+            <div className="mx-auto max-w-6xl space-y-4">
+                <header className="relative isolate overflow-hidden rounded-xl border bg-card px-4 py-4 shadow-sm sm:px-5 sm:py-5">
                     <div className="absolute -top-20 -right-12 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                            <ShieldCheck className="size-7" />
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                            <ShieldCheck className="size-5" />
                         </div>
-                        <div className="min-w-0 flex-1 space-y-2">
+                        <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+                                <span className="text-[11px] font-semibold tracking-[0.14em] text-primary uppercase">
                                     {family === 'loan'
                                         ? 'Lending'
                                         : 'Deposit products'}
                                 </span>
-                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                <span className="rounded-full border bg-background/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                                     {policy ? 'Policy settings' : 'New policy'}
                                 </span>
                             </div>
-                            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                                 {family === 'loan'
                                     ? 'Loan product policy'
                                     : 'Deposit product policy'}
                             </h1>
-                            <p className="text-sm leading-6 text-muted-foreground sm:text-base">
+                            <p className="text-sm leading-5 text-muted-foreground">
                                 Configure{' '}
                                 {family === 'loan'
                                     ? 'lending limits, repayment, and security requirements'
@@ -124,8 +132,8 @@ export default function FinancialProductPolicyForm() {
                                 .
                             </p>
                         </div>
-                        <div className="flex shrink-0 items-center gap-3 rounded-xl border bg-background/70 px-4 py-3">
-                            <Landmark className="size-5 text-primary" />
+                        <div className="flex shrink-0 items-center gap-2 rounded-lg border bg-background/70 px-3 py-2">
+                            <Landmark className="size-4 text-primary" />
                             <div>
                                 <p className="text-xs text-muted-foreground">
                                     Product code
@@ -137,15 +145,15 @@ export default function FinancialProductPolicyForm() {
                         </div>
                     </div>
                 </header>
-                <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+                <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
                     <form
                         onSubmit={submit}
                         className="overflow-hidden rounded-2xl border bg-card shadow-sm"
                     >
-                        <section className="space-y-5 p-5 sm:p-7">
-                            <div className="flex items-start gap-3 border-b pb-5">
-                                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                                    <SlidersHorizontal className="size-5" />
+                        <section className="space-y-4 p-4 sm:p-5">
+                            <div className="flex items-start gap-2.5 border-b pb-3">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                                    <SlidersHorizontal className="size-4" />
                                 </div>
                                 <div className="space-y-1">
                                     <h2 className="font-semibold tracking-tight">
@@ -157,7 +165,7 @@ export default function FinancialProductPolicyForm() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="max-w-sm">
+                            <div className="max-w-xs space-y-1">
                                 <Label>Accounts per customer</Label>
                                 <Select
                                     value={
@@ -190,7 +198,7 @@ export default function FinancialProductPolicyForm() {
                                     errors.customer_can_open_multiple_account
                                 }
                             />
-                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
                                 {[
                                     ...(family === 'loan'
                                         ? [
@@ -222,13 +230,30 @@ export default function FinancialProductPolicyForm() {
                                         'Interest rebate (%)',
                                     ],
                                 ].map(([field, label]) => (
-                                    <div key={field} className="space-y-2">
+                                    <div key={field} className="space-y-1">
                                         <Label>{label}</Label>
                                         <Input
-                                            type="number"
-                                            min="0"
-                                            step="0.0001"
-                                            className="h-11"
+                                            type={
+                                                field.endsWith('_amount')
+                                                    ? 'text'
+                                                    : 'number'
+                                            }
+                                            inputMode={
+                                                field.endsWith('_amount')
+                                                    ? 'decimal'
+                                                    : undefined
+                                            }
+                                            min={
+                                                field.endsWith('_amount')
+                                                    ? undefined
+                                                    : '0'
+                                            }
+                                            step={
+                                                field.endsWith('_amount')
+                                                    ? undefined
+                                                    : '0.01'
+                                            }
+                                            className="h-9"
                                             value={
                                                 data[
                                                     field as keyof typeof data
@@ -240,6 +265,23 @@ export default function FinancialProductPolicyForm() {
                                                     event.target.value as never,
                                                 )
                                             }
+                                            onBlur={() => {
+                                                const value =
+                                                    data[
+                                                        field as keyof typeof data
+                                                    ];
+                                                if (
+                                                    typeof value === 'string' &&
+                                                    value !== ''
+                                                ) {
+                                                    setData(
+                                                        field as keyof typeof data,
+                                                        formatDecimal(
+                                                            value,
+                                                        ) as never,
+                                                    );
+                                                }
+                                            }}
                                         />
                                         <InputError
                                             message={
@@ -253,10 +295,10 @@ export default function FinancialProductPolicyForm() {
                             </div>
                         </section>
 
-                        <section className="space-y-5 border-t p-5 sm:p-7">
-                            <div className="flex items-start gap-3 border-b pb-5">
-                                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                                    <Clock3 className="size-5" />
+                        <section className="space-y-4 border-t p-4 sm:p-5">
+                            <div className="flex items-start gap-2.5 border-b pb-3">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                                    <Clock3 className="size-4" />
                                 </div>
                                 <div className="space-y-1">
                                     <h2 className="font-semibold tracking-tight">
@@ -268,12 +310,12 @@ export default function FinancialProductPolicyForm() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                                <div className="space-y-2">
+                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                                <div className="space-y-1">
                                     <Label>Version</Label>
                                     <Input
                                         value={data.version}
-                                        className="h-11"
+                                        className="h-9"
                                         onChange={(event) =>
                                             setData(
                                                 'version',
@@ -283,7 +325,7 @@ export default function FinancialProductPolicyForm() {
                                     />
                                     <InputError message={errors.version} />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-1">
                                     <Label>Status</Label>
                                     <Select
                                         value={data.status}
@@ -301,7 +343,7 @@ export default function FinancialProductPolicyForm() {
                                     />
                                     <InputError message={errors.status} />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-1">
                                     <Label>Effective from</Label>
                                     <AppDatePicker
                                         value={data.effective_from}
@@ -313,7 +355,7 @@ export default function FinancialProductPolicyForm() {
                                         message={errors.effective_from}
                                     />
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-1">
                                     <Label>Effective until</Label>
                                     <AppDatePicker
                                         value={data.effective_until}
@@ -326,13 +368,13 @@ export default function FinancialProductPolicyForm() {
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <Label>Source URL</Label>
                                 <Input
                                     type="url"
                                     value={data.source_url}
                                     placeholder="https://..."
-                                    className="h-11"
+                                    className="h-9"
                                     onChange={(event) =>
                                         setData(
                                             'source_url',
@@ -342,7 +384,7 @@ export default function FinancialProductPolicyForm() {
                                 />
                                 <InputError message={errors.source_url} />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-1">
                                 <Label>Source checked at</Label>
                                 <AppDatePicker
                                     value={data.source_checked_at}
@@ -368,10 +410,10 @@ export default function FinancialProductPolicyForm() {
                             </div>
                         </section>
 
-                        <section className="space-y-5 border-t p-5 sm:p-7">
-                            <div className="flex items-start gap-3 border-b pb-5">
-                                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                                    <FileJson2 className="size-5" />
+                        <section className="space-y-4 border-t p-4 sm:p-5">
+                            <div className="flex items-start gap-2.5 border-b pb-3">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
+                                    <FileJson2 className="size-4" />
                                 </div>
                                 <div className="space-y-1">
                                     <h2 className="font-semibold tracking-tight">
@@ -383,7 +425,7 @@ export default function FinancialProductPolicyForm() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-3 md:grid-cols-2">
                                 {[
                                     ...(family === 'loan'
                                         ? [
@@ -417,10 +459,10 @@ export default function FinancialProductPolicyForm() {
                                         'Documentation requirements',
                                     ],
                                 ].map(([field, label]) => (
-                                    <div key={field} className="space-y-2">
+                                    <div key={field} className="space-y-1">
                                         <Label>{label}</Label>
                                         <textarea
-                                            className="min-h-32 w-full resize-y rounded-xl border border-input bg-background px-3.5 py-3 font-mono text-xs leading-5 shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                            className="min-h-24 w-full resize-y rounded-lg border border-input bg-background px-3 py-2 font-mono text-xs leading-5 shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                             value={
                                                 data[
                                                     field as keyof typeof data
@@ -445,7 +487,7 @@ export default function FinancialProductPolicyForm() {
                             </div>
                         </section>
 
-                        <footer className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
+                        <footer className="flex flex-col-reverse gap-2 border-t bg-muted/20 px-4 py-3 sm:flex-row sm:justify-end sm:px-5">
                             <Button asChild type="button" variant="outline">
                                 <Link href={route(`${policyRoute}.index`)}>
                                     Cancel
@@ -456,23 +498,20 @@ export default function FinancialProductPolicyForm() {
                             </Button>
                         </footer>
                     </form>
-                    <aside className="space-y-4">
-                        <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                            <div className="border-b p-5">
+                    <aside className="space-y-3">
+                        <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                            <div className="border-b px-4 py-3">
                                 <div className="flex items-center gap-2">
                                     <Sparkles className="size-4 text-primary" />
                                     <h2 className="text-sm font-semibold">
                                         Policy overview
                                     </h2>
                                 </div>
-                                <p className="mt-1 text-xs text-muted-foreground">
+                                <p className="mt-0.5 text-xs text-muted-foreground">
                                     A live summary of the current settings.
                                 </p>
                             </div>
-                            <div className="space-y-4 p-5">
-                                <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                    <ShieldCheck className="size-5" />
-                                </div>
+                            <div className="space-y-3 p-4">
                                 <div className="space-y-1">
                                     <p className="font-semibold">
                                         {product.name}
@@ -483,7 +522,7 @@ export default function FinancialProductPolicyForm() {
                                         policy
                                     </p>
                                 </div>
-                                <div className="flex items-center justify-between rounded-xl bg-muted/50 px-3.5 py-3">
+                                <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
                                     <span className="text-xs text-muted-foreground">
                                         Policy version
                                     </span>
@@ -491,12 +530,14 @@ export default function FinancialProductPolicyForm() {
                                         {data.version || 'Not set'}
                                     </span>
                                 </div>
-                                <div className="flex items-center justify-between rounded-xl bg-muted/50 px-3.5 py-3">
+                                <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2">
                                     <span className="text-xs text-muted-foreground">
                                         Effective from
                                     </span>
                                     <span className="text-sm font-semibold">
-                                        {data.effective_from || 'Not set'}
+                                        {data.effective_from
+                                            ? formatDate(data.effective_from)
+                                            : 'Not set'}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
@@ -505,7 +546,7 @@ export default function FinancialProductPolicyForm() {
                                 </div>
                             </div>
                         </section>
-                        <section className="rounded-2xl border border-primary/15 bg-primary/[0.035] p-5">
+                        <section className="rounded-xl border border-primary/15 bg-primary/[0.035] p-4">
                             <div className="flex items-center gap-2 text-sm font-semibold">
                                 <Check className="size-4 text-primary" />
                                 Helpful reminders

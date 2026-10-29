@@ -7,6 +7,7 @@ import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import { formatDateTime } from '@/lib/date_util';
 import type { Props } from '@/modules/treasury-cash/types/cheques/payments/show.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
@@ -242,9 +243,7 @@ export default function ChequePaymentReview() {
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title={`Cheque ${payment.cheque.cheque_no}`}
-                        description={`${payment.financial_account.account_no} · Received ${new Date(
-                            payment.created_at,
-                        ).toLocaleString()}`}
+                        description={`${payment.financial_account.account_no} · Received ${formatDateTime(payment.created_at)}`}
                     />
                     <div className="flex flex-col gap-2 empty:hidden sm:flex-row sm:items-center">
                         <StatusBadge tone={tone}>
@@ -949,9 +948,9 @@ export default function ChequePaymentReview() {
                                                 </div>
 
                                                 <time className="shrink-0 text-[11px] text-muted-foreground">
-                                                    {new Date(
+                                                    {formatDateTime(
                                                         event.created_at,
-                                                    ).toLocaleString()}
+                                                    )}
                                                 </time>
                                             </div>
 

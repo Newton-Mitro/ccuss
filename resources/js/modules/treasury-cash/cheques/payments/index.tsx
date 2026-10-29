@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import { formatDate } from '@/lib/date_util';
 import type { Props } from '@/modules/treasury-cash/types/cheques/payments/index.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
@@ -218,9 +219,7 @@ export default function ChequePaymentQueue() {
                                                     '-'}
                                             </td>
                                             <td className="px-3 py-3">
-                                                {new Date(
-                                                    payment.created_at,
-                                                ).toLocaleDateString()}
+                                                {formatDate(payment.created_at)}
                                             </td>
                                             <td className="px-3 py-3 text-right">
                                                 <Link

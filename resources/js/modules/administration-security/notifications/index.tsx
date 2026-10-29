@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDateTime } from '@/lib/date_util';
 import type {
     NotificationItem,
     Props,
@@ -191,9 +192,9 @@ export default function NotificationIndex() {
                                                 </span>
 
                                                 <time className="shrink-0 text-[10px] text-muted-foreground sm:pt-0.5">
-                                                    {new Date(
+                                                    {formatDateTime(
                                                         notification.created_at,
-                                                    ).toLocaleString()}
+                                                    )}
                                                 </time>
                                             </span>
 

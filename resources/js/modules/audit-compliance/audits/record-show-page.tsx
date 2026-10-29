@@ -2,6 +2,7 @@ import HeadingSmall from '@/components/heading-small';
 import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatDate, formatDateTime } from '@/lib/date_util';
 import type { Props } from '@/modules/audit-compliance/types/audits/record-show-page.interfaces';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -35,9 +36,7 @@ function statusTone(status: string) {
 
 function prettyDate(date: string | null) {
     if (!date) return 'Not set';
-    return new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-    }).format(new Date(`${date.slice(0, 10)}T00:00:00`));
+    return formatDate(date);
 }
 
 export default function RecordShowPage({
@@ -232,14 +231,8 @@ export default function RecordShowPage({
                                                     </span>
                                                 </div>
                                                 <span className="text-xs text-muted-foreground">
-                                                    {new Intl.DateTimeFormat(
-                                                        undefined,
-                                                        {
-                                                            dateStyle: 'medium',
-                                                            timeStyle: 'short',
-                                                        },
-                                                    ).format(
-                                                        new Date(log.acted_at),
+                                                    {formatDateTime(
+                                                        log.acted_at,
                                                     )}
                                                 </span>
                                             </div>

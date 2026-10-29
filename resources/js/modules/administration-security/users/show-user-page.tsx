@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import { useInitials } from '@/hooks/use-initials';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import type { BreadcrumbItem } from '@/types';
+import { formatDateTime, formatDate as formatHumanDate } from '@/lib/date_util';
 import type { Permission } from '@/modules/administration-security/types/user';
+import type { Props } from '@/modules/administration-security/types/users/show-user-page.interfaces';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -29,18 +31,9 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { route } from 'ziggy-js';
-import type { Props } from '@/modules/administration-security/types/users/show-user-page.interfaces';
-
 
 function formatDate(value?: string | null, withTime = false): string {
-    if (!value) return '—';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '—';
-
-    return new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-        ...(withTime ? { timeStyle: 'short' as const } : {}),
-    }).format(date);
+    return withTime ? formatDateTime(value) : formatHumanDate(value);
 }
 
 function groupPermissions(permissions: Permission[]) {

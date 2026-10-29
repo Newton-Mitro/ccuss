@@ -354,7 +354,7 @@ export default function OpeningBalancesCreate() {
                                         Total entered
                                     </span>
                                     <span className="font-semibold tabular-nums">
-                                        {totalAmount.toLocaleString(undefined, {
+                                        {totalAmount.toLocaleString('en-BD', {
                                             minimumFractionDigits: 2,
                                             maximumFractionDigits: 2,
                                         })}

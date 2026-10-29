@@ -5,26 +5,28 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 import type { FinancialProductFormPageProps } from '@/modules/financial-services/types/financial-services';
+import type { ProductTermData } from '@/modules/financial-services/types/products/form.types';
+import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     BadgePercent,
     Banknote,
     Check,
     FileText,
-    Percent,
-    Sparkles,
+    Plus,
+    Settings2,
+    Trash2,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import type { ProductTermData } from '@/modules/financial-services/types/products/form.types';
-
 
 export default function FinancialProductForm() {
     const { product, family = '' } =
         usePage<FinancialProductFormPageProps>().props;
+
     const productRoute =
         family === 'loan' ? 'loan-products' : 'deposit-products';
+
     const categories =
         family === 'loan'
             ? ['LOAN']
@@ -38,7 +40,10 @@ export default function FinancialProductForm() {
                     'LOAN',
                     'OTHER',
                 ];
+
     const editing = Boolean(product);
+    const isLoan = family === 'loan';
+
     const { data, setData, post, put, transform, processing, errors } =
         useForm<{
             code: string;
@@ -54,8 +59,7 @@ export default function FinancialProductForm() {
         }>({
             code: product?.code ?? '',
             name: product?.name ?? '',
-            category:
-                product?.category ?? (family === 'loan' ? 'LOAN' : 'SAVINGS'),
+            category: product?.category ?? (isLoan ? 'LOAN' : 'SAVINGS'),
             balance_type: product?.balance_type ?? 'LIABILITY',
             interest_calculation: product?.interest_calculation ?? 'NONE',
             interest_frequency: product?.interest_frequency ?? 'NONE',
@@ -102,12 +106,27 @@ export default function FinancialProductForm() {
             status: product?.status ?? true,
         });
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Financial Services', href: '' },
+        {
+            title: isLoan
+                ? 'Loan Products'
+                : family === 'deposit'
+                  ? 'Deposit Products'
+                  : 'Products',
+            href: route(`${productRoute}.index`),
+        },
+        { title: editing ? 'Edit Product' : 'New Product', href: '' },
+    ];
+
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
+
         transform((formData) => {
-            if (family === 'loan') {
+            if (isLoan) {
                 const loanData = { ...formData };
                 Reflect.deleteProperty(loanData, 'terms');
+
                 return {
                     ...loanData,
                     category: 'LOAN',
@@ -120,26 +139,13 @@ export default function FinancialProductForm() {
                 base_interest_rate: formData.terms[0]?.interest_rate ?? '0',
             };
         });
+
         if (editing) {
             put(route(`${productRoute}.update`, product!.id));
         } else {
             post(route(`${productRoute}.store`));
         }
     };
-
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Financial Services', href: '' },
-        {
-            title:
-                family === 'loan'
-                    ? 'Loan Products'
-                    : family === 'deposit'
-                      ? 'Deposit Products'
-                      : 'Products',
-            href: route(`${productRoute}.index`),
-        },
-        { title: editing ? 'Edit Product' : 'New Product', href: '' },
-    ];
 
     const updateTerm = <K extends keyof ProductTermData>(
         index: number,
@@ -154,73 +160,137 @@ export default function FinancialProductForm() {
         );
     };
 
+    const addTerm = () => {
+        const number = data.terms.length + 1;
+
+        setData('terms', [
+            ...data.terms,
+            {
+                code: `TERM-${number}`,
+                name: `Term ${number}`,
+                tenure_value: '12',
+                tenure_unit: 'MONTH',
+                interest_rate: '0',
+                interest_calculation: data.interest_calculation,
+                interest_frequency: data.interest_frequency,
+                minimum_amount: '',
+                maximum_amount: '',
+                status: true,
+                effective_from: '',
+                effective_until: '',
+            },
+        ]);
+    };
+
+    const removeTerm = (index: number) => {
+        setData(
+            'terms',
+            data.terms.filter((_, termIndex) => termIndex !== index),
+        );
+    };
+
+    const calculationOptions = [
+        'NONE',
+        'SIMPLE',
+        'COMPOUND',
+        'FLAT',
+        'REDUCING_BALANCE',
+    ].map((value) => ({
+        value,
+        label: value.replaceAll('_', ' '),
+    }));
+
+    const frequencyOptions = [
+        'NONE',
+        'DAILY',
+        'MONTHLY',
+        'QUARTERLY',
+        'HALF_YEARLY',
+        'YEARLY',
+        'MATURITY',
+    ].map((value) => ({
+        value,
+        label: value.replaceAll('_', ' '),
+    }));
+
+    const tenureOptions = ['DAY', 'WEEK', 'MONTH', 'QUARTER', 'YEAR'].map(
+        (value) => ({ value, label: value }),
+    );
+
+    const fieldClass = 'h-10 min-w-0 text-sm';
+    const labelClass = 'text-sm font-medium';
+
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head
-                title={
-                    editing
-                        ? `Edit ${family === 'loan' ? 'Loan' : 'Financial'} Product`
-                        : `New ${family === 'loan' ? 'Loan' : 'Financial'} Product`
-                }
+                title={`${editing ? 'Edit' : 'New'} ${isLoan ? 'Loan' : 'Financial'} Product`}
             />
-            <div className="mx-auto max-w-6xl space-y-6">
-                <header className="space-y-3 py-2">
-                    <div className="flex flex-col gap-4">
+
+            <div className="mx-auto w-full max-w-6xl min-w-0 space-y-6 pb-8">
+                <header className="relative overflow-hidden rounded-2xl border bg-card px-5 py-5 shadow-sm sm:px-8 sm:py-7">
+                    <div className="pointer-events-none absolute -top-20 right-8 size-56 rounded-full bg-primary/[0.07] blur-3xl" />
+                    <div className="relative flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                         <div className="min-w-0 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                                    {family === 'loan'
-                                        ? 'Lending'
-                                        : 'Financial products'}
+                                    {isLoan ? 'Lending' : 'Deposit products'}
                                 </span>
-                                <span className="rounded-full px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
                                     {editing ? 'Edit product' : 'New setup'}
                                 </span>
                             </div>
-                            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
                                 {editing
-                                    ? `Edit ${family === 'loan' ? 'loan' : 'financial'} product`
-                                    : `Create a ${family === 'loan' ? 'loan' : 'financial'} product`}
+                                    ? `Edit ${isLoan ? 'loan' : 'financial'} product`
+                                    : `Create ${isLoan ? 'loan' : 'financial'} product`}
                             </h1>
                             <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                                {family === 'loan'
-                                    ? 'Set up the product details and interest terms used to create consistent loan offers.'
-                                    : 'Define the product rules used when financial accounts are opened.'}
+                                {isLoan
+                                    ? 'Configure lending rules, interest rates and product availability.'
+                                    : 'Configure product details, account terms and eligibility rules.'}
                             </p>
                         </div>
+                        <span
+                            className={`inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium ${
+                                data.status
+                                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                    : 'bg-muted text-muted-foreground'
+                            }`}
+                        >
+                            <span className="size-1.5 rounded-full bg-current" />
+                            {data.status ? 'Active' : 'Inactive'}
+                        </span>
                     </div>
                 </header>
-                <div
+
+                <form
+                    onSubmit={submit}
                     className={
-                        family === 'loan'
-                            ? 'grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]'
-                            : ''
+                        isLoan
+                            ? 'space-y-6'
+                            : 'grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]'
                     }
                 >
-                    <form
-                        onSubmit={submit}
-                        className="overflow-hidden rounded-2xl border bg-card shadow-sm"
-                    >
-                        <section className="space-y-6 p-5 sm:p-7">
-                            <div className="flex items-start gap-3 border-b pb-5">
-                                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                                    <FileText className="size-5" />
-                                </div>
-                                <div className="space-y-1">
-                                    <h2 className="font-semibold tracking-tight">
-                                        Product details
-                                    </h2>
-                                    <p className="text-sm text-muted-foreground">
-                                        {family === 'loan'
-                                            ? 'Give this loan product a recognizable identity and define its core settings.'
-                                            : 'Define the product information and account-opening rules.'}
-                                    </p>
-                                </div>
+                    <div className="min-w-0 space-y-6">
+                        {/* Product details */}
+                        <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                            <div className="flex items-center gap-3 border-b bg-muted/20 px-5 py-4">
+                                <FileText className="size-4 text-primary" />
+                                <h2 className="font-semibold">
+                                    Product details
+                                </h2>
+                                <span className="hidden text-sm text-muted-foreground sm:inline">
+                                    Identity and accounting configuration
+                                </span>
                             </div>
-                            <div className="grid gap-x-5 gap-y-6 sm:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="financial-product-code">
-                                        Code
+
+                            <div className="grid gap-x-5 gap-y-5 p-5 sm:grid-cols-2 sm:p-7 lg:grid-cols-3">
+                                <div className="min-w-0 space-y-2">
+                                    <Label
+                                        htmlFor="financial-product-code"
+                                        className={labelClass}
+                                    >
+                                        Product code
                                     </Label>
                                     <Input
                                         id="financial-product-code"
@@ -232,13 +302,17 @@ export default function FinancialProductForm() {
                                             )
                                         }
                                         placeholder="e.g. PERSONAL-LOAN"
-                                        className="h-11"
+                                        className={fieldClass}
                                     />
                                     <InputError message={errors.code} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="financial-product-name">
-                                        Name
+
+                                <div className="min-w-0 space-y-2">
+                                    <Label
+                                        htmlFor="financial-product-name"
+                                        className={labelClass}
+                                    >
+                                        Product name
                                     </Label>
                                     <Input
                                         id="financial-product-name"
@@ -247,12 +321,15 @@ export default function FinancialProductForm() {
                                             setData('name', event.target.value)
                                         }
                                         placeholder="e.g. Personal Loan"
-                                        className="h-11"
+                                        className={fieldClass}
                                     />
                                     <InputError message={errors.name} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Category</Label>
+
+                                <div className="min-w-0 space-y-2">
+                                    <Label className={labelClass}>
+                                        Category
+                                    </Label>
                                     <Select
                                         value={data.category}
                                         onChange={(value) =>
@@ -262,10 +339,15 @@ export default function FinancialProductForm() {
                                             value,
                                             label: value.replaceAll('_', ' '),
                                         }))}
+                                        className={fieldClass}
                                     />
+                                    <InputError message={errors.category} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Balance type</Label>
+
+                                <div className="min-w-0 space-y-2">
+                                    <Label className={labelClass}>
+                                        Balance type
+                                    </Label>
                                     <Select
                                         value={data.balance_type}
                                         onChange={(value) =>
@@ -279,10 +361,15 @@ export default function FinancialProductForm() {
                                             value,
                                             label: value,
                                         }))}
+                                        className={fieldClass}
                                     />
+                                    <InputError message={errors.balance_type} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Interest calculation</Label>
+
+                                <div className="min-w-0 space-y-2">
+                                    <Label className={labelClass}>
+                                        Interest calculation
+                                    </Label>
                                     <Select
                                         value={data.interest_calculation}
                                         onChange={(value) =>
@@ -291,456 +378,584 @@ export default function FinancialProductForm() {
                                                 value,
                                             )
                                         }
-                                        options={[
-                                            'NONE',
-                                            'SIMPLE',
-                                            'COMPOUND',
-                                            'FLAT',
-                                            'REDUCING_BALANCE',
-                                        ].map((value) => ({
-                                            value,
-                                            label: value.replaceAll('_', ' '),
-                                        }))}
+                                        options={calculationOptions}
+                                        className={fieldClass}
+                                    />
+                                    <InputError
+                                        message={errors.interest_calculation}
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Interest frequency</Label>
+
+                                <div className="min-w-0 space-y-2">
+                                    <Label className={labelClass}>
+                                        Interest frequency
+                                    </Label>
                                     <Select
                                         value={data.interest_frequency}
                                         onChange={(value) =>
                                             setData('interest_frequency', value)
                                         }
-                                        options={[
-                                            'NONE',
-                                            'DAILY',
-                                            'MONTHLY',
-                                            'QUARTERLY',
-                                            'HALF_YEARLY',
-                                            'YEARLY',
-                                            'MATURITY',
-                                        ].map((value) => ({
-                                            value,
-                                            label: value.replaceAll('_', ' '),
-                                        }))}
+                                        options={frequencyOptions}
+                                        className={fieldClass}
+                                    />
+                                    <InputError
+                                        message={errors.interest_frequency}
                                     />
                                 </div>
                             </div>
                         </section>
-                        {family === 'loan' && (
-                            <section className="space-y-5 border-t p-5 sm:p-7">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                        <Percent className="size-5" />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <h2 className="font-semibold tracking-tight">
-                                            Interest settings
-                                        </h2>
-                                        <p className="text-sm text-muted-foreground">
-                                            Define how interest is calculated
-                                            and applied to this loan.
+
+                        {/* Loan interest settings */}
+                        {isLoan && (
+                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                                <div className="flex items-center gap-3 border-b bg-muted/20 px-5 py-4">
+                                    <BadgePercent className="size-4 text-primary" />
+                                    <h2 className="font-semibold">
+                                        Loan interest settings
+                                    </h2>
+                                </div>
+
+                                <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7 lg:grid-cols-3">
+                                    <div className="min-w-0 space-y-2">
+                                        <Label
+                                            htmlFor="loan-interest-rate"
+                                            className={labelClass}
+                                        >
+                                            Annual interest rate (%)
+                                        </Label>
+                                        <div className="relative">
+                                            <Input
+                                                id="loan-interest-rate"
+                                                type="number"
+                                                min="0"
+                                                step="0.000001"
+                                                value={data.interest_rate}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'interest_rate',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="0.00"
+                                                className={`${fieldClass} pr-8`}
+                                            />
+                                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-xs text-muted-foreground">
+                                                %
+                                            </span>
+                                        </div>
+                                        <InputError
+                                            message={errors.interest_rate}
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Yearly rate used for loan interest
+                                            calculations.
                                         </p>
                                     </div>
-                                </div>
-                                <div className="max-w-sm space-y-2">
-                                    <Label htmlFor="loan-interest-rate">
-                                        Annual interest rate
-                                    </Label>
-                                    <div className="relative">
-                                        <Input
-                                            id="loan-interest-rate"
-                                            type="number"
-                                            min="0"
-                                            step="0.000001"
-                                            value={data.interest_rate}
-                                            onChange={(event) =>
-                                                setData(
-                                                    'interest_rate',
-                                                    event.target.value,
-                                                )
-                                            }
-                                            placeholder="0.00"
-                                            className="h-11 pr-12"
-                                        />
-                                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-sm font-medium text-muted-foreground">
-                                            %
-                                        </span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        Set the yearly rate used for loan
-                                        interest calculations.
-                                    </p>
                                 </div>
                             </section>
                         )}
-                        {family !== 'loan' && (
-                            <section className="space-y-4 border-t p-5 sm:p-7">
-                                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-                                    <div>
-                                        <h2 className="font-semibold">
-                                            Product terms
-                                        </h2>
-                                        <p className="text-sm text-muted-foreground">
-                                            Configure the tenure and interest
-                                            choices shown when an account is
-                                            opened.
-                                        </p>
+
+                        {/* Deposit terms */}
+                        {!isLoan && (
+                            <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                                <div className="flex flex-col gap-3 border-b bg-muted/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                                    <div className="flex items-center gap-3">
+                                        <Settings2 className="size-5 text-primary" />
+                                        <div>
+                                            <h2 className="font-semibold">
+                                                Product terms
+                                            </h2>
+                                            <p className="text-sm text-muted-foreground">
+                                                Configure tenure, interest,
+                                                amount limits and validity.
+                                            </p>
+                                        </div>
+                                        <span className="rounded-md border bg-background px-2.5 py-1 text-xs font-medium tabular-nums">
+                                            {data.terms.length} total
+                                        </span>
                                     </div>
+
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() =>
-                                            setData('terms', [
-                                                ...data.terms,
-                                                {
-                                                    code: `TERM-${data.terms.length + 1}`,
-                                                    name: `Term ${data.terms.length + 1}`,
-                                                    tenure_value: '12',
-                                                    tenure_unit: 'MONTH',
-                                                    interest_rate: '0',
-                                                    interest_calculation:
-                                                        data.interest_calculation,
-                                                    interest_frequency:
-                                                        data.interest_frequency,
-                                                    minimum_amount: '',
-                                                    maximum_amount: '',
-                                                    status: true,
-                                                    effective_from: '',
-                                                    effective_until: '',
-                                                },
-                                            ])
-                                        }
+                                        size="sm"
+                                        onClick={addTerm}
+                                        className="h-9"
                                     >
+                                        <Plus className="mr-1.5 size-4" />
                                         Add term
                                     </Button>
                                 </div>
-                                {data.terms.map((term, index) => (
-                                    <fieldset
-                                        key={term.id ?? `${term.code}-${index}`}
-                                        className="space-y-3 rounded-xl border bg-muted/20 p-4"
-                                    >
-                                        <div className="flex items-center justify-between">
-                                            <legend className="font-medium">
-                                                {term.name ||
-                                                    `Term ${index + 1}`}
-                                            </legend>
-                                            {term.code !== 'BASE' && (
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() =>
-                                                        setData(
-                                                            'terms',
-                                                            data.terms.filter(
-                                                                (
-                                                                    _,
-                                                                    termIndex,
-                                                                ) =>
-                                                                    termIndex !==
+
+                                <div className="space-y-4 p-5 sm:p-7">
+                                    {data.terms.map((term, index) => (
+                                        <fieldset
+                                            key={
+                                                term.id ??
+                                                `${term.code}-${index}`
+                                            }
+                                            className="min-w-0 rounded-xl border bg-muted/20 p-4 shadow-xs sm:p-5"
+                                        >
+                                            <div className="flex items-center justify-between gap-3 border-b pb-3">
+                                                <div className="flex min-w-0 items-center gap-2">
+                                                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">
+                                                        {index + 1}
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <legend className="max-w-full truncate text-sm font-semibold">
+                                                            {term.name ||
+                                                                `Term ${index + 1}`}
+                                                        </legend>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {term.code} ·{' '}
+                                                            {term.tenure_value ||
+                                                                '0'}{' '}
+                                                            {term.tenure_unit.toLowerCase()}{' '}
+                                                            ·{' '}
+                                                            {term.interest_rate ||
+                                                                '0'}
+                                                            % interest
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex shrink-0 items-center gap-2">
+                                                    <span
+                                                        className={`rounded-md px-2.5 py-1 text-xs font-medium ${
+                                                            term.status
+                                                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                                                : 'bg-muted text-muted-foreground'
+                                                        }`}
+                                                    >
+                                                        {term.status
+                                                            ? 'Active'
+                                                            : 'Inactive'}
+                                                    </span>
+
+                                                    {term.code !== 'BASE' && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-8 text-muted-foreground hover:text-destructive"
+                                                            aria-label={`Remove ${term.name || `term ${index + 1}`}`}
+                                                            onClick={() =>
+                                                                removeTerm(
                                                                     index,
-                                                            ),
-                                                        )
-                                                    }
-                                                >
-                                                    Remove term
-                                                </Button>
-                                            )}
+                                                                )
+                                                            }
+                                                        >
+                                                            <Trash2 className="size-4" />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <Input
+                                                type="hidden"
+                                                name={`terms.${index}.id`}
+                                                value={term.id ?? ''}
+                                            />
+
+                                            <div className="grid gap-x-4 gap-y-4 pt-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                                <div className="min-w-0 space-y-2">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Term code
+                                                    </Label>
+                                                    <Input
+                                                        className={fieldClass}
+                                                        value={term.code}
+                                                        readOnly={
+                                                            term.code === 'BASE'
+                                                        }
+                                                        onChange={(event) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'code',
+                                                                event.target.value.toUpperCase(),
+                                                            )
+                                                        }
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.code`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-2">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Term name
+                                                    </Label>
+                                                    <Input
+                                                        className={fieldClass}
+                                                        value={term.name}
+                                                        onChange={(event) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'name',
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.name`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-2">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Tenure value
+                                                    </Label>
+                                                    <Input
+                                                        type="number"
+                                                        min="1"
+                                                        className={fieldClass}
+                                                        value={
+                                                            term.tenure_value
+                                                        }
+                                                        onChange={(event) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'tenure_value',
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.tenure_value`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-2">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Tenure unit
+                                                    </Label>
+                                                    <Select
+                                                        className={fieldClass}
+                                                        value={term.tenure_unit}
+                                                        onChange={(value) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'tenure_unit',
+                                                                value,
+                                                            )
+                                                        }
+                                                        options={tenureOptions}
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.tenure_unit`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-2">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Annual interest rate (%)
+                                                    </Label>
+                                                    <div className="relative">
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            step="0.000001"
+                                                            className={`${fieldClass} pr-7`}
+                                                            value={
+                                                                term.interest_rate
+                                                            }
+                                                            onChange={(event) =>
+                                                                updateTerm(
+                                                                    index,
+                                                                    'interest_rate',
+                                                                    event.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                        />
+                                                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-xs text-muted-foreground">
+                                                            %
+                                                        </span>
+                                                    </div>
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.interest_rate`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-2">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Interest calculation
+                                                    </Label>
+                                                    <Select
+                                                        className={fieldClass}
+                                                        value={
+                                                            term.interest_calculation
+                                                        }
+                                                        onChange={(value) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'interest_calculation',
+                                                                value,
+                                                            )
+                                                        }
+                                                        options={
+                                                            calculationOptions
+                                                        }
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.interest_calculation`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-2">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Interest frequency
+                                                    </Label>
+                                                    <Select
+                                                        className={fieldClass}
+                                                        value={
+                                                            term.interest_frequency
+                                                        }
+                                                        onChange={(value) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'interest_frequency',
+                                                                value,
+                                                            )
+                                                        }
+                                                        options={
+                                                            frequencyOptions
+                                                        }
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.interest_frequency`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-2">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Minimum amount
+                                                    </Label>
+                                                    <Input
+                                                        type="number"
+                                                        min="0"
+                                                        className={fieldClass}
+                                                        value={
+                                                            term.minimum_amount ??
+                                                            ''
+                                                        }
+                                                        onChange={(event) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'minimum_amount',
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                        placeholder="No minimum"
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.minimum_amount`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-1">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Maximum amount
+                                                    </Label>
+                                                    <Input
+                                                        type="number"
+                                                        min="0"
+                                                        className={fieldClass}
+                                                        value={
+                                                            term.maximum_amount ??
+                                                            ''
+                                                        }
+                                                        onChange={(event) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'maximum_amount',
+                                                                event.target
+                                                                    .value,
+                                                            )
+                                                        }
+                                                        placeholder="No maximum"
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.maximum_amount`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-1">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Effective from
+                                                    </Label>
+                                                    <AppDatePicker
+                                                        className={fieldClass}
+                                                        value={
+                                                            term.effective_from ??
+                                                            ''
+                                                        }
+                                                        onChange={(value) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'effective_from',
+                                                                value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.effective_from`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="min-w-0 space-y-1">
+                                                    <Label
+                                                        className={labelClass}
+                                                    >
+                                                        Effective until
+                                                    </Label>
+                                                    <AppDatePicker
+                                                        className={fieldClass}
+                                                        value={
+                                                            term.effective_until ??
+                                                            ''
+                                                        }
+                                                        onChange={(value) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'effective_until',
+                                                                value,
+                                                            )
+                                                        }
+                                                    />
+                                                    <InputError
+                                                        message={
+                                                            errors[
+                                                                `terms.${index}.effective_until`
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <label className="flex min-h-10 cursor-pointer items-center gap-2 self-end rounded-lg border bg-background px-3 py-2 text-sm hover:bg-muted/30">
+                                                    <Input
+                                                        type="checkbox"
+                                                        checked={term.status}
+                                                        onChange={(event) =>
+                                                            updateTerm(
+                                                                index,
+                                                                'status',
+                                                                event.target
+                                                                    .checked,
+                                                            )
+                                                        }
+                                                        className="size-3.5"
+                                                    />
+                                                    <span className="font-medium">
+                                                        Active term
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </fieldset>
+                                    ))}
+
+                                    {data.terms.length === 0 && (
+                                        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed px-4 py-8 text-center">
+                                            <Settings2 className="mb-2 size-7 text-muted-foreground" />
+                                            <p className="text-sm font-medium">
+                                                No product terms
+                                            </p>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                Add a term to define tenure and
+                                                interest options.
+                                            </p>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                className="mt-3"
+                                                onClick={addTerm}
+                                            >
+                                                <Plus className="mr-1.5 size-3.5" />
+                                                Add first term
+                                            </Button>
                                         </div>
-                                        <Input
-                                            type="hidden"
-                                            name={`terms.${index}.id`}
-                                            value={term.id ?? ''}
-                                        />
-                                        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                            <div>
-                                                <Label>Code</Label>
-                                                <Input
-                                                    value={term.code}
-                                                    readOnly={
-                                                        term.code === 'BASE'
-                                                    }
-                                                    onChange={(event) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'code',
-                                                            event.target.value.toUpperCase(),
-                                                        )
-                                                    }
-                                                />
-                                                <InputError
-                                                    message={
-                                                        errors[
-                                                            `terms.${index}.code`
-                                                        ]
-                                                    }
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Name</Label>
-                                                <Input
-                                                    value={term.name}
-                                                    onChange={(event) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'name',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                />
-                                                <InputError
-                                                    message={
-                                                        errors[
-                                                            `terms.${index}.name`
-                                                        ]
-                                                    }
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Tenure</Label>
-                                                <Input
-                                                    type="number"
-                                                    min="1"
-                                                    value={term.tenure_value}
-                                                    onChange={(event) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'tenure_value',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                />
-                                                <InputError
-                                                    message={
-                                                        errors[
-                                                            `terms.${index}.tenure_value`
-                                                        ]
-                                                    }
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Tenure unit</Label>
-                                                <Select
-                                                    value={term.tenure_unit}
-                                                    onChange={(value) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'tenure_unit',
-                                                            value,
-                                                        )
-                                                    }
-                                                    options={[
-                                                        'DAY',
-                                                        'WEEK',
-                                                        'MONTH',
-                                                        'QUARTER',
-                                                        'YEAR',
-                                                    ].map((value) => ({
-                                                        value,
-                                                        label: value,
-                                                    }))}
-                                                />
-                                                <InputError
-                                                    message={
-                                                        errors[
-                                                            `terms.${index}.tenure_unit`
-                                                        ]
-                                                    }
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>
-                                                    Annual interest rate (%)
-                                                </Label>
-                                                <Input
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.000001"
-                                                    value={term.interest_rate}
-                                                    onChange={(event) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'interest_rate',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                />
-                                                <InputError
-                                                    message={
-                                                        errors[
-                                                            `terms.${index}.interest_rate`
-                                                        ]
-                                                    }
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>
-                                                    Interest calculation
-                                                </Label>
-                                                <Select
-                                                    value={
-                                                        term.interest_calculation
-                                                    }
-                                                    onChange={(value) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'interest_calculation',
-                                                            value,
-                                                        )
-                                                    }
-                                                    options={[
-                                                        'NONE',
-                                                        'SIMPLE',
-                                                        'COMPOUND',
-                                                        'FLAT',
-                                                        'REDUCING_BALANCE',
-                                                    ].map((value) => ({
-                                                        value,
-                                                        label: value.replaceAll(
-                                                            '_',
-                                                            ' ',
-                                                        ),
-                                                    }))}
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>
-                                                    Interest frequency
-                                                </Label>
-                                                <Select
-                                                    value={
-                                                        term.interest_frequency
-                                                    }
-                                                    onChange={(value) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'interest_frequency',
-                                                            value,
-                                                        )
-                                                    }
-                                                    options={[
-                                                        'NONE',
-                                                        'DAILY',
-                                                        'MONTHLY',
-                                                        'QUARTERLY',
-                                                        'HALF_YEARLY',
-                                                        'YEARLY',
-                                                        'MATURITY',
-                                                    ].map((value) => ({
-                                                        value,
-                                                        label: value.replaceAll(
-                                                            '_',
-                                                            ' ',
-                                                        ),
-                                                    }))}
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Minimum amount</Label>
-                                                <Input
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.0001"
-                                                    value={
-                                                        term.minimum_amount ??
-                                                        ''
-                                                    }
-                                                    onChange={(event) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'minimum_amount',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                />
-                                                <InputError
-                                                    message={
-                                                        errors[
-                                                            `terms.${index}.minimum_amount`
-                                                        ]
-                                                    }
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Maximum amount</Label>
-                                                <Input
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.0001"
-                                                    value={
-                                                        term.maximum_amount ??
-                                                        ''
-                                                    }
-                                                    onChange={(event) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'maximum_amount',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                />
-                                                <InputError
-                                                    message={
-                                                        errors[
-                                                            `terms.${index}.maximum_amount`
-                                                        ]
-                                                    }
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Effective from</Label>
-                                                <AppDatePicker
-                                                    value={
-                                                        term.effective_from ??
-                                                        ''
-                                                    }
-                                                    onChange={(value) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'effective_from',
-                                                            value,
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Effective until</Label>
-                                                <AppDatePicker
-                                                    value={
-                                                        term.effective_until ??
-                                                        ''
-                                                    }
-                                                    onChange={(value) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'effective_until',
-                                                            value,
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                            <label className="flex items-center gap-2 text-sm">
-                                                <Input
-                                                    type="checkbox"
-                                                    checked={term.status}
-                                                    onChange={(event) =>
-                                                        updateTerm(
-                                                            index,
-                                                            'status',
-                                                            event.target
-                                                                .checked,
-                                                        )
-                                                    }
-                                                />
-                                                Active term
-                                            </label>
-                                        </div>
-                                    </fieldset>
-                                ))}
+                                    )}
+
+                                    <InputError message={errors.terms} />
+                                </div>
                             </section>
                         )}
-                        <footer className="flex flex-col gap-5 border-t bg-muted/20 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <label className="flex cursor-pointer items-start gap-3 rounded-xl border bg-background p-3.5 text-sm transition hover:bg-muted/50">
+
+                        {/* Availability and account rules */}
+                        <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                            <div className="flex items-center gap-3 border-b bg-muted/20 px-5 py-4">
+                                <Check className="size-4 text-primary" />
+                                <h2 className="font-semibold">
+                                    Availability & account rules
+                                </h2>
+                            </div>
+
+                            <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-7">
+                                <label className="flex cursor-pointer items-center gap-3 rounded-xl border bg-background px-4 py-3.5 text-sm transition-colors hover:bg-muted/30">
                                     <Input
                                         type="checkbox"
                                         checked={data.status}
@@ -750,18 +965,29 @@ export default function FinancialProductForm() {
                                                 event.target.checked,
                                             )
                                         }
-                                        className="mt-0.5"
+                                        className="size-4"
                                     />
-                                    <span className="space-y-1">
-                                        <span className="block font-medium">
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block text-sm font-semibold">
                                             Active product
                                         </span>
-                                        <span className="block text-xs leading-5 text-muted-foreground">
-                                            Available for new loan applications.
+                                        <span className="block text-xs text-muted-foreground">
+                                            Make this product available for new
+                                            applications.
                                         </span>
                                     </span>
+                                    <span
+                                        className={`rounded-md px-2 py-1 text-[10px] font-medium ${
+                                            data.status
+                                                ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                                : 'bg-muted text-muted-foreground'
+                                        }`}
+                                    >
+                                        {data.status ? 'Enabled' : 'Disabled'}
+                                    </span>
                                 </label>
-                                <label className="flex cursor-pointer items-start gap-3 rounded-xl border bg-background p-3.5 text-sm transition hover:bg-muted/50">
+
+                                <label className="flex cursor-pointer items-center gap-3 rounded-xl border bg-background px-4 py-3.5 text-sm transition-colors hover:bg-muted/30">
                                     <Input
                                         type="checkbox"
                                         checked={
@@ -773,75 +999,132 @@ export default function FinancialProductForm() {
                                                 event.target.checked,
                                             )
                                         }
-                                        className="mt-0.5"
+                                        className="size-4"
                                     />
-                                    <span className="space-y-1">
-                                        <span className="block font-medium">
-                                            Multiple accounts
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block text-sm font-semibold">
+                                            Multiple accounts per customer
                                         </span>
-                                        <span className="block text-xs leading-5 text-muted-foreground">
-                                            Allow customers to open more than
-                                            one.
+                                        <span className="block text-xs text-muted-foreground">
+                                            Allow a customer to open more than
+                                            one account.
                                         </span>
                                     </span>
                                 </label>
+                            </div>
+
+                            <div className="px-5 pb-5 sm:px-7 sm:pb-7">
                                 <InputError
                                     message={
                                         errors.customer_can_open_multiple_account
                                     }
                                 />
+                                <InputError message={errors.status} />
                             </div>
-                            <div className="flex flex-col-reverse gap-2 sm:flex-row">
-                                <Button asChild type="button" variant="outline">
-                                    <Link href={route(`${productRoute}.index`)}>
-                                        Cancel
-                                    </Link>
-                                </Button>
-                                <Button type="submit" disabled={processing}>
-                                    {processing
-                                        ? 'Saving...'
-                                        : editing
-                                          ? 'Save changes'
-                                          : 'Create product'}
-                                </Button>
-                            </div>
-                        </footer>
-                    </form>
-                    {family === 'loan' && (
-                        <aside className="space-y-4">
+                        </section>
+                    </div>
+
+                    {!isLoan && (
+                        <aside className="space-y-4 lg:sticky lg:top-6">
                             <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                <div className="border-b p-5">
-                                    <div className="flex items-center gap-2">
-                                        <Sparkles className="size-4 text-primary" />
-                                        <h2 className="text-sm font-semibold">
-                                            Loan product preview
-                                        </h2>
+                                <div className="border-b bg-muted/20 px-5 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                            <Banknote className="size-5" />
+                                        </span>
+                                        <div>
+                                            <h2 className="font-semibold">
+                                                Product preview
+                                            </h2>
+                                            <p className="text-xs text-muted-foreground">
+                                                Live account offer summary
+                                            </p>
+                                        </div>
                                     </div>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        A quick overview of your product setup.
-                                    </p>
                                 </div>
+
                                 <div className="space-y-4 p-5">
-                                    <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                        <Banknote className="size-5" />
-                                    </div>
                                     <div className="space-y-1">
-                                        <p className="font-semibold break-words">
-                                            {data.name || 'Loan product name'}
+                                        <p className="text-lg font-semibold tracking-tight">
+                                            {data.name || 'Product name'}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-sm text-muted-foreground">
                                             {data.code || 'PRODUCT-CODE'}
                                         </p>
                                     </div>
-                                    <div className="flex items-center justify-between rounded-xl bg-muted/50 px-3.5 py-3">
+
+                                    <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 px-3.5 py-3">
+                                        <span className="text-xs text-muted-foreground">
+                                            Category
+                                        </span>
+                                        <span className="text-right text-sm font-medium">
+                                            {data.category.replaceAll('_', ' ')}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 px-3.5 py-3">
                                         <span className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <BadgePercent className="size-4" />
                                             Annual interest
                                         </span>
-                                        <span className="font-semibold tabular-nums">
-                                            {data.interest_rate || '0.00'}%
+                                        <span className="text-sm font-semibold tabular-nums">
+                                            {data.terms[0]?.interest_rate ||
+                                                '0'}
+                                            %
                                         </span>
                                     </div>
+
+                                    <div className="flex items-center justify-between gap-3 rounded-xl bg-muted/50 px-3.5 py-3">
+                                        <span className="text-xs text-muted-foreground">
+                                            Available terms
+                                        </span>
+                                        <span className="text-sm font-semibold tabular-nums">
+                                            {data.terms.length}
+                                        </span>
+                                    </div>
+
+                                    {data.terms.length > 0 && (
+                                        <div className="space-y-2 border-t pt-4">
+                                            <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                                Term options
+                                            </p>
+                                            {data.terms.map((term, index) => (
+                                                <div
+                                                    key={
+                                                        term.id ??
+                                                        `${term.code}-${index}`
+                                                    }
+                                                    className="flex items-center justify-between gap-3 text-sm"
+                                                >
+                                                    <span className="min-w-0 truncate">
+                                                        {term.name ||
+                                                            `Term ${index + 1}`}
+                                                    </span>
+                                                    <span className="shrink-0 text-xs text-muted-foreground">
+                                                        {term.tenure_value ||
+                                                            '0'}{' '}
+                                                        {term.tenure_unit.toLowerCase()}
+                                                        {' · '}
+                                                        {term.interest_rate ||
+                                                            '0'}
+                                                        %
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center justify-between gap-3 text-xs">
+                                        <span className="text-muted-foreground">
+                                            Multiple accounts
+                                        </span>
+                                        <span className="font-medium">
+                                            {data.customer_can_open_multiple_account
+                                                ? 'Allowed'
+                                                : 'Not allowed'}
+                                        </span>
+                                    </div>
+
                                     <div
                                         className={`flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium ${
                                             data.status
@@ -857,34 +1140,61 @@ export default function FinancialProductForm() {
                                             }`}
                                         />
                                         {data.status
-                                            ? 'Active for new applications'
+                                            ? 'Available for new accounts'
                                             : 'Currently unavailable'}
                                     </div>
                                 </div>
                             </section>
+
                             <section className="rounded-2xl border border-primary/15 bg-primary/[0.035] p-5">
-                                <div className="flex items-center gap-2 text-sm font-semibold">
-                                    <Check className="size-4 text-primary" />
+                                <p className="text-sm font-semibold">
                                     Before you save
-                                </div>
-                                <ul className="mt-3 space-y-2.5 text-xs leading-5 text-muted-foreground">
-                                    <li>
-                                        Choose a unique code staff can quickly
-                                        recognize.
-                                    </li>
-                                    <li>
-                                        Verify the interest method and rate
-                                        match your lending policy.
-                                    </li>
-                                    <li>
-                                        Set the product active when it is ready
-                                        to be offered.
-                                    </li>
-                                </ul>
+                                </p>
+                                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                    Confirm the account terms, interest
+                                    settings, and availability match your
+                                    approved product rules.
+                                </p>
                             </section>
                         </aside>
                     )}
-                </div>
+
+                    <footer className="flex flex-col gap-4 rounded-2xl border bg-muted/20 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:col-span-2">
+                        <div className="min-w-0">
+                            <p className="truncate text-sm font-medium">
+                                {editing
+                                    ? 'Ready to update product'
+                                    : 'Ready to create product'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {isLoan
+                                    ? 'Review the lending configuration before saving.'
+                                    : `${data.terms.length} product ${data.terms.length === 1 ? 'term' : 'terms'} configured.`}
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                            <Button
+                                asChild
+                                type="button"
+                                variant="outline"
+                                disabled={processing}
+                            >
+                                <Link href={route(`${productRoute}.index`)}>
+                                    Cancel
+                                </Link>
+                            </Button>
+
+                            <Button type="submit" disabled={processing}>
+                                {processing
+                                    ? 'Saving...'
+                                    : editing
+                                      ? 'Save changes'
+                                      : 'Create product'}
+                            </Button>
+                        </div>
+                    </footer>
+                </form>
             </div>
         </CustomAuthLayout>
     );

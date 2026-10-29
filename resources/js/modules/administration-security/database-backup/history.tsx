@@ -9,22 +9,23 @@ import {
 import { useEffect } from 'react';
 import { route } from 'ziggy-js';
 
+import DataTablePagination from '@/components/data-table-pagination';
 import HeadingSmall from '@/components/heading-small';
+import { Input } from '@/components/ui/input';
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { appSwal } from '@/lib/appSwal';
+import { formatDateTime } from '@/lib/date_util';
 import type {
     BackupHistoryPageProps,
     BackupLog,
 } from '@/modules/administration-security/types/page-props';
-import DataTablePagination from '@/components/data-table-pagination';
-import { Input } from '@/components/ui/input';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import { appSwal } from '@/lib/appSwal';
 import { BreadcrumbItem } from '@/types';
 
 export default function History() {
@@ -169,15 +170,13 @@ export default function History() {
                                             )}
                                         </td>
                                         <td className="px-2 py-1">
-                                            {new Date(
-                                                log.started_at,
-                                            ).toLocaleString()}
+                                            {formatDateTime(log.started_at)}
                                         </td>
                                         <td className="px-2 py-1">
                                             {log.completed_at
-                                                ? new Date(
+                                                ? formatDateTime(
                                                       log.completed_at,
-                                                  ).toLocaleString()
+                                                  )
                                                 : '-'}
                                         </td>
 

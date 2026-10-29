@@ -234,7 +234,7 @@ export default function CashDenominationsIndex() {
                                                             'en-BD',
                                                             {
                                                                 minimumFractionDigits: 2,
-                                                                maximumFractionDigits: 4,
+                                                                maximumFractionDigits: 2,
                                                             },
                                                         )}
                                                     </div>

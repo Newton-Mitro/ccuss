@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 
 import HeadingSmall from '@/components/heading-small';
@@ -581,15 +582,7 @@ export default function RecurringDepositAccountCreate() {
                                             Estimated total deposits
                                         </p>
                                         <p className="mt-1 text-2xl font-semibold tracking-tight break-words tabular-nums">
-                                            {estimatedTotal.toLocaleString(
-                                                'en-BD',
-                                                {
-                                                    style: 'currency',
-                                                    currency: 'BDT',
-                                                    minimumFractionDigits: 2,
-                                                    maximumFractionDigits: 2,
-                                                },
-                                            )}
+                                            {formatBDTCurrency(estimatedTotal)}
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
                                             Excludes interest, fees, and
@@ -603,13 +596,8 @@ export default function RecurringDepositAccountCreate() {
                                                 Installment
                                             </span>
                                             <span className="text-right text-sm font-medium tabular-nums">
-                                                {installmentAmount.toLocaleString(
-                                                    'en-BD',
-                                                    {
-                                                        style: 'currency',
-                                                        currency: 'BDT',
-                                                        maximumFractionDigits: 4,
-                                                    },
+                                                {formatBDTCurrency(
+                                                    installmentAmount,
                                                 )}
                                             </span>
                                         </div>
