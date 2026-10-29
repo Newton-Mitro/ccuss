@@ -20,7 +20,7 @@ export const financialServices: SidebarItem[] = [
             },
             {
                 name: 'Finincial Accounts',
-                icon: <i className="fa-solid fa-list" />,
+                icon: <i className="fa-solid fa-seedling" />,
                 path: '/all-financial-accounts',
                 match_path: 'all-financial-accounts',
                 permission: ['financial.accounts.view'],

@@ -12,7 +12,7 @@ import { route } from 'ziggy-js';
 export const sidebarMenu: SidebarItem[] = [
     {
         name: 'Dashboard',
-        icon: <i className="fa-solid fa-house" />,
+        icon: <i className="fa-solid fa-gauge-high" />,
         path: route('dashboard'),
         match_path: 'dashboard',
     },

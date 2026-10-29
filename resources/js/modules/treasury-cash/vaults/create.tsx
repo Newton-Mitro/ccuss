@@ -10,7 +10,6 @@ import {
     Info,
     Landmark,
     ShieldCheck,
-    Vault as VaultIcon,
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
@@ -79,36 +78,6 @@ export default function Create({ vault, branch_locked = false }: any) {
                                 : 'Set up a secure branch cash location with clearly defined holding limits.'
                         }
                     />
-                </div>
-
-                {/* Overview */}
-                <div className="overflow-hidden rounded-xl border bg-card">
-                    <div className="flex items-start gap-4 p-4 sm:p-5">
-                        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border bg-muted/50">
-                            <VaultIcon className="size-6 text-primary" />
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <h2 className="text-base font-semibold tracking-tight">
-                                    {editing
-                                        ? 'Vault configuration'
-                                        : 'New vault setup'}
-                                </h2>
-
-                                <span className="inline-flex items-center gap-1 rounded-full border bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                                    <ShieldCheck className="size-3.5" />
-                                    Treasury & Cash
-                                </span>
-                            </div>
-
-                            <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                                {editing
-                                    ? 'Review the vault details and update its operational settings.'
-                                    : 'Define the vault identity and configure its maximum permitted balance.'}
-                            </p>
-                        </div>
-                    </div>
                 </div>
 
                 <form onSubmit={submit} className="space-y-4">
