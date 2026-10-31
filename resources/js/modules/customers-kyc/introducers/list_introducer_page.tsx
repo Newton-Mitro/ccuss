@@ -79,10 +79,12 @@ export default function IntroducersIndex() {
 
             <div className="space-y-4">
                 {/* Header */}
-                <HeadingSmall
-                    title="Introducers"
-                    description="Manage customer introducers."
-                />
+                <div data-slot="customer-page-header">
+                    <HeadingSmall
+                        title="Introducers"
+                        description="Manage customer introducers."
+                    />
+                </div>
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

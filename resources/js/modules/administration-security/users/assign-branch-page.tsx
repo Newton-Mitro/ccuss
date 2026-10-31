@@ -1,3 +1,8 @@
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/select';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -10,15 +15,8 @@ import {
     UserCircle2,
 } from 'lucide-react';
 import { route } from 'ziggy-js';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/select';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
-
 
 import type { Props } from '@/modules/administration-security/types/users/assign-branch-page.interfaces';
-
 
 export default function AssignBranchPage() {
     const { user, branches } = usePage<Props>().props;
@@ -57,17 +55,11 @@ export default function AssignBranchPage() {
             <div className="mx-auto max-w-6xl space-y-6 pb-8">
                 <header className="relative isolate overflow-hidden rounded-2xl border bg-card shadow-sm">
                     <div className="absolute -top-24 right-8 -z-10 size-72 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="flex flex-col gap-5 p-5 sm:p-8 md:flex-row md:items-center">
-                        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                            <GitBranch className="size-7" />
-                        </div>
+                    <div className="flex flex-col gap-5 md:flex-row md:items-center">
                         <div className="min-w-0 flex-1 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                     User administration
-                                </span>
-                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                                    Branch assignment
                                 </span>
                             </div>
                             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">

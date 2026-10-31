@@ -1,4 +1,5 @@
 import InputError from '@/components/input-error';
+import AppDatePicker from '@/components/ui/app_date_picker';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
@@ -129,14 +130,12 @@ export default function CutoverImport() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="cutover_date">Cutover date</Label>
-                            <input
+                            <AppDatePicker
                                 id="cutover_date"
-                                type="date"
                                 value={data.cutover_date}
-                                onChange={(event) =>
-                                    setData('cutover_date', event.target.value)
+                                onChange={(value) =>
+                                    setData('cutover_date', value)
                                 }
-                                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                             />
                             <InputError message={errors.cutover_date} />
                         </div>
@@ -299,7 +298,10 @@ export default function CutoverImport() {
                         <InputError message={errors.file} />
                     </section>
 
-                    <footer className="flex justify-end border-t pt-5">
+                    <footer
+                        data-slot="form-actions"
+                        className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end"
+                    >
                         <Button
                             type="submit"
                             disabled={

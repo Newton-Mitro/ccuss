@@ -16,7 +16,7 @@ export function Breadcrumbs({
     breadcrumbs: BreadcrumbItemType[];
 }) {
     return (
-        <>
+        <div className="hidden md:block">
             {breadcrumbs.length > 0 && (
                 <Breadcrumb>
                     <BreadcrumbList>
@@ -44,6 +44,6 @@ export function Breadcrumbs({
                     </BreadcrumbList>
                 </Breadcrumb>
             )}
-        </>
+        </div>
     );
 }

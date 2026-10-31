@@ -6,6 +6,10 @@ use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
 use App\TreasuryAndCash\Models\BranchDay;
+use App\TreasuryAndCash\Models\CashLocation;
+use App\TreasuryAndCash\Models\Teller;
+use App\TreasuryAndCash\Models\TellerCashTransaction;
+use App\TreasuryAndCash\Models\TellerSession;
 
 function grantBranchDayPermission(User $user): void
 {
@@ -142,6 +146,83 @@ it('opens and closes a branch day for the authenticated users branch', function 
         ->and($branchDay->fresh()->closed_by)->toBe($user->id)
         ->and($branchDay->fresh()->closing_note)->toBe('Day closed')
         ->and($branchDay->fresh()->closed_at)->not->toBeNull();
+});
+
+it('blocks closing a branch day until its sessions and pending cash transactions are settled', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+    $branchDay = BranchDay::create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'business_date' => '2026-09-18',
+        'status' => BranchDay::STATUS_OPEN,
+        'opened_at' => now(),
+        'opened_by' => $user->id,
+    ]);
+    $location = CashLocation::create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+        'code' => 'BRANCH-DAY-CLOSE-TELLER',
+        'name' => 'Branch Day Close Teller',
+        'type' => 'TELLER',
+        'is_active' => true,
+    ]);
+    $teller = Teller::create([
+        'cash_location_id' => $location->id,
+        'user_id' => $user->id,
+        'code' => 'BRANCH-DAY-CLOSE-001',
+        'name' => 'Branch Day Close Teller',
+        'status' => 'ACTIVE',
+    ]);
+    $session = TellerSession::create([
+        'branch_day_id' => $branchDay->id,
+        'teller_id' => $teller->id,
+        'opened_by' => $user->id,
+        'status' => 'OPEN',
+        'opening_cash' => 100,
+        'opened_at' => now(),
+    ]);
+    $service = app(\App\TreasuryAndCash\Application\BranchDayService::class);
+
+    grantBranchDayLifecyclePermissions($user);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->from(route('branch-days.index'))
+        ->post(route('branch-days.close', $branchDay), [])
+        ->assertRedirect(route('branch-days.index'))
+        ->assertSessionHas('error', fn (string $message) => str_contains(
+            $message,
+            '1 open teller session',
+        ));
+
+    expect($branchDay->fresh()->status)->toBe(BranchDay::STATUS_OPEN);
+
+    expect(fn () => $service->close($branchDay, $user->id))
+        ->toThrow(RuntimeException::class, '1 open teller session');
+
+    $session->update(['status' => 'CLOSED']);
+    $transaction = TellerCashTransaction::create([
+        'branch_day_id' => $branchDay->id,
+        'cash_location_id' => $location->id,
+        'teller_session_id' => $session->id,
+        'transaction_no' => 'BRANCH-DAY-PENDING-001',
+        'type' => 'DEPOSIT',
+        'amount' => 25,
+        'status' => 'PENDING',
+    ]);
+
+    expect(fn () => $service->close($branchDay, $user->id))
+        ->toThrow(RuntimeException::class, '1 pending teller transaction');
+
+    $transaction->update(['status' => 'POSTED']);
+
+    expect($service->close($branchDay, $user->id)->status)
+        ->toBe(BranchDay::STATUS_CLOSED);
 });
 
 it('redirects with an error when opening a branch day without a branch assignment', function () {

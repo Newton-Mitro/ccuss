@@ -42,7 +42,6 @@ import {
     Phone,
     Trash2,
     UserRound,
-    Users,
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { route } from 'ziggy-js';
@@ -187,12 +186,11 @@ const Edit = ({ customer }: CustomerPageProps) => {
 
             <div className="mx-auto w-full max-w-400 space-y-5 pb-28">
                 {/* Page Header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div className="flex items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
-                            <Users className="size-5" />
-                        </div>
-
                         <div className="min-w-0 space-y-1">
                             <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                                 Edit Customer
@@ -961,7 +959,10 @@ const Edit = ({ customer }: CustomerPageProps) => {
                     </aside>
 
                     {/* Sticky Actions */}
-                    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background shadow-lg md:left-[var(--app-sidebar-offset,0px)]">
+                    <div
+                        data-slot="page-action-bar"
+                        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background shadow-lg"
+                    >
                         <div className="mx-auto flex w-full max-w-400 flex-col-reverse gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                             <p className="hidden text-xs text-muted-foreground md:block">
                                 Review the updated information before saving.

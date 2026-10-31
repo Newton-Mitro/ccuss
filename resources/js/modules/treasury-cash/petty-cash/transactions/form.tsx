@@ -369,10 +369,11 @@ export default function Form() {
                         </section>
 
                         {/* Submission actions */}
-                        <div
-                            className={`fixed inset-x-4 bottom-0 z-30 border-t bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)] md:w-[calc(100%-var(--app-sidebar-offset,0px)-3rem)] ${isFunding ? 'md:max-w-7xl' : 'md:max-w-4xl'}`}
-                        >
-                            <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="fixed inset-x-4 bottom-0 z-30 border-t bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)] md:w-[calc(100%-var(--app-sidebar-offset,0px)-3.25rem)]">
+                            <div
+                                data-slot="form-actions"
+                                className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                            >
                                 <div className="flex min-w-0 items-start gap-2">
                                     <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                                     <p className="text-xs leading-5 text-muted-foreground">

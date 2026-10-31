@@ -88,10 +88,12 @@ export default function FamilyRelationIndex() {
 
             <div className="space-y-4 text-foreground">
                 {/* Header */}
-                <HeadingSmall
-                    title="Family Relations"
-                    description="Manage family and relative relationships."
-                />
+                <div data-slot="customer-page-header">
+                    <HeadingSmall
+                        title="Family Relations"
+                        description="Manage family and relative relationships."
+                    />
+                </div>
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

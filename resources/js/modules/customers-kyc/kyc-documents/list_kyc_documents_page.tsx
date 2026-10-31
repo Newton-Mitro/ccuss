@@ -81,10 +81,12 @@ export default function KycDocumentsIndex() {
 
             <div className="space-y-4">
                 {/* Header */}
-                <HeadingSmall
-                    title="KYC Documents"
-                    description="Manage customer verification documents."
-                />
+                <div data-slot="customer-page-header">
+                    <HeadingSmall
+                        title="KYC Documents"
+                        description="Manage customer verification documents."
+                    />
+                </div>
 
                 {/* Filters */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

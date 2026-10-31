@@ -255,7 +255,10 @@ export default function MemberOpeningBalanceImport() {
                         row prevents all changes.
                     </div>
 
-                    <footer className="flex justify-end border-t pt-5">
+                    <footer
+                        data-slot="form-actions"
+                        className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end"
+                    >
                         <Button
                             type="submit"
                             disabled={processing || !data.file}

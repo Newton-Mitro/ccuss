@@ -389,7 +389,10 @@ export default function SavingsAccountCreate() {
                         </div>
 
                         {/* Form actions */}
-                        <div className="sticky bottom-0 z-20 flex flex-col-reverse gap-2 border-t bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                        <div
+                            data-slot="page-sticky-action-bar"
+                            className="sticky bottom-0 z-20 flex flex-col-reverse gap-2 border-t bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                        >
                             <Button
                                 asChild
                                 type="button"

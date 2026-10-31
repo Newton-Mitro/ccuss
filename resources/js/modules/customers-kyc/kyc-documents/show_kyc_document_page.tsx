@@ -101,9 +101,15 @@ const Show = () => {
 
             <div className="mx-auto w-full max-w-420 space-y-6 pb-8">
                 {/* Page heading */}
-                <div className="flex flex-col gap-5 rounded-2xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-5 rounded-2xl border border-border bg-linear-to-br from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6"
+                >
                     <div className="flex min-w-0 items-start gap-4">
-                        <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+                        <div
+                            data-slot="customer-page-header-icon"
+                            className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm"
+                        >
                             <ShieldCheck className="size-6" />
                         </div>
                         <div className="min-w-0 space-y-2">

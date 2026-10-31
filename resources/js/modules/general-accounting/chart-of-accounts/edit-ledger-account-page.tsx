@@ -452,40 +452,6 @@ export default function Edit({
                                 )}
                             </section>
                         </div>
-
-                        {/* Sticky form actions */}
-                        <div className="sticky bottom-0 z-10 flex flex-col-reverse gap-3 border-t border-border bg-card/95 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                            <p className="text-xs leading-relaxed text-muted-foreground">
-                                Review your changes before saving.
-                            </p>
-
-                            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                                <Button
-                                    variant="outline"
-                                    type="button"
-                                    asChild
-                                    className="w-full sm:w-auto"
-                                >
-                                    <Link href={route('ledger-accounts.index')}>
-                                        Cancel
-                                    </Link>
-                                </Button>
-
-                                <Button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="w-full sm:w-auto"
-                                >
-                                    {processing ? (
-                                        <LoaderCircle className="mr-2 size-4 animate-spin" />
-                                    ) : (
-                                        <Check className="mr-2 size-4" />
-                                    )}
-
-                                    {processing ? 'Saving...' : 'Save changes'}
-                                </Button>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Preview sidebar */}
@@ -653,6 +619,43 @@ export default function Edit({
                             </div>
                         </section>
                     </aside>
+
+                    {/* Sticky form actions */}
+                    <div
+                        data-slot="page-sticky-action-bar"
+                        className="sticky bottom-0 z-10 flex flex-col-reverse gap-3 border-t border-border bg-card/95 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6 xl:col-span-full"
+                    >
+                        <p className="text-xs leading-relaxed text-muted-foreground">
+                            Review your changes before saving.
+                        </p>
+
+                        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                            <Button
+                                variant="outline"
+                                type="button"
+                                asChild
+                                className="w-full sm:w-auto"
+                            >
+                                <Link href={route('ledger-accounts.index')}>
+                                    Cancel
+                                </Link>
+                            </Button>
+
+                            <Button
+                                type="submit"
+                                disabled={processing}
+                                className="w-full sm:w-auto"
+                            >
+                                {processing ? (
+                                    <LoaderCircle className="mr-2 size-4 animate-spin" />
+                                ) : (
+                                    <Check className="mr-2 size-4" />
+                                )}
+
+                                {processing ? 'Saving...' : 'Save changes'}
+                            </Button>
+                        </div>
+                    </div>
                 </form>
             </div>
         </CustomAuthLayout>

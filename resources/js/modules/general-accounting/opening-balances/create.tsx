@@ -296,7 +296,10 @@ export default function OpeningBalancesCreate() {
                             </div>
                         </section>
 
-                        <footer className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
+                        <footer
+                            data-slot="form-actions"
+                            className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-5 py-4 sm:flex-row sm:justify-end sm:px-7"
+                        >
                             <Button asChild variant="outline">
                                 <a href={route('opening-balances.index')}>
                                     Cancel

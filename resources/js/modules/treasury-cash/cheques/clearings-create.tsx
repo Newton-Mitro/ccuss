@@ -256,7 +256,10 @@ export default function CreateChequeClearing({
                             </div>
                         </section>
 
-                        <div className="sticky bottom-0 flex flex-col-reverse gap-2 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur sm:flex-row sm:justify-end">
+                        <div
+                            data-slot="page-sticky-action-bar"
+                            className="sticky bottom-0 flex flex-col-reverse gap-2 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur sm:flex-row sm:justify-end"
+                        >
                             <Button
                                 asChild
                                 variant="outline"

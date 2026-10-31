@@ -567,7 +567,10 @@ export default function FixedDepositAccountCreate() {
                     </div>
 
                     {/* Form actions */}
-                    <div className="sticky bottom-0 z-10 flex flex-col-reverse gap-2 border-t bg-card/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div
+                        data-slot="page-sticky-action-bar"
+                        className="sticky bottom-0 z-10 flex flex-col-reverse gap-2 border-t bg-card/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+                    >
                         <Button asChild type="button" variant="outline">
                             <Link
                                 href={route('financial-accounts.fixed.index')}

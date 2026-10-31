@@ -84,9 +84,15 @@ const Edit = () => {
 
             <div className="w-full space-y-3 pb-24">
                 {/* Compact page header */}
-                <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div className="flex min-w-0 items-center gap-2.5">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+                        <div
+                            data-slot="customer-page-header-icon"
+                            className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary"
+                        >
                             <MapPin className="size-4.5" />
                         </div>
 
@@ -441,7 +447,10 @@ const Edit = () => {
                     </div>
 
                     {/* Sticky form actions */}
-                    <div className="fixed right-0 bottom-0 left-(--app-sidebar-offset) z-30 border-t border-border bg-background/95 px-3 py-2.5 backdrop-blur-md sm:static sm:rounded-lg sm:border sm:bg-card sm:px-3 sm:py-2.5 sm:backdrop-blur-none">
+                    <div
+                        data-slot="mobile-page-action-bar"
+                        className="fixed right-0 bottom-0 left-(--app-sidebar-offset) z-30 border-t border-border bg-background/95 px-3 py-2.5 backdrop-blur-md sm:static sm:rounded-lg sm:border sm:bg-card sm:px-3 sm:py-2.5 sm:backdrop-blur-none"
+                    >
                         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden text-xs text-muted-foreground md:block">
                                 Review the address details before saving.

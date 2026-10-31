@@ -76,10 +76,12 @@ export default function AddressIndex() {
             <Head title="Addresses" />
 
             <div className="space-y-4 text-foreground">
-                <HeadingSmall
-                    title="Addresses"
-                    description="Review and approve customer addresses."
-                />
+                <div data-slot="customer-page-header">
+                    <HeadingSmall
+                        title="Addresses"
+                        description="Review and approve customer addresses."
+                    />
+                </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="w-60">
@@ -118,7 +120,7 @@ export default function AddressIndex() {
                                                             'customers.show',
                                                             address.customer_id,
                                                         )}
-                                                        className="block truncate font-medium text-primary hover:underline"
+                                                        className="block truncate font-medium text-foreground hover:text-primary hover:underline"
                                                     >
                                                         {address.customer
                                                             ?.name ?? 'Unknown'}
@@ -204,7 +206,7 @@ export default function AddressIndex() {
                                                         'customers.show',
                                                         address.customer_id,
                                                     )}
-                                                    className="text-primary hover:underline"
+                                                    className="font-medium text-foreground hover:text-primary hover:underline"
                                                 >
                                                     {address.customer?.name ??
                                                         'Unknown'}

@@ -1,4 +1,12 @@
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { UserFormPageProps } from '@/modules/administration-security/types/page-props';
+import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
@@ -11,18 +19,9 @@ import {
     ShieldCheck,
     Sparkles,
     UserRound,
-    Users,
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 
 const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
     useFlashToastHandler();
@@ -166,19 +165,11 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
             <div className="w-full max-w-none space-y-4 pb-6">
                 <header className="relative isolate overflow-hidden rounded-xl border bg-card shadow-sm">
                     <div className="absolute -top-24 right-8 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="flex flex-col gap-3 p-4 sm:p-5 md:flex-row md:items-center">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                            <Users className="size-5" />
-                        </div>
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center">
                         <div className="min-w-0 flex-1 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-[11px] font-semibold tracking-[0.14em] text-primary uppercase">
                                     User administration
-                                </span>
-                                <span className="rounded-full border bg-background/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                                    {isEdit
-                                        ? 'Profile settings'
-                                        : 'New account'}
                                 </span>
                             </div>
                             <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
@@ -457,7 +448,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                 </div>
                                 <div className="space-y-3 p-4">
                                     {allRoles.length ? (
-                                        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                                        <div className="flex flex-wrap gap-2">
                                             {allRoles.map((role) => {
                                                 const selected =
                                                     data.roles.includes(
@@ -466,7 +457,7 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                 return (
                                                     <label
                                                         key={role.id}
-                                                        className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 transition ${
+                                                        className={`inline-flex max-w-full cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 transition ${
                                                             selected
                                                                 ? 'border-primary/40 bg-primary/5'
                                                                 : 'hover:bg-muted/50'
@@ -494,16 +485,10 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                                                           ),
                                                                 )
                                                             }
-                                                            className="mt-0.5 size-4"
+                                                            className="size-4 shrink-0"
                                                         />
-                                                        <span className="min-w-0 space-y-1">
-                                                            <span className="block text-sm font-medium">
-                                                                {role.name}
-                                                            </span>
-                                                            <span className="block text-xs leading-5 text-muted-foreground">
-                                                                {role.description ||
-                                                                    'Role-based access for this account.'}
-                                                            </span>
+                                                        <span className="text-sm font-medium break-words">
+                                                            {role.name}
                                                         </span>
                                                     </label>
                                                 );

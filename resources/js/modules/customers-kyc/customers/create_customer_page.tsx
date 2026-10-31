@@ -165,9 +165,15 @@ const Create = () => {
 
             <div className="mx-auto w-full max-w-400 space-y-5 pb-28">
                 {/* Page header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div className="flex items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
+                        <div
+                            data-slot="customer-page-header-icon"
+                            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary"
+                        >
                             <Users className="size-5" />
                         </div>
 
@@ -895,7 +901,10 @@ const Create = () => {
                     </aside>
 
                     {/* Sticky form actions */}
-                    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background shadow-lg md:left-[var(--app-sidebar-offset,0px)]">
+                    <div
+                        data-slot="page-action-bar"
+                        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background shadow-lg"
+                    >
                         <div className="mx-auto flex w-full max-w-400 flex-col-reverse gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                             <p className="hidden text-xs text-muted-foreground md:block">
                                 Review the customer details before submitting.

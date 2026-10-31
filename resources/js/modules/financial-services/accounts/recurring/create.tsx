@@ -671,7 +671,10 @@ export default function RecurringDepositAccountCreate() {
                     </div>
 
                     {/* Form actions */}
-                    <div className="sticky bottom-0 z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
+                    <div
+                        data-slot="page-sticky-action-bar"
+                        className="sticky bottom-0 z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6"
+                    >
                         <div className="mx-auto flex max-w-screen-xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-2 text-xs text-muted-foreground md:flex">
                                 <FileText className="size-3.5" />

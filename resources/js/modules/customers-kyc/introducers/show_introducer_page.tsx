@@ -88,9 +88,15 @@ export default function ShowIntroducer() {
 
             <div className="w-full space-y-4 pb-6">
                 {/* Page heading */}
-                <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                        <div
+                            data-slot="customer-page-header-icon"
+                            className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary"
+                        >
                             <GitBranch className="size-5" />
                         </div>
 

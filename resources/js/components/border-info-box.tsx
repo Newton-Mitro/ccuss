@@ -12,7 +12,9 @@ export function BorderInfoBox({
             className={`rounded-md border border-border p-3 ${className || ''}`}
         >
             <p className="text-xs text-muted-foreground">{label}</p>
-            <p className="text-sm font-medium">{value || '—'}</p>
+            <p className="min-w-0 text-sm font-medium break-words">
+                {value || '—'}
+            </p>
         </div>
     );
 }

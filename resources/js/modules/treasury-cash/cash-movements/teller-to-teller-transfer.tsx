@@ -568,8 +568,11 @@ export default function TellerToTellerTransfer() {
                         </section>
 
                         {/* Sticky actions */}
-                        <div className="sticky bottom-0 z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6">
-                            <div className="mx-auto flex max-w-5xl flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div
+                            data-slot="page-action-bar"
+                            className="fixed bottom-0 z-30 border-t bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+                        >
+                            <div className="flex w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <p className="flex items-center gap-2 text-xs text-muted-foreground">
                                     <CheckCircle2 className="size-4 shrink-0" />
                                     Transfer will be created as pending.

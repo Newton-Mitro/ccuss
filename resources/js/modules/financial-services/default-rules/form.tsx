@@ -616,7 +616,10 @@ export default function DefaultRuleForm() {
                         </aside>
                     </div>
 
-                    <footer className="flex flex-col-reverse gap-3 rounded-xl border bg-muted/20 px-4 py-3 sm:flex-row sm:justify-end sm:px-5">
+                    <footer
+                        data-slot="form-actions"
+                        className="flex flex-col-reverse gap-3 rounded-xl border bg-muted/20 px-4 py-3 sm:flex-row sm:justify-end sm:px-5"
+                    >
                         <Button asChild variant="outline">
                             <Link href={route('account-default-rules.index')}>
                                 Cancel

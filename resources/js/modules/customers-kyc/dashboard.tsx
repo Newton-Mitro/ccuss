@@ -71,7 +71,10 @@ export default function Dashboard() {
 
             <div className="space-y-5 text-foreground">
                 {/* Header */}
-                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
+                >
                     <HeadingSmall
                         title="Customer & KYC"
                         description="Customer onboarding, records, and verification activities."

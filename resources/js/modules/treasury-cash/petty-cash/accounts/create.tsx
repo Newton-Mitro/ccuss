@@ -657,7 +657,10 @@ export default function CreatePettyCashAccount() {
                     </div>
 
                     {/* Form actions */}
-                    <div className="fixed inset-x-4 bottom-0 z-30 border-t bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:right-6 md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)]">
+                    <div
+                        data-slot="page-action-bar"
+                        className="fixed inset-x-4 bottom-0 z-30 border-t bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+                    >
                         <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-1.5 text-xs text-muted-foreground md:flex">
                                 <ShieldCheck className="size-3.5" />

@@ -79,14 +79,17 @@ export default function FinancialAccountEdit() {
                             />
                         </div>
                     </div>
-                    <div className="flex justify-end gap-2 border-t pt-3">
+                    <footer
+                        data-slot="form-actions"
+                        className="flex flex-col-reverse gap-2 border-t pt-3 sm:flex-row sm:justify-end"
+                    >
                         <Button asChild type="button" variant="outline">
                             <Link href={showHref}>Cancel</Link>
                         </Button>
                         <Button type="submit" disabled={processing}>
                             Save changes
                         </Button>
-                    </div>
+                    </footer>
                 </form>
             </div>
         </CustomAuthLayout>

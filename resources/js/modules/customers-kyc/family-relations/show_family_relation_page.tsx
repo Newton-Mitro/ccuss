@@ -96,9 +96,15 @@ export default function ShowFamilyRelation() {
 
             <div className="w-full space-y-4 pb-6">
                 {/* Page header */}
-                <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary">
+                        <div
+                            data-slot="customer-page-header-icon"
+                            className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-primary/10 text-primary"
+                        >
                             <ShieldCheck className="size-5" />
                         </div>
 

@@ -736,7 +736,10 @@ export default function TreasuryGlMappingForm({
                     </div>
 
                     {/* Sticky actions */}
-                    <footer className="sticky bottom-0 z-20 -mx-2 border-t border-border bg-background/95 px-2 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-4 sm:px-4">
+                    <footer
+                        data-slot="page-sticky-action-bar"
+                        className="sticky bottom-0 z-20 -mx-2 border-t border-border bg-background/95 px-2 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-4 sm:px-4"
+                    >
                         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden text-xs text-muted-foreground md:block">
                                 {editing

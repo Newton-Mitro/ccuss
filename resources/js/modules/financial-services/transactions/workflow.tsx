@@ -876,6 +876,7 @@ export default function TransactionWorkflow() {
                     {/* Sticky form actions */}
                     {(isTransfer || isLoanWorkflow) && (
                         <div
+                            data-slot="page-sticky-action-bar"
                             className={
                                 isTransfer
                                     ? 'border-t bg-background/95 px-4 py-4 md:px-6'

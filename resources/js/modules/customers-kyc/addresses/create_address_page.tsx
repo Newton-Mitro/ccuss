@@ -67,9 +67,15 @@ const Create = () => {
 
             <div className="w-full space-y-3 pb-24">
                 {/* Page heading */}
-                <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div className="flex min-w-0 items-center gap-2.5">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+                        <div
+                            data-slot="customer-page-header-icon"
+                            className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary"
+                        >
                             <MapPinned className="size-4.5" />
                         </div>
 

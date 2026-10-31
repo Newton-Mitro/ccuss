@@ -590,7 +590,10 @@ function CreateOrganization() {
                     </aside>
 
                     {/* Sticky form actions */}
-                    <div className="sticky bottom-0 z-20 -mx-3 border-t border-border/70 bg-background/95 px-3 py-3 backdrop-blur-md sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 xl:col-span-2">
+                    <div
+                        data-slot="page-sticky-action-bar"
+                        className="sticky bottom-0 z-20 -mx-3 border-t border-border/70 bg-background/95 px-3 py-3 backdrop-blur-md sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6 xl:col-span-2"
+                    >
                         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-xs text-muted-foreground">
                                 Review your organization's details before

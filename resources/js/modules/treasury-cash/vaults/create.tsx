@@ -433,8 +433,11 @@ export default function Create({ vault, branch_locked = false }: any) {
                     </div>
 
                     {/* Actions */}
-                    <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 shadow-[0_-4px_16px_-12px_rgba(0,0,0,0.2)] backdrop-blur supports-[backdrop-filter]:bg-background/85 md:left-[var(--app-sidebar-offset,0px)]">
-                        <div className="ml-4 flex w-[calc(100%-2rem)] max-w-7xl flex-col-reverse gap-2 py-3 sm:flex-row sm:items-center sm:justify-between md:ml-6 md:w-[calc(100%-3rem)]">
+                    <div
+                        data-slot="page-action-bar"
+                        className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 shadow-[0_-4px_16px_-12px_rgba(0,0,0,0.2)] backdrop-blur supports-[backdrop-filter]:bg-background/85"
+                    >
+                        <div className="flex w-full flex-col-reverse gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                             <a
                                 href={route('vaults.index')}
                                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-medium transition-colors hover:bg-muted"

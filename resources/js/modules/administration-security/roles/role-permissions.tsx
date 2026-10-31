@@ -272,7 +272,9 @@ const RolePermissionForm = ({
                             </div>
                             <div className="min-w-0 space-y-1">
                                 <DialogTitle className="text-base font-semibold tracking-tight">
-                                    {editingRoleId ? 'Edit role' : 'Create role'}
+                                    {editingRoleId
+                                        ? 'Edit role'
+                                        : 'Create role'}
                                 </DialogTitle>
                                 <DialogDescription className="text-xs leading-relaxed">
                                     Configure the role name, slug, and
@@ -879,7 +881,10 @@ const RolePermissionForm = ({
 
                                 {/* Compact sticky save bar */}
                                 {!selectedRole.preset && (
-                                    <div className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-border bg-card/95 px-4 py-3 shadow-[0_-8px_24px_-20px_hsl(var(--foreground)/0.4)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                                    <div
+                                        data-slot="page-sticky-action-bar"
+                                        className="sticky bottom-0 z-10 flex flex-col gap-2 border-t border-border bg-card/95 px-4 py-3 shadow-[0_-8px_24px_-20px_hsl(var(--foreground)/0.4)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                                    >
                                         <div className="flex min-w-0 items-center gap-2">
                                             <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                                                 <CheckCheck className="size-3.5" />

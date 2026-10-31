@@ -146,7 +146,10 @@ const CreateKycDocument = () => {
 
             <div className="w-full space-y-5 pb-24">
                 {/* Page Header */}
-                <div className="flex flex-col gap-3 border-b border-border/70 pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-3 border-b border-border/70 pb-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <HeadingSmall
                         title="Upload KYC Document"
                         description="Follow the steps below to add a document to the customer's KYC profile."

@@ -487,7 +487,10 @@ export default function FinancialProductPolicyForm() {
                             </div>
                         </section>
 
-                        <footer className="flex flex-col-reverse gap-2 border-t bg-muted/20 px-4 py-3 sm:flex-row sm:justify-end sm:px-5">
+                        <footer
+                            data-slot="form-actions"
+                            className="flex flex-col-reverse gap-2 border-t bg-muted/20 px-4 py-3 sm:flex-row sm:justify-end sm:px-5"
+                        >
                             <Button asChild type="button" variant="outline">
                                 <Link href={route(`${policyRoute}.index`)}>
                                     Cancel

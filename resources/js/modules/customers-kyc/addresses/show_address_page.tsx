@@ -72,9 +72,15 @@ export default function ViewAddress({ address }: Props) {
 
             <div className="mx-auto w-full max-w-400 space-y-5 pb-6">
                 {/* Page header */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div className="flex items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
+                        <div
+                            data-slot="customer-page-header-icon"
+                            className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary"
+                        >
                             <MapPin className="size-5" />
                         </div>
 

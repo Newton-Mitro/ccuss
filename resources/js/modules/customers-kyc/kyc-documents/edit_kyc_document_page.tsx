@@ -156,9 +156,15 @@ export default function EditKycDocument() {
 
             <div className="w-full space-y-4 pb-28 text-foreground sm:pb-6">
                 {/* Page heading */}
-                <div className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                    data-slot="customer-page-header"
+                    className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between"
+                >
                     <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+                        <div
+                            data-slot="customer-page-header-icon"
+                            className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary"
+                        >
                             <FileCheck2 className="size-5" />
                         </div>
 
@@ -479,7 +485,10 @@ export default function EditKycDocument() {
                     </section>
 
                     {/* Action bar */}
-                    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-4 sm:py-3 sm:backdrop-blur-none">
+                    <div
+                        data-slot="mobile-page-action-bar"
+                        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-4 sm:py-3 sm:backdrop-blur-none"
+                    >
                         <div className="mx-auto flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
                                 <ShieldCheck className="size-4" />

@@ -1,5 +1,12 @@
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select } from '@/components/ui/select';
+import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
+import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
 import type { CashAdjustmentFormPageProps } from '@/modules/treasury-cash/types/forms';
+import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import {
     AlertTriangle,
@@ -12,13 +19,6 @@ import {
 } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
-import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
-import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
 
 export default function TellerCashAdjustment() {
     const { teller_sessions } = usePage<CashAdjustmentFormPageProps>().props;
@@ -251,7 +251,10 @@ export default function TellerCashAdjustment() {
                             </div>
                         </section>
 
-                        <footer className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
+                        <footer
+                            data-slot="form-actions"
+                            className="flex flex-col-reverse gap-3 border-t bg-muted/20 px-5 py-4 sm:flex-row sm:justify-end sm:px-7"
+                        >
                             <Button
                                 type="button"
                                 variant="outline"

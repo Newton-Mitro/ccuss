@@ -65,6 +65,13 @@ export default function CustomAuthLayout({
      * Sidebar state
      * ------------------------------------------------------------------ */
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+        if (
+            typeof window !== 'undefined' &&
+            window.matchMedia('(max-width: 47.999rem)').matches
+        ) {
+            return false;
+        }
+
         try {
             const v = localStorage.getItem(SIDEBAR_OPEN_KEY);
             return v ? JSON.parse(v) : true;
@@ -109,8 +116,34 @@ export default function CustomAuthLayout({
      * Persist sidebar open/close
      * ------------------------------------------------------------------ */
     useEffect(() => {
-        localStorage.setItem(SIDEBAR_OPEN_KEY, JSON.stringify(sidebarOpen));
+        if (window.matchMedia('(min-width: 48rem)').matches) {
+            localStorage.setItem(SIDEBAR_OPEN_KEY, JSON.stringify(sidebarOpen));
+        }
     }, [sidebarOpen]);
+
+    useEffect(() => {
+        const desktopViewport = window.matchMedia('(min-width: 48rem)');
+        const syncSidebarWithViewport = () => {
+            if (!desktopViewport.matches) {
+                setSidebarOpen(false);
+                return;
+            }
+
+            try {
+                const storedState = localStorage.getItem(SIDEBAR_OPEN_KEY);
+                setSidebarOpen(storedState ? JSON.parse(storedState) : true);
+            } catch {
+                setSidebarOpen(true);
+            }
+        };
+
+        desktopViewport.addEventListener('change', syncSidebarWithViewport);
+        return () =>
+            desktopViewport.removeEventListener(
+                'change',
+                syncSidebarWithViewport,
+            );
+    }, []);
 
     useEffect(() => {
         localStorage.setItem(
@@ -200,6 +233,7 @@ export default function CustomAuthLayout({
         <div className="app-shell relative flex h-screen overflow-hidden bg-background text-foreground">
             {/* Sidebar */}
             <aside
+                data-mobile-open={sidebarOpen}
                 className={cn(
                     'app-sidebar z-40 flex h-screen shrink-0 flex-col overflow-hidden border-r border-sidebar-border/80 bg-sidebar text-sidebar-foreground transition-all duration-300',
                     sidebarFloating ? 'absolute top-0 left-0' : 'relative',
@@ -393,6 +427,16 @@ export default function CustomAuthLayout({
                 )}
             </aside>
 
+            {sidebarOpen && (
+                <button
+                    type="button"
+                    data-mobile-sidebar-overlay
+                    className="fixed inset-0 z-30 hidden bg-black/40 max-[47.999rem]:block"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label="Close navigation"
+                />
+            )}
+
             {/* Main */}
             <div
                 className={cn(
@@ -419,7 +463,7 @@ export default function CustomAuthLayout({
                         <button
                             type="button"
                             onClick={() => setSidebarFloating((v) => !v)}
-                            className="rounded-xl border border-border/70 bg-card/60 p-2 transition-colors hover:bg-muted"
+                            className="hidden rounded-xl border border-border/70 bg-card/60 p-2 transition-colors hover:bg-muted md:flex"
                             aria-label={
                                 sidebarFloating
                                     ? 'Use side-by-side sidebar'

@@ -139,7 +139,10 @@ export default function Show({ customer }: CustomerPageProps) {
 
             {/* ================= Header ================= */}
 
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div
+                data-slot="customer-page-header"
+                className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+            >
                 <div className="flex items-center gap-3">
                     {customer.photo ? (
                         <img
@@ -196,7 +199,7 @@ export default function Show({ customer }: CustomerPageProps) {
                     </Link>
                 }
             >
-                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {isIndividual && (
                         <>
                             <BorderInfoBox
@@ -291,7 +294,7 @@ export default function Show({ customer }: CustomerPageProps) {
                     icon={<UserCheckIcon size={18} />}
                     title="KYC Profile"
                 >
-                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
+                    <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         <BorderInfoBox
                             label="KYC Level"
                             value={formatUndersoreString(
@@ -331,7 +334,7 @@ export default function Show({ customer }: CustomerPageProps) {
                     </Link>
                 }
             >
-                <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {customer.addresses.map((addr) => (
                         <DataCard
                             key={addr.id}
@@ -355,14 +358,16 @@ export default function Show({ customer }: CustomerPageProps) {
                                 handleDeleteCustomerAddress(addr.id);
                             }}
                         >
-                            <div className="flex items-center justify-between gap-2 text-sm font-semibold capitalize">
-                                <span>{addr.type}</span>
+                            <div className="flex min-w-0 items-center justify-between gap-2 text-sm font-semibold capitalize">
+                                <span className="min-w-0 break-words">
+                                    {addr.type}
+                                </span>
                                 <VerificationBadge
                                     status={addr.verification_status}
                                 />
                             </div>
 
-                            <div className="text-xs opacity-80">
+                            <div className="text-xs break-words opacity-80">
                                 {addr.line1}, {addr.line2}, {addr.district},{' '}
                                 {addr.division}, {addr.postal_code}
                             </div>
@@ -389,7 +394,7 @@ export default function Show({ customer }: CustomerPageProps) {
                         </Link>
                     }
                 >
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {customer.family_relations?.map((rel) => (
                             <DataCard
                                 key={rel.id}
@@ -413,7 +418,7 @@ export default function Show({ customer }: CustomerPageProps) {
                                     handleDeleteCustomerFamilyRelation(rel.id);
                                 }}
                             >
-                                <div className="flex items-center gap-2">
+                                <div className="flex min-w-0 items-center gap-2">
                                     {rel.relative?.photo?.url ? (
                                         <img
                                             src={rel.relative.photo.url}
@@ -426,14 +431,14 @@ export default function Show({ customer }: CustomerPageProps) {
                                     )}
 
                                     {rel.relative && (
-                                        <div className="flex flex-col text-xs">
+                                        <div className="flex min-w-0 flex-col text-xs">
                                             <div className="text-sm font-medium">
                                                 <Link
                                                     href={route(
                                                         'customers.show',
                                                         rel.relative?.id,
                                                     )}
-                                                    className="cursor-pointer text-sm font-semibold hover:underline"
+                                                    className="cursor-pointer text-sm font-semibold break-words hover:underline"
                                                     onClick={(e) =>
                                                         e.stopPropagation()
                                                     }
@@ -442,8 +447,8 @@ export default function Show({ customer }: CustomerPageProps) {
                                                 </Link>
                                             </div>
 
-                                            <div className="flex gap-2 capitalize">
-                                                <span>
+                                            <div className="flex min-w-0 flex-wrap gap-2 capitalize">
+                                                <span className="break-words">
                                                     {rel.relation_type.replace(
                                                         /_/g,
                                                         ' ',
@@ -482,7 +487,7 @@ export default function Show({ customer }: CustomerPageProps) {
                     </Link>
                 }
             >
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {customer.introducers.map((intro) => (
                         <DataCard
                             key={intro.id}
@@ -506,7 +511,7 @@ export default function Show({ customer }: CustomerPageProps) {
                                 handleDeleteCustomerIntroducer(intro.id);
                             }}
                         >
-                            <div className="flex items-center gap-2">
+                            <div className="flex min-w-0 items-center gap-2">
                                 {intro.introducer_customer?.photo?.url ? (
                                     <img
                                         src={
@@ -522,7 +527,7 @@ export default function Show({ customer }: CustomerPageProps) {
                                     </div>
                                 )}
                                 {intro.introducer_customer && (
-                                    <div className="">
+                                    <div className="min-w-0">
                                         <div className="text-sm font-medium">
                                             <Link
                                                 href={route(
@@ -530,7 +535,7 @@ export default function Show({ customer }: CustomerPageProps) {
                                                     intro.introducer_customer
                                                         ?.id,
                                                 )}
-                                                className="cursor-pointer text-sm font-semibold hover:underline"
+                                                className="cursor-pointer text-sm font-semibold break-words hover:underline"
                                                 onClick={(e) =>
                                                     e.stopPropagation()
                                                 }
@@ -539,8 +544,8 @@ export default function Show({ customer }: CustomerPageProps) {
                                             </Link>
                                         </div>
 
-                                        <div className="flex gap-2 text-xs capitalize">
-                                            <span>
+                                        <div className="flex flex-wrap gap-2 text-xs capitalize">
+                                            <span className="break-words">
                                                 {intro.relationship_type.replace(
                                                     /_/g,
                                                     ' ',
@@ -578,7 +583,7 @@ export default function Show({ customer }: CustomerPageProps) {
                     </Link>
                 }
             >
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {customer.kyc_documents.map((doc) => (
                         <DataCard
                             key={doc.id}
@@ -602,11 +607,11 @@ export default function Show({ customer }: CustomerPageProps) {
                                 handleDeleteCustomerKycDocument(doc.id);
                             }}
                         >
-                            <div className="flex items-center gap-2 capitalize">
+                            <div className="flex min-w-0 flex-wrap items-center gap-2 capitalize">
                                 <VerificationBadge
                                     status={doc.verification_status}
                                 />
-                                <div className="text-sm font-semibold">
+                                <div className="min-w-0 text-sm font-semibold break-words">
                                     {formatUndersoreString(
                                         doc.document_type || '—',
                                     )}
@@ -622,17 +627,17 @@ export default function Show({ customer }: CustomerPageProps) {
                     icon={<History size={18} />}
                     title="Customer Audit History"
                 >
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {customer.audits.map((audit) => (
                             <a
                                 key={audit.id}
                                 href={route('audits.batch', audit.batch_id)}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group hover: flex items-center justify-between rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40"
+                                className="group flex min-w-0 items-center justify-between gap-2 rounded-md border bg-card px-3 py-2 text-xs transition hover:border-primary/40"
                             >
                                 {/* Left: Event + User */}
-                                <div className="flex items-center gap-2 overflow-hidden">
+                                <div className="flex min-w-0 items-center gap-2 overflow-hidden">
                                     <span className="truncate capitalize">
                                         {`${audit.event} by`}
                                     </span>
