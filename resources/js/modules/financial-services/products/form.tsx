@@ -229,14 +229,11 @@ export default function FinancialProductForm() {
             <div className="mx-auto w-full max-w-6xl min-w-0 space-y-6 pb-8">
                 <header className="relative overflow-hidden rounded-2xl border bg-card px-5 py-5 shadow-sm sm:px-8 sm:py-7">
                     <div className="pointer-events-none absolute -top-20 right-8 size-56 rounded-full bg-primary/[0.07] blur-3xl" />
-                    <div className="relative flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                    <div className="relative flex w-full flex-col justify-between gap-4 sm:flex-row sm:items-center">
                         <div className="min-w-0 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                     {isLoan ? 'Lending' : 'Deposit products'}
-                                </span>
-                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                                    {editing ? 'Edit product' : 'New setup'}
                                 </span>
                             </div>
                             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">

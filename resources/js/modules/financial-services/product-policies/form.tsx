@@ -100,7 +100,7 @@ export default function FinancialProductPolicyForm() {
             <div className="mx-auto max-w-6xl space-y-4">
                 <header className="relative isolate overflow-hidden rounded-xl border bg-card px-4 py-4 shadow-sm sm:px-5 sm:py-5">
                     <div className="absolute -top-20 -right-12 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
                             <ShieldCheck className="size-5" />
                         </div>
@@ -110,9 +110,6 @@ export default function FinancialProductPolicyForm() {
                                     {family === 'loan'
                                         ? 'Lending'
                                         : 'Deposit products'}
-                                </span>
-                                <span className="rounded-full border bg-background/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                                    {policy ? 'Policy settings' : 'New policy'}
                                 </span>
                             </div>
                             <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">

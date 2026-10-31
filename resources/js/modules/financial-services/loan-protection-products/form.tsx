@@ -69,9 +69,6 @@ export default function LoanProtectionProductForm() {
                             <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                 Protection products
                             </span>
-                            <span className="rounded-full px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                                {editing ? 'Edit product' : 'New setup'}
-                            </span>
                         </div>
                         <h1 className="text-xl leading-tight font-semibold tracking-tight text-foreground">
                             {editing
