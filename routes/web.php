@@ -18,12 +18,13 @@ Route::get('/dashboard', [DashboardController::class, 'home'])
     ->middleware(['auth', 'verified', 'organization'])
     ->name('dashboard');
 
-require __DIR__ . '/system_administration_routes.php';
+require __DIR__ . '/modules/administration_security.php';
+require __DIR__ . '/modules/organization_settings.php';
+require __DIR__ . '/modules/audit_compliance.php';
 require __DIR__ . '/settings_routes.php';
-require __DIR__ . '/treasury_cash_routes.php';
-require __DIR__ . '/customer_module_routes.php';
-require __DIR__ . '/general_accounting_routes.php';
-require __DIR__ . '/financial_services_routes.php';
-require __DIR__ . '/report_export_routes.php';
-
-
+require __DIR__ . '/modules/branch_operations.php';
+require __DIR__ . '/modules/treasury_cash.php';
+require __DIR__ . '/modules/customers_kyc.php';
+require __DIR__ . '/modules/general_accounting.php';
+require __DIR__ . '/modules/financial_services.php';
+require __DIR__ . '/modules/reports.php';

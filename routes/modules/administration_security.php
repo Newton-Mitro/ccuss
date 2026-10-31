@@ -1,12 +1,8 @@
 <?php
 
-use App\SystemAdministration\Application\AuditComplianceCatalog;
-use App\SystemAdministration\Controllers\AuditComplianceController;
-use App\SystemAdministration\Controllers\AuditLogController;
 use App\SystemAdministration\Controllers\BranchController;
 use App\SystemAdministration\Controllers\DatabaseBackupController;
 use App\SystemAdministration\Controllers\NotificationController;
-use App\SystemAdministration\Controllers\OrganizationController;
 use App\SystemAdministration\Controllers\RolePermissionController;
 use App\SystemAdministration\Controllers\SystemAdministrationDashboardController;
 use App\SystemAdministration\Controllers\UserController;
@@ -81,16 +77,6 @@ Route::middleware(['auth', 'verified'])->prefix('roles')->name('roles.')->group(
         ->name('update-permissions');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::post('organization/switch', [OrganizationController::class, 'switchOrganization'])
-        ->name('organizations.switch');
-
-    Route::resource('organizations', OrganizationController::class)
-        ->only(['index', 'create', 'store', 'show', 'edit', 'update'])
-        ->middlewareFor(['index', 'show'], 'permission:organizations.view')
-        ->middlewareFor(['edit', 'update'], 'permission:organizations.update');
-});
-
 Route::middleware(['auth', 'verified', 'organization'])->prefix('organizations')
     ->group(function () {
         Route::resource('branches', BranchController::class)
@@ -99,72 +85,6 @@ Route::middleware(['auth', 'verified', 'organization'])->prefix('organizations')
             ->middlewareFor(['edit', 'update'], 'permission:branches.update')
             ->middlewareFor('destroy', 'permission:branches.delete');
     });
-
-Route::prefix('audits')->middleware(['auth', 'verified', 'organization'])->group(function () {
-    Route::get('/', [AuditLogController::class, 'index'])
-        ->middleware('permission:activity_logs.view')
-        ->name('audits.index');
-    Route::get('/model', [AuditLogController::class, 'model'])
-        ->middleware('permission:activity_logs.view')
-        ->name('audits.model');
-    Route::get('/batch/{batchId}', [AuditLogController::class, 'batch'])
-        ->middleware('permission:activity_logs.view')
-        ->name('audits.batch');
-});
-
-Route::middleware(['auth', 'verified', 'organization'])->group(function () {
-    foreach (AuditComplianceCatalog::dashboards() as $dashboard => $config) {
-        Route::get("/{$dashboard}", [AuditComplianceController::class, 'dashboard'])
-            ->defaults('dashboard', $dashboard)
-            ->middleware("permission:{$dashboard}.view")
-            ->name("{$dashboard}.index");
-    }
-
-    foreach (AuditComplianceCatalog::registers() as $routeName => $config) {
-        $permission = $config['permission'] ?? $routeName;
-
-        Route::prefix($config['path'])
-            ->name("{$routeName}.")
-            ->group(function () use ($routeName, $permission): void {
-                Route::get('/', [AuditComplianceController::class, 'index'])
-                    ->defaults('register', $routeName)
-                    ->middleware("permission:{$permission}.view")
-                    ->name('index');
-                Route::get('/create', [AuditComplianceController::class, 'create'])
-                    ->defaults('register', $routeName)
-                    ->middleware("permission:{$permission}.create")
-                    ->name('create');
-                Route::post('/', [AuditComplianceController::class, 'store'])
-                    ->defaults('register', $routeName)
-                    ->middleware("permission:{$permission}.create")
-                    ->name('store');
-                Route::get('/{record}/edit', [AuditComplianceController::class, 'edit'])
-                    ->whereNumber('record')
-                    ->defaults('register', $routeName)
-                    ->middleware("permission:{$permission}.update")
-                    ->name('edit');
-                Route::get('/{record}', [AuditComplianceController::class, 'show'])
-                    ->whereNumber('record')
-                    ->defaults('register', $routeName)
-                    ->middleware("permission:{$permission}.view")
-                    ->name('show');
-                Route::put('/{record}', [AuditComplianceController::class, 'update'])
-                    ->whereNumber('record')
-                    ->defaults('register', $routeName)
-                    ->middleware("permission:{$permission}.update")
-                    ->name('update');
-                Route::delete('/{record}', [AuditComplianceController::class, 'destroy'])
-                    ->whereNumber('record')
-                    ->defaults('register', $routeName)
-                    ->middleware("permission:{$permission}.delete")
-                    ->name('destroy');
-            });
-    }
-
-    Route::get('/approval-logs', [AuditComplianceController::class, 'approvalLogs'])
-        ->middleware('permission:approval-logs.view')
-        ->name('approval-logs.index');
-});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('database/backups', [DatabaseBackupController::class, 'history'])
