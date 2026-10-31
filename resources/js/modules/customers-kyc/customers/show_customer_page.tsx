@@ -143,7 +143,10 @@ export default function Show({ customer }: CustomerPageProps) {
                 data-slot="customer-page-header"
                 className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
             >
-                <div className="flex items-center gap-3">
+                <div
+                    data-slot="customer-page-header-identity"
+                    className="flex items-center gap-3"
+                >
                     {customer.photo ? (
                         <img
                             src={customer.photo.url}
@@ -156,7 +159,10 @@ export default function Show({ customer }: CustomerPageProps) {
                         </div>
                     )}
 
-                    <div className="flex flex-col">
+                    <div
+                        data-slot="customer-page-header-details"
+                        className="flex min-w-0 flex-col items-start gap-1"
+                    >
                         <h1 className="text-lg font-semibold">
                             {customer.name}
                         </h1>

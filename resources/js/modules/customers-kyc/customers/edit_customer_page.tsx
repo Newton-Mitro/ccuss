@@ -190,7 +190,7 @@ const Edit = ({ customer }: CustomerPageProps) => {
                     data-slot="customer-page-header"
                     className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
                 >
-                    <div className="flex items-start gap-3">
+                    <div className="min-w-0 flex-1">
                         <div className="min-w-0 space-y-1">
                             <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
                                 Edit Customer

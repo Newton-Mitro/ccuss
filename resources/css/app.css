@@ -103,14 +103,25 @@
 
 .app-page-content
     > *
-    > :is(header, [class~='flex'], [data-slot='customer-page-header']):has(
-        h1,
-        [data-slot='page-heading']
-    ),
+    > :is(
+        header,
+        [class~='flex']:not(
+            [data-slot='customer-page-header-details'],
+            [data-slot='customer-page-header-identity']
+        ),
+        [data-slot='customer-page-header']
+    ):has(h1, [data-slot='page-heading']),
+.app-page-content > * > [class~='flex']:has(> [data-slot='page-heading']),
 .app-page-content
     > *
     > div
-    > :is(header, [class~='flex']):has(h1, [data-slot='page-heading']) {
+    > :is(
+        header,
+        [class~='flex']:not(
+            [data-slot='customer-page-header-details'],
+            [data-slot='customer-page-header-identity']
+        )
+    ):has(h1, [data-slot='page-heading']) {
     display: flex;
     min-width: 0;
     width: 100%;
@@ -125,7 +136,10 @@
     box-shadow: none;
 }
 
-.app-page-content > * > header:has(h1) > [class~='flex']:has(h1) {
+.app-page-content
+    > *
+    > header:has(h1)
+    > [class~='flex']:has(h1):not([data-slot='customer-page-header-identity']) {
     width: 100%;
     min-width: 0;
     justify-content: space-between;
@@ -205,12 +219,19 @@
             h1,
             [data-slot='page-heading']
         ),
+    .app-page-content > * > [class~='flex']:has(> [data-slot='page-heading']),
     .app-page-content
         > *
         > div
-        > :is(header, [class~='flex']):has(h1, [data-slot='page-heading']) {
-        flex-direction: row;
-        align-items: center;
+        > :is(
+            header,
+            [class~='flex']:not(
+                [data-slot='customer-page-header-details'],
+                [data-slot='customer-page-header-identity']
+            )
+        ):has(h1, [data-slot='page-heading']) {
+        flex-direction: row !important;
+        align-items: center !important;
     }
 }
 

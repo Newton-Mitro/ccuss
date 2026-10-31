@@ -1,6 +1,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
+    Eye,
     FileCheck2,
     FileImage,
     FileText,
@@ -239,87 +240,223 @@ export default function EditKycDocument() {
                     </section>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Document information */}
-                    <section className="overflow-hidden rounded-xl border border-border bg-card">
-                        <SectionHeading
-                            icon={<FileText className="size-4" />}
-                            title="Document Information"
-                            description="Maintain the document category and descriptive text."
-                            step="01"
-                        />
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]"
+                >
+                    <div className="min-w-0 space-y-5 xl:col-start-1">
+                        {/* Document information */}
+                        <section className="overflow-hidden rounded-xl border border-border bg-card">
+                            <SectionHeading
+                                icon={<FileText className="size-4" />}
+                                title="Document Information"
+                                description="Maintain the document category and descriptive text."
+                                step="01"
+                            />
 
-                        <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
-                            <div className="space-y-1.5">
-                                <Label htmlFor="document_type">
-                                    Document Type
-                                    <span className="ml-1 text-destructive">
-                                        *
-                                    </span>
-                                </Label>
-
-                                <Select
-                                    value={data.document_type}
-                                    onChange={(value) =>
-                                        setData('document_type', value)
-                                    }
-                                    options={documentTypes}
-                                />
-
-                                <InputError message={errors.document_type} />
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <Label htmlFor="alt_text">
-                                    Alternative Text
-                                    <span className="ml-1 text-xs font-normal text-muted-foreground">
-                                        (Optional)
-                                    </span>
-                                </Label>
-
-                                <Input
-                                    id="alt_text"
-                                    value={data.alt_text}
-                                    onChange={(event) =>
-                                        setData('alt_text', event.target.value)
-                                    }
-                                    placeholder="Describe this document"
-                                    className="h-9"
-                                />
-
-                                <p className="text-xs text-muted-foreground">
-                                    A short description to help identify the
-                                    document.
-                                </p>
-
-                                <InputError message={errors.alt_text} />
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Document attachment */}
-                    <section className="overflow-hidden rounded-xl border border-border bg-card">
-                        <SectionHeading
-                            icon={<ImageIcon className="size-4" />}
-                            title="Document Attachment"
-                            description="Preview the current file or upload a replacement."
-                            step="02"
-                        />
-
-                        <div className="grid grid-cols-1 gap-5 p-4 lg:grid-cols-2">
-                            {/* Preview panel */}
-                            <div className="min-w-0 space-y-2">
-                                <div className="flex min-h-6 items-center justify-between gap-2">
-                                    <Label>Document Preview</Label>
-
-                                    {fileName && (
-                                        <span className="max-w-40 truncate rounded-md border border-primary/20 bg-primary/5 px-2 py-1 text-[11px] font-medium text-primary">
-                                            Replacement selected
+                            <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="document_type">
+                                        Document Type
+                                        <span className="ml-1 text-destructive">
+                                            *
                                         </span>
-                                    )}
+                                    </Label>
+
+                                    <Select
+                                        value={data.document_type}
+                                        onChange={(value) =>
+                                            setData('document_type', value)
+                                        }
+                                        options={documentTypes}
+                                    />
+
+                                    <InputError
+                                        message={errors.document_type}
+                                    />
                                 </div>
 
-                                <div className="flex min-h-64 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/20 p-3 sm:min-h-72">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="alt_text">
+                                        Alternative Text
+                                        <span className="ml-1 text-xs font-normal text-muted-foreground">
+                                            (Optional)
+                                        </span>
+                                    </Label>
+
+                                    <Input
+                                        id="alt_text"
+                                        value={data.alt_text}
+                                        onChange={(event) =>
+                                            setData(
+                                                'alt_text',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Describe this document"
+                                        className="h-9"
+                                    />
+
+                                    <p className="text-xs text-muted-foreground">
+                                        A short description to help identify the
+                                        document.
+                                    </p>
+
+                                    <InputError message={errors.alt_text} />
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Document attachment */}
+                        <section className="overflow-hidden rounded-xl border border-border bg-card">
+                            <SectionHeading
+                                icon={<ImageIcon className="size-4" />}
+                                title="Document Attachment"
+                                description="Preview the current file or upload a replacement."
+                                step="02"
+                            />
+
+                            <div className="p-4">
+                                <div className="min-w-0 space-y-2">
+                                    <Label>Replace File</Label>
+
+                                    <div
+                                        onDragOver={(event) => {
+                                            event.preventDefault();
+                                            setIsDragging(true);
+                                        }}
+                                        onDragLeave={(event) => {
+                                            event.preventDefault();
+                                            setIsDragging(false);
+                                        }}
+                                        onDrop={(event) => {
+                                            event.preventDefault();
+                                            setIsDragging(false);
+                                            handleFileChange(
+                                                event.dataTransfer.files?.[0] ||
+                                                    null,
+                                            );
+                                        }}
+                                        className={`flex min-h-64 flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 text-center transition-colors sm:min-h-72 ${
+                                            isDragging
+                                                ? 'border-primary bg-primary/5'
+                                                : 'border-border bg-background hover:border-primary/40'
+                                        }`}
+                                    >
+                                        <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-card text-primary">
+                                            <Upload className="size-6" />
+                                        </div>
+
+                                        <h3 className="mt-4 text-sm font-semibold">
+                                            Upload a replacement
+                                        </h3>
+
+                                        <p className="mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">
+                                            Drag and drop a file here, or browse
+                                            your device to choose a new
+                                            document.
+                                        </p>
+
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="mt-4"
+                                            onClick={() =>
+                                                fileInputRef.current?.click()
+                                            }
+                                        >
+                                            <FolderOpen className="size-4" />
+                                            Choose File
+                                        </Button>
+
+                                        <Input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            accept={KYC_DOCUMENT_ACCEPT}
+                                            onChange={(event) =>
+                                                handleFileChange(
+                                                    event.target.files?.[0] ||
+                                                        null,
+                                                )
+                                            }
+                                            className="sr-only"
+                                        />
+
+                                        <p className="mt-4 text-[11px] text-muted-foreground">
+                                            JPG, PNG, or PDF · Maximum 10 MB
+                                        </p>
+                                    </div>
+
+                                    <InputError message={errors.file} />
+
+                                    {fileError && (
+                                        <p
+                                            role="alert"
+                                            className="text-sm text-destructive"
+                                        >
+                                            {fileError}
+                                        </p>
+                                    )}
+
+                                    <p className="text-xs leading-relaxed text-muted-foreground">
+                                        No replacement is required if you want
+                                        to keep the existing attachment.
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <aside className="min-w-0 xl:sticky xl:top-4 xl:col-start-2 xl:row-start-1 xl:self-start">
+                        <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
+                            <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-4">
+                                <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
+                                <div className="relative flex items-center gap-2.5">
+                                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                                        <Eye className="size-4" />
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
+                                            KYC document
+                                        </p>
+                                        <h2 className="text-sm font-semibold">
+                                            Document preview
+                                        </h2>
+                                    </div>
+                                    <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[10px] font-semibold text-primary">
+                                        LIVE
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3 p-3">
+                                <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3.5 ring-1 ring-primary/10">
+                                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-background text-primary">
+                                        {previewUrl && !isPdf ? (
+                                            <img
+                                                src={previewUrl}
+                                                alt=""
+                                                className="size-full object-cover"
+                                            />
+                                        ) : (
+                                            <FileText className="size-5" />
+                                        )}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold break-words">
+                                            {data.alt_text || 'KYC document'}
+                                        </p>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {data.document_type}
+                                            {isPdf
+                                                ? ' · PDF document'
+                                                : ' · Image document'}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex min-h-64 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted/20 p-3">
                                     {previewUrl && !isPdf ? (
                                         <img
                                             src={previewUrl}
@@ -327,39 +464,17 @@ export default function EditKycDocument() {
                                                 data.alt_text ||
                                                 'KYC document preview'
                                             }
-                                            className="max-h-96 max-w-full rounded-lg object-contain"
+                                            className="max-h-96 w-full rounded-lg object-contain"
                                         />
                                     ) : previewUrl && isPdf ? (
-                                        <div className="flex flex-col items-center gap-3 text-center">
-                                            <div className="flex size-16 items-center justify-center rounded-2xl border border-border bg-card text-primary">
-                                                <FileText className="size-8" />
-                                            </div>
-
-                                            <div>
-                                                <p className="text-sm font-semibold">
-                                                    PDF Document
-                                                </p>
-                                                <p className="mt-1 max-w-xs text-xs break-all text-muted-foreground">
-                                                    {fileName ||
-                                                        'Existing PDF attachment'}
-                                                </p>
-                                            </div>
-
-                                            <a
-                                                href={previewUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-xs font-medium text-primary hover:underline"
-                                            >
-                                                Open PDF in new tab
-                                            </a>
-                                        </div>
+                                        <iframe
+                                            src={previewUrl}
+                                            title={`${data.alt_text || 'KYC document'} PDF preview`}
+                                            className="h-96 w-full rounded-lg border border-border bg-background"
+                                        />
                                     ) : (
                                         <div className="flex flex-col items-center gap-3 text-center">
-                                            <div className="flex size-16 items-center justify-center rounded-2xl border border-border bg-card text-muted-foreground">
-                                                <FileImage className="size-8" />
-                                            </div>
-
+                                            <FileImage className="size-8 text-muted-foreground" />
                                             <div>
                                                 <p className="text-sm font-medium">
                                                     No preview available
@@ -374,13 +489,11 @@ export default function EditKycDocument() {
                                 </div>
 
                                 {fileName && (
-                                    <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-muted/20 p-2.5">
+                                    <div className="flex min-w-0 items-center gap-2 rounded-xl border border-border/60 bg-muted/20 p-3">
                                         <FileText className="size-4 shrink-0 text-primary" />
-
                                         <span className="min-w-0 flex-1 truncate text-xs">
                                             {fileName}
                                         </span>
-
                                         <Button
                                             type="button"
                                             variant="ghost"
@@ -394,100 +507,13 @@ export default function EditKycDocument() {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Upload panel */}
-                            <div className="min-w-0 space-y-2">
-                                <Label>Replace File</Label>
-
-                                <div
-                                    onDragOver={(event) => {
-                                        event.preventDefault();
-                                        setIsDragging(true);
-                                    }}
-                                    onDragLeave={(event) => {
-                                        event.preventDefault();
-                                        setIsDragging(false);
-                                    }}
-                                    onDrop={(event) => {
-                                        event.preventDefault();
-                                        setIsDragging(false);
-                                        handleFileChange(
-                                            event.dataTransfer.files?.[0] ||
-                                                null,
-                                        );
-                                    }}
-                                    className={`flex min-h-64 flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 text-center transition-colors sm:min-h-72 ${
-                                        isDragging
-                                            ? 'border-primary bg-primary/5'
-                                            : 'border-border bg-background hover:border-primary/40'
-                                    }`}
-                                >
-                                    <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-card text-primary">
-                                        <Upload className="size-6" />
-                                    </div>
-
-                                    <h3 className="mt-4 text-sm font-semibold">
-                                        Upload a replacement
-                                    </h3>
-
-                                    <p className="mt-1 max-w-xs text-xs leading-relaxed text-muted-foreground">
-                                        Drag and drop a file here, or browse
-                                        your device to choose a new document.
-                                    </p>
-
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        className="mt-4"
-                                        onClick={() =>
-                                            fileInputRef.current?.click()
-                                        }
-                                    >
-                                        <FolderOpen className="size-4" />
-                                        Choose File
-                                    </Button>
-
-                                    <Input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept={KYC_DOCUMENT_ACCEPT}
-                                        onChange={(event) =>
-                                            handleFileChange(
-                                                event.target.files?.[0] || null,
-                                            )
-                                        }
-                                        className="sr-only"
-                                    />
-
-                                    <p className="mt-4 text-[11px] text-muted-foreground">
-                                        JPG, PNG, or PDF · Maximum 10 MB
-                                    </p>
-                                </div>
-
-                                <InputError message={errors.file} />
-
-                                {fileError && (
-                                    <p
-                                        role="alert"
-                                        className="text-sm text-destructive"
-                                    >
-                                        {fileError}
-                                    </p>
-                                )}
-
-                                <p className="text-xs leading-relaxed text-muted-foreground">
-                                    No replacement is required if you want to
-                                    keep the existing attachment.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
+                        </section>
+                    </aside>
 
                     {/* Action bar */}
                     <div
                         data-slot="mobile-page-action-bar"
-                        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-4 sm:py-3 sm:backdrop-blur-none"
+                        className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:static sm:rounded-xl sm:border sm:bg-card sm:px-4 sm:py-3 sm:backdrop-blur-none xl:col-span-2"
                     >
                         <div className="mx-auto flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
