@@ -26,22 +26,11 @@
 .app-page-content > * > header:has(h1) {
     overflow: visible;
     border: 0;
+    border-bottom: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
     border-radius: 0;
     background: transparent;
-    padding: 0;
+    padding: 0 0 0.75rem;
     box-shadow: none;
-}
-
-.app-page-content > * > header:has(h1) > :is(div[class*='absolute']) {
-    display: none;
-}
-
-.app-page-content
-    > *
-    > header:has(h1)
-    > div
-    > div:first-child[class*='size-'][class*='bg-'] {
-    display: none;
 }
 
 .app-main
@@ -66,6 +55,56 @@
         [class~='rounded-2xl'][class~='border']
     ) {
     border-radius: 0.75rem;
+}
+
+.app-main :is(h1) {
+    color: var(--foreground);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+}
+
+.app-page-content
+    > *
+    > :is(header, [class~='flex']):has(h1, [data-slot='page-heading']),
+.app-page-content
+    > *
+    > div
+    > [class~='flex']:has(h1, [data-slot='page-heading']) {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-bottom: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+    padding-bottom: 0.75rem;
+}
+
+@media (min-width: 40rem) {
+    .app-page-content
+        > *
+        > :is(header, [class~='flex']):has(h1, [data-slot='page-heading']),
+    .app-page-content
+        > *
+        > div
+        > [class~='flex']:has(h1, [data-slot='page-heading']) {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+.app-main :is([data-slot='card'], [data-slot='resource-table-card']) {
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 5%, transparent);
+}
+
+.app-main
+    :is(
+        [data-slot='button'],
+        button[class~='bg-primary'],
+        a[class~='bg-primary']
+    ) {
+    border-radius: 0.625rem;
 }
 
 .app-main [class~='bg-card'][class~='border'] {

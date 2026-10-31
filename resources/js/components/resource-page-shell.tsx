@@ -54,8 +54,9 @@ export function ResourceEmptyState({
 }: ResourceEmptyStateProps) {
     return (
         <div
+            data-slot="resource-empty-state"
             className={cn(
-                'flex min-h-56 flex-col items-center justify-center rounded-md border border-dashed bg-card px-6 py-12 text-center',
+                'flex min-h-56 flex-col items-center justify-center rounded-xl border border-dashed bg-card px-6 py-12 text-center shadow-sm',
                 className,
             )}
         >
@@ -84,7 +85,7 @@ export function ResourceTableViewport({
         <>
             <div
                 className={cn(
-                    'hidden overflow-auto rounded-md border bg-card md:block',
+                    'hidden overflow-auto rounded-xl border bg-card shadow-sm md:block',
                     heightClassName,
                 )}
             >

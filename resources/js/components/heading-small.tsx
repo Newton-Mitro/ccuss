@@ -10,7 +10,10 @@ export default function HeadingSmall({
     className?: string;
 }) {
     return (
-        <div className={cn('space-y-0.5', className)}>
+        <div
+            data-slot="page-heading"
+            className={cn('min-w-0 space-y-0.5', className)}
+        >
             <h1 className="text-xl leading-tight font-semibold tracking-tight text-foreground">
                 {title}
             </h1>

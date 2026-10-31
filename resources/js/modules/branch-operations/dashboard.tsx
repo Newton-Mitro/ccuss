@@ -7,6 +7,13 @@ import {
     ResourceEmptyState,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import BranchOperationsCharts from '@/modules/branch-operations/components/branch-operations-charts';
@@ -84,7 +91,7 @@ export default function BranchOperationsDashboard() {
                     />
                 ) : (
                     <>
-                        <section className="flex flex-wrap items-center justify-between gap-3 border-y py-3">
+                        <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
                                     <CalendarDays className="h-5 w-5" />
@@ -151,169 +158,180 @@ export default function BranchOperationsDashboard() {
                         />
 
                         <div className="grid items-start gap-5 xl:grid-cols-2">
-                            <section className="min-w-0 space-y-3">
-                                <div className="flex items-center justify-between gap-3">
-                                    <div>
-                                        <h2 className="text-sm font-semibold">
-                                            Open teller sessions
-                                        </h2>
-                                        <p className="text-xs text-muted-foreground">
-                                            Current branch day
-                                        </p>
+                            <Card className="min-w-0 gap-4 py-5">
+                                <CardHeader>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <CardTitle className="text-sm">
+                                                Open teller sessions
+                                            </CardTitle>
+                                            <CardDescription className="mt-1 text-xs">
+                                                Current branch day
+                                            </CardDescription>
+                                        </div>
+                                        <StatusBadge tone="info">
+                                            {open_sessions.length} open
+                                        </StatusBadge>
                                     </div>
-                                    <StatusBadge tone="info">
-                                        {open_sessions.length} open
-                                    </StatusBadge>
-                                </div>
-                                {open_sessions.length ? (
-                                    <div className="divide-y border-y">
-                                        {open_sessions.map((session) => (
-                                            <div
-                                                key={session.id}
-                                                className="flex flex-wrap items-center justify-between gap-3 py-3"
-                                            >
-                                                <div className="flex min-w-0 items-center gap-3">
-                                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                                                        <UserRound className="h-4 w-4" />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <div className="truncate text-sm font-medium">
-                                                            {
-                                                                session.teller_name
-                                                            }
+                                </CardHeader>
+                                <CardContent>
+                                    {open_sessions.length ? (
+                                        <div className="divide-y">
+                                            {open_sessions.map((session) => (
+                                                <div
+                                                    key={session.id}
+                                                    className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                                                >
+                                                    <div className="flex min-w-0 items-center gap-3">
+                                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                                            <UserRound className="h-4 w-4" />
                                                         </div>
-                                                        <div className="text-xs text-muted-foreground">
-                                                            {session.teller_code ??
-                                                                'No teller code'}
-                                                            {' · '}
-                                                            {session.teller_account_no ??
-                                                                'No financial account'}
-                                                            {' · '}
-                                                            {session.business_date ??
-                                                                '-'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <div className="text-[10px] text-muted-foreground">
-                                                        Expected cash
-                                                    </div>
-                                                    <div className="text-sm font-semibold tabular-nums">
-                                                        {money(
-                                                            session.expected_cash,
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <p className="border-y py-5 text-sm text-muted-foreground">
-                                        No open teller sessions for this branch
-                                        day.
-                                    </p>
-                                )}
-                            </section>
-
-                            <section className="min-w-0 space-y-3">
-                                <div className="flex items-center justify-between gap-3">
-                                    <div>
-                                        <h2 className="text-sm font-semibold">
-                                            Recent cash activity
-                                        </h2>
-                                        <p className="text-xs text-muted-foreground">
-                                            Latest branch transactions
-                                        </p>
-                                    </div>
-                                    <Link
-                                        href={route(
-                                            'teller-transactions.index',
-                                        )}
-                                        className="text-xs font-medium text-primary hover:underline"
-                                    >
-                                        View queue
-                                    </Link>
-                                </div>
-                                {recent_activity.length ? (
-                                    <div className="overflow-x-auto border-y">
-                                        <table className="w-full min-w-112 text-sm">
-                                            <thead className="text-left text-[10px] text-muted-foreground uppercase">
-                                                <tr>
-                                                    <th className="py-2 pr-3 font-medium">
-                                                        Transaction
-                                                    </th>
-                                                    <th className="py-2 pr-3 font-medium">
-                                                        Teller
-                                                    </th>
-                                                    <th className="py-2 pr-3 text-right font-medium">
-                                                        Amount
-                                                    </th>
-                                                    <th className="py-2 font-medium">
-                                                        Status
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y">
-                                                {recent_activity.map(
-                                                    (transaction) => (
-                                                        <tr
-                                                            key={transaction.id}
-                                                        >
-                                                            <td className="py-2 pr-3">
-                                                                <div className="font-mono text-xs">
-                                                                    {
-                                                                        transaction.transaction_no
-                                                                    }
-                                                                </div>
-                                                                <div className="text-[10px] text-muted-foreground">
-                                                                    {transaction.type.replaceAll(
-                                                                        '_',
-                                                                        ' ',
-                                                                    )}
-                                                                    {transaction.cash_location
-                                                                        ? ` · ${transaction.cash_location}`
-                                                                        : ''}
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-2 pr-3 text-xs">
-                                                                {transaction.teller ??
+                                                        <div className="min-w-0">
+                                                            <div className="truncate text-sm font-medium">
+                                                                {
+                                                                    session.teller_name
+                                                                }
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground">
+                                                                {session.teller_code ??
+                                                                    'No teller code'}
+                                                                {' · '}
+                                                                {session.teller_account_no ??
+                                                                    'No financial account'}
+                                                                {' · '}
+                                                                {session.business_date ??
                                                                     '-'}
-                                                            </td>
-                                                            <td className="py-2 pr-3 text-right text-xs font-medium tabular-nums">
-                                                                {money(
-                                                                    transaction.amount,
-                                                                )}
-                                                            </td>
-                                                            <td className="py-2">
-                                                                <StatusBadge
-                                                                    tone={
-                                                                        transaction.status ===
-                                                                        'POSTED'
-                                                                            ? 'success'
-                                                                            : transaction.status ===
-                                                                                'PENDING'
-                                                                              ? 'warning'
-                                                                              : 'neutral'
-                                                                    }
-                                                                >
-                                                                    {
-                                                                        transaction.status
-                                                                    }
-                                                                </StatusBadge>
-                                                            </td>
-                                                        </tr>
-                                                    ),
-                                                )}
-                                            </tbody>
-                                        </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-[10px] text-muted-foreground">
+                                                            Expected cash
+                                                        </div>
+                                                        <div className="text-sm font-semibold tabular-nums">
+                                                            {money(
+                                                                session.expected_cash,
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="py-2 text-sm text-muted-foreground">
+                                            No open teller sessions for this
+                                            branch day.
+                                        </p>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            <Card className="min-w-0 gap-4 py-5">
+                                <CardHeader>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <CardTitle className="text-sm">
+                                                Recent cash activity
+                                            </CardTitle>
+                                            <CardDescription className="mt-1 text-xs">
+                                                Latest branch transactions
+                                            </CardDescription>
+                                        </div>
+                                        <Link
+                                            href={route(
+                                                'teller-transactions.index',
+                                            )}
+                                            className="text-xs font-medium text-primary hover:underline"
+                                        >
+                                            View queue
+                                        </Link>
                                     </div>
-                                ) : (
-                                    <p className="border-y py-5 text-sm text-muted-foreground">
-                                        No cash transactions recorded for this
-                                        branch yet.
-                                    </p>
-                                )}
-                            </section>
+                                </CardHeader>
+                                <CardContent className="px-0">
+                                    {recent_activity.length ? (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full min-w-112 text-sm">
+                                                <thead className="text-left text-[10px] text-muted-foreground uppercase">
+                                                    <tr>
+                                                        <th className="py-2 pr-3 pl-6 font-medium">
+                                                            Transaction
+                                                        </th>
+                                                        <th className="py-2 pr-3 font-medium">
+                                                            Teller
+                                                        </th>
+                                                        <th className="py-2 pr-3 text-right font-medium">
+                                                            Amount
+                                                        </th>
+                                                        <th className="py-2 pr-6 font-medium">
+                                                            Status
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y">
+                                                    {recent_activity.map(
+                                                        (transaction) => (
+                                                            <tr
+                                                                key={
+                                                                    transaction.id
+                                                                }
+                                                                className="transition-colors hover:bg-muted/40"
+                                                            >
+                                                                <td className="py-2.5 pr-3 pl-6">
+                                                                    <div className="font-mono text-xs">
+                                                                        {
+                                                                            transaction.transaction_no
+                                                                        }
+                                                                    </div>
+                                                                    <div className="text-[10px] text-muted-foreground">
+                                                                        {transaction.type.replaceAll(
+                                                                            '_',
+                                                                            ' ',
+                                                                        )}
+                                                                        {transaction.cash_location
+                                                                            ? ` · ${transaction.cash_location}`
+                                                                            : ''}
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-2.5 pr-3 text-xs">
+                                                                    {transaction.teller ??
+                                                                        '-'}
+                                                                </td>
+                                                                <td className="py-2.5 pr-3 text-right text-xs font-medium tabular-nums">
+                                                                    {money(
+                                                                        transaction.amount,
+                                                                    )}
+                                                                </td>
+                                                                <td className="py-2.5 pr-6">
+                                                                    <StatusBadge
+                                                                        tone={
+                                                                            transaction.status ===
+                                                                            'POSTED'
+                                                                                ? 'success'
+                                                                                : transaction.status ===
+                                                                                    'PENDING'
+                                                                                  ? 'warning'
+                                                                                  : 'neutral'
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            transaction.status
+                                                                        }
+                                                                    </StatusBadge>
+                                                                </td>
+                                                            </tr>
+                                                        ),
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <p className="px-6 py-2 text-sm text-muted-foreground">
+                                            No cash transactions recorded for
+                                            this branch yet.
+                                        </p>
+                                    )}
+                                </CardContent>
+                            </Card>
                         </div>
                     </>
                 )}
