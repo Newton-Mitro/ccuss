@@ -7,7 +7,7 @@ import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatDate } from '@/lib/date_util';
 import type { CashAdjustmentFormPageProps } from '@/modules/treasury-cash/types/forms';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import {
     AlertTriangle,
     ArrowLeft,

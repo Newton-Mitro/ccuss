@@ -217,8 +217,8 @@ export default function FinancialProductForm() {
         (value) => ({ value, label: value }),
     );
 
-    const fieldClass = 'h-10 min-w-0 text-sm';
-    const labelClass = 'text-sm font-medium';
+    const fieldClass = 'h-9 min-w-0 text-sm';
+    const labelClass = 'text-xs font-medium';
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -226,22 +226,22 @@ export default function FinancialProductForm() {
                 title={`${editing ? 'Edit' : 'New'} ${isLoan ? 'Loan' : 'Financial'} Product`}
             />
 
-            <div className="mx-auto w-full max-w-6xl min-w-0 space-y-6 pb-8">
-                <header className="relative overflow-hidden rounded-2xl border bg-card px-5 py-5 shadow-sm sm:px-8 sm:py-7">
+            <div className="mx-auto w-full max-w-6xl min-w-0 space-y-4 pb-4">
+                <header className="relative overflow-hidden rounded-xl border bg-card px-4 py-4 shadow-sm sm:px-5 sm:py-5">
                     <div className="pointer-events-none absolute -top-20 right-8 size-56 rounded-full bg-primary/[0.07] blur-3xl" />
-                    <div className="relative flex w-full flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                        <div className="min-w-0 space-y-2">
+                    <div className="relative flex w-full flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                        <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                     {isLoan ? 'Lending' : 'Deposit products'}
                                 </span>
                             </div>
-                            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                            <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
                                 {editing
                                     ? `Edit ${isLoan ? 'loan' : 'financial'} product`
                                     : `Create ${isLoan ? 'loan' : 'financial'} product`}
                             </h1>
-                            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                            <p className="max-w-2xl text-xs leading-5 text-muted-foreground sm:text-sm">
                                 {isLoan
                                     ? 'Configure lending rules, interest rates and product availability.'
                                     : 'Configure product details, account terms and eligibility rules.'}
@@ -260,12 +260,12 @@ export default function FinancialProductForm() {
                     </div>
                 </header>
 
-                <form onSubmit={submit} className="space-y-6">
-                    <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-                        <div className="min-w-0 space-y-6">
+                <form onSubmit={submit} className="space-y-4">
+                    <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+                        <div className="min-w-0 space-y-4">
                             {/* Product details */}
                             <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                <div className="flex items-center gap-3 border-b bg-muted/20 px-5 py-4">
+                                <div className="flex items-center gap-2.5 border-b bg-muted/20 px-4 py-3">
                                     <FileText className="size-4 text-primary" />
                                     <h2 className="font-semibold">
                                         Product details
@@ -275,8 +275,8 @@ export default function FinancialProductForm() {
                                     </span>
                                 </div>
 
-                                <div className="grid gap-x-5 gap-y-5 p-5 sm:grid-cols-2 sm:p-7 lg:grid-cols-3">
-                                    <div className="min-w-0 space-y-2">
+                                <div className="grid gap-x-4 gap-y-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
+                                    <div className="min-w-0 space-y-1.5">
                                         <Label
                                             htmlFor="financial-product-code"
                                             className={labelClass}
@@ -298,7 +298,7 @@ export default function FinancialProductForm() {
                                         <InputError message={errors.code} />
                                     </div>
 
-                                    <div className="min-w-0 space-y-2">
+                                    <div className="min-w-0 space-y-1.5">
                                         <Label
                                             htmlFor="financial-product-name"
                                             className={labelClass}
@@ -320,7 +320,7 @@ export default function FinancialProductForm() {
                                         <InputError message={errors.name} />
                                     </div>
 
-                                    <div className="min-w-0 space-y-2">
+                                    <div className="min-w-0 space-y-1.5">
                                         <Label className={labelClass}>
                                             Category
                                         </Label>
@@ -343,7 +343,7 @@ export default function FinancialProductForm() {
                                         <InputError message={errors.category} />
                                     </div>
 
-                                    <div className="min-w-0 space-y-2">
+                                    <div className="min-w-0 space-y-1.5">
                                         <Label className={labelClass}>
                                             Balance type
                                         </Label>
@@ -367,7 +367,7 @@ export default function FinancialProductForm() {
                                         />
                                     </div>
 
-                                    <div className="min-w-0 space-y-2">
+                                    <div className="min-w-0 space-y-1.5">
                                         <Label className={labelClass}>
                                             Interest calculation
                                         </Label>
@@ -389,7 +389,7 @@ export default function FinancialProductForm() {
                                         />
                                     </div>
 
-                                    <div className="min-w-0 space-y-2">
+                                    <div className="min-w-0 space-y-1.5">
                                         <Label className={labelClass}>
                                             Interest frequency
                                         </Label>
@@ -414,15 +414,15 @@ export default function FinancialProductForm() {
                             {/* Loan interest settings */}
                             {isLoan && (
                                 <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                    <div className="flex items-center gap-3 border-b bg-muted/20 px-5 py-4">
+                                    <div className="flex items-center gap-2.5 border-b bg-muted/20 px-4 py-3">
                                         <BadgePercent className="size-4 text-primary" />
                                         <h2 className="font-semibold">
                                             Loan interest settings
                                         </h2>
                                     </div>
 
-                                    <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7 lg:grid-cols-3">
-                                        <div className="min-w-0 space-y-2">
+                                    <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
+                                        <div className="min-w-0 space-y-1.5">
                                             <Label
                                                 htmlFor="loan-interest-rate"
                                                 className={labelClass}
@@ -464,8 +464,8 @@ export default function FinancialProductForm() {
                             {/* Deposit terms */}
                             {!isLoan && (
                                 <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                    <div className="flex flex-col gap-3 border-b bg-muted/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-                                        <div className="flex items-center gap-3">
+                                    <div className="flex flex-col gap-3 border-b bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                                        <div className="flex items-center gap-2.5">
                                             <Settings2 className="size-5 text-primary" />
                                             <div>
                                                 <h2 className="font-semibold">
@@ -493,14 +493,14 @@ export default function FinancialProductForm() {
                                         </Button>
                                     </div>
 
-                                    <div className="space-y-4 p-5 sm:p-7">
+                                    <div className="space-y-3 p-4 sm:p-5">
                                         {data.terms.map((term, index) => (
                                             <fieldset
                                                 key={
                                                     term.id ??
                                                     `${term.code}-${index}`
                                                 }
-                                                className="min-w-0 rounded-xl border bg-muted/20 p-4 shadow-xs sm:p-5"
+                                                className="min-w-0 rounded-lg border bg-muted/20 p-3 shadow-xs sm:p-4"
                                             >
                                                 <div className="flex items-center justify-between gap-3 border-b pb-3">
                                                     <div className="flex min-w-0 items-center gap-2">
@@ -564,8 +564,8 @@ export default function FinancialProductForm() {
                                                     value={term.id ?? ''}
                                                 />
 
-                                                <div className="grid gap-x-4 gap-y-4 pt-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                                    <div className="min-w-0 space-y-2">
+                                                <div className="grid gap-x-3 gap-y-3 pt-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                                    <div className="min-w-0 space-y-1.5">
                                                         <Label
                                                             className={
                                                                 labelClass
@@ -599,7 +599,7 @@ export default function FinancialProductForm() {
                                                         />
                                                     </div>
 
-                                                    <div className="min-w-0 space-y-2">
+                                                    <div className="min-w-0 space-y-1.5">
                                                         <Label
                                                             className={
                                                                 labelClass
@@ -630,7 +630,7 @@ export default function FinancialProductForm() {
                                                         />
                                                     </div>
 
-                                                    <div className="min-w-0 space-y-2">
+                                                    <div className="min-w-0 space-y-1.5">
                                                         <Label
                                                             className={
                                                                 labelClass
@@ -665,7 +665,7 @@ export default function FinancialProductForm() {
                                                         />
                                                     </div>
 
-                                                    <div className="min-w-0 space-y-2">
+                                                    <div className="min-w-0 space-y-1.5">
                                                         <Label
                                                             className={
                                                                 labelClass
@@ -700,7 +700,7 @@ export default function FinancialProductForm() {
                                                         />
                                                     </div>
 
-                                                    <div className="min-w-0 space-y-2">
+                                                    <div className="min-w-0 space-y-1.5">
                                                         <Label
                                                             className={
                                                                 labelClass
@@ -743,7 +743,7 @@ export default function FinancialProductForm() {
                                                         />
                                                     </div>
 
-                                                    <div className="min-w-0 space-y-2">
+                                                    <div className="min-w-0 space-y-1.5">
                                                         <Label
                                                             className={
                                                                 labelClass
@@ -778,7 +778,7 @@ export default function FinancialProductForm() {
                                                         />
                                                     </div>
 
-                                                    <div className="min-w-0 space-y-2">
+                                                    <div className="min-w-0 space-y-1.5">
                                                         <Label
                                                             className={
                                                                 labelClass
@@ -813,7 +813,7 @@ export default function FinancialProductForm() {
                                                         />
                                                     </div>
 
-                                                    <div className="min-w-0 space-y-2">
+                                                    <div className="min-w-0 space-y-1.5">
                                                         <Label
                                                             className={
                                                                 labelClass
@@ -1014,8 +1014,8 @@ export default function FinancialProductForm() {
                                     </h2>
                                 </div>
 
-                                <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-7">
-                                    <label className="flex cursor-pointer items-center gap-3 rounded-xl border bg-background px-4 py-3.5 text-sm transition-colors hover:bg-muted/30">
+                                <div className="grid gap-2.5 p-4 sm:grid-cols-2 sm:p-5">
+                                    <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border bg-background px-3 py-2.5 text-sm transition-colors hover:bg-muted/30">
                                         <Input
                                             type="checkbox"
                                             checked={data.status}
@@ -1049,7 +1049,7 @@ export default function FinancialProductForm() {
                                         </span>
                                     </label>
 
-                                    <label className="flex cursor-pointer items-center gap-3 rounded-xl border bg-background px-4 py-3.5 text-sm transition-colors hover:bg-muted/30">
+                                    <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border bg-background px-3 py-2.5 text-sm transition-colors hover:bg-muted/30">
                                         <Input
                                             type="checkbox"
                                             checked={
@@ -1075,7 +1075,7 @@ export default function FinancialProductForm() {
                                     </label>
                                 </div>
 
-                                <div className="px-5 pb-5 sm:px-7 sm:pb-7">
+                                <div className="px-4 pb-4 sm:px-5 sm:pb-5">
                                     <InputError
                                         message={
                                             errors.customer_can_open_multiple_account
@@ -1086,13 +1086,13 @@ export default function FinancialProductForm() {
                             </section>
                         </div>
 
-                        <aside className="min-w-0 space-y-4 xl:sticky xl:top-4 xl:self-start">
+                        <aside className="min-w-0 space-y-3 xl:sticky xl:top-4 xl:self-start">
                             {isLoan ? (
-                                <section className="overflow-hidden rounded-3xl border border-border/70 bg-card shadow-xl ring-1 shadow-primary/[0.05] ring-foreground/[0.02]">
-                                    <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-5 py-5">
+                                <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm ring-1 shadow-primary/[0.05] ring-foreground/[0.02]">
+                                    <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-3">
                                         <div className="pointer-events-none absolute -top-12 right-0 size-36 rounded-full bg-primary/10 blur-3xl" />
                                         <div className="relative flex items-center gap-3">
-                                            <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                                            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
                                                 <Banknote className="size-5" />
                                             </span>
                                             <div className="min-w-0 flex-1">
@@ -1109,8 +1109,8 @@ export default function FinancialProductForm() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-4 p-4">
-                                        <div className="rounded-2xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-4 ring-1 ring-primary/10">
+                                    <div className="space-y-3 p-3">
+                                        <div className="rounded-xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3 ring-1 ring-primary/10">
                                             <div className="flex items-start justify-between gap-3">
                                                 <div className="min-w-0">
                                                     <p className="text-lg font-semibold tracking-tight break-words">
@@ -1136,7 +1136,7 @@ export default function FinancialProductForm() {
                                             </div>
                                         </div>
 
-                                        <div className="rounded-2xl border border-primary/15 bg-primary/[0.06] p-4">
+                                        <div className="rounded-xl border border-primary/15 bg-primary/[0.06] p-3">
                                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                 <BadgePercent className="size-4 text-primary" />
                                                 Annual interest rate
@@ -1223,8 +1223,8 @@ export default function FinancialProductForm() {
                                 </section>
                             ) : (
                                 <>
-                                    <section className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                                        <div className="border-b bg-muted/20 px-5 py-4">
+                                    <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                                        <div className="border-b bg-muted/20 px-4 py-3">
                                             <div className="flex items-center gap-3">
                                                 <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
                                                     <Banknote className="size-5" />
@@ -1241,7 +1241,7 @@ export default function FinancialProductForm() {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-4 p-5">
+                                        <div className="space-y-3 p-4">
                                             <div className="space-y-1">
                                                 <p className="text-lg font-semibold tracking-tight">
                                                     {data.name ||
@@ -1287,7 +1287,7 @@ export default function FinancialProductForm() {
                                             </div>
 
                                             {data.terms.length > 0 && (
-                                                <div className="space-y-2 border-t pt-4">
+                                                <div className="space-y-1.5 border-t pt-3">
                                                     <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                                                         Term options
                                                     </p>
@@ -1351,7 +1351,7 @@ export default function FinancialProductForm() {
                                         </div>
                                     </section>
 
-                                    <section className="rounded-2xl border border-primary/15 bg-primary/[0.035] p-5">
+                                    <section className="rounded-xl border border-primary/15 bg-primary/[0.035] p-4">
                                         <p className="text-sm font-semibold">
                                             Before you save
                                         </p>
@@ -1366,7 +1366,7 @@ export default function FinancialProductForm() {
                         </aside>
                     </div>
 
-                    <footer className="flex flex-col gap-4 rounded-2xl border bg-muted/20 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                    <footer className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                         <div className="min-w-0">
                             <p className="truncate text-sm font-medium">
                                 {editing
