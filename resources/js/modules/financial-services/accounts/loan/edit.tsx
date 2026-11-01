@@ -3,7 +3,6 @@ import InputError from '@/components/input-error';
 import { StatusBadge } from '@/components/resource-page-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
@@ -23,11 +22,11 @@ import { route } from 'ziggy-js';
 
 function DetailItem({ label, value }: { label: string; value: string }) {
     return (
-        <div className="min-w-0 rounded-lg border border-border/70 bg-background/70 px-3.5 py-3">
-            <dt className="text-xs font-medium text-muted-foreground">
+        <div className="min-w-0 rounded-lg border border-border/70 bg-background/70 px-2.5 py-2">
+            <dt className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
                 {label}
             </dt>
-            <dd className="mt-1 truncate text-sm font-semibold text-foreground">
+            <dd className="mt-0.5 truncate text-xs font-semibold text-foreground">
                 {value || '—'}
             </dd>
         </div>
@@ -125,8 +124,8 @@ export default function LoanAccountEdit() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit ${loanNumber}`} />
 
-            <div className="w-full max-w-7xl space-y-6 pb-8">
-                <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
+            <div className="w-full max-w-7xl space-y-4 pb-24">
+                <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title="Edit loan account"
                         description="Update the account display name and review the approved loan details."
@@ -143,138 +142,143 @@ export default function LoanAccountEdit() {
                     </div>
                 </div>
 
-                <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                    <div className="flex flex-col gap-4 border-b border-border bg-muted/20 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                        <div className="flex min-w-0 items-center gap-4">
-                            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                <FileText className="size-6" />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                                    Loan account
-                                </p>
-                                <h2 className="mt-1 truncate text-lg font-semibold tracking-tight">
-                                    {loanNumber}
-                                </h2>
-                                <p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-                                    <UserRound className="size-3.5 shrink-0" />
-                                    <span className="truncate">
-                                        {account.holder?.name ??
-                                            'Borrower not assigned'}
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center gap-2">
-                            <StatusBadge
-                                tone={
-                                    loan?.status?.toUpperCase() === 'ACTIVE'
-                                        ? 'success'
-                                        : 'neutral'
-                                }
-                            >
-                                {loan?.status ?? 'APPROVED'}
-                            </StatusBadge>
-                            <StatusBadge>
-                                {account.status ?? 'ACCOUNT STATUS UNKNOWN'}
-                            </StatusBadge>
-                        </div>
-                    </div>
-
-                    <div className="grid gap-px bg-border sm:grid-cols-2 xl:grid-cols-4">
-                        {summaryItems.map(({ label, value, icon: Icon }) => (
-                            <div
-                                key={label}
-                                className="flex items-center gap-3 bg-card px-5 py-4"
-                            >
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/8 text-primary">
-                                    <Icon className="size-4" />
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="text-xs text-muted-foreground">
-                                        {label}
-                                    </p>
-                                    <p className="mt-1 truncate text-sm font-semibold tabular-nums">
-                                        {value}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
                 <form
                     onSubmit={(event) => {
                         event.preventDefault();
                         put(route('loan-accounts.update', account.id));
                     }}
-                    className="space-y-5"
+                    className="grid items-start gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
                 >
-                    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                        <div className="flex items-center gap-3 border-b border-border px-5 py-4 sm:px-6">
-                            <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <PencilLine className="size-4" />
+                    <section className="overflow-hidden rounded-2xl border bg-card shadow-sm lg:col-span-2">
+                        <div className="relative overflow-hidden bg-gradient-to-r from-primary/[0.12] via-primary/[0.06] to-card p-4 text-foreground sm:p-5">
+                            <div className="pointer-events-none absolute -top-20 -right-10 size-56 rounded-full bg-primary/10 blur-3xl" />
+                            <div className="relative flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                                <div className="min-w-0">
+                                    <p className="text-[10px] font-semibold tracking-[0.16em] text-primary uppercase">
+                                        Loan account
+                                    </p>
+                                    <h2 className="mt-1 truncate text-lg font-semibold tracking-tight">
+                                        {loanNumber}
+                                    </h2>
+                                    <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                        <UserRound className="size-3.5 shrink-0 text-primary" />
+                                        <span className="truncate">
+                                            {account.holder?.name ??
+                                                'Borrower not assigned'}
+                                        </span>
+                                    </p>
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                                        <StatusBadge
+                                            tone={
+                                                loan?.status?.toUpperCase() ===
+                                                'ACTIVE'
+                                                    ? 'success'
+                                                    : 'neutral'
+                                            }
+                                        >
+                                            {loan?.status ?? 'APPROVED'}
+                                        </StatusBadge>
+                                        <StatusBadge>
+                                            {account.status ??
+                                                'ACCOUNT STATUS UNKNOWN'}
+                                        </StatusBadge>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 xl:min-w-[520px]">
+                                    {summaryItems.map(
+                                        ({ label, value, icon: Icon }) => (
+                                            <div
+                                                key={label}
+                                                className="flex min-w-0 items-center gap-2.5 rounded-xl border border-border/70 bg-background/75 px-3 py-2.5 shadow-sm"
+                                            >
+                                                <Icon className="size-4 shrink-0 text-primary" />
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-[10px] text-muted-foreground">
+                                                        {label}
+                                                    </p>
+                                                    <p className="truncate text-xs font-semibold tabular-nums">
+                                                        {value}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-sm font-semibold">
-                                    Account display name
-                                </h2>
-                                <p className="mt-0.5 text-xs text-muted-foreground">
-                                    This is the only editable field on this
-                                    account.
+                        </div>
+                    </section>
+
+                    <div className="min-w-0 space-y-3">
+                        <section className="overflow-hidden rounded-xl border border-primary/20 bg-card shadow-sm">
+                            <div className="flex items-center gap-2.5 border-b bg-primary/[0.04] px-3.5 py-2.5">
+                                <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <PencilLine className="size-3.5" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xs font-semibold">
+                                        Display name
+                                    </h2>
+                                    <p className="text-[10px] text-muted-foreground">
+                                        The only editable loan account detail
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="space-y-1.5 p-3">
+                                <Input
+                                    id="account-name"
+                                    aria-label="Display name"
+                                    placeholder="Enter account display name"
+                                    value={data.name}
+                                    onChange={(event) =>
+                                        setData('name', event.target.value)
+                                    }
+                                    aria-invalid={Boolean(errors.name)}
+                                    className="h-9"
+                                />
+                                <InputError message={errors.name} />
+                            </div>
+                        </section>
+
+                        <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+                            <div className="border-b px-3.5 py-2.5">
+                                <p className="text-[10px] font-semibold tracking-[0.12em] text-primary uppercase">
+                                    Account details
                                 </p>
+                                <h2 className="text-xs font-semibold">
+                                    Overview
+                                </h2>
                             </div>
-                        </div>
-                        <div className="max-w-2xl space-y-2 p-5 sm:px-6">
-                            <Label htmlFor="account-name">Display name</Label>
-                            <Input
-                                id="account-name"
-                                value={data.name}
-                                onChange={(event) =>
-                                    setData('name', event.target.value)
-                                }
-                                aria-invalid={Boolean(errors.name)}
-                                className="h-11"
-                            />
-                            <InputError message={errors.name} />
-                        </div>
-                    </section>
+                            <dl className="grid gap-2 p-3 sm:grid-cols-2 xl:grid-cols-3">
+                                {accountDetails.map((detail) => (
+                                    <DetailItem
+                                        key={detail.label}
+                                        {...detail}
+                                    />
+                                ))}
+                            </dl>
+                        </section>
+                    </div>
 
-                    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                        <div className="border-b border-border px-5 py-4 sm:px-6">
-                            <h2 className="text-sm font-semibold">
-                                Account overview
-                            </h2>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                Account identity, status and current balances.
-                            </p>
+                    <section className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-sm">
+                        <div className="flex items-center justify-between border-b px-3.5 py-2.5">
+                            <div>
+                                <p className="text-[10px] font-semibold tracking-[0.12em] text-primary uppercase">
+                                    Reference only
+                                </p>
+                                <h2 className="text-xs font-semibold">
+                                    Approved loan terms
+                                </h2>
+                            </div>
+                            <FileText className="size-4 text-muted-foreground" />
                         </div>
-                        <dl className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
-                            {accountDetails.map((detail) => (
-                                <DetailItem key={detail.label} {...detail} />
-                            ))}
-                        </dl>
-                    </section>
-
-                    <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                        <div className="border-b border-border px-5 py-4 sm:px-6">
-                            <h2 className="text-sm font-semibold">
-                                Approved loan terms
-                            </h2>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                Contract and servicing details are shown for
-                                reference and cannot be changed here.
-                            </p>
-                        </div>
-                        <dl className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
+                        <dl className="grid gap-2 p-3 sm:grid-cols-2">
                             {contractDetails.map((detail) => (
                                 <DetailItem key={detail.label} {...detail} />
                             ))}
                         </dl>
                     </section>
 
-                    <div className="flex flex-col-reverse gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    <div className="sticky bottom-0 z-10 -mx-4 flex flex-col-reverse gap-2 border-t bg-background/95 px-4 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:col-span-2">
                         <p className="text-xs text-muted-foreground">
                             Loan contract terms remain protected from this
                             screen.

@@ -71,15 +71,12 @@ export default function FiscalPeriodForm() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`${isEditing ? 'Edit' : 'Create'} Fiscal Period`} />
 
-            <div className="w-full min-w-0 space-y-6 pb-8">
+            <div className="w-full min-w-0 space-y-3 pb-4">
                 {/* Page header */}
-                <div className="flex flex-col gap-4 border-b border-border/60 pb-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary">
-                            <FileClock className="size-6" />
-                        </div>
-
-                        <div className="min-w-0 space-y-1">
+                <div className="flex flex-col gap-2 border-b border-border/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-2">
+                        <FileClock className="size-4 shrink-0 text-primary" />
+                        <div className="min-w-0 flex-1">
                             <HeadingSmall
                                 title={
                                     isEditing
@@ -95,7 +92,7 @@ export default function FiscalPeriodForm() {
                         </div>
                     </div>
 
-                    <div className="flex w-fit shrink-0 items-center gap-2 rounded-full border border-border bg-muted/40 px-3 py-2 text-xs font-medium text-muted-foreground">
+                    <div className="flex w-fit shrink-0 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground">
                         {isEditing ? (
                             <LockKeyhole className="size-3.5" />
                         ) : (
@@ -105,29 +102,29 @@ export default function FiscalPeriodForm() {
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div className="grid min-w-0 grid-cols-1 items-start gap-5 xl:grid-cols-3">
+                <form onSubmit={handleSubmit} className="space-y-3">
+                    <div className="grid min-w-0 grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_300px]">
                         {/* Period details */}
-                        <section className="min-w-0 overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm xl:col-span-2">
-                            <div className="flex items-start gap-3 border-b border-border/60 bg-muted/20 px-4 py-4 sm:px-6">
-                                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                    <CalendarDays className="size-5" />
+                        <section className="min-w-0 overflow-hidden rounded-xl border border-border/70 bg-card xl:col-span-1">
+                            <div className="flex items-center gap-2.5 border-b border-border/60 bg-muted/20 px-3 py-2.5">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <CalendarDays className="size-4" />
                                 </div>
 
-                                <div className="space-y-1">
+                                <div>
                                     <h2 className="text-sm font-semibold tracking-tight">
                                         Period Details
                                     </h2>
-                                    <p className="text-xs leading-5 text-muted-foreground">
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         Configure the period name, parent fiscal
                                         year, and date range.
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-5 p-4 sm:p-6">
+                            <div className="grid gap-x-3 gap-y-3 p-3 sm:grid-cols-2">
                                 {/* Period name */}
-                                <div className="space-y-2">
+                                <div className="space-y-1">
                                     <Label htmlFor="name">
                                         Period Name
                                         <span className="ml-1 text-destructive">
@@ -144,20 +141,20 @@ export default function FiscalPeriodForm() {
                                         placeholder="e.g. July 2026"
                                         autoComplete="off"
                                         aria-invalid={Boolean(errors.name)}
-                                        className="h-11 w-full"
+                                        className="mt-1 h-9 w-full"
                                         required
                                     />
 
                                     <InputError message={errors.name} />
 
-                                    <p className="text-xs leading-5 text-muted-foreground">
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         Use a clear name for reports and
                                         accounting records.
                                     </p>
                                 </div>
 
                                 {/* Parent fiscal year */}
-                                <div className="space-y-2">
+                                <div className="space-y-1">
                                     <Label htmlFor="fiscal_year_id">
                                         Parent Fiscal Year
                                         <span className="ml-1 text-destructive">
@@ -166,6 +163,7 @@ export default function FiscalPeriodForm() {
                                     </Label>
 
                                     <Select
+                                        className="mt-1 h-9 w-full"
                                         value={data.fiscal_year_id}
                                         onChange={(value) =>
                                             setData('fiscal_year_id', value)
@@ -182,15 +180,15 @@ export default function FiscalPeriodForm() {
                                         message={errors.fiscal_year_id}
                                     />
 
-                                    <p className="text-xs leading-5 text-muted-foreground">
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         Select the fiscal year this accounting
                                         period belongs to.
                                     </p>
                                 </div>
 
                                 {/* Date range */}
-                                <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2">
-                                    <div className="min-w-0 space-y-2">
+                                <div className="grid min-w-0 grid-cols-1 gap-3 sm:col-span-2 md:grid-cols-2">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="start_date">
                                             Start Date
                                             <span className="ml-1 text-destructive">
@@ -199,7 +197,9 @@ export default function FiscalPeriodForm() {
                                         </Label>
 
                                         <AppDatePicker
+                                            id="start_date"
                                             value={data.start_date}
+                                            className="mt-1 h-9"
                                             onChange={(value) =>
                                                 setData('start_date', value)
                                             }
@@ -209,12 +209,12 @@ export default function FiscalPeriodForm() {
                                             message={errors.start_date}
                                         />
 
-                                        <p className="text-xs leading-5 text-muted-foreground">
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                             First day of the accounting period.
                                         </p>
                                     </div>
 
-                                    <div className="min-w-0 space-y-2">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="end_date">
                                             End Date
                                             <span className="ml-1 text-destructive">
@@ -223,7 +223,9 @@ export default function FiscalPeriodForm() {
                                         </Label>
 
                                         <AppDatePicker
+                                            id="end_date"
                                             value={data.end_date}
+                                            className="mt-1 h-9"
                                             onChange={(value) =>
                                                 setData('end_date', value)
                                             }
@@ -231,15 +233,15 @@ export default function FiscalPeriodForm() {
 
                                         <InputError message={errors.end_date} />
 
-                                        <p className="text-xs leading-5 text-muted-foreground">
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                             Last day of the accounting period.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-muted/20 p-3.5">
-                                    <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                    <p className="text-xs leading-5 text-muted-foreground">
+                                <div className="flex items-start gap-2 rounded-lg border border-border/60 bg-muted/20 p-2.5 sm:col-span-2">
+                                    <Info className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         Ensure the period dates fall within the
                                         selected fiscal year and follow your
                                         organization’s accounting calendar.
@@ -249,30 +251,31 @@ export default function FiscalPeriodForm() {
                         </section>
 
                         {/* Period status */}
-                        <section className="min-w-0 overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm">
-                            <div className="flex items-start gap-3 border-b border-border/60 bg-muted/20 px-4 py-4 sm:px-5">
-                                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                    <LockKeyhole className="size-5" />
+                        <section className="min-w-0 overflow-hidden rounded-xl border border-border/70 bg-card">
+                            <div className="flex items-center gap-2.5 border-b border-border/60 bg-muted/20 px-3 py-2.5">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <LockKeyhole className="size-4" />
                                 </div>
 
-                                <div className="space-y-1">
+                                <div>
                                     <h2 className="text-sm font-semibold tracking-tight">
                                         Period Status
                                     </h2>
-                                    <p className="text-xs leading-5 text-muted-foreground">
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         Manage the operational status of this
                                         accounting period.
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-5 p-4 sm:p-5">
-                                <div className="space-y-2">
+                            <div className="space-y-3 p-3">
+                                <div className="space-y-1">
                                     <Label htmlFor="status">
                                         Operational Status
                                     </Label>
 
                                     <Select
+                                        className="mt-1 h-9 w-full"
                                         value={data.status}
                                         onChange={(value) =>
                                             setData('status', value)
@@ -285,9 +288,9 @@ export default function FiscalPeriodForm() {
                                 </div>
 
                                 {/* Dynamic status information */}
-                                <div className="rounded-xl border border-border/70 bg-muted/20 p-4">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-muted-foreground">
+                                <div className="rounded-lg border border-border/70 bg-muted/20 p-2.5">
+                                    <div className="flex items-start gap-2">
+                                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-muted-foreground">
                                             {data.status === 'OPEN' ? (
                                                 <Clock3 className="size-4" />
                                             ) : (
@@ -295,14 +298,14 @@ export default function FiscalPeriodForm() {
                                             )}
                                         </div>
 
-                                        <div className="min-w-0 space-y-1.5">
-                                            <p className="text-sm font-semibold">
+                                        <div className="min-w-0 space-y-1">
+                                            <p className="text-xs font-semibold">
                                                 {selectedStatus?.label ??
                                                     data.status ??
                                                     'No status selected'}
                                             </p>
 
-                                            <p className="text-xs leading-5 text-muted-foreground">
+                                            <p className="text-[11px] leading-4 text-muted-foreground">
                                                 {data.status === 'OPEN'
                                                     ? 'This period is marked as open. Transaction availability depends on your accounting rules.'
                                                     : data.status === 'CLOSED'
@@ -313,7 +316,7 @@ export default function FiscalPeriodForm() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 border-t border-border/60 pt-4">
+                                <div className="space-y-2 border-t border-border/60 pt-3">
                                     <div className="flex items-center justify-between gap-3 text-xs">
                                         <span className="text-muted-foreground">
                                             Record type
@@ -350,7 +353,7 @@ export default function FiscalPeriodForm() {
                     </div>
 
                     {/* Sticky action bar */}
-                    <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-xl border border-border/70 bg-background/95 p-3 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/85 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    <div className="sticky bottom-2 z-10 flex flex-col gap-2 rounded-lg border border-border/70 bg-background/95 p-2.5 shadow-md backdrop-blur supports-[backdrop-filter]:bg-background/85 sm:flex-row sm:items-center sm:justify-between sm:px-3">
                         <p className="hidden text-xs text-muted-foreground sm:block">
                             <span className="text-destructive">*</span> Required
                             fields
@@ -374,7 +377,7 @@ export default function FiscalPeriodForm() {
                             <Button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full gap-2 sm:w-auto sm:min-w-40"
+                                className="h-9 w-full gap-2 sm:w-auto sm:min-w-40"
                             >
                                 {processing ? (
                                     <>

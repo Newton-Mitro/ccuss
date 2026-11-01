@@ -4,6 +4,7 @@ import {
     ResourceEmptyState,
     StatusBadge,
 } from '@/components/resource-page-shell';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
@@ -46,19 +47,21 @@ export default function Index() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Cheque Books" />
             <div className="space-y-4 text-foreground">
-                <div className="flex items-center justify-around gap-4 sm:justify-between">
-                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-                        <HeadingSmall
-                            title="Cheque Books"
-                            description="Review cheque books assigned to the active organization bank accounts."
-                        />
-                    </div>
-                    <Link
-                        href={route('cheque-books.create')}
-                        className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <HeadingSmall
+                        title="Cheque Books"
+                        description="Review cheque books assigned to the active organization bank accounts."
+                    />
+                    <Button
+                        asChild
+                        size="sm"
+                        className="h-9 shrink-0 gap-2 px-4 whitespace-nowrap"
                     >
-                        <Plus className="h-4 w-4" /> Create cheque book
-                    </Link>
+                        <Link href={route('cheque-books.create')}>
+                            <Plus className="size-4" />
+                            Create cheque book
+                        </Link>
+                    </Button>
                 </div>
                 <Input
                     className="w-full bg-card sm:w-80"

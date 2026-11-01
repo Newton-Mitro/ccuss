@@ -104,28 +104,25 @@ export default function Edit({
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit ${ledger.code ?? 'Ledger Account'}`} />
 
-            <div className="w-full min-w-0 space-y-5 pb-10 text-foreground sm:space-y-6">
+            <div className="w-full min-w-0 space-y-3 pb-4 text-foreground">
                 {/* Page header */}
-                <div className="flex min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border bg-linear-to-r from-primary/10 via-card to-card p-4 shadow-sm sm:flex-row sm:items-center sm:p-6">
-                    <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary sm:size-12">
-                            <Landmark className="size-5 sm:size-6" />
-                        </div>
-
-                        <div className="min-w-0">
+                <div className="flex min-w-0 flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                    <div className="flex min-w-0 items-start gap-2">
+                        <Landmark className="mt-1 size-4 shrink-0 text-primary" />
+                        <div className="min-w-0 flex-1">
                             <HeadingSmall
                                 title="Edit Ledger Account"
                                 description="Update the account’s classification, hierarchy, and reconciliation behavior."
                             />
 
-                            <div className="mt-3 flex flex-wrap items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
-                                    <FolderTree className="size-3.5" />
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-border bg-background/70 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                    <FolderTree className="size-3" />
                                     Chart of Accounts
                                 </span>
 
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[11px] font-medium text-primary">
-                                    <Activity className="size-3.5" />
+                                <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[10px] font-medium text-primary">
+                                    <Activity className="size-3" />
                                     Editing account
                                 </span>
                             </div>
@@ -135,7 +132,7 @@ export default function Edit({
                     <Button
                         variant="outline"
                         asChild
-                        className="w-full shrink-0 sm:w-auto"
+                        className="h-9 w-full shrink-0 sm:w-auto"
                     >
                         <Link href={route('ledger-accounts.index')}>
                             <ArrowLeft className="mr-2 size-4" />
@@ -146,13 +143,13 @@ export default function Edit({
 
                 <form
                     onSubmit={handleSubmit}
-                    className="grid min-w-0 items-start gap-5 xl:grid-cols-3"
+                    className="grid min-w-0 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_300px]"
                 >
                     {/* Main form */}
-                    <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm xl:col-span-2">
-                        <div className="flex min-w-0 items-start gap-3 border-b border-border bg-muted/20 px-4 py-4 sm:px-6">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                <Landmark className="size-5" />
+                    <div className="min-w-0 overflow-hidden rounded-xl border border-border/80 bg-card">
+                        <div className="flex min-w-0 items-center gap-2.5 border-b border-border bg-muted/20 px-3 py-2.5">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Landmark className="size-4" />
                             </div>
 
                             <div className="min-w-0">
@@ -160,16 +157,16 @@ export default function Edit({
                                     Account configuration
                                 </h2>
 
-                                <p className="mt-1 text-xs leading-relaxed break-words text-muted-foreground">
+                                <p className="text-[11px] leading-4 break-words text-muted-foreground">
                                     Editing {ledger.code || 'ledger account'}
                                     {ledger.name ? ` · ${ledger.name}` : ''}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="space-y-7 p-4 sm:p-6">
+                        <div className="space-y-3 p-3">
                             {/* Basic information */}
-                            <section className="space-y-4">
+                            <section className="space-y-2">
                                 <div className="flex items-start gap-3">
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                                         <Landmark className="size-4" />
@@ -179,15 +176,15 @@ export default function Edit({
                                         <h3 className="text-sm font-semibold">
                                             Basic information
                                         </h3>
-                                        <p className="mt-1 text-xs text-muted-foreground">
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                             Update the account code and
                                             descriptive name.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-4 sm:grid-cols-2">
-                                    <div className="min-w-0 space-y-1.5">
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="ledger-code">
                                             Account code
                                         </Label>
@@ -201,14 +198,14 @@ export default function Edit({
                                                     event.target.value,
                                                 )
                                             }
-                                            className="h-10"
+                                            className="mt-1 h-9"
                                             aria-invalid={Boolean(errors.code)}
                                         />
 
                                         <InputError message={errors.code} />
                                     </div>
 
-                                    <div className="min-w-0 space-y-1.5">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="ledger-name">
                                             Account name
                                         </Label>
@@ -222,7 +219,7 @@ export default function Edit({
                                                     event.target.value,
                                                 )
                                             }
-                                            className="h-10"
+                                            className="mt-1 h-9"
                                             aria-invalid={Boolean(errors.name)}
                                         />
 
@@ -232,7 +229,7 @@ export default function Edit({
                             </section>
 
                             {/* Classification and hierarchy */}
-                            <section className="space-y-4 border-t border-border pt-6">
+                            <section className="space-y-2 border-t border-border pt-3">
                                 <div className="flex items-start gap-3">
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                                         <FolderTree className="size-4" />
@@ -242,7 +239,7 @@ export default function Edit({
                                         <h3 className="text-sm font-semibold">
                                             Classification and hierarchy
                                         </h3>
-                                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                             Choose the account type, normal
                                             balance, group, and parent
                                             relationship.
@@ -250,13 +247,14 @@ export default function Edit({
                                     </div>
                                 </div>
 
-                                <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
-                                    <div className="min-w-0 space-y-1.5">
+                                <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="ledger-type">
                                             Account type
                                         </Label>
 
                                         <Select
+                                            className="mt-1 h-9 w-full"
                                             value={data.type}
                                             onChange={(value) =>
                                                 setData('type', value)
@@ -274,12 +272,13 @@ export default function Edit({
                                         <InputError message={errors.type} />
                                     </div>
 
-                                    <div className="min-w-0 space-y-1.5">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="normal-balance">
                                             Normal balance
                                         </Label>
 
                                         <Select
+                                            className="mt-1 h-9 w-full"
                                             value={data.normal_balance}
                                             onChange={(value) =>
                                                 setData('normal_balance', value)
@@ -302,12 +301,13 @@ export default function Edit({
                                         />
                                     </div>
 
-                                    <div className="min-w-0 space-y-1.5">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="account-group">
                                             Account group
                                         </Label>
 
                                         <Select
+                                            className="mt-1 h-9 w-full"
                                             value={data.account_group_id}
                                             onChange={(value) =>
                                                 setData(
@@ -335,12 +335,13 @@ export default function Edit({
                                         />
                                     </div>
 
-                                    <div className="min-w-0 space-y-1.5">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="parent-account">
                                             Parent account
                                         </Label>
 
                                         <Select
+                                            className="mt-1 h-9 w-full"
                                             value={data.parent_id}
                                             onChange={(value) =>
                                                 setData('parent_id', value)
@@ -375,7 +376,7 @@ export default function Edit({
                             </section>
 
                             {/* Account settings */}
-                            <section className="space-y-4 border-t border-border pt-6">
+                            <section className="space-y-2 border-t border-border pt-3">
                                 <div className="flex items-start gap-3">
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                                         <ShieldCheck className="size-4" />
@@ -385,14 +386,14 @@ export default function Edit({
                                         <h3 className="text-sm font-semibold">
                                             Account settings
                                         </h3>
-                                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                             Configure how the account is used
                                             and managed.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="grid gap-2 sm:grid-cols-2">
                                     {settingOptions.map(
                                         ({
                                             key,
@@ -403,14 +404,14 @@ export default function Edit({
                                             <label
                                                 key={key}
                                                 htmlFor={`setting-${key}`}
-                                                className={`flex min-w-0 cursor-pointer items-start gap-3 rounded-xl border p-3.5 transition-colors ${
+                                                className={`flex min-w-0 cursor-pointer items-start gap-2 rounded-lg border p-2.5 transition-colors ${
                                                     data[key]
                                                         ? 'border-primary/30 bg-primary/5'
                                                         : 'border-border bg-background hover:bg-muted/30'
                                                 }`}
                                             >
                                                 <span
-                                                    className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
+                                                    className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${
                                                         data[key]
                                                             ? 'bg-primary/10 text-primary'
                                                             : 'bg-muted text-muted-foreground'
@@ -424,7 +425,7 @@ export default function Edit({
                                                         {label}
                                                     </span>
 
-                                                    <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+                                                    <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
                                                         {description}
                                                     </span>
                                                 </span>
@@ -455,10 +456,10 @@ export default function Edit({
                     </div>
 
                     {/* Preview sidebar */}
-                    <aside className="min-w-0 space-y-4 xl:sticky xl:top-5">
-                        <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                            <div className="flex items-center gap-3 border-b border-border px-4 py-4">
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <aside className="min-w-0 space-y-3 xl:sticky xl:top-4">
+                        <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm">
+                            <div className="flex items-center gap-2.5 border-b border-border px-3 py-2.5">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                     <FolderTree className="size-4" />
                                 </div>
 
@@ -466,16 +467,16 @@ export default function Edit({
                                     <h2 className="text-sm font-semibold">
                                         Live preview
                                     </h2>
-                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                    <p className="text-[11px] text-muted-foreground">
                                         Updated account details
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-5 p-4">
-                                <div className="flex min-w-0 items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-3.5">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                        <Landmark className="size-5" />
+                            <div className="space-y-3 p-3">
+                                <div className="flex min-w-0 items-start gap-2.5 rounded-lg border border-primary/15 bg-primary/5 p-2.5">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <Landmark className="size-4" />
                                     </div>
 
                                     <div className="min-w-0 flex-1">
@@ -483,25 +484,25 @@ export default function Edit({
                                             {data.name || 'Account name'}
                                         </p>
 
-                                        <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                        <p className="font-mono text-[11px] text-muted-foreground">
                                             {data.code || 'ACCOUNT-CODE'}
                                         </p>
                                     </div>
                                 </div>
 
                                 <dl className="divide-y divide-border">
-                                    <div className="flex items-center justify-between gap-3 py-3">
+                                    <div className="flex items-center justify-between gap-3 py-2">
                                         <dt className="text-xs text-muted-foreground">
                                             Account type
                                         </dt>
 
-                                        <dd className="max-w-[60%] truncate rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-right text-[11px] font-semibold text-primary">
+                                        <dd className="max-w-[60%] truncate rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-right text-[10px] font-semibold text-primary">
                                             {selectedType?.label ??
                                                 'Not selected'}
                                         </dd>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-3 py-3">
+                                    <div className="flex items-center justify-between gap-3 py-2">
                                         <dt className="text-xs text-muted-foreground">
                                             Normal balance
                                         </dt>
@@ -518,7 +519,7 @@ export default function Edit({
                                         </dd>
                                     </div>
 
-                                    <div className="flex items-start justify-between gap-3 py-3">
+                                    <div className="flex items-start justify-between gap-3 py-2">
                                         <dt className="pt-0.5 text-xs text-muted-foreground">
                                             Account group
                                         </dt>
@@ -530,7 +531,7 @@ export default function Edit({
                                         </dd>
                                     </div>
 
-                                    <div className="flex items-start justify-between gap-3 py-3">
+                                    <div className="flex items-start justify-between gap-3 py-2">
                                         <dt className="pt-0.5 text-xs text-muted-foreground">
                                             Parent account
                                         </dt>
@@ -542,7 +543,7 @@ export default function Edit({
                                         </dd>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-3 py-3">
+                                    <div className="flex items-center justify-between gap-3 py-2">
                                         <dt className="text-xs text-muted-foreground">
                                             Status
                                         </dt>
@@ -569,8 +570,8 @@ export default function Edit({
                                     </div>
                                 </dl>
 
-                                <div className="border-t border-border pt-4">
-                                    <p className="mb-2.5 text-xs font-semibold">
+                                <div className="border-t border-border pt-3">
+                                    <p className="mb-2 text-[11px] font-semibold">
                                         Enabled settings
                                     </p>
 
@@ -598,8 +599,8 @@ export default function Edit({
                             </div>
                         </section>
 
-                        <section className="rounded-2xl border border-border bg-muted/20 p-4">
-                            <div className="flex items-start gap-3">
+                        <section className="rounded-xl border border-border/80 bg-muted/20 p-3">
+                            <div className="flex items-start gap-2.5">
                                 <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                     <CircleHelp className="size-4" />
                                 </div>
@@ -609,7 +610,7 @@ export default function Edit({
                                         Keep the hierarchy consistent
                                     </h3>
 
-                                    <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                                    <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
                                         Select a group and parent that match the
                                         account’s purpose. Its normal balance
                                         should reflect how the balance typically
@@ -623,7 +624,7 @@ export default function Edit({
                     {/* Sticky form actions */}
                     <div
                         data-slot="page-sticky-action-bar"
-                        className="sticky bottom-0 z-10 flex flex-col-reverse gap-3 border-t border-border bg-card/95 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6 xl:col-span-full"
+                        className="sticky bottom-0 z-10 flex flex-col-reverse gap-2 border-t border-border bg-card/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between xl:col-span-full"
                     >
                         <p className="text-xs leading-relaxed text-muted-foreground">
                             Review your changes before saving.
@@ -634,7 +635,7 @@ export default function Edit({
                                 variant="outline"
                                 type="button"
                                 asChild
-                                className="w-full sm:w-auto"
+                                className="h-9 w-full sm:w-auto"
                             >
                                 <Link href={route('ledger-accounts.index')}>
                                     Cancel
@@ -644,7 +645,7 @@ export default function Edit({
                             <Button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full sm:w-auto"
+                                className="h-9 w-full sm:w-auto"
                             >
                                 {processing ? (
                                     <LoaderCircle className="mr-2 size-4 animate-spin" />

@@ -83,7 +83,7 @@ export default function CreatePettyCashAccount() {
     ];
 
     const inputClassName = 'mt-1 h-9 w-full';
-    const sectionClassName = 'rounded-xl border bg-card p-3 sm:p-4';
+    const sectionClassName = 'rounded-xl border border-border/80 bg-card p-3';
 
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
@@ -93,10 +93,10 @@ export default function CreatePettyCashAccount() {
                 }
             />
 
-            <div className="w-full max-w-7xl space-y-3 pb-20">
-                <header className="flex flex-col gap-2 py-1 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0 space-y-1">
-                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
+            <div className="w-full max-w-7xl space-y-3 pb-4">
+                <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0 space-y-0.5">
+                        <p className="text-[10px] font-semibold tracking-[0.16em] text-primary uppercase">
                             Treasury &amp; cash · Petty cash
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
@@ -111,7 +111,7 @@ export default function CreatePettyCashAccount() {
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs leading-5 text-muted-foreground">
+                        <p className="text-[11px] leading-4 text-muted-foreground">
                             {editing
                                 ? 'Update fund details, custody, and operational status.'
                                 : 'Set up the fund, assign a custodian, and define its financial limits.'}
@@ -122,7 +122,7 @@ export default function CreatePettyCashAccount() {
                         asChild
                         variant="outline"
                         size="sm"
-                        className="shrink-0"
+                        className="h-9 shrink-0"
                     >
                         <Link href={route('petty-cash-accounts.index')}>
                             <ArrowLeft className="size-4" />
@@ -132,11 +132,11 @@ export default function CreatePettyCashAccount() {
                 </header>
 
                 <form onSubmit={submit} className="space-y-3">
-                    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+                    <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
                         <div className="min-w-0 space-y-3">
                             {/* Fund identity */}
                             <section className={sectionClassName}>
-                                <div className="mb-3 flex items-center gap-3">
+                                <div className="mb-2.5 flex items-center gap-2.5">
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                         <FileText className="size-4 text-foreground" />
                                     </div>
@@ -145,15 +145,15 @@ export default function CreatePettyCashAccount() {
                                         <h2 className="text-sm font-semibold">
                                             Fund information
                                         </h2>
-                                        <p className="text-xs leading-4 text-muted-foreground">
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                             Define the fund's identification and
                                             replenishment method.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
-                                    <div className="space-y-1.5">
+                                <div className="grid gap-x-3 gap-y-2.5 sm:grid-cols-2">
+                                    <div className="space-y-1">
                                         <Label htmlFor="code">
                                             Fund code
                                             <span className="ml-1 text-destructive">
@@ -176,7 +176,7 @@ export default function CreatePettyCashAccount() {
                                         <InputError message={errors.code} />
                                     </div>
 
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                         <Label htmlFor="method">
                                             Replenishment method
                                             <span className="ml-1 text-destructive">
@@ -202,14 +202,13 @@ export default function CreatePettyCashAccount() {
                                             ]}
                                         />
                                         <InputError message={errors.method} />
-                                        <p className="text-xs leading-4 text-muted-foreground">
-                                            Imprest maintains an authorized fund
-                                            level; variable allows a flexible
-                                            fund limit.
+                                        <p className="text-[10px] leading-4 text-muted-foreground">
+                                            Imprest keeps a fixed authorized
+                                            level; variable allows flexibility.
                                         </p>
                                     </div>
 
-                                    <div className="space-y-1.5 sm:col-span-2">
+                                    <div className="space-y-1 sm:col-span-2">
                                         <Label htmlFor="name">
                                             Fund name
                                             <span className="ml-1 text-destructive">
@@ -235,7 +234,7 @@ export default function CreatePettyCashAccount() {
 
                             {/* Branch and custody */}
                             <section className={sectionClassName}>
-                                <div className="mb-3 flex items-center gap-3">
+                                <div className="mb-2.5 flex items-center gap-2.5">
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                         <Building2 className="size-4 text-foreground" />
                                     </div>
@@ -244,7 +243,7 @@ export default function CreatePettyCashAccount() {
                                         <h2 className="text-sm font-semibold">
                                             Branch & custody
                                         </h2>
-                                        <p className="text-xs leading-4 text-muted-foreground">
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                             Select the branch responsible for
                                             the fund and the user accountable
                                             for its custody.
@@ -252,8 +251,8 @@ export default function CreatePettyCashAccount() {
                                     </div>
                                 </div>
 
-                                <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2">
-                                    <div className="space-y-1.5">
+                                <div className="grid gap-x-3 gap-y-2.5 sm:grid-cols-3">
+                                    <div className="space-y-1">
                                         <Label htmlFor="branch_id">
                                             Branch
                                             <span className="ml-1 text-destructive">
@@ -294,7 +293,7 @@ export default function CreatePettyCashAccount() {
                                         )}
                                     </div>
 
-                                    <div className="space-y-1.5">
+                                    <div className="space-y-1">
                                         <Label htmlFor="custodian_id">
                                             Fund custodian
                                             <span className="ml-1 text-destructive">
@@ -323,17 +322,42 @@ export default function CreatePettyCashAccount() {
                                         <InputError
                                             message={errors.custodian_id}
                                         />
-                                        <p className="text-xs leading-4 text-muted-foreground">
-                                            The assigned user responsible for
-                                            managing petty cash.
-                                        </p>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label htmlFor="status">
+                                            Fund status
+                                        </Label>
+                                        <Select
+                                            id="status"
+                                            className={inputClassName}
+                                            value={data.status}
+                                            onChange={(value) =>
+                                                setData('status', value)
+                                            }
+                                            options={[
+                                                {
+                                                    value: 'ACTIVE',
+                                                    label: 'Active — available',
+                                                },
+                                                {
+                                                    value: 'INACTIVE',
+                                                    label: 'Inactive — unavailable',
+                                                },
+                                                {
+                                                    value: 'CLOSED',
+                                                    label: 'Closed — permanently closed',
+                                                },
+                                            ]}
+                                        />
+                                        <InputError message={errors.status} />
                                     </div>
                                 </div>
                             </section>
 
                             {/* Financial controls */}
                             <section className={sectionClassName}>
-                                <div className="mb-3 flex items-center gap-3">
+                                <div className="mb-2.5 flex items-center gap-2.5">
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                         <CircleDollarSign className="size-4 text-foreground" />
                                     </div>
@@ -342,20 +366,20 @@ export default function CreatePettyCashAccount() {
                                         <h2 className="text-sm font-semibold">
                                             Financial controls
                                         </h2>
-                                        <p className="text-xs leading-4 text-muted-foreground">
-                                            Set the authorized fund limit and
-                                            review the recorded cash balance.
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
+                                            Set the authorized limit and opening
+                                            balance.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded-lg border bg-background p-3">
-                                        <div className="mb-2 flex items-center gap-2">
-                                            <Landmark className="size-4 text-muted-foreground" />
+                                <div className="grid gap-2.5 sm:grid-cols-2">
+                                    <div className="rounded-lg border bg-background p-2.5">
+                                        <div className="mb-1.5 flex items-center gap-1.5">
+                                            <Landmark className="size-3.5 text-muted-foreground" />
                                             <Label
                                                 htmlFor="fund_limit"
-                                                className="font-medium"
+                                                className="text-xs font-medium"
                                             >
                                                 Fund limit
                                                 <span className="ml-1 text-destructive">
@@ -387,18 +411,18 @@ export default function CreatePettyCashAccount() {
                                         <InputError
                                             message={errors.fund_limit}
                                         />
-                                        <p className="mt-1 text-xs text-muted-foreground">
+                                        <p className="mt-1 text-[10px] text-muted-foreground">
                                             Maximum authorized fund amount.
                                         </p>
                                     </div>
 
                                     {!editing ? (
-                                        <div className="rounded-lg border bg-background p-3">
-                                            <div className="mb-2 flex items-center gap-2">
-                                                <Banknote className="size-4 text-muted-foreground" />
+                                        <div className="rounded-lg border bg-background p-2.5">
+                                            <div className="mb-1.5 flex items-center gap-1.5">
+                                                <Banknote className="size-3.5 text-muted-foreground" />
                                                 <Label
                                                     htmlFor="current_balance"
-                                                    className="font-medium"
+                                                    className="text-xs font-medium"
                                                 >
                                                     Opening funding amount
                                                     <span className="ml-1 text-destructive">
@@ -430,29 +454,27 @@ export default function CreatePettyCashAccount() {
                                             <InputError
                                                 message={errors.current_balance}
                                             />
-                                            <p className="mt-1 text-xs leading-4 text-muted-foreground">
-                                                A positive amount queues pending
-                                                funding. Posting it updates the
-                                                balance and creates the voucher;
-                                                the selected branch needs an
-                                                open business day.
+                                            <p className="mt-1 text-[10px] leading-4 text-muted-foreground">
+                                                Positive funding is queued for
+                                                posting and requires an open
+                                                branch business day.
                                             </p>
                                         </div>
                                     ) : (
-                                        <div className="rounded-lg border bg-muted/30 p-3">
-                                            <div className="mb-2 flex items-center gap-2">
-                                                <Wallet className="size-4 text-muted-foreground" />
-                                                <span className="text-sm font-medium">
+                                        <div className="rounded-lg border bg-muted/30 p-2.5">
+                                            <div className="mb-1.5 flex items-center gap-1.5">
+                                                <Wallet className="size-3.5 text-muted-foreground" />
+                                                <span className="text-xs font-medium">
                                                     Current balance
                                                 </span>
                                             </div>
 
-                                            <p className="text-2xl font-semibold tracking-tight tabular-nums">
+                                            <p className="text-xl font-semibold tracking-tight tabular-nums">
                                                 {formatBDTCurrency(
                                                     fund?.current_balance ?? 0,
                                                 )}
                                             </p>
-                                            <p className="mt-1 text-xs leading-4 text-muted-foreground">
+                                            <p className="mt-1 text-[10px] leading-4 text-muted-foreground">
                                                 Read-only balance. Use
                                                 authorized transactions to
                                                 change the fund balance.
@@ -461,102 +483,46 @@ export default function CreatePettyCashAccount() {
                                     )}
                                 </div>
                             </section>
-
-                            {/* Operational status */}
-                            <section className={sectionClassName}>
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-                                            <UserRound className="size-4 text-foreground" />
-                                        </div>
-
-                                        <div>
-                                            <h2 className="text-sm font-semibold">
-                                                Operational status
-                                            </h2>
-                                            <p className="text-xs leading-4 text-muted-foreground">
-                                                Determine whether this fund is
-                                                available for operational use.
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="w-full sm:w-64">
-                                        <Label
-                                            htmlFor="status"
-                                            className="sr-only"
-                                        >
-                                            Fund status
-                                        </Label>
-                                        <Select
-                                            id="status"
-                                            className="h-9 w-full"
-                                            value={data.status}
-                                            onChange={(value) =>
-                                                setData('status', value)
-                                            }
-                                            options={[
-                                                {
-                                                    value: 'ACTIVE',
-                                                    label: 'Active — available',
-                                                },
-                                                {
-                                                    value: 'INACTIVE',
-                                                    label: 'Inactive — unavailable',
-                                                },
-                                                {
-                                                    value: 'CLOSED',
-                                                    label: 'Closed — permanently closed',
-                                                },
-                                            ]}
-                                        />
-                                        <InputError message={errors.status} />
-                                    </div>
-                                </div>
-                            </section>
                         </div>
 
                         <aside className="min-w-0 xl:sticky xl:top-4 xl:self-start">
-                            <section className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
-                                <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-4">
+                            <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-md shadow-primary/[0.04]">
+                                <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-3.5 py-3">
                                     <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
                                     <div className="relative flex items-center gap-2.5">
-                                        <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                                            <Eye className="size-4" />
+                                        <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/15">
+                                            <Eye className="size-3.5" />
                                         </span>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
-                                                Treasury &amp; cash
-                                            </p>
                                             <h2 className="text-sm font-semibold">
                                                 Fund preview
                                             </h2>
                                         </div>
-                                        <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[10px] font-semibold text-primary">
+                                        <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[9px] font-semibold tracking-wide text-primary">
                                             LIVE
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 p-3">
-                                    <div className="rounded-xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3.5 ring-1 ring-primary/10">
-                                        <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                <div className="space-y-2.5 p-3">
+                                    <div className="rounded-lg bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3 ring-1 ring-primary/10">
+                                        <p className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
                                             Petty cash fund
                                         </p>
-                                        <p className="mt-1 text-base font-semibold break-words">
+                                        <p className="mt-0.5 text-sm font-semibold break-words">
                                             {data.name || 'Fund name'}
                                         </p>
-                                        <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                        <p className="font-mono text-[11px] text-muted-foreground">
                                             {data.code || 'FUND-CODE'}
                                         </p>
                                     </div>
 
-                                    <div className="rounded-xl border border-primary/15 bg-primary/[0.06] p-3.5">
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <CircleDollarSign className="size-4 text-primary" />
+                                    <div className="rounded-lg border border-primary/15 bg-primary/[0.06] p-3">
+                                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                            <CircleDollarSign className="size-3.5 text-primary" />
                                             Fund limit
                                         </div>
-                                        <p className="mt-1.5 text-2xl font-semibold tracking-tight text-primary tabular-nums">
+                                        <p className="mt-1 text-xl font-semibold tracking-tight text-primary tabular-nums">
                                             {data.fund_limit
                                                 ? formatBDTCurrency(
                                                       data.fund_limit,
@@ -566,7 +532,7 @@ export default function CreatePettyCashAccount() {
                                         </p>
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         {[
                                             {
                                                 label: 'Branch',
@@ -590,18 +556,23 @@ export default function CreatePettyCashAccount() {
                                                         : 'Variable — flexible fund',
                                                 icon: Wallet,
                                             },
+                                            {
+                                                label: 'Status',
+                                                value: data.status,
+                                                icon: CheckCircle2,
+                                            },
                                         ].map((item) => {
                                             const ItemIcon = item.icon;
                                             return (
                                                 <div
                                                     key={item.label}
-                                                    className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5"
+                                                    className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-border/70 bg-muted/20 px-2.5 py-2"
                                                 >
-                                                    <span className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-                                                        <ItemIcon className="size-3.5 shrink-0" />
+                                                    <span className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+                                                        <ItemIcon className="size-3 shrink-0" />
                                                         {item.label}
                                                     </span>
-                                                    <span className="min-w-0 text-right text-xs font-medium break-words">
+                                                    <span className="min-w-0 text-right text-[11px] font-medium break-words">
                                                         {item.value}
                                                     </span>
                                                 </div>
@@ -609,14 +580,14 @@ export default function CreatePettyCashAccount() {
                                         })}
                                     </div>
 
-                                    <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                                    <div className="rounded-lg border border-border/70 bg-muted/20 p-2.5">
                                         <div className="flex items-center gap-2 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
                                             <Banknote className="size-3.5" />
                                             {editing
                                                 ? 'Current balance'
                                                 : 'Opening funding amount'}
                                         </div>
-                                        <p className="mt-2 text-lg font-semibold tabular-nums">
+                                        <p className="mt-1 text-base font-semibold tabular-nums">
                                             {formatBDTCurrency(
                                                 editing
                                                     ? (fund?.current_balance ??
@@ -634,7 +605,7 @@ export default function CreatePettyCashAccount() {
                                     </div>
 
                                     <div
-                                        className={`flex items-center gap-2 rounded-xl px-3.5 py-3 text-xs font-medium ${
+                                        className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-[11px] font-medium ${
                                             data.status === 'ACTIVE'
                                                 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
                                                 : data.status === 'INACTIVE'
@@ -646,7 +617,7 @@ export default function CreatePettyCashAccount() {
                                         Operational status: {data.status}
                                     </div>
 
-                                    <div className="flex items-start gap-2 rounded-xl border border-border/60 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
+                                    <div className="flex items-start gap-2 rounded-lg border border-border/60 px-2.5 py-2 text-[10px] leading-relaxed text-muted-foreground">
                                         <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" />
                                         Review the fund details and custody
                                         before saving.
@@ -659,7 +630,7 @@ export default function CreatePettyCashAccount() {
                     {/* Form actions */}
                     <div
                         data-slot="page-action-bar"
-                        className="fixed inset-x-4 bottom-0 z-30 border-t bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+                        className="border-t bg-background/95 py-2"
                     >
                         <div className="flex w-full flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-1.5 text-xs text-muted-foreground md:flex">
@@ -689,7 +660,7 @@ export default function CreatePettyCashAccount() {
                                     disabled={
                                         processing || branches.length === 0
                                     }
-                                    className="w-full sm:min-w-40"
+                                    className="h-9 w-full sm:min-w-40"
                                 >
                                     {processing ? (
                                         <LoaderCircle className="mr-2 size-4 animate-spin" />

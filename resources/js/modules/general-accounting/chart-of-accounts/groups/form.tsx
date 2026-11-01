@@ -81,15 +81,12 @@ export default function AccountGroupForm({
                 title={editing ? 'Edit Account Group' : 'Create Account Group'}
             />
 
-            <div className="w-full min-w-0 space-y-6 pb-8">
+            <div className="w-full min-w-0 space-y-3 pb-4">
                 {/* Page header */}
-                <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary">
-                            <FolderTree className="size-6" />
-                        </div>
-
-                        <div className="min-w-0 space-y-1">
+                        <FolderTree className="mt-1 size-4 shrink-0 text-primary" />
+                        <div className="min-w-0 flex-1">
                             <HeadingSmall
                                 title={
                                     editing
@@ -104,7 +101,7 @@ export default function AccountGroupForm({
                     <Button
                         variant="outline"
                         asChild
-                        className="w-full shrink-0 sm:w-auto"
+                        className="h-9 w-full shrink-0 sm:w-auto"
                     >
                         <Link href={route('account-groups.index')}>
                             <ArrowLeft className="mr-2 size-4" />
@@ -115,41 +112,41 @@ export default function AccountGroupForm({
 
                 <form
                     onSubmit={submit}
-                    className="grid min-w-0 grid-cols-1 items-start gap-5 xl:grid-cols-3"
+                    className="grid min-w-0 grid-cols-1 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_300px]"
                 >
                     {/* Main configuration */}
-                    <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm xl:col-span-2">
-                        <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-4 py-4 sm:px-6">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                <FolderTree className="size-5" />
+                    <div className="min-w-0 overflow-hidden rounded-xl border border-border/80 bg-card">
+                        <div className="flex items-center gap-2.5 border-b border-border bg-muted/20 px-3 py-2.5">
+                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <FolderTree className="size-4" />
                             </div>
 
                             <div className="min-w-0">
                                 <h2 className="text-sm font-semibold">
                                     Group Configuration
                                 </h2>
-                                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                <p className="text-[11px] leading-4 text-muted-foreground">
                                     Configure the group identity,
                                     classification, hierarchy, and status.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="space-y-6 p-4 sm:p-6">
+                        <div className="space-y-3 p-3">
                             {/* Basic information */}
-                            <section className="space-y-4">
+                            <section className="space-y-2">
                                 <div>
                                     <h3 className="text-sm font-semibold">
                                         Basic Information
                                     </h3>
-                                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         Enter a unique group code and a
                                         recognizable name.
                                     </p>
                                 </div>
 
-                                <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div className="min-w-0 space-y-2">
+                                <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="group-code">
                                             Group Code
                                         </Label>
@@ -163,13 +160,13 @@ export default function AccountGroupForm({
                                                 )
                                             }
                                             placeholder="e.g. 1000"
-                                            className="h-11 w-full"
+                                            className="mt-1 h-9 w-full"
                                             aria-invalid={Boolean(errors.code)}
                                         />
                                         <InputError message={errors.code} />
                                     </div>
 
-                                    <div className="min-w-0 space-y-2">
+                                    <div className="min-w-0 space-y-1">
                                         <Label htmlFor="group-name">
                                             Group Name
                                         </Label>
@@ -183,7 +180,7 @@ export default function AccountGroupForm({
                                                 )
                                             }
                                             placeholder="e.g. Current assets"
-                                            className="h-11 w-full"
+                                            className="mt-1 h-9 w-full"
                                             aria-invalid={Boolean(errors.name)}
                                         />
                                         <InputError message={errors.name} />
@@ -192,21 +189,22 @@ export default function AccountGroupForm({
                             </section>
 
                             {/* Classification and hierarchy */}
-                            <section className="space-y-4 border-t border-border pt-5">
+                            <section className="space-y-2 border-t border-border pt-3">
                                 <div>
                                     <h3 className="text-sm font-semibold">
                                         Classification & Hierarchy
                                     </h3>
-                                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         Select the accounting category, normal
                                         balance, and parent group.
                                     </p>
                                 </div>
 
-                                <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
-                                    <div className="min-w-0 space-y-2">
+                                <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
+                                    <div className="min-w-0 space-y-1">
                                         <Label>Account Type</Label>
                                         <Select
+                                            className="mt-1 h-9 w-full"
                                             value={data.type}
                                             onChange={(value) =>
                                                 setData('type', value)
@@ -226,9 +224,10 @@ export default function AccountGroupForm({
                                         <InputError message={errors.type} />
                                     </div>
 
-                                    <div className="min-w-0 space-y-2">
+                                    <div className="min-w-0 space-y-1">
                                         <Label>Normal Balance</Label>
                                         <Select
+                                            className="mt-1 h-9 w-full"
                                             value={data.normal_balance}
                                             onChange={(value) =>
                                                 setData('normal_balance', value)
@@ -250,9 +249,10 @@ export default function AccountGroupForm({
                                         />
                                     </div>
 
-                                    <div className="min-w-0 space-y-2 sm:col-span-2">
+                                    <div className="min-w-0 space-y-1 sm:col-span-2">
                                         <Label>Parent Group</Label>
                                         <Select
+                                            className="mt-1 h-9 w-full"
                                             value={data.parent_id}
                                             onChange={(value) =>
                                                 setData('parent_id', value)
@@ -272,7 +272,7 @@ export default function AccountGroupForm({
                                         <InputError
                                             message={errors.parent_id}
                                         />
-                                        <p className="text-xs leading-5 text-muted-foreground">
+                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                             Leave empty to create a top-level
                                             group in the chart of accounts.
                                         </p>
@@ -281,33 +281,33 @@ export default function AccountGroupForm({
                             </section>
 
                             {/* Group status */}
-                            <section className="space-y-3 border-t border-border pt-5">
-                                <div>
+                            <section className="space-y-2 border-t border-border pt-3">
+                                <div className="flex items-center justify-between gap-3">
                                     <h3 className="text-sm font-semibold">
                                         Group Status
                                     </h3>
-                                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                                        Control whether this group is marked as
-                                        active.
+                                    <p className="text-[11px] text-muted-foreground">
+                                        Available for ledger accounts
                                     </p>
                                 </div>
 
                                 <label
                                     htmlFor="group-status"
-                                    className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border bg-muted/20 p-4 transition-colors hover:bg-muted/40"
+                                    className="flex cursor-pointer items-center justify-between gap-3 rounded-lg border border-border/70 bg-muted/20 px-3 py-2.5 transition-colors hover:bg-muted/40"
                                 >
-                                    <span className="flex min-w-0 items-center gap-3">
-                                        <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-muted-foreground">
-                                            <Check className="size-5" />
+                                    <span className="flex min-w-0 items-center gap-2">
+                                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background text-muted-foreground">
+                                            <Check className="size-4" />
                                         </span>
 
                                         <span className="min-w-0">
                                             <span className="block text-sm font-medium">
                                                 Active Group
                                             </span>
-                                            <span className="mt-1 block text-xs leading-5 text-muted-foreground">
-                                                Available for classifying ledger
-                                                accounts.
+                                            <span className="block text-[11px] leading-4 text-muted-foreground">
+                                                {data.status
+                                                    ? 'Group is active.'
+                                                    : 'Group is inactive.'}
                                             </span>
                                         </span>
                                     </span>
@@ -331,7 +331,7 @@ export default function AccountGroupForm({
                         </div>
 
                         {/* Form actions */}
-                        <div className="sticky bottom-3 z-10 flex flex-col gap-3 border-t border-border bg-background/95 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/85 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                        <div className="sticky bottom-2 z-10 flex flex-col gap-2 border-t border-border bg-background/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/85 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden text-xs leading-5 text-muted-foreground sm:block">
                                 Group changes affect how accounts are organized
                                 in reports.
@@ -371,27 +371,27 @@ export default function AccountGroupForm({
                     </div>
 
                     {/* Live preview sidebar */}
-                    <aside className="min-w-0 space-y-5 xl:sticky xl:top-5">
-                        <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                            <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-4 py-4">
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                    <Landmark className="size-4.5" />
+                    <aside className="min-w-0 space-y-3 xl:sticky xl:top-4">
+                        <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm">
+                            <div className="flex items-center gap-2.5 border-b border-border bg-muted/20 px-3 py-2.5">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                    <Landmark className="size-4" />
                                 </div>
 
                                 <div className="min-w-0">
                                     <h2 className="text-sm font-semibold">
                                         Live Preview
                                     </h2>
-                                    <p className="mt-1 text-xs text-muted-foreground">
+                                    <p className="text-[11px] text-muted-foreground">
                                         Updates as you edit
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-5 p-4">
-                                <div className="flex min-w-0 items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-3.5">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                        <Layers3 className="size-5" />
+                            <div className="space-y-3 p-3">
+                                <div className="flex min-w-0 items-start gap-2.5 rounded-lg border border-primary/15 bg-primary/5 p-2.5">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <Layers3 className="size-4" />
                                     </div>
 
                                     <div className="min-w-0 flex-1">
@@ -404,12 +404,12 @@ export default function AccountGroupForm({
                                     </div>
                                 </div>
 
-                                <dl className="space-y-4">
+                                <dl className="space-y-2.5">
                                     <div className="flex items-center justify-between gap-3">
                                         <dt className="text-xs text-muted-foreground">
                                             Account type
                                         </dt>
-                                        <dd className="max-w-[60%] rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-right text-[11px] font-semibold text-primary">
+                                        <dd className="max-w-[60%] rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-right text-[10px] font-semibold text-primary">
                                             {data.type || 'Not selected'}
                                         </dd>
                                     </div>
@@ -465,8 +465,8 @@ export default function AccountGroupForm({
                                     </div>
                                 </dl>
 
-                                <div className="border-t border-border pt-4">
-                                    <p className="text-xs leading-5 text-muted-foreground">
+                                <div className="border-t border-border pt-3">
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         {editing
                                             ? 'Changes will be applied when you save this group.'
                                             : 'Your group will be created with the configuration shown above.'}
@@ -476,17 +476,17 @@ export default function AccountGroupForm({
                         </section>
 
                         {/* Account type guidance */}
-                        <section className="rounded-xl border border-border bg-muted/20 p-4">
-                            <div className="flex items-start gap-3">
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-primary">
-                                    <CircleHelp className="size-4" />
+                        <section className="rounded-xl border border-border/80 bg-muted/20 p-3">
+                            <div className="flex items-start gap-2.5">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-primary">
+                                    <CircleHelp className="size-3.5" />
                                 </div>
 
                                 <div className="min-w-0">
                                     <h3 className="text-sm font-semibold">
                                         {data.type || 'Account Type Guide'}
                                     </h3>
-                                    <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
+                                    <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
                                         {typeDescription[data.type] ??
                                             'Select an account type to understand its classification in the chart of accounts.'}
                                     </p>

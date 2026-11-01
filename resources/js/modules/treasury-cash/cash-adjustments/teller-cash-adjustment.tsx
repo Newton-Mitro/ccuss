@@ -63,9 +63,6 @@ export default function TellerCashAdjustment() {
                                 <span className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
                                     Cash management
                                 </span>
-                                <span className="rounded-full border bg-background/70 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                                    Teller operations
-                                </span>
                             </div>
                             <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                                 Record a cash adjustment

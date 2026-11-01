@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 
 import HeadingSmall from '@/components/heading-small';
@@ -18,6 +19,7 @@ import {
     CheckCircle2,
     CircleDollarSign,
     Clock3,
+    Eye,
     Landmark,
     ShieldCheck,
     UserRound,
@@ -46,21 +48,21 @@ function FormSection({
     children: React.ReactNode;
 }) {
     return (
-        <section className="space-y-4">
+        <section className="space-y-3">
             <div className="flex items-start gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                    <Icon className="size-4" />
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon className="size-3.5" />
                 </div>
                 <div className="min-w-0 pt-0.5">
                     <h2 className="text-sm font-semibold">{title}</h2>
                     {description && (
-                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                        <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
                             {description}
                         </p>
                     )}
                 </div>
             </div>
-            <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
+            <div className="grid gap-x-3 gap-y-3 sm:grid-cols-2">
                 {children}
             </div>
         </section>
@@ -81,14 +83,14 @@ function Field({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-w-0 space-y-1.5">
-            <Label className="text-sm">
+        <div className="min-w-0 space-y-1">
+            <Label className="text-xs">
                 {label}
                 {required && <span className="ml-1 text-destructive">*</span>}
             </Label>
             {children}
             {hint && !error && (
-                <p className="text-xs leading-relaxed text-muted-foreground">
+                <p className="text-[11px] leading-snug text-muted-foreground">
                     {hint}
                 </p>
             )}
@@ -141,6 +143,13 @@ export default function FixedDepositAccountCreate() {
                     : data.term_months,
           )
         : data.term_months;
+    const guardian = customers.find(
+        (customer) => String(customer.id) === data.guardian_customer_id,
+    );
+    const maturityInstructionLabel =
+        maturityInstructions.find(
+            (instruction) => instruction.value === data.maturity_instruction,
+        )?.label ?? data.maturity_instruction;
 
     const submit = (event: React.FormEvent) => {
         event.preventDefault();
@@ -160,7 +169,7 @@ export default function FixedDepositAccountCreate() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open fixed deposit" />
 
-            <div className="max-w-4xl space-y-5 pb-8">
+            <div className="w-full max-w-6xl space-y-3 pb-24">
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title="Open fixed deposit"
@@ -170,9 +179,9 @@ export default function FixedDepositAccountCreate() {
 
                 <form
                     onSubmit={submit}
-                    className="overflow-hidden rounded-xl border bg-card"
+                    className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_280px]"
                 >
-                    <div className="space-y-6 p-4 sm:p-6">
+                    <div className="min-w-0 space-y-4 overflow-hidden rounded-xl border bg-card p-3.5 shadow-sm sm:p-4">
                         {/* Product selection */}
                         <FormSection
                             icon={Landmark}
@@ -566,10 +575,128 @@ export default function FixedDepositAccountCreate() {
                         </FormSection>
                     </div>
 
+                    <aside className="min-w-0 space-y-2.5 rounded-xl border bg-card p-3 shadow-sm lg:sticky lg:top-4">
+                        <div className="flex items-center gap-2.5 border-b pb-2.5">
+                            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Eye className="size-3.5" />
+                            </span>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[9px] font-semibold tracking-[0.14em] text-primary uppercase">
+                                    Deposit summary
+                                </p>
+                                <h2 className="text-[13px] font-semibold">
+                                    Live preview
+                                </h2>
+                            </div>
+                            <span className="rounded-full border border-primary/15 bg-primary/5 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                                LIVE
+                            </span>
+                        </div>
+
+                        <div className="rounded-lg bg-gradient-to-br from-primary/[0.09] to-muted/30 p-3 ring-1 ring-primary/10">
+                            <p className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                Fixed deposit
+                            </p>
+                            <p className="mt-0.5 text-sm font-semibold break-words">
+                                {data.name.trim() ||
+                                    product?.name ||
+                                    'Fixed deposit'}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                                {depositor?.name ??
+                                    'Select a depositor to begin'}
+                            </p>
+                        </div>
+
+                        <div className="rounded-lg border border-primary/15 bg-primary/[0.06] px-3 py-2.5">
+                            <p className="text-[10px] text-muted-foreground">
+                                Principal amount
+                            </p>
+                            <p className="mt-0.5 text-lg font-semibold text-primary tabular-nums">
+                                {formatBDTCurrency(data.principal_amount || 0)}
+                            </p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            {[
+                                {
+                                    label: 'Product',
+                                    value: product
+                                        ? `${product.code} · ${product.name}`
+                                        : 'Not selected',
+                                    icon: Landmark,
+                                },
+                                {
+                                    label: 'Product term',
+                                    value:
+                                        selectedTerm?.name ??
+                                        (selectedTermMonths
+                                            ? `${selectedTermMonths} months`
+                                            : 'Not selected'),
+                                    icon: Clock3,
+                                },
+                                {
+                                    label: 'Annual rate',
+                                    value: selectedRate
+                                        ? `${selectedRate}%`
+                                        : 'Not set',
+                                    icon: CircleDollarSign,
+                                },
+                                {
+                                    label: 'Start date',
+                                    value: data.started_at || 'Not set',
+                                    icon: CalendarDays,
+                                },
+                                {
+                                    label: 'Maturity',
+                                    value: maturityInstructionLabel,
+                                    icon: ShieldCheck,
+                                },
+                            ].map((item) => {
+                                const Icon = item.icon;
+
+                                return (
+                                    <div
+                                        key={item.label}
+                                        className="flex min-w-0 items-center justify-between gap-2 rounded-md border bg-muted/20 px-2 py-1.5"
+                                    >
+                                        <span className="flex min-w-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+                                            <Icon className="size-3 shrink-0" />
+                                            <span className="truncate">
+                                                {item.label}
+                                            </span>
+                                        </span>
+                                        <span className="min-w-0 text-right text-[10px] font-medium break-words">
+                                            {item.value}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {isMinorDepositor && (
+                            <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 px-2.5 py-2 text-[11px]">
+                                <p className="font-medium text-amber-700 dark:text-amber-400">
+                                    Guardian required
+                                </p>
+                                <p className="mt-0.5 text-muted-foreground">
+                                    {guardian?.name ??
+                                        'Select an adult guardian'}
+                                </p>
+                            </div>
+                        )}
+
+                        <p className="flex items-start gap-1.5 border-t pt-2.5 text-[10px] leading-snug text-muted-foreground">
+                            <ShieldCheck className="mt-0.5 size-3 shrink-0 text-primary" />
+                            Interest and maturity follow configured business
+                            rules.
+                        </p>
+                    </aside>
+
                     {/* Form actions */}
                     <div
                         data-slot="page-sticky-action-bar"
-                        className="sticky bottom-0 z-10 flex flex-col-reverse gap-2 border-t bg-card/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+                        className="sticky bottom-0 z-10 flex flex-col-reverse gap-2 border-t bg-card/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-card/85 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:col-span-2"
                     >
                         <Button asChild type="button" variant="outline">
                             <Link

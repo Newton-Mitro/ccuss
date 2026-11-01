@@ -8,7 +8,6 @@ import {
     CircleDollarSign,
     Eye,
     Info,
-    ShieldCheck,
     UserRound,
     Wallet,
 } from 'lucide-react';
@@ -74,7 +73,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={editing ? 'Edit Teller' : 'Create Teller'} />
 
-            <div className="w-full max-w-screen-xl space-y-5 pb-8 text-foreground">
+            <div className="w-full max-w-screen-xl space-y-4 pb-6 text-foreground">
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title={editing ? 'Edit Teller' : 'Create Teller'}
@@ -84,53 +83,27 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                 : 'Register a teller, assign a branch user, and configure cash handling limits.'
                         }
                     />
+                    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border bg-muted/40 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                        <Banknote className="size-3.5 text-primary" />
+                        Cash management
+                    </span>
                 </div>
 
-                {/* Page introduction */}
-                <div className="relative overflow-hidden rounded-xl border bg-card">
-                    <div className="flex items-start gap-4 p-4 sm:p-5">
-                        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border bg-muted/60">
-                            <Banknote className="size-6 text-primary" />
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <h2 className="text-base font-semibold tracking-tight">
-                                    {editing
-                                        ? 'Teller configuration'
-                                        : 'New teller setup'}
-                                </h2>
-
-                                <span className="inline-flex items-center gap-1 rounded-full border bg-muted/50 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                                    <ShieldCheck className="size-3.5" />
-                                    Cash management
-                                </span>
-                            </div>
-
-                            <p className="mt-1 text-sm leading-5 text-muted-foreground">
-                                {editing
-                                    ? 'Review the current configuration and make the necessary changes.'
-                                    : 'Complete the teller profile and operating controls before saving.'}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <form onSubmit={submit} className="space-y-4">
-                    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
-                        <div className="min-w-0 space-y-4">
+                <form onSubmit={submit} className="space-y-3">
+                    <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_280px]">
+                        <div className="min-w-0 space-y-3">
                             {/* Teller identity */}
                             <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="flex items-start gap-3 border-b px-4 py-4 sm:px-5">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                        <UserRound className="size-4.5" />
+                                <div className="flex items-center gap-3 border-b px-4 py-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <UserRound className="size-4" />
                                     </div>
 
                                     <div className="min-w-0">
                                         <h2 className="text-sm font-semibold">
                                             Teller identity
                                         </h2>
-                                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground">
                                             Specify the branch, responsible
                                             user, and teller identification
                                             details.
@@ -138,11 +111,11 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                     </div>
                                 </div>
 
-                                <div className="grid gap-x-5 gap-y-4 p-4 sm:grid-cols-2 sm:p-5">
-                                    <div className="space-y-2">
+                                <div className="grid gap-x-4 gap-y-3 p-4 sm:grid-cols-2">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="branch_id"
-                                            className="text-sm font-medium"
+                                            className="text-xs font-medium"
                                         >
                                             Branch{' '}
                                             <span className="text-destructive">
@@ -152,7 +125,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
 
                                         <Select
                                             id="branch_id"
-                                            className="h-10 w-full"
+                                            className="h-9 w-full"
                                             value={data.branch_id}
                                             disabled={editing && branch_locked}
                                             onChange={(value) =>
@@ -178,18 +151,18 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                         )}
 
                                         {editing && branch_locked && (
-                                            <p className="flex items-start gap-1.5 text-xs leading-5 text-muted-foreground">
-                                                <Info className="mt-0.5 size-3.5 shrink-0" />
+                                            <p className="flex items-start gap-1.5 text-[11px] leading-4 text-muted-foreground">
+                                                <Info className="mt-0.5 size-3 shrink-0" />
                                                 Branch changes are restricted
                                                 because teller activity exists.
                                             </p>
                                         )}
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="user_id"
-                                            className="text-sm font-medium"
+                                            className="text-xs font-medium"
                                         >
                                             Assigned user{' '}
                                             <span className="text-destructive">
@@ -199,7 +172,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
 
                                         <Select
                                             id="user_id"
-                                            className="h-10 w-full"
+                                            className="h-9 w-full"
                                             value={data.user_id}
                                             onChange={(value) =>
                                                 setData('user_id', value)
@@ -224,10 +197,10 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                         )}
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="code"
-                                            className="text-sm font-medium"
+                                            className="text-xs font-medium"
                                         >
                                             Teller code{' '}
                                             <span className="text-destructive">
@@ -248,7 +221,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                             autoComplete="off"
                                             required
                                             aria-invalid={Boolean(errors.code)}
-                                            className="h-10"
+                                            className="h-9"
                                         />
 
                                         {errors.code && (
@@ -256,17 +229,12 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                                 {errors.code}
                                             </p>
                                         )}
-
-                                        <p className="text-xs text-muted-foreground">
-                                            Use a unique identifier for this
-                                            teller.
-                                        </p>
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="name"
-                                            className="text-sm font-medium"
+                                            className="text-xs font-medium"
                                         >
                                             Teller name{' '}
                                             <span className="text-destructive">
@@ -286,7 +254,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                             placeholder="Enter teller name"
                                             required
                                             aria-invalid={Boolean(errors.name)}
-                                            className="h-10"
+                                            className="h-9"
                                         />
 
                                         {errors.name && (
@@ -300,27 +268,27 @@ export default function Create({ teller, branch_locked = false }: Props) {
 
                             {/* Operating controls */}
                             <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="flex items-start gap-3 border-b px-4 py-4 sm:px-5">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                        <Wallet className="size-4.5" />
+                                <div className="flex items-center gap-3 border-b px-4 py-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <Wallet className="size-4" />
                                     </div>
 
                                     <div className="min-w-0">
                                         <h2 className="text-sm font-semibold">
                                             Operating controls
                                         </h2>
-                                        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground">
                                             Establish the permitted cash
                                             exposure and teller availability.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-x-5 gap-y-4 p-4 sm:grid-cols-2 sm:p-5">
-                                    <div className="space-y-2">
+                                <div className="grid gap-x-4 gap-y-3 p-4 sm:grid-cols-2">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="maximum_cash"
-                                            className="text-sm font-medium"
+                                            className="text-xs font-medium"
                                         >
                                             Maximum cash limit
                                         </label>
@@ -346,7 +314,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                                 aria-invalid={Boolean(
                                                     errors.maximum_cash,
                                                 )}
-                                                className="h-10 pl-8 tabular-nums"
+                                                className="h-9 pl-8 tabular-nums"
                                             />
                                         </div>
 
@@ -355,24 +323,19 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                                 {errors.maximum_cash}
                                             </p>
                                         )}
-
-                                        <p className="text-xs text-muted-foreground">
-                                            Maximum permitted cash exposure for
-                                            this teller.
-                                        </p>
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="status"
-                                            className="text-sm font-medium"
+                                            className="text-xs font-medium"
                                         >
                                             Operational status
                                         </label>
 
                                         <Select
                                             id="status"
-                                            className="h-10 w-full"
+                                            className="h-9 w-full"
                                             value={data.status}
                                             onChange={(value) =>
                                                 setData(
@@ -398,20 +361,12 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                                 },
                                             ]}
                                         />
-
-                                        <p className="text-xs text-muted-foreground">
-                                            {data.status === 'ACTIVE'
-                                                ? 'The teller is marked as active.'
-                                                : data.status === 'INACTIVE'
-                                                  ? 'The teller is marked as inactive.'
-                                                  : 'The teller is marked as closed.'}
-                                        </p>
                                     </div>
                                 </div>
 
-                                <div className="mx-4 mb-4 flex items-start gap-2.5 rounded-lg border bg-muted/30 p-3 sm:mx-5 sm:mb-5">
-                                    <CircleDollarSign className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                    <p className="text-xs leading-5 text-muted-foreground">
+                                <div className="mx-4 mb-4 flex items-start gap-2 rounded-lg border bg-muted/30 p-2.5">
+                                    <CircleDollarSign className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                         Configure the cash limit according to
                                         your organization's internal cash
                                         handling policy. The backend should
@@ -422,17 +377,14 @@ export default function Create({ teller, branch_locked = false }: Props) {
                         </div>
 
                         <aside className="min-w-0 xl:sticky xl:top-4 xl:self-start">
-                            <section className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
-                                <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-4">
+                            <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-md shadow-primary/[0.04]">
+                                <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-3.5 py-3">
                                     <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
-                                    <div className="relative flex items-center gap-2.5">
-                                        <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
-                                            <Eye className="size-4" />
+                                    <div className="relative flex items-center gap-2">
+                                        <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/15">
+                                            <Eye className="size-3.5" />
                                         </span>
                                         <div className="min-w-0 flex-1">
-                                            <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
-                                                Cash operations
-                                            </p>
                                             <h2 className="text-sm font-semibold">
                                                 Teller preview
                                             </h2>
@@ -443,25 +395,25 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 p-3">
-                                    <div className="rounded-xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3.5 ring-1 ring-primary/10">
+                                <div className="space-y-2.5 p-3">
+                                    <div className="rounded-lg bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3 ring-1 ring-primary/10">
                                         <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
                                             Teller
                                         </p>
-                                        <p className="mt-1 text-base font-semibold break-words">
+                                        <p className="mt-0.5 text-sm font-semibold break-words">
                                             {data.name || 'Teller name'}
                                         </p>
-                                        <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                        <p className="font-mono text-[11px] text-muted-foreground">
                                             {data.code || 'TELLER-CODE'}
                                         </p>
                                     </div>
 
-                                    <div className="rounded-xl border border-primary/15 bg-primary/[0.06] p-3.5">
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <CircleDollarSign className="size-4 text-primary" />
+                                    <div className="rounded-lg border border-primary/15 bg-primary/[0.06] p-3">
+                                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                                            <CircleDollarSign className="size-3.5 text-primary" />
                                             Maximum cash limit
                                         </div>
-                                        <p className="mt-1.5 text-2xl font-semibold tracking-tight text-primary tabular-nums">
+                                        <p className="mt-1 text-xl font-semibold tracking-tight text-primary tabular-nums">
                                             {data.maximum_cash
                                                 ? `৳ ${new Intl.NumberFormat(
                                                       'en-BD',
@@ -476,7 +428,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                         </p>
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         {[
                                             {
                                                 label: 'Branch',
@@ -497,13 +449,13 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                             return (
                                                 <div
                                                     key={item.label}
-                                                    className="flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5"
+                                                    className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/20 px-2.5 py-2"
                                                 >
-                                                    <span className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-                                                        <ItemIcon className="size-3.5 shrink-0" />
+                                                    <span className="flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground">
+                                                        <ItemIcon className="size-3 shrink-0" />
                                                         {item.label}
                                                     </span>
-                                                    <span className="min-w-0 text-right text-xs font-medium break-words">
+                                                    <span className="min-w-0 text-right text-[11px] font-medium break-words">
                                                         {item.value}
                                                     </span>
                                                 </div>
@@ -512,7 +464,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                     </div>
 
                                     <div
-                                        className={`flex items-center gap-2 rounded-xl px-3.5 py-3 text-xs font-medium ${
+                                        className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-[11px] font-medium ${
                                             data.status === 'ACTIVE'
                                                 ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
                                                 : data.status === 'INACTIVE'
@@ -523,26 +475,20 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                         <span className="size-2 rounded-full bg-current" />
                                         Operational status: {data.status}
                                     </div>
-
-                                    <div className="flex items-start gap-2 rounded-xl border border-border/60 px-3 py-2.5 text-[11px] leading-relaxed text-muted-foreground">
-                                        <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                                        Cash limit is an operational control for
-                                        this teller.
-                                    </div>
                                 </div>
                             </section>
                         </aside>
                     </div>
 
                     {/* Form actions */}
-                    <div className="border-t bg-background/95 py-3">
+                    <div className="border-t bg-background/95 py-2">
                         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => window.history.back()}
                                 disabled={processing}
-                                className="h-10 gap-2 rounded-lg px-4"
+                                className="h-9 gap-2 rounded-lg px-3.5"
                             >
                                 <Info className="size-4" />
                                 Cancel
@@ -555,7 +501,7 @@ export default function Create({ teller, branch_locked = false }: Props) {
                                     (branches.length === 0 &&
                                         !(editing && branch_locked))
                                 }
-                                className="h-10 gap-2 rounded-lg px-5"
+                                className="h-9 gap-2 rounded-lg px-4"
                             >
                                 {processing ? (
                                     <>

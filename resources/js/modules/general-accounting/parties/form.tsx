@@ -88,26 +88,23 @@ export default function PartyForm({ party }: Props) {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={editing ? 'Edit Party' : 'Create Party'} />
 
-            <div className="w-full min-w-0 space-y-5 pb-8 text-foreground">
+            <div className="w-full min-w-0 space-y-3 pb-4 text-foreground">
                 {/* Page header */}
-                <div className="flex flex-col gap-4 rounded-2xl border border-border bg-gradient-to-r from-primary/10 via-card to-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
-                    <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary">
-                            <ContactRound className="size-5" />
-                        </div>
-
-                        <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-2">
+                        <ContactRound className="mt-1 size-4 shrink-0 text-primary" />
+                        <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1.5">
                                 <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
                                     {editing ? 'Edit Party' : 'Create Party'}
                                 </h1>
 
-                                <span className="rounded-full border border-border bg-background/80 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
+                                <span className="rounded-full border border-border bg-background/80 px-2 py-0.5 text-[9px] font-semibold tracking-wide text-muted-foreground uppercase">
                                     General Accounting
                                 </span>
                             </div>
 
-                            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                            <p className="text-[11px] leading-4 text-muted-foreground">
                                 {editing
                                     ? 'Update the party profile, contact information, and availability.'
                                     : 'Register a customer, supplier, employee, or other party for accounting transactions.'}
@@ -118,7 +115,7 @@ export default function PartyForm({ party }: Props) {
                     <Button
                         variant="outline"
                         asChild
-                        className="w-full shrink-0 sm:w-auto"
+                        className="h-9 w-full shrink-0 sm:w-auto"
                     >
                         <Link href={route('parties.index')}>
                             <ArrowLeft className="mr-2 size-4" />
@@ -127,42 +124,42 @@ export default function PartyForm({ party }: Props) {
                     </Button>
                 </div>
 
-                <form onSubmit={submit} className="space-y-5">
-                    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-3">
+                <form onSubmit={submit} className="space-y-3">
+                    <div className="grid min-w-0 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_300px]">
                         {/* Main form */}
-                        <div className="min-w-0 space-y-5 xl:col-span-2">
+                        <div className="min-w-0">
                             {/* Party profile */}
-                            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                                <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-4 py-4 sm:px-6">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                        <UserRound className="size-5" />
+                            <section className="overflow-hidden rounded-xl border border-border/80 bg-card">
+                                <div className="flex items-center gap-2.5 border-b border-border bg-muted/20 px-3 py-2.5">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <UserRound className="size-4" />
                                     </div>
 
                                     <div className="min-w-0">
                                         <h2 className="text-sm font-semibold">
                                             Party profile
                                         </h2>
-                                        <p className="mt-0.5 text-xs text-muted-foreground">
+                                        <p className="text-[11px] text-muted-foreground">
                                             Basic identity and accounting
                                             classification
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-6 p-4 sm:p-6">
-                                    <section className="space-y-4">
+                                <div className="space-y-3 p-3">
+                                    <section className="space-y-2">
                                         <div>
                                             <h3 className="text-sm font-semibold">
                                                 Basic information
                                             </h3>
-                                            <p className="mt-1 text-xs text-muted-foreground">
+                                            <p className="text-[11px] leading-4 text-muted-foreground">
                                                 Enter a unique code and a
                                                 recognizable party name.
                                             </p>
                                         </div>
 
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            <div className="min-w-0 space-y-1.5">
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            <div className="min-w-0 space-y-1">
                                                 <Label htmlFor="party-code">
                                                     Party code
                                                     <span className="ml-1 text-destructive">
@@ -180,7 +177,7 @@ export default function PartyForm({ party }: Props) {
                                                         )
                                                     }
                                                     placeholder="e.g. P-001"
-                                                    className="h-10"
+                                                    className="mt-1 h-9"
                                                     required
                                                     aria-invalid={Boolean(
                                                         errors.code,
@@ -192,7 +189,7 @@ export default function PartyForm({ party }: Props) {
                                                 />
                                             </div>
 
-                                            <div className="min-w-0 space-y-1.5">
+                                            <div className="min-w-0 space-y-1">
                                                 <Label htmlFor="party-name">
                                                     Party name
                                                     <span className="ml-1 text-destructive">
@@ -210,7 +207,7 @@ export default function PartyForm({ party }: Props) {
                                                         )
                                                     }
                                                     placeholder="e.g. Acme Supplies"
-                                                    className="h-10"
+                                                    className="mt-1 h-9"
                                                     required
                                                     aria-invalid={Boolean(
                                                         errors.name,
@@ -222,14 +219,14 @@ export default function PartyForm({ party }: Props) {
                                                 />
                                             </div>
 
-                                            <div className="space-y-1.5 sm:col-span-2">
+                                            <div className="space-y-1 sm:col-span-2">
                                                 <Label htmlFor="party-type">
                                                     Party type
                                                 </Label>
 
                                                 <Select
                                                     id="party-type"
-                                                    className="h-10 w-full"
+                                                    className="mt-1 h-9 w-full"
                                                     value={data.party_type}
                                                     onChange={(value) =>
                                                         setData(
@@ -246,16 +243,16 @@ export default function PartyForm({ party }: Props) {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-start gap-3 rounded-xl border border-primary/15 bg-primary/5 p-3.5 sm:p-4">
-                                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                                <BriefcaseBusiness className="size-4" />
+                                        <div className="flex items-start gap-2 rounded-lg border border-primary/15 bg-primary/5 p-2.5">
+                                            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                                                <BriefcaseBusiness className="size-3.5" />
                                             </div>
 
                                             <div className="min-w-0">
                                                 <p className="text-xs font-semibold">
                                                     {selectedPartyType}
                                                 </p>
-                                                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                                <p className="text-[11px] leading-4 text-muted-foreground">
                                                     {partyTypeDescriptions[
                                                         data.party_type
                                                     ] ??
@@ -266,17 +263,17 @@ export default function PartyForm({ party }: Props) {
                                     </section>
 
                                     {/* Contact details */}
-                                    <section className="space-y-4 border-t border-border pt-5">
-                                        <div className="flex items-start gap-3">
-                                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                                                <Phone className="size-4" />
+                                    <section className="space-y-2 border-t border-border pt-3">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                                                <Phone className="size-3.5" />
                                             </div>
 
                                             <div>
                                                 <h3 className="text-sm font-semibold">
                                                     Contact information
                                                 </h3>
-                                                <p className="mt-1 text-xs text-muted-foreground">
+                                                <p className="text-[11px] leading-4 text-muted-foreground">
                                                     Optional details for
                                                     communication and record
                                                     identification.
@@ -284,8 +281,8 @@ export default function PartyForm({ party }: Props) {
                                             </div>
                                         </div>
 
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            <div className="min-w-0 space-y-1.5">
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            <div className="min-w-0 space-y-1">
                                                 <Label
                                                     htmlFor="party-phone"
                                                     className="flex items-center gap-2"
@@ -305,7 +302,7 @@ export default function PartyForm({ party }: Props) {
                                                         )
                                                     }
                                                     placeholder="Enter phone number"
-                                                    className="h-10"
+                                                    className="mt-1 h-9"
                                                     aria-invalid={Boolean(
                                                         errors.phone,
                                                     )}
@@ -316,7 +313,7 @@ export default function PartyForm({ party }: Props) {
                                                 />
                                             </div>
 
-                                            <div className="min-w-0 space-y-1.5">
+                                            <div className="min-w-0 space-y-1">
                                                 <Label
                                                     htmlFor="party-email"
                                                     className="flex items-center gap-2"
@@ -336,7 +333,7 @@ export default function PartyForm({ party }: Props) {
                                                         )
                                                     }
                                                     placeholder="name@example.com"
-                                                    className="h-10"
+                                                    className="mt-1 h-9"
                                                     aria-invalid={Boolean(
                                                         errors.email,
                                                     )}
@@ -347,7 +344,7 @@ export default function PartyForm({ party }: Props) {
                                                 />
                                             </div>
 
-                                            <div className="min-w-0 space-y-1.5 sm:col-span-2">
+                                            <div className="min-w-0 space-y-1 sm:col-span-2">
                                                 <div className="flex items-center justify-between gap-3">
                                                     <Label
                                                         htmlFor="party-address"
@@ -375,7 +372,7 @@ export default function PartyForm({ party }: Props) {
                                                     maxLength={500}
                                                     rows={3}
                                                     placeholder="Street, city, and other address details"
-                                                    className="flex min-h-24 w-full resize-y rounded-md border border-input bg-background px-3 py-2.5 text-sm shadow-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring aria-[invalid=true]:border-destructive"
+                                                    className="flex min-h-20 w-full resize-y rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors outline-none placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring aria-[invalid=true]:border-destructive"
                                                     aria-invalid={Boolean(
                                                         errors.address,
                                                     )}
@@ -390,18 +387,18 @@ export default function PartyForm({ party }: Props) {
 
                                     {/* Status is only editable on existing records */}
                                     {editing && (
-                                        <section className="border-t border-border pt-5">
-                                            <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
-                                                <div className="flex items-start gap-3">
-                                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                                        <ShieldCheck className="size-4" />
+                                        <section className="border-t border-border pt-3">
+                                            <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/20 p-2.5 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="flex items-start gap-2">
+                                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                                        <ShieldCheck className="size-3.5" />
                                                     </div>
 
                                                     <div>
                                                         <p className="text-sm font-medium">
                                                             Party status
                                                         </p>
-                                                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                                        <p className="text-[11px] leading-4 text-muted-foreground">
                                                             Control whether this
                                                             party is available
                                                             for accounting
@@ -410,7 +407,7 @@ export default function PartyForm({ party }: Props) {
                                                     </div>
                                                 </div>
 
-                                                <label className="flex cursor-pointer items-center gap-3 self-start rounded-lg border border-border bg-background px-3 py-2.5 sm:self-auto">
+                                                <label className="flex cursor-pointer items-center gap-2 self-start rounded-lg border border-border bg-background px-3 py-2 sm:self-auto">
                                                     <Input
                                                         type="checkbox"
                                                         checked={data.status}
@@ -439,11 +436,11 @@ export default function PartyForm({ party }: Props) {
                         </div>
 
                         {/* Sidebar */}
-                        <aside className="min-w-0 space-y-4 xl:sticky xl:top-5">
+                        <aside className="min-w-0 space-y-3 xl:sticky xl:top-4">
                             {/* Live preview */}
-                            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                                <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm">
+                                <div className="flex items-center gap-2.5 border-b border-border px-3 py-2.5">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                         <ContactRound className="size-4" />
                                     </div>
 
@@ -451,14 +448,14 @@ export default function PartyForm({ party }: Props) {
                                         <h2 className="text-sm font-semibold">
                                             Live preview
                                         </h2>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-[11px] text-muted-foreground">
                                             Party summary
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 p-4">
-                                    <div className="rounded-xl border border-primary/15 bg-primary/5 p-4">
+                                <div className="space-y-2.5 p-3">
+                                    <div className="rounded-lg border border-primary/15 bg-primary/5 p-3">
                                         <div className="flex items-center justify-between gap-2">
                                             <span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Party code
@@ -470,29 +467,29 @@ export default function PartyForm({ party }: Props) {
                                             )}
                                         </div>
 
-                                        <p className="mt-1.5 font-mono text-sm font-semibold break-all text-primary">
+                                        <p className="mt-1 font-mono text-xs font-semibold break-all text-primary">
                                             {data.code || 'PARTY CODE'}
                                         </p>
 
-                                        <div className="my-3 border-t border-primary/10" />
+                                        <div className="my-2 border-t border-primary/10" />
 
-                                        <p className="text-base font-semibold break-words">
+                                        <p className="text-sm font-semibold break-words">
                                             {data.name || 'Party name'}
                                         </p>
 
-                                        <span className="mt-2 inline-flex max-w-full items-center rounded-md border border-border bg-background/80 px-2 py-1 text-xs font-medium">
+                                        <span className="mt-1.5 inline-flex max-w-full items-center rounded-md border border-border bg-background/80 px-2 py-0.5 text-[11px] font-medium">
                                             {selectedPartyType}
                                         </span>
                                     </div>
 
-                                    <div className="space-y-3 rounded-xl border border-border/70 bg-background/70 p-3.5">
-                                        <p className="text-xs font-semibold text-muted-foreground">
+                                    <div className="space-y-2 rounded-lg border border-border/70 bg-background/70 p-2.5">
+                                        <p className="text-[11px] font-semibold text-muted-foreground">
                                             Contact details
                                         </p>
 
                                         <div className="flex min-w-0 items-start gap-2.5">
                                             <Phone className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                            <span className="min-w-0 text-sm break-all">
+                                            <span className="min-w-0 text-xs break-all">
                                                 {data.phone ||
                                                     'No phone provided'}
                                             </span>
@@ -500,7 +497,7 @@ export default function PartyForm({ party }: Props) {
 
                                         <div className="flex min-w-0 items-start gap-2.5">
                                             <Mail className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                            <span className="min-w-0 text-sm break-all">
+                                            <span className="min-w-0 text-xs break-all">
                                                 {data.email ||
                                                     'No email provided'}
                                             </span>
@@ -508,7 +505,7 @@ export default function PartyForm({ party }: Props) {
 
                                         <div className="flex min-w-0 items-start gap-2.5">
                                             <MapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                            <span className="min-w-0 text-sm break-words whitespace-pre-wrap text-muted-foreground">
+                                            <span className="min-w-0 text-xs break-words whitespace-pre-wrap text-muted-foreground">
                                                 {data.address ||
                                                     'No address provided'}
                                             </span>
@@ -544,10 +541,10 @@ export default function PartyForm({ party }: Props) {
                             </section>
 
                             {/* Guidance */}
-                            <section className="rounded-2xl border border-border bg-muted/20 p-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                        <CircleHelp className="size-4" />
+                            <section className="rounded-xl border border-border/80 bg-muted/20 p-3">
+                                <div className="flex items-start gap-2.5">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <CircleHelp className="size-3.5" />
                                     </div>
 
                                     <div className="min-w-0">
@@ -555,7 +552,7 @@ export default function PartyForm({ party }: Props) {
                                             Party record tips
                                         </h3>
 
-                                        <ul className="mt-3 space-y-2.5 text-xs leading-relaxed text-muted-foreground">
+                                        <ul className="mt-2 space-y-2 text-[11px] leading-4 text-muted-foreground">
                                             <li className="flex items-start gap-2">
                                                 <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
                                                 Use a consistent, unique party
@@ -577,15 +574,15 @@ export default function PartyForm({ party }: Props) {
                             </section>
 
                             {/* Record context */}
-                            <section className="rounded-2xl border border-border bg-card p-4">
-                                <div className="flex items-start gap-3">
+                            <section className="rounded-xl border border-border/80 bg-card p-3">
+                                <div className="flex items-start gap-2.5">
                                     <FileText className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
 
                                     <div>
                                         <h3 className="text-xs font-semibold">
                                             Record management
                                         </h3>
-                                        <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                                        <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
                                             {editing
                                                 ? 'Review your changes before saving. Updated details will be used wherever this party is referenced.'
                                                 : 'Review the party details before creating the record. You can update contact information later.'}
@@ -599,7 +596,7 @@ export default function PartyForm({ party }: Props) {
                     {/* Sticky form actions */}
                     <div
                         data-slot="page-sticky-action-bar"
-                        className="sticky bottom-0 z-20 -mx-2 border-t border-border bg-background/95 px-2 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-4 sm:px-4"
+                        className="sticky bottom-0 z-20 -mx-2 border-t border-border bg-background/95 px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-4 sm:px-4"
                     >
                         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden text-xs text-muted-foreground md:block">
@@ -613,7 +610,7 @@ export default function PartyForm({ party }: Props) {
                                     type="button"
                                     variant="outline"
                                     asChild
-                                    className="w-full sm:w-auto"
+                                    className="h-9 w-full sm:w-auto"
                                 >
                                     <Link href={route('parties.index')}>
                                         Cancel
@@ -623,7 +620,7 @@ export default function PartyForm({ party }: Props) {
                                 <Button
                                     type="submit"
                                     disabled={processing}
-                                    className="w-full gap-2 sm:w-auto"
+                                    className="h-9 w-full gap-2 sm:w-auto"
                                 >
                                     {processing ? (
                                         <LoaderCircle className="size-4 animate-spin" />

@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
+import type { Customer } from '@/modules/customers-kyc/types/customer_kyc_module';
 
 import HeadingSmall from '@/components/heading-small';
 import type { Props } from '@/modules/financial-services/types/accounts/recurring/create.interfaces';
@@ -17,19 +18,21 @@ import {
     ArrowLeft,
     CalendarDays,
     CheckCircle2,
+    Eye,
     FileText,
     Landmark,
     Percent,
     Repeat2,
-    ShieldCheck,
     UserRound,
-    Wallet,
 } from 'lucide-react';
-import type { FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { route } from 'ziggy-js';
 
 export default function RecurringDepositAccountCreate() {
     const { products } = usePage<Props>().props;
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+        null,
+    );
 
     const { data, setData, post, processing, errors } = useForm({
         financial_product_id: '',
@@ -85,7 +88,7 @@ export default function RecurringDepositAccountCreate() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open recurring deposit" />
 
-            <div className="w-full max-w-screen-xl space-y-5 pb-6">
+            <div className="w-full max-w-screen-xl space-y-4 pb-24">
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title="Open recurring deposit"
@@ -107,12 +110,12 @@ export default function RecurringDepositAccountCreate() {
                     </div>
                 </div>
 
-                <form onSubmit={submit} className="space-y-5">
-                    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-                        <div className="min-w-0 space-y-5">
+                <form onSubmit={submit} className="space-y-4">
+                    <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_280px]">
+                        <div className="min-w-0 space-y-3">
                             {/* Product selection */}
                             <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="flex items-center gap-3 border-b px-4 py-4 sm:px-5">
+                                <div className="flex items-center gap-2.5 border-b px-3 py-3 sm:px-4">
                                     <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-primary">
                                         <Landmark className="size-4" />
                                     </div>
@@ -127,7 +130,7 @@ export default function RecurringDepositAccountCreate() {
                                     </div>
                                 </div>
 
-                                <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
+                                <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="financial_product_id">
                                             Deposit product{' '}
@@ -275,7 +278,7 @@ export default function RecurringDepositAccountCreate() {
 
                             {/* Depositor information */}
                             <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="flex items-center gap-3 border-b px-4 py-4 sm:px-5">
+                                <div className="flex items-center gap-2.5 border-b px-3 py-3 sm:px-4">
                                     <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-primary">
                                         <UserRound className="size-4" />
                                     </div>
@@ -290,7 +293,7 @@ export default function RecurringDepositAccountCreate() {
                                     </div>
                                 </div>
 
-                                <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
+                                <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="holder_id">
                                             Depositor{' '}
@@ -299,15 +302,17 @@ export default function RecurringDepositAccountCreate() {
                                             </span>
                                         </Label>
                                         <CustomerSearchInput
-                                            onSelect={(customer) =>
+                                            onSelect={(customer) => {
                                                 setData(
                                                     'holder_id',
                                                     String(customer.id),
-                                                )
-                                            }
-                                            clearSelectedCustomer={() =>
-                                                setData('holder_id', '')
-                                            }
+                                                );
+                                                setSelectedCustomer(customer);
+                                            }}
+                                            clearSelectedCustomer={() => {
+                                                setData('holder_id', '');
+                                                setSelectedCustomer(null);
+                                            }}
                                             placeholder="Search depositor by name or customer number..."
                                         />
                                         <InputError
@@ -341,7 +346,7 @@ export default function RecurringDepositAccountCreate() {
 
                             {/* Installment configuration */}
                             <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="flex items-center gap-3 border-b px-4 py-4 sm:px-5">
+                                <div className="flex items-center gap-2.5 border-b px-3 py-3 sm:px-4">
                                     <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-primary">
                                         <Repeat2 className="size-4" />
                                     </div>
@@ -356,7 +361,7 @@ export default function RecurringDepositAccountCreate() {
                                     </div>
                                 </div>
 
-                                <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
+                                <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="installment_amount">
                                             Installment amount{' '}
@@ -470,7 +475,7 @@ export default function RecurringDepositAccountCreate() {
 
                             {/* Dates and maturity */}
                             <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="flex items-center gap-3 border-b px-4 py-4 sm:px-5">
+                                <div className="flex items-center gap-2.5 border-b px-3 py-3 sm:px-4">
                                     <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-primary">
                                         <CalendarDays className="size-4" />
                                     </div>
@@ -485,7 +490,7 @@ export default function RecurringDepositAccountCreate() {
                                     </div>
                                 </div>
 
-                                <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5">
+                                <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="started_at">
                                             Start date{' '}
@@ -560,53 +565,77 @@ export default function RecurringDepositAccountCreate() {
                         </div>
 
                         {/* Live summary */}
-                        <aside className="space-y-4 lg:sticky lg:top-5">
+                        <aside className="space-y-3 lg:sticky lg:top-4">
                             <section className="overflow-hidden rounded-xl border bg-card">
-                                <div className="flex items-center gap-3 border-b px-4 py-4">
-                                    <div className="flex size-9 items-center justify-center rounded-lg bg-muted/50 text-primary">
-                                        <Wallet className="size-4" />
+                                <div className="flex items-center gap-2.5 border-b px-3 py-3">
+                                    <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <Eye className="size-3.5" />
                                     </div>
-                                    <div>
-                                        <h2 className="text-sm font-semibold">
-                                            Deposit summary
+                                    <div className="min-w-0 flex-1">
+                                        <h2 className="text-[13px] font-semibold">
+                                            Live preview
                                         </h2>
-                                        <p className="text-xs text-muted-foreground">
-                                            Estimated contribution
+                                        <p className="text-[10px] text-muted-foreground">
+                                            Recurring deposit summary
                                         </p>
                                     </div>
+                                    <span className="rounded-full border border-primary/15 bg-primary/5 px-2 py-0.5 text-[9px] font-semibold text-primary">
+                                        LIVE
+                                    </span>
                                 </div>
 
-                                <div className="space-y-4 p-4">
+                                <div className="space-y-3 p-3">
+                                    <div className="rounded-lg bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3 ring-1 ring-primary/10">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                                    Account display name
+                                                </p>
+                                                <p className="mt-0.5 truncate text-sm font-semibold">
+                                                    {data.name.trim() ||
+                                                        product?.name ||
+                                                        'Recurring deposit'}
+                                                </p>
+                                                <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+                                                    {selectedCustomer?.name ??
+                                                        'Select a depositor'}
+                                                </p>
+                                            </div>
+                                            <span className="shrink-0 rounded-full border border-primary/15 bg-background/80 px-2 py-0.5 text-[9px] font-semibold text-primary">
+                                                RECURRING
+                                            </span>
+                                        </div>
+                                    </div>
                                     <div>
                                         <p className="text-xs text-muted-foreground">
                                             Estimated total deposits
                                         </p>
-                                        <p className="mt-1 text-2xl font-semibold tracking-tight break-words tabular-nums">
+                                        <p className="mt-0.5 text-xl font-semibold tracking-tight break-words tabular-nums">
                                             {formatBDTCurrency(estimatedTotal)}
                                         </p>
-                                        <p className="mt-1 text-xs text-muted-foreground">
+                                        <p className="mt-0.5 text-[10px] text-muted-foreground">
                                             Excludes interest, fees, and
                                             penalties.
                                         </p>
                                     </div>
 
-                                    <div className="space-y-3 border-t pt-4">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <span className="text-xs text-muted-foreground">
+                                    <div className="space-y-2 border-t pt-3">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <span className="text-[11px] text-muted-foreground">
                                                 Installment
                                             </span>
-                                            <span className="text-right text-sm font-medium tabular-nums">
+                                            <span className="text-right text-xs font-medium tabular-nums">
                                                 {formatBDTCurrency(
                                                     installmentAmount,
                                                 )}
                                             </span>
                                         </div>
 
-                                        <div className="flex items-start justify-between gap-3">
-                                            <span className="text-xs text-muted-foreground">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <span className="text-[11px] text-muted-foreground">
                                                 Frequency
                                             </span>
-                                            <span className="text-right text-sm font-medium">
+                                            <span className="text-right text-xs font-medium">
                                                 {selectedTerm?.tenure_unit ===
                                                 'QUARTER'
                                                     ? 'Quarterly'
@@ -624,11 +653,11 @@ export default function RecurringDepositAccountCreate() {
                                             </span>
                                         </div>
 
-                                        <div className="flex items-start justify-between gap-3">
-                                            <span className="text-xs text-muted-foreground">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <span className="text-[11px] text-muted-foreground">
                                                 Installments
                                             </span>
-                                            <span className="text-sm font-medium tabular-nums">
+                                            <span className="text-xs font-medium tabular-nums">
                                                 {Number.isFinite(
                                                     installmentCount,
                                                 )
@@ -637,11 +666,11 @@ export default function RecurringDepositAccountCreate() {
                                             </span>
                                         </div>
 
-                                        <div className="flex items-start justify-between gap-3">
-                                            <span className="text-xs text-muted-foreground">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <span className="text-[11px] text-muted-foreground">
                                                 Grace period
                                             </span>
-                                            <span className="text-sm font-medium tabular-nums">
+                                            <span className="text-xs font-medium tabular-nums">
                                                 {data.grace_days || '0'} days
                                             </span>
                                         </div>
@@ -649,31 +678,17 @@ export default function RecurringDepositAccountCreate() {
                                 </div>
                             </section>
 
-                            <section className="rounded-xl border bg-muted/20 p-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-background text-muted-foreground">
-                                        <ShieldCheck className="size-4" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-semibold">
-                                            Before you continue
-                                        </h3>
-                                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                            Verify the depositor, selected
-                                            product term, installment amount,
-                                            and schedule before opening the
-                                            account.
-                                        </p>
-                                    </div>
-                                </div>
-                            </section>
+                            <p className="flex items-start gap-1.5 border-t pt-2.5 text-[10px] leading-snug text-muted-foreground">
+                                <Eye className="mt-0.5 size-3 shrink-0 text-primary" />
+                                Preview updates as you complete the form.
+                            </p>
                         </aside>
                     </div>
 
                     {/* Form actions */}
                     <div
                         data-slot="page-sticky-action-bar"
-                        className="sticky bottom-0 z-10 -mx-4 border-t bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6"
+                        className="sticky bottom-0 z-10 -mx-4 border-t bg-background/95 px-4 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-6 sm:px-6"
                     >
                         <div className="mx-auto flex max-w-screen-xl flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden items-center gap-2 text-xs text-muted-foreground md:flex">

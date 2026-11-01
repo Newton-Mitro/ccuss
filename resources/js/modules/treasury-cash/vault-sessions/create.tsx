@@ -4,6 +4,7 @@ import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import type { PageProps } from '@/modules/treasury-cash/types/vault-sessions/create.types';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
@@ -18,8 +19,6 @@ import {
 } from 'lucide-react';
 import type { FormEvent } from 'react';
 import { route } from 'ziggy-js';
-import type { PageProps } from '@/modules/treasury-cash/types/vault-sessions/create.types';
-
 
 export default function CreateVaultSessionPage() {
     const {
@@ -77,11 +76,11 @@ export default function CreateVaultSessionPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open Vault Session" />
 
-            <div className="max-w-6xl space-y-5 pb-6">
+            <div className="max-w-6xl space-y-4 pb-6">
                 {/* Page heading */}
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-start gap-3">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border bg-card shadow-sm">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/[0.08]">
                             <Vault className="size-5 text-primary" />
                         </div>
 
@@ -91,8 +90,8 @@ export default function CreateVaultSessionPage() {
                                     Open Vault Session
                                 </h1>
 
-                                <span className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-2 py-1 text-[10px] font-semibold text-muted-foreground">
-                                    <span className="size-1.5 rounded-full bg-primary" />
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/[0.06] px-2 py-1 text-[10px] font-semibold text-primary">
+                                    <span className="size-1.5 animate-pulse rounded-full bg-primary" />
                                     NEW SESSION
                                 </span>
                             </div>
@@ -165,12 +164,12 @@ export default function CreateVaultSessionPage() {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="grid items-start gap-5 lg:grid-cols-12">
+                    <div className="grid items-start gap-4 lg:grid-cols-12">
                         {/* Left column: Session configuration */}
-                        <div className="space-y-4 lg:col-span-7">
-                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                                <div className="flex items-center gap-3 border-b px-4 py-3.5 sm:px-5">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <div className="space-y-3 lg:col-span-7">
+                            <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm">
+                                <div className="flex items-center gap-3 border-b bg-gradient-to-r from-muted/40 to-transparent px-4 py-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                         <Vault className="size-4" />
                                     </div>
 
@@ -178,14 +177,14 @@ export default function CreateVaultSessionPage() {
                                         <h2 className="text-sm font-semibold">
                                             Session configuration
                                         </h2>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-[11px] text-muted-foreground">
                                             Select the business day and vault
                                             for this session.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-5 p-4 sm:p-5">
+                                <div className="grid gap-3 p-4 sm:grid-cols-2">
                                     {/* Branch business day */}
                                     <div>
                                         <label
@@ -203,7 +202,7 @@ export default function CreateVaultSessionPage() {
 
                                             <Select
                                                 id="branch_day_id"
-                                                className="h-10 w-full pl-9"
+                                                className="h-9 w-full pl-9"
                                                 value={data.branch_day_id}
                                                 onChange={(value) =>
                                                     setData(
@@ -266,7 +265,7 @@ export default function CreateVaultSessionPage() {
 
                                             <Select
                                                 id="vault_id"
-                                                className="h-10 w-full pl-9"
+                                                className="h-9 w-full pl-9"
                                                 value={data.vault_id}
                                                 onChange={(value) =>
                                                     setData('vault_id', value)
@@ -296,7 +295,7 @@ export default function CreateVaultSessionPage() {
                                         )}
 
                                         {selectedVault && (
-                                            <div className="mt-2 flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+                                            <div className="mt-1.5 flex items-center gap-2 rounded-lg border bg-muted/30 px-2.5 py-2">
                                                 <Vault className="size-4 shrink-0 text-muted-foreground" />
 
                                                 <div className="min-w-0 flex-1">
@@ -323,18 +322,101 @@ export default function CreateVaultSessionPage() {
                                 </div>
                             </section>
 
+                            {/* Opening cash */}
+                            <section className="overflow-hidden rounded-xl border border-primary/15 bg-card shadow-sm shadow-primary/[0.03]">
+                                <div className="flex items-center gap-3 border-b bg-gradient-to-r from-primary/[0.07] to-transparent px-4 py-3">
+                                    <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <CircleDollarSign className="size-4" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-sm font-semibold">
+                                            Opening cash balance
+                                        </h2>
+                                        <p className="text-[11px] text-muted-foreground">
+                                            Physical cash counted for this
+                                            session
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(180px,0.8fr)] sm:items-end">
+                                    <div>
+                                        <label
+                                            htmlFor="opening_cash"
+                                            className={labelClass}
+                                        >
+                                            Opening amount
+                                            <span className="ml-1 text-destructive">
+                                                *
+                                            </span>
+                                        </label>
+
+                                        <div className="relative">
+                                            <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-lg font-semibold text-muted-foreground">
+                                                ৳
+                                            </span>
+                                            <Input
+                                                id="opening_cash"
+                                                type="number"
+                                                min="0"
+                                                step="0.0001"
+                                                inputMode="decimal"
+                                                placeholder="0.00"
+                                                className="h-11 border-primary/20 bg-background pl-9 text-xl font-bold tracking-tight tabular-nums"
+                                                value={data.opening_cash}
+                                                onChange={(event) =>
+                                                    setData(
+                                                        'opening_cash',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                disabled={!canOpenSession}
+                                                required
+                                            />
+                                        </div>
+
+                                        {errors.opening_cash && (
+                                            <p className={errorClass}>
+                                                {errors.opening_cash}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    {selectedVault && (
+                                        <div className="flex min-w-0 items-center justify-between gap-3 rounded-lg border bg-muted/30 px-3 py-2.5">
+                                            <div className="min-w-0">
+                                                <p className="text-[11px] font-medium">
+                                                    Current ledger balance
+                                                </p>
+                                                <p className="text-[10px] text-muted-foreground">
+                                                    Reference only
+                                                </p>
+                                            </div>
+                                            <p className="shrink-0 text-xs font-semibold tabular-nums">
+                                                {selectedVault.current_balance ==
+                                                null
+                                                    ? '—'
+                                                    : formatBDTCurrency(
+                                                          selectedVault.current_balance,
+                                                      )}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </section>
+
                             {/* Opening remarks */}
-                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                                <div className="flex items-center gap-3 border-b px-4 py-3.5 sm:px-5">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                                        <FileText className="size-4" />
+                            <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm">
+                                <div className="flex items-center gap-3 border-b bg-gradient-to-r from-muted/40 to-transparent px-4 py-3">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                                        <FileText className="size-3.5" />
                                     </div>
 
                                     <div>
                                         <h2 className="text-sm font-semibold">
                                             Opening remarks
                                         </h2>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-[11px] text-muted-foreground">
                                             Add an optional note to the session
                                             record.
                                         </p>
@@ -345,7 +427,7 @@ export default function CreateVaultSessionPage() {
                                     </span>
                                 </div>
 
-                                <div className="p-4 sm:p-5">
+                                <div className="p-4">
                                     <label
                                         htmlFor="opening_note"
                                         className={labelClass}
@@ -366,7 +448,7 @@ export default function CreateVaultSessionPage() {
                                                 )
                                             }
                                             placeholder="Enter opening remarks or cash verification details..."
-                                            className="h-10 pl-9"
+                                            className="h-9 pl-9"
                                             disabled={!canOpenSession}
                                             maxLength={2000}
                                         />
@@ -385,132 +467,117 @@ export default function CreateVaultSessionPage() {
                             </section>
                         </div>
 
-                        {/* Right column: Opening cash and readiness */}
-                        <div className="space-y-4 lg:col-span-5">
-                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                                <div className="flex items-center gap-3 border-b px-4 py-3.5 sm:px-5">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                        <CircleDollarSign className="size-5" />
-                                    </div>
-
-                                    <div>
-                                        <h2 className="text-sm font-semibold">
-                                            Opening cash balance
-                                        </h2>
-                                        <p className="text-xs text-muted-foreground">
-                                            Initial physical cash in the vault
-                                        </p>
+                        {/* Right column: Session overview */}
+                        <div className="space-y-3 lg:col-span-5">
+                            <section className="overflow-hidden rounded-xl border border-primary/20 bg-card shadow-md shadow-primary/[0.04]">
+                                <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-3">
+                                    <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
+                                    <div className="relative flex items-center gap-2.5">
+                                        <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/15">
+                                            <Vault className="size-4" />
+                                        </span>
+                                        <div className="min-w-0 flex-1">
+                                            <h2 className="text-sm font-semibold">
+                                                Session overview
+                                            </h2>
+                                            <p className="text-[10px] text-muted-foreground">
+                                                Review before opening
+                                            </p>
+                                        </div>
+                                        <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[9px] font-semibold tracking-wide text-primary">
+                                            LIVE
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 p-4 sm:p-5">
-                                    {selectedVault && (
-                                        <div className="flex items-center justify-between gap-4 rounded-lg border bg-muted/30 px-3 py-2.5">
-                                            <div>
-                                                <p className="text-xs font-medium">
-                                                    Current ledger balance
-                                                </p>
-                                                <p className="text-[11px] text-muted-foreground">
-                                                    Reference only; count the
-                                                    physical cash below.
-                                                </p>
-                                            </div>
-                                            <p className="shrink-0 text-sm font-semibold tabular-nums">
-                                                {selectedVault.current_balance ==
-                                                null
-                                                    ? '-'
-                                                    : formatBDTCurrency(
-                                                          selectedVault.current_balance,
-                                                      )}
-                                            </p>
-                                        </div>
-                                    )}
-                                    <div>
-                                        <label
-                                            htmlFor="opening_cash"
-                                            className={labelClass}
-                                        >
-                                            Opening amount
-                                            <span className="ml-1 text-destructive">
-                                                *
-                                            </span>
-                                        </label>
-
-                                        <div className="relative">
-                                            <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-lg font-semibold text-muted-foreground">
-                                                ৳
-                                            </span>
-
-                                            <Input
-                                                id="opening_cash"
-                                                type="number"
-                                                min="0"
-                                                step="0.0001"
-                                                inputMode="decimal"
-                                                placeholder="0.00"
-                                                className="h-14 pl-9 text-2xl font-bold tracking-tight tabular-nums"
-                                                value={data.opening_cash}
-                                                onChange={(event) =>
-                                                    setData(
-                                                        'opening_cash',
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                disabled={!canOpenSession}
-                                                required
-                                            />
-                                        </div>
-
-                                        {errors.opening_cash && (
-                                            <p className={errorClass}>
-                                                {errors.opening_cash}
-                                            </p>
-                                        )}
-
-                                        <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                                            Enter the actual physical cash
-                                            counted and available at the start
-                                            of the business day.
+                                <div className="space-y-2.5 p-3">
+                                    <div className="rounded-lg bg-gradient-to-br from-primary/[0.09] to-muted/30 p-3 ring-1 ring-primary/10">
+                                        <p className="text-[9px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+                                            Opening cash
+                                        </p>
+                                        <p className="mt-0.5 text-xl font-bold tracking-tight text-primary tabular-nums">
+                                            {hasOpeningCash
+                                                ? formatBDTCurrency(
+                                                      data.opening_cash,
+                                                  )
+                                                : formatBDTCurrency(0)}
                                         </p>
                                     </div>
 
-                                    <div className="rounded-lg border bg-muted/30 p-3">
-                                        <div className="flex items-start gap-2.5">
-                                            <ShieldCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-
-                                            <div>
-                                                <p className="text-xs font-semibold">
-                                                    Cash verification
-                                                </p>
-                                                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                                    Count and verify the
-                                                    physical cash before opening
-                                                    the vault session. The
-                                                    opening amount should match
-                                                    the actual cash on hand.
-                                                </p>
+                                    {[
+                                        {
+                                            label: 'Business day',
+                                            value: branch_day
+                                                ? branch_day.business_date
+                                                : 'Not selected',
+                                            icon: CalendarDays,
+                                        },
+                                        {
+                                            label: 'Vault',
+                                            value: selectedVault
+                                                ? `${selectedVault.name} (${selectedVault.code})`
+                                                : 'Not selected',
+                                            icon: Vault,
+                                        },
+                                        {
+                                            label: 'Ledger balance',
+                                            value:
+                                                selectedVault?.current_balance ==
+                                                null
+                                                    ? '—'
+                                                    : formatBDTCurrency(
+                                                          selectedVault.current_balance,
+                                                      ),
+                                            icon: CircleDollarSign,
+                                        },
+                                    ].map((item) => {
+                                        const ItemIcon = item.icon;
+                                        return (
+                                            <div
+                                                key={item.label}
+                                                className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-border/70 bg-muted/20 px-2.5 py-2"
+                                            >
+                                                <span className="flex shrink-0 items-center gap-1.5 text-[10px] text-muted-foreground">
+                                                    <ItemIcon className="size-3" />
+                                                    {item.label}
+                                                </span>
+                                                <span className="min-w-0 text-right text-[11px] font-medium break-words">
+                                                    {item.value}
+                                                </span>
                                             </div>
+                                        );
+                                    })}
+
+                                    {data.opening_note && (
+                                        <div className="rounded-lg border border-border/70 px-2.5 py-2">
+                                            <p className="text-[9px] font-semibold tracking-wide text-muted-foreground uppercase">
+                                                Session note
+                                            </p>
+                                            <p className="mt-0.5 line-clamp-2 text-[11px] break-words">
+                                                {data.opening_note}
+                                            </p>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             </section>
 
                             {/* Session readiness */}
-                            <section className="rounded-xl border bg-muted/20 p-4 sm:p-5">
-                                <h3 className="text-sm font-semibold">
-                                    Session readiness
-                                </h3>
+                            <section className="rounded-xl border bg-muted/20 p-3">
+                                <div className="mb-2 flex items-center justify-between gap-2">
+                                    <h3 className="text-xs font-semibold">
+                                        Session readiness
+                                    </h3>
+                                    <span className="text-[10px] text-muted-foreground">
+                                        Required checks
+                                    </span>
+                                </div>
 
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    Review these details before proceeding.
-                                </p>
-
-                                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
-                                    <div className="flex items-center gap-2.5 text-xs">
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                                    <div className="flex items-center gap-1.5 text-[10px]">
                                         {userHasBranch ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
+                                            <CheckCircle2 className="size-3.5 shrink-0 text-success" />
                                         ) : (
-                                            <span className="size-4 shrink-0 rounded-full border border-amber-500" />
+                                            <span className="size-3.5 shrink-0 rounded-full border border-amber-500" />
                                         )}
 
                                         <span
@@ -524,11 +591,11 @@ export default function CreateVaultSessionPage() {
                                         </span>
                                     </div>
 
-                                    <div className="flex items-center gap-2.5 text-xs">
+                                    <div className="flex items-center gap-1.5 text-[10px]">
                                         {hasBranchDay ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
+                                            <CheckCircle2 className="size-3.5 shrink-0 text-success" />
                                         ) : (
-                                            <span className="size-4 shrink-0 rounded-full border border-amber-500" />
+                                            <span className="size-3.5 shrink-0 rounded-full border border-amber-500" />
                                         )}
 
                                         <span
@@ -542,11 +609,11 @@ export default function CreateVaultSessionPage() {
                                         </span>
                                     </div>
 
-                                    <div className="flex items-center gap-2.5 text-xs">
+                                    <div className="flex items-center gap-1.5 text-[10px]">
                                         {selectedVault ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
+                                            <CheckCircle2 className="size-3.5 shrink-0 text-success" />
                                         ) : (
-                                            <span className="size-4 shrink-0 rounded-full border" />
+                                            <span className="size-3.5 shrink-0 rounded-full border" />
                                         )}
 
                                         <span
@@ -560,11 +627,11 @@ export default function CreateVaultSessionPage() {
                                         </span>
                                     </div>
 
-                                    <div className="flex items-center gap-2.5 text-xs">
+                                    <div className="flex items-center gap-1.5 text-[10px]">
                                         {hasOpeningCash ? (
-                                            <CheckCircle2 className="size-4 shrink-0 text-success" />
+                                            <CheckCircle2 className="size-3.5 shrink-0 text-success" />
                                         ) : (
-                                            <span className="size-4 shrink-0 rounded-full border" />
+                                            <span className="size-3.5 shrink-0 rounded-full border" />
                                         )}
 
                                         <span
@@ -581,7 +648,7 @@ export default function CreateVaultSessionPage() {
                             </section>
 
                             {/* Form actions */}
-                            <div className="space-y-3 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+                            <div className="space-y-2 rounded-xl border border-primary/15 bg-card p-3 shadow-sm">
                                 <Button
                                     type="submit"
                                     disabled={
@@ -590,7 +657,7 @@ export default function CreateVaultSessionPage() {
                                         !selectedVault ||
                                         !hasOpeningCash
                                     }
-                                    className="h-11 w-full font-semibold"
+                                    className="h-10 w-full font-semibold"
                                 >
                                     <Vault className="mr-2 size-4" />
 
@@ -606,7 +673,7 @@ export default function CreateVaultSessionPage() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    className="h-10 w-full"
+                                    className="h-9 w-full"
                                     disabled={processing}
                                     onClick={() =>
                                         router.visit(

@@ -131,95 +131,87 @@ export default function TreasuryGlMappingForm({
                 }
             />
 
-            <div className="w-full min-w-0 space-y-5 pb-8 text-foreground">
+            <div className="w-full min-w-0 space-y-3 pb-4 text-foreground">
                 {/* Page header */}
-                <header className="relative isolate overflow-hidden rounded-2xl border border-border bg-gradient-to-r from-primary/10 via-card to-card p-4 shadow-sm sm:p-6">
-                    <div className="pointer-events-none absolute -top-20 -right-12 -z-10 size-64 rounded-full bg-primary/10 blur-3xl" />
+                <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-start gap-2">
+                        <ArrowLeftRight className="mt-1 size-4 shrink-0 text-primary" />
+                        <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h1 className="text-xl leading-tight font-semibold tracking-tight">
+                                    {editing
+                                        ? 'Edit Treasury GL Mapping'
+                                        : 'Create Treasury GL Mapping'}
+                                </h1>
 
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex min-w-0 items-start gap-3">
-                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/10 text-primary sm:size-12">
-                                <ArrowLeftRight className="size-5 sm:size-6" />
+                                <span className="rounded-full border border-border bg-background/80 px-2 py-0.5 text-[9px] font-semibold tracking-wide text-muted-foreground uppercase">
+                                    Treasury
+                                </span>
                             </div>
-
-                            <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
-                                        {editing
-                                            ? 'Edit Treasury GL Mapping'
-                                            : 'Create Treasury GL Mapping'}
-                                    </h1>
-
-                                    <span className="rounded-full border border-border bg-background/80 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
-                                        Treasury
-                                    </span>
-                                </div>
-
-                                <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-                                    Connect Treasury transaction types to the
-                                    appropriate general ledger accounts for
-                                    accurate journal posting.
-                                </p>
-                            </div>
+                            <p className="text-[11px] leading-4 text-muted-foreground">
+                                Connect Treasury transaction types to the
+                                appropriate general ledger accounts for accurate
+                                journal posting.
+                            </p>
                         </div>
-
-                        <Button
-                            asChild
-                            variant="outline"
-                            className="w-full shrink-0 sm:w-auto"
-                        >
-                            <Link href={route('treasury-gl-mappings.index')}>
-                                <ArrowLeft className="mr-2 size-4" />
-                                Back to mappings
-                            </Link>
-                        </Button>
                     </div>
+
+                    <Button
+                        asChild
+                        variant="outline"
+                        className="h-9 w-full shrink-0 sm:w-auto"
+                    >
+                        <Link href={route('treasury-gl-mappings.index')}>
+                            <ArrowLeft className="mr-2 size-4" />
+                            Back to mappings
+                        </Link>
+                    </Button>
                 </header>
 
-                <form onSubmit={submit} className="space-y-5">
-                    <div className="grid min-w-0 items-start gap-5 xl:grid-cols-3">
+                <form onSubmit={submit} className="space-y-3">
+                    <div className="grid min-w-0 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_300px]">
                         {/* Main form */}
-                        <div className="min-w-0 space-y-5 xl:col-span-2">
-                            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                                <div className="flex items-center gap-3 border-b border-border bg-muted/20 px-4 py-4 sm:px-6">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                        <Landmark className="size-5" />
+                        <div className="min-w-0 space-y-3">
+                            <section className="overflow-hidden rounded-xl border border-border/80 bg-card">
+                                <div className="flex items-center gap-2.5 border-b border-border bg-muted/20 px-3 py-2.5">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <Landmark className="size-4" />
                                     </div>
 
                                     <div className="min-w-0">
                                         <h2 className="text-sm font-semibold">
                                             Mapping configuration
                                         </h2>
-                                        <p className="mt-1 text-xs text-muted-foreground">
+                                        <p className="text-[11px] text-muted-foreground">
                                             Define the source, transaction, and
                                             debit/credit accounts.
                                         </p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-6 p-4 sm:p-6">
+                                <div className="space-y-3 p-3">
                                     {/* Source configuration */}
-                                    <section className="space-y-4">
+                                    <section className="space-y-2">
                                         <div>
                                             <h3 className="text-sm font-semibold">
                                                 Transaction source
                                             </h3>
-                                            <p className="mt-1 text-xs text-muted-foreground">
+                                            <p className="text-[11px] leading-4 text-muted-foreground">
                                                 Specify which Treasury source
                                                 and transaction this mapping
                                                 applies to.
                                             </p>
                                         </div>
 
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            <div className="min-w-0 space-y-1.5">
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            <div className="min-w-0 space-y-1">
                                                 <Label htmlFor="source_type">
                                                     Source type
                                                 </Label>
 
                                                 <Select
                                                     id="source_type"
-                                                    className="h-10 w-full"
+                                                    className="mt-1 h-9 w-full"
                                                     value={
                                                         form.data.source_type
                                                     }
@@ -259,7 +251,7 @@ export default function TreasuryGlMappingForm({
                                                 />
                                             </div>
 
-                                            <div className="min-w-0 space-y-1.5">
+                                            <div className="min-w-0 space-y-1">
                                                 <Label htmlFor="source_code">
                                                     Source code
                                                 </Label>
@@ -276,7 +268,7 @@ export default function TreasuryGlMappingForm({
                                                         )
                                                     }
                                                     placeholder="DEFAULT, TELLER, or VAULT"
-                                                    className="h-10"
+                                                    className="mt-1 h-9"
                                                     required
                                                     aria-invalid={Boolean(
                                                         form.errors.source_code,
@@ -290,7 +282,7 @@ export default function TreasuryGlMappingForm({
                                                 />
                                             </div>
 
-                                            <div className="min-w-0 space-y-1.5 sm:col-span-2">
+                                            <div className="min-w-0 space-y-1 sm:col-span-2">
                                                 <Label htmlFor="transaction_type">
                                                     Transaction type
                                                 </Label>
@@ -298,7 +290,7 @@ export default function TreasuryGlMappingForm({
                                                 {sourceTransactionTypes ? (
                                                     <Select
                                                         id="transaction_type"
-                                                        className="h-10 w-full"
+                                                        className="mt-1 h-9 w-full"
                                                         value={
                                                             form.data
                                                                 .transaction_type
@@ -332,7 +324,7 @@ export default function TreasuryGlMappingForm({
                                                             )
                                                         }
                                                         placeholder="Transaction type"
-                                                        className="h-10"
+                                                        className="mt-1 h-9"
                                                         required
                                                         aria-invalid={Boolean(
                                                             form.errors
@@ -352,21 +344,21 @@ export default function TreasuryGlMappingForm({
                                     </section>
 
                                     {/* Ledger account mapping */}
-                                    <section className="space-y-4 border-t border-border pt-5">
+                                    <section className="space-y-2 border-t border-border pt-3">
                                         <div>
                                             <h3 className="text-sm font-semibold">
                                                 Ledger account mapping
                                             </h3>
-                                            <p className="mt-1 text-xs text-muted-foreground">
+                                            <p className="text-[11px] leading-4 text-muted-foreground">
                                                 Select the accounts that will be
                                                 debited and credited when this
                                                 transaction is posted.
                                             </p>
                                         </div>
 
-                                        <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="grid gap-2.5 md:grid-cols-2">
                                             {/* Debit account */}
-                                            <div className="min-w-0 space-y-3 rounded-xl border border-border p-4">
+                                            <div className="min-w-0 space-y-2 rounded-lg border border-border/80 p-2.5">
                                                 <div className="flex items-center gap-2">
                                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                                         <ArrowRight className="size-4" />
@@ -383,7 +375,7 @@ export default function TreasuryGlMappingForm({
 
                                                 <Select
                                                     id="debit_account_id"
-                                                    className="h-10 w-full"
+                                                    className="h-9 w-full"
                                                     value={
                                                         form.data
                                                             .debit_account_id
@@ -398,7 +390,7 @@ export default function TreasuryGlMappingForm({
                                                 />
 
                                                 {debitAccount && (
-                                                    <div className="rounded-lg bg-muted/40 px-3 py-2.5">
+                                                    <div className="rounded-lg bg-muted/40 px-2.5 py-2">
                                                         <p className="text-xs font-medium break-words">
                                                             {debitAccount.code}{' '}
                                                             —{' '}
@@ -434,7 +426,7 @@ export default function TreasuryGlMappingForm({
                                             </div>
 
                                             {/* Credit account */}
-                                            <div className="min-w-0 space-y-3 rounded-xl border border-border p-4">
+                                            <div className="min-w-0 space-y-2 rounded-lg border border-border/80 p-2.5">
                                                 <div className="flex items-center gap-2">
                                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                                         <ArrowLeftRight className="size-4" />
@@ -451,7 +443,7 @@ export default function TreasuryGlMappingForm({
 
                                                 <Select
                                                     id="credit_account_id"
-                                                    className="h-10 w-full"
+                                                    className="h-9 w-full"
                                                     value={
                                                         form.data
                                                             .credit_account_id
@@ -466,7 +458,7 @@ export default function TreasuryGlMappingForm({
                                                 />
 
                                                 {creditAccount && (
-                                                    <div className="rounded-lg bg-muted/40 px-3 py-2.5">
+                                                    <div className="rounded-lg bg-muted/40 px-2.5 py-2">
                                                         <p className="text-xs font-medium break-words">
                                                             {creditAccount.code}{' '}
                                                             —{' '}
@@ -506,7 +498,7 @@ export default function TreasuryGlMappingForm({
                                             creditAccount &&
                                             form.data.debit_account_id ===
                                                 form.data.credit_account_id && (
-                                                <div className="flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/5 p-3.5 text-sm text-destructive">
+                                                <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-2.5 text-xs text-destructive">
                                                     <CircleHelp className="mt-0.5 size-4 shrink-0" />
                                                     <p>
                                                         Debit and credit
@@ -521,8 +513,8 @@ export default function TreasuryGlMappingForm({
 
                                     {/* Mapping status */}
                                     {editing && (
-                                        <section className="border-t border-border pt-5">
-                                            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-muted/20 p-4">
+                                        <section className="border-t border-border pt-3">
+                                            <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-muted/20 p-2.5">
                                                 <Input
                                                     type="checkbox"
                                                     checked={form.data.status}
@@ -540,7 +532,7 @@ export default function TreasuryGlMappingForm({
                                                     <p className="text-sm font-medium">
                                                         Active mapping
                                                     </p>
-                                                    <p className="mt-0.5 text-xs text-muted-foreground">
+                                                    <p className="text-[11px] leading-4 text-muted-foreground">
                                                         Allow this mapping to be
                                                         used for transaction
                                                         posting.
@@ -558,14 +550,14 @@ export default function TreasuryGlMappingForm({
 
                             {/* Cash control guidance */}
                             {cashControlSide && (
-                                <section className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-                                    <div className="flex items-start gap-3">
-                                        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
+                                <section className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                                    <div className="flex items-start gap-2">
+                                        <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-primary" />
                                         <div>
                                             <h3 className="text-sm font-semibold">
                                                 Cash control account required
                                             </h3>
-                                            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                                            <p className="text-[11px] leading-4 text-muted-foreground">
                                                 For this cash location{' '}
                                                 {formatLabel(
                                                     form.data.transaction_type,
@@ -585,35 +577,35 @@ export default function TreasuryGlMappingForm({
                         </div>
 
                         {/* Sidebar */}
-                        <aside className="min-w-0 space-y-4 xl:sticky xl:top-5">
-                            <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-                                <div className="border-b border-border bg-muted/20 px-4 py-4">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                            <Sparkles className="size-4" />
+                        <aside className="min-w-0 space-y-3 xl:sticky xl:top-4">
+                            <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm">
+                                <div className="border-b border-border bg-muted/20 px-3 py-2.5">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                            <Sparkles className="size-3.5" />
                                         </div>
                                         <div>
                                             <h2 className="text-sm font-semibold">
                                                 Posting preview
                                             </h2>
-                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                            <p className="text-[11px] text-muted-foreground">
                                                 Review the mapping direction
                                             </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 p-4">
-                                    <div className="rounded-xl border border-border bg-muted/20 p-3.5">
+                                <div className="space-y-2.5 p-3">
+                                    <div className="rounded-lg border border-border bg-muted/20 p-2.5">
                                         <p className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
                                             Transaction
                                         </p>
-                                        <p className="mt-1.5 text-sm font-semibold break-words">
+                                        <p className="mt-1 text-xs font-semibold break-words">
                                             {formatLabel(
                                                 form.data.transaction_type,
                                             ) || 'Transaction type'}
                                         </p>
-                                        <p className="mt-1 text-xs break-words text-muted-foreground">
+                                        <p className="text-[11px] break-words text-muted-foreground">
                                             {formatLabel(form.data.source_type)}{' '}
                                             ·{' '}
                                             {form.data.source_code ||
@@ -621,8 +613,8 @@ export default function TreasuryGlMappingForm({
                                         </p>
                                     </div>
 
-                                    <div className="space-y-2.5">
-                                        <div className="rounded-xl border border-border p-3.5">
+                                    <div className="space-y-2">
+                                        <div className="rounded-lg border border-border p-2.5">
                                             <div className="flex items-center justify-between gap-2">
                                                 <span className="text-[10px] font-semibold tracking-wider text-primary uppercase">
                                                     Debit
@@ -633,7 +625,7 @@ export default function TreasuryGlMappingForm({
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="mt-1.5 text-sm font-semibold break-words">
+                                            <p className="mt-1 text-xs font-semibold break-words">
                                                 {debitAccount
                                                     ? `${debitAccount.code} — ${debitAccount.name}`
                                                     : 'Select debit account'}
@@ -641,12 +633,12 @@ export default function TreasuryGlMappingForm({
                                         </div>
 
                                         <div className="flex justify-center">
-                                            <div className="flex size-7 items-center justify-center rounded-full border border-border bg-background text-muted-foreground">
-                                                <ArrowRight className="size-3.5 rotate-90" />
+                                            <div className="flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground">
+                                                <ArrowRight className="size-3 rotate-90" />
                                             </div>
                                         </div>
 
-                                        <div className="rounded-xl border border-border p-3.5">
+                                        <div className="rounded-lg border border-border p-2.5">
                                             <div className="flex items-center justify-between gap-2">
                                                 <span className="text-[10px] font-semibold tracking-wider text-primary uppercase">
                                                     Credit
@@ -657,7 +649,7 @@ export default function TreasuryGlMappingForm({
                                                     </span>
                                                 )}
                                             </div>
-                                            <p className="mt-1.5 text-sm font-semibold break-words">
+                                            <p className="mt-1 text-xs font-semibold break-words">
                                                 {creditAccount
                                                     ? `${creditAccount.code} — ${creditAccount.name}`
                                                     : 'Select credit account'}
@@ -666,7 +658,7 @@ export default function TreasuryGlMappingForm({
                                     </div>
 
                                     <div
-                                        className={`flex items-start gap-2.5 rounded-xl border p-3 text-xs leading-relaxed ${
+                                        className={`flex items-start gap-2 rounded-lg border p-2.5 text-[11px] leading-4 ${
                                             mappingReady
                                                 ? 'border-primary/20 bg-primary/5 text-foreground'
                                                 : 'border-border bg-muted/30 text-muted-foreground'
@@ -686,10 +678,10 @@ export default function TreasuryGlMappingForm({
                                 </div>
                             </section>
 
-                            <section className="rounded-2xl border border-border bg-muted/20 p-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                                        <ShieldCheck className="size-4" />
+                            <section className="rounded-xl border border-border/80 bg-muted/20 p-3">
+                                <div className="flex items-start gap-2.5">
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                        <ShieldCheck className="size-3.5" />
                                     </div>
 
                                     <div className="min-w-0">
@@ -697,7 +689,7 @@ export default function TreasuryGlMappingForm({
                                             Before saving
                                         </h3>
 
-                                        <ul className="mt-3 space-y-2.5 text-xs leading-relaxed text-muted-foreground">
+                                        <ul className="mt-2 space-y-2 text-[11px] leading-4 text-muted-foreground">
                                             <li>
                                                 Confirm the source and
                                                 transaction type.
@@ -715,14 +707,14 @@ export default function TreasuryGlMappingForm({
                                 </div>
                             </section>
 
-                            <section className="rounded-2xl border border-border bg-card p-4">
-                                <div className="flex items-start gap-3">
+                            <section className="rounded-xl border border-border/80 bg-card p-3">
+                                <div className="flex items-start gap-2.5">
                                     <ArrowLeftRight className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                                     <div>
                                         <h3 className="text-xs font-semibold">
                                             Balanced journal entries
                                         </h3>
-                                        <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+                                        <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
                                             This mapping defines the ledger
                                             accounts used for posting. Ensure
                                             the transaction rules and account
@@ -738,7 +730,7 @@ export default function TreasuryGlMappingForm({
                     {/* Sticky actions */}
                     <footer
                         data-slot="page-sticky-action-bar"
-                        className="sticky bottom-0 z-20 -mx-2 border-t border-border bg-background/95 px-2 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-4 sm:px-4"
+                        className="sticky bottom-0 z-20 -mx-2 border-t border-border bg-background/95 px-2 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-4 sm:px-4"
                     >
                         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <p className="hidden text-xs text-muted-foreground md:block">
@@ -752,7 +744,7 @@ export default function TreasuryGlMappingForm({
                                     asChild
                                     variant="outline"
                                     disabled={form.processing}
-                                    className="w-full sm:w-auto"
+                                    className="h-9 w-full sm:w-auto"
                                 >
                                     <Link
                                         href={route(
@@ -770,7 +762,7 @@ export default function TreasuryGlMappingForm({
                                         accounts.length < 2 ||
                                         !mappingReady
                                     }
-                                    className="w-full gap-2 sm:w-auto"
+                                    className="h-9 w-full gap-2 sm:w-auto"
                                 >
                                     {form.processing ? (
                                         <RefreshCw className="size-4 animate-spin" />

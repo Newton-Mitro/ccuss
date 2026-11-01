@@ -110,20 +110,35 @@ export default function Form() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={isDeposit ? 'Cash Deposit' : 'Cash Withdrawal'} />
 
-            <div className="w-full max-w-none space-y-5 pb-8 text-foreground">
-                <header className="flex flex-col gap-2 py-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0 space-y-1">
-                        <p className="text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-                            Teller · Cash operations
-                        </p>
-                        <h1 className="text-xl leading-tight font-semibold tracking-tight sm:text-2xl">
-                            {isDeposit ? 'Cash Deposit' : 'Cash Withdrawal'}
-                        </h1>
-                        <p className="max-w-2xl text-xs leading-5 text-muted-foreground">
-                            {isDeposit
-                                ? 'Record cash received from customers against their financial accounts.'
-                                : 'Pay out cash to a customer and record the debit against their account.'}
-                        </p>
+            <div className="w-full max-w-none space-y-4 pb-6 text-foreground">
+                <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <div
+                            className={`flex size-10 shrink-0 items-center justify-center rounded-xl border ${
+                                isDeposit
+                                    ? 'border-emerald-500/20 bg-muted/40 text-emerald-700 dark:text-emerald-300'
+                                    : 'border-orange-500/15 bg-orange-500/[0.08] text-orange-700 dark:text-orange-300'
+                            }`}
+                        >
+                            {isDeposit ? (
+                                <ArrowDownToLine className="size-5" />
+                            ) : (
+                                <ArrowUpFromLine className="size-5" />
+                            )}
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
+                                Teller · Cash operations
+                            </p>
+                            <h1 className="text-xl leading-tight font-semibold tracking-tight sm:text-2xl">
+                                {isDeposit ? 'Cash Deposit' : 'Cash Withdrawal'}
+                            </h1>
+                            <p className="mt-0.5 max-w-2xl text-xs leading-5 text-muted-foreground">
+                                {isDeposit
+                                    ? 'Record cash received from customers against their financial accounts.'
+                                    : 'Pay out cash to a customer and record the debit against their account.'}
+                            </p>
+                        </div>
                     </div>
                     <StatusBadge tone={isDeposit ? 'success' : 'warning'}>
                         {isDeposit ? 'DEPOSIT' : 'WITHDRAWAL'}
@@ -132,14 +147,14 @@ export default function Form() {
 
                 <form
                     onSubmit={submit}
-                    className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]"
+                    className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_300px]"
                 >
-                    <div className="relative min-w-0 overflow-hidden rounded-2xl border bg-card shadow-sm">
+                    <div className="relative min-w-0 overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm shadow-foreground/[0.02]">
                         {/* Teller Session */}
-                        <div className="border-b bg-muted/20 px-5 py-4 sm:px-7">
-                            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <div className="border-b bg-gradient-to-r from-muted/40 to-transparent px-4 py-3.5">
+                            <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
                                 <div className="flex items-center gap-2.5">
-                                    <div className="flex size-8 items-center justify-center rounded-lg border bg-background text-primary shadow-sm">
+                                    <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/10">
                                         <CalendarDays className="size-4" />
                                     </div>
                                     <div>
@@ -149,7 +164,7 @@ export default function Form() {
                                         >
                                             Teller session
                                         </label>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-[11px] text-muted-foreground">
                                             Choose an open session for this
                                             transaction.
                                         </p>
@@ -172,7 +187,7 @@ export default function Form() {
 
                             <Select
                                 id="teller_session_id"
-                                className="h-10 bg-background"
+                                className="h-9 bg-background"
                                 value={data.teller_session_id}
                                 onChange={(value) =>
                                     setData('teller_session_id', value)
@@ -190,14 +205,14 @@ export default function Form() {
                                 ]}
                             />
 
-                            <div className="mt-3 overflow-hidden rounded-lg border bg-background/80">
+                            <div className="mt-2.5 overflow-hidden rounded-lg border border-border/70 bg-background/80">
                                 <div className="border-b px-3 py-2 text-xs font-medium">
                                     {selectedTellerSession
                                         ? `${selectedTellerSession.teller?.name ?? 'Teller'}${selectedTellerSession.teller?.code ? ` (${selectedTellerSession.teller.code})` : ''}`
                                         : 'Teller cash balance'}
                                 </div>
                                 <div className="grid grid-cols-2">
-                                    <div className="px-3 py-2.5">
+                                    <div className="px-3 py-2">
                                         <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
                                             Opening cash
                                         </div>
@@ -210,7 +225,7 @@ export default function Form() {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="border-l px-3 py-2.5">
+                                    <div className="border-l px-3 py-2">
                                         <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
                                             Current cash
                                         </div>
@@ -244,13 +259,13 @@ export default function Form() {
                         </div>
 
                         {/* Transaction Details */}
-                        <div className="space-y-6 p-5 sm:p-7">
+                        <div className="space-y-4 p-4 sm:p-5">
                             {isDeposit ? (
-                                <section className="space-y-4">
-                                    <div className="flex flex-col gap-3 rounded-xl border border-emerald-500/15 bg-emerald-500/[0.035] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-                                        <div className="flex items-start gap-3">
-                                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/15 dark:text-emerald-300">
-                                                <WalletCards className="size-5" />
+                                <section className="space-y-3">
+                                    <div className="flex flex-col gap-3 rounded-xl border border-border/80 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="flex min-w-0 items-center gap-2.5">
+                                            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20 dark:text-emerald-300">
+                                                <WalletCards className="size-4" />
                                             </div>
                                             <div>
                                                 <div className="flex flex-wrap items-center gap-2">
@@ -265,11 +280,9 @@ export default function Form() {
                                                             : 'lines'}
                                                     </StatusBadge>
                                                 </div>
-                                                <p className="mt-1 max-w-xl text-xs leading-5 text-muted-foreground">
-                                                    Add one or more customer
-                                                    accounts, then enter the
-                                                    cash amount for each
-                                                    deposit.
+                                                <p className="text-[11px] leading-4 text-muted-foreground">
+                                                    Add customer accounts and
+                                                    enter each deposit amount.
                                                 </p>
                                             </div>
                                         </div>
@@ -278,21 +291,21 @@ export default function Form() {
                                             type="button"
                                             variant="outline"
                                             size="sm"
-                                            className="h-9 gap-2 border-emerald-500/25 bg-background px-3 text-emerald-800 hover:bg-emerald-500/10 dark:text-emerald-200"
+                                            className="h-8 gap-1.5 border-border bg-background px-2.5 text-xs text-emerald-800 hover:border-emerald-500/30 hover:bg-emerald-500/10 dark:text-emerald-200"
                                             onClick={addLine}
                                         >
-                                            <Plus className="size-4" />
+                                            <Plus className="size-3.5" />
                                             Add customer
                                         </Button>
                                     </div>
 
-                                    <div className="space-y-3">
+                                    <div className="space-y-2.5">
                                         {depositLines.map((line, index) => (
                                             <div
                                                 key={index}
-                                                className="relative grid gap-3 rounded-xl border bg-background p-3 shadow-sm transition-shadow hover:shadow-md sm:grid-cols-[minmax(0,1fr)_minmax(150px,0.32fr)_2.5rem] sm:items-center sm:p-4"
+                                                className="relative grid gap-2.5 rounded-xl border border-border/70 bg-background p-3 shadow-sm transition-shadow hover:shadow-md sm:grid-cols-[minmax(0,1fr)_minmax(140px,0.3fr)_2rem] sm:items-end"
                                             >
-                                                <div className="min-w-0 space-y-2">
+                                                <div className="min-w-0 space-y-1.5">
                                                     <div className="flex items-center gap-2">
                                                         <span className="flex size-5 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
                                                             {index + 1}
@@ -360,7 +373,7 @@ export default function Form() {
                                                     />
                                                 </div>
 
-                                                <div className="space-y-2">
+                                                <div className="space-y-1.5">
                                                     <label className="flex items-center gap-1.5 text-xs font-medium">
                                                         <CircleDollarSign className="size-3.5 text-muted-foreground" />
                                                         Deposit amount
@@ -370,7 +383,7 @@ export default function Form() {
                                                         min="0.0001"
                                                         step="0.0001"
                                                         placeholder="0.00"
-                                                        className="h-10 text-right font-semibold tabular-nums"
+                                                        className="h-9 text-right font-semibold tabular-nums"
                                                         value={line.amount}
                                                         onChange={(event) => {
                                                             const lines = [
@@ -396,7 +409,7 @@ export default function Form() {
                                                     type="button"
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="h-9 w-9 justify-self-end text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:mt-5"
+                                                    className="h-8 w-8 justify-self-end text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                                                     disabled={
                                                         depositLines.length ===
                                                         1
@@ -410,7 +423,7 @@ export default function Form() {
                                                 </Button>
 
                                                 <div className="grid grid-cols-2 overflow-hidden rounded-lg border bg-muted/20 sm:col-span-3">
-                                                    <div className="px-3 py-2.5">
+                                                    <div className="px-3 py-2">
                                                         <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
                                                             Available balance
                                                         </div>
@@ -426,7 +439,7 @@ export default function Form() {
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="border-l px-3 py-2.5">
+                                                    <div className="border-l px-3 py-2">
                                                         <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
                                                             Current balance
                                                         </div>
@@ -452,16 +465,16 @@ export default function Form() {
                                     )}
 
                                     {/* Total */}
-                                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] px-4 py-3.5 sm:px-5">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex size-9 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                                                <ArrowDownToLine className="size-4" />
+                                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/80 bg-emerald-500/[0.04] px-3.5 py-3">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                                                <ArrowDownToLine className="size-3.5" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-semibold">
+                                                <p className="text-xs font-semibold">
                                                     Total cash received
                                                 </p>
-                                                <p className="text-xs text-muted-foreground">
+                                                <p className="text-[11px] text-muted-foreground">
                                                     Across {depositLines.length}{' '}
                                                     {depositLines.length === 1
                                                         ? 'deposit'
@@ -470,7 +483,7 @@ export default function Form() {
                                             </div>
                                         </div>
 
-                                        <p className="text-xl font-semibold tracking-tight text-emerald-800 tabular-nums dark:text-emerald-200">
+                                        <p className="text-lg font-semibold tracking-tight text-emerald-800 tabular-nums dark:text-emerald-200">
                                             BDT{' '}
                                             {formatBDTCurrency(
                                                 Number(data.amount || 0),
@@ -613,7 +626,7 @@ export default function Form() {
                             )}
 
                             {/* Reference + Note */}
-                            <div className="grid gap-4 border-t pt-5 sm:grid-cols-2">
+                            <div className="grid gap-3 border-t pt-4 sm:grid-cols-2">
                                 <div className="space-y-1.5">
                                     <label
                                         htmlFor="reference"
@@ -679,7 +692,7 @@ export default function Form() {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex flex-col gap-3 rounded-b-2xl border-t bg-muted/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                        <div className="flex flex-col gap-3 rounded-b-xl border-t bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                             <p className="flex items-center gap-2 text-xs text-muted-foreground">
                                 Transaction will be created as
                                 <StatusBadge tone="warning">
@@ -692,7 +705,7 @@ export default function Form() {
                                 disabled={
                                     processing || teller_sessions.length === 0
                                 }
-                                className={`h-10 gap-2 px-5 font-semibold shadow-sm ${
+                                className={`h-9 gap-2 px-4 font-semibold shadow-sm ${
                                     isDeposit
                                         ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                                         : 'bg-orange-600 text-white hover:bg-orange-700'
@@ -712,17 +725,11 @@ export default function Form() {
                     </div>
 
                     <aside className="min-w-0 xl:sticky xl:top-4 xl:self-start">
-                        <section
-                            className={`overflow-hidden rounded-2xl border bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02] ${
-                                isDeposit
-                                    ? 'border-emerald-500/15'
-                                    : 'border-orange-500/15'
-                            }`}
-                        >
+                        <section className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-md ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
                             <div
-                                className={`relative overflow-hidden border-b px-4 py-4 ${
+                                className={`relative overflow-hidden border-b px-3.5 py-3 ${
                                     isDeposit
-                                        ? 'bg-gradient-to-br from-emerald-500/[0.12] via-emerald-500/[0.04] to-transparent'
+                                        ? 'bg-muted/20'
                                         : 'bg-gradient-to-br from-orange-500/[0.12] via-orange-500/[0.04] to-transparent'
                                 }`}
                             >
@@ -735,18 +742,15 @@ export default function Form() {
                                 />
                                 <div className="relative flex items-center gap-2.5">
                                     <span
-                                        className={`flex size-9 items-center justify-center rounded-xl ring-1 ${
+                                        className={`flex size-8 items-center justify-center rounded-lg ring-1 ${
                                             isDeposit
-                                                ? 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/15 dark:text-emerald-300'
+                                                ? 'bg-emerald-500/10 text-emerald-700 ring-border dark:text-emerald-300'
                                                 : 'bg-orange-500/10 text-orange-700 ring-orange-500/15 dark:text-orange-300'
                                         }`}
                                     >
                                         <Eye className="size-4" />
                                     </span>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-[10px] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
-                                            Cash operations
-                                        </p>
                                         <h2 className="text-sm font-semibold">
                                             Transaction preview
                                         </h2>
@@ -757,11 +761,11 @@ export default function Form() {
                                 </div>
                             </div>
 
-                            <div className="space-y-3 p-3">
+                            <div className="space-y-2.5 p-3">
                                 <div
-                                    className={`rounded-xl p-3.5 ring-1 ${
+                                    className={`rounded-lg p-3 ring-1 ${
                                         isDeposit
-                                            ? 'bg-gradient-to-br from-emerald-500/[0.08] to-muted/30 ring-emerald-500/10'
+                                            ? 'bg-emerald-500/[0.035] ring-border/70'
                                             : 'bg-gradient-to-br from-orange-500/[0.08] to-muted/30 ring-orange-500/10'
                                     }`}
                                 >
@@ -771,7 +775,7 @@ export default function Form() {
                                             : 'Cash to be paid'}
                                     </p>
                                     <p
-                                        className={`mt-1 text-2xl font-semibold tracking-tight break-words tabular-nums ${
+                                        className={`mt-0.5 text-xl font-semibold tracking-tight break-words tabular-nums ${
                                             isDeposit
                                                 ? 'text-emerald-700 dark:text-emerald-300'
                                                 : 'text-orange-700 dark:text-orange-300'
