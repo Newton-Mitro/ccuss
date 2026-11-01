@@ -6,11 +6,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-import { logout } from '@/routes';
-import { edit } from '@/routes/profile';
 import { type User } from '@/modules/administration-security/types/user';
+import { logout } from '@/routes';
+import { edit as editAppearance } from '@/routes/appearance';
+import { edit as editProfile } from '@/routes/profile';
+import { show as showTwoFactor } from '@/routes/two-factor';
+import { edit as editPassword } from '@/routes/user-password';
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import {
+    KeyRound,
+    LogOut,
+    Palette,
+    ShieldCheck,
+    UserRound,
+} from 'lucide-react';
 
 interface UserMenuContentProps {
     user: User;
@@ -32,17 +41,56 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                 </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuLabel className="px-2 py-1 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
+                Account settings
+            </DropdownMenuLabel>
             <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full"
-                        href={edit()}
+                        href={editProfile()}
                         as="button"
                         prefetch
                         onClick={cleanup}
                     >
-                        <Settings className="mr-2" />
-                        Settings
+                        <UserRound className="mr-2" />
+                        Profile
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full"
+                        href={editPassword()}
+                        as="button"
+                        prefetch
+                        onClick={cleanup}
+                    >
+                        <KeyRound className="mr-2" />
+                        Password
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full"
+                        href={showTwoFactor()}
+                        as="button"
+                        prefetch
+                        onClick={cleanup}
+                    >
+                        <ShieldCheck className="mr-2" />
+                        Two-factor authentication
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full"
+                        href={editAppearance()}
+                        as="button"
+                        prefetch
+                        onClick={cleanup}
+                    >
+                        <Palette className="mr-2" />
+                        Appearance
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>

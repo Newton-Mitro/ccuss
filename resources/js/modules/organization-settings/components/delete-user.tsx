@@ -1,7 +1,7 @@
-import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { appSwal } from '@/lib/appSwal';
 import { router } from '@inertiajs/react';
+import { ShieldAlert } from 'lucide-react';
 import { route } from 'ziggy-js';
 
 export default function DeleteUser() {
@@ -51,27 +51,32 @@ export default function DeleteUser() {
     };
 
     return (
-        <div className="space-y-6">
-            <HeadingSmall
-                title="Delete account"
-                description="Delete your account and all of its resources"
-            />
-            <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4">
-                <div className="relative space-y-0.5 text-red-600">
-                    <p className="font-medium">Warning</p>
-                    <p className="text-sm">
-                        Please proceed with caution, this cannot be undone.
+        <section className="overflow-hidden rounded-2xl border border-destructive/25 bg-card shadow-sm">
+            <div className="flex items-center gap-3 border-b border-destructive/15 bg-destructive/[0.04] px-5 py-4 sm:px-6">
+                <span className="flex size-9 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
+                    <ShieldAlert className="size-4" />
+                </span>
+                <div>
+                    <h2 className="text-sm font-semibold">Delete account</h2>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                        Permanently remove your account and its data.
                     </p>
                 </div>
-
+            </div>
+            <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <p className="max-w-xl text-xs leading-5 text-muted-foreground">
+                    This action cannot be undone. Your account and associated
+                    resources will be permanently deleted after confirmation.
+                </p>
                 <Button
                     variant="destructive"
                     data-test="delete-user-button"
                     onClick={() => void confirmDelete()}
+                    className="shrink-0"
                 >
                     Delete account
                 </Button>
             </div>
-        </div>
+        </section>
     );
 }

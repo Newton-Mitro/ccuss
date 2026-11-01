@@ -4,15 +4,15 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 
-import DeleteUser from '@/modules/organization-settings/components/delete-user';
-import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import SettingsLayout from '@/modules/organization-settings/layouts/settings-layout';
-import { edit } from '@/routes/profile';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import DeleteUser from '@/modules/organization-settings/components/delete-user';
+import SettingsPageHeader from '@/modules/organization-settings/components/settings-page-header';
+import { edit } from '@/routes/profile';
+import { Mail, UserRound } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -34,59 +34,86 @@ export default function Profile({
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
 
-            <SettingsLayout>
-                <div className="space-y-6">
-                    <HeadingSmall
-                        title="Profile information"
-                        description="Update your name and email address"
-                    />
+            <div className="mx-auto w-full max-w-5xl space-y-5 pb-8 text-foreground">
+                <SettingsPageHeader
+                    title="Profile & personal details"
+                    description="Keep your name and email address up to date so your account information stays accurate."
+                    icon={UserRound}
+                />
 
+                <section className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm">
+                    <div className="flex items-center gap-3 border-b border-border/70 bg-muted/15 px-5 py-4 sm:px-6">
+                        <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                            <UserRound className="size-4" />
+                        </span>
+                        <div>
+                            <h2 className="text-sm font-semibold">
+                                Profile information
+                            </h2>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                Update the personal details associated with your
+                                account.
+                            </p>
+                        </div>
+                    </div>
                     <Form
                         {...ProfileController.update.form()}
                         options={{
                             preserveScroll: true,
                         }}
-                        className="space-y-6"
+                        className="space-y-5 p-5 sm:p-6"
                     >
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
+                                <div className="grid gap-5 sm:grid-cols-2">
+                                    <div className="grid content-start gap-2">
+                                        <Label
+                                            htmlFor="name"
+                                            className="flex items-center gap-2"
+                                        >
+                                            <UserRound className="size-3.5 text-muted-foreground" />
+                                            Name
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            className="h-10 w-full"
+                                            defaultValue={auth.user.name}
+                                            name="name"
+                                            required
+                                            autoComplete="name"
+                                            placeholder="Full name"
+                                        />
 
-                                    <Input
-                                        id="name"
-                                        className="mt-1 block w-full"
-                                        defaultValue={auth.user.name}
-                                        name="name"
-                                        required
-                                        autoComplete="name"
-                                        placeholder="Full name"
-                                    />
+                                        <InputError
+                                            className="text-xs"
+                                            message={errors.name}
+                                        />
+                                    </div>
 
-                                    <InputError
-                                        className="mt-2"
-                                        message={errors.name}
-                                    />
-                                </div>
+                                    <div className="grid content-start gap-2">
+                                        <Label
+                                            htmlFor="email"
+                                            className="flex items-center gap-2"
+                                        >
+                                            <Mail className="size-3.5 text-muted-foreground" />
+                                            Email address
+                                        </Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            className="h-10 w-full"
+                                            defaultValue={auth.user.email}
+                                            name="email"
+                                            required
+                                            autoComplete="username"
+                                            placeholder="Email address"
+                                        />
 
-                                <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
-
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        className="mt-1 block w-full"
-                                        defaultValue={auth.user.email}
-                                        name="email"
-                                        required
-                                        autoComplete="username"
-                                        placeholder="Email address"
-                                    />
-
-                                    <InputError
-                                        className="mt-2"
-                                        message={errors.email}
-                                    />
+                                        <InputError
+                                            className="text-xs"
+                                            message={errors.email}
+                                        />
+                                    </div>
                                 </div>
 
                                 {mustVerifyEmail &&
@@ -116,7 +143,7 @@ export default function Profile({
                                         </div>
                                     )}
 
-                                <div className="flex items-center gap-4">
+                                <div className="flex flex-wrap items-center gap-3 border-t pt-4">
                                     <Button
                                         disabled={processing}
                                         data-test="update-profile-button"
@@ -131,18 +158,18 @@ export default function Profile({
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-neutral-600">
-                                            Saved
+                                        <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                                            Changes saved
                                         </p>
                                     </Transition>
                                 </div>
                             </>
                         )}
                     </Form>
-                </div>
+                </section>
 
                 <DeleteUser />
-            </SettingsLayout>
+            </div>
         </CustomAuthLayout>
     );
 }

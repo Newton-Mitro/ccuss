@@ -20,12 +20,15 @@ import {
     ChevronsUp,
     Columns2,
     InfoIcon,
+    KeyRound,
     LogOut,
     Monitor,
     Moon,
+    Palette,
     PanelLeftClose,
     PanelLeftOpen,
     Search,
+    ShieldCheck,
     Sun,
     TriangleAlert,
     UserCircle,
@@ -39,7 +42,10 @@ import { SidebarMenuItem } from '../components/sidebar-menu-item';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { sidebarMenu } from '../data/menus';
 import { useAppearance } from '../hooks/use-appearance';
+import { edit as editAppearance } from '../routes/appearance';
 import { edit } from '../routes/profile';
+import { show as showTwoFactor } from '../routes/two-factor';
+import { edit as editPassword } from '../routes/user-password';
 import { BreadcrumbItem, SharedData, SidebarItem } from '../types';
 
 const STORAGE_KEY = 'app_sidebar_open_menus_v1';
@@ -624,6 +630,9 @@ export default function CustomAuthLayout({
                                 </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-52">
+                                <div className="px-2 py-1 text-[10px] font-semibold tracking-wide text-muted-foreground uppercase">
+                                    Account settings
+                                </div>
                                 <DropdownMenuGroup>
                                     <DropdownMenuItem asChild>
                                         <Link
@@ -634,9 +643,51 @@ export default function CustomAuthLayout({
                                         >
                                             <UserCircle
                                                 size={16}
-                                                className="text-card-foreground hover:text-primary-foreground"
+                                                className="text-muted-foreground"
                                             />
-                                            User Profile
+                                            Profile
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={editPassword()}
+                                            preserveScroll
+                                            onClick={cleanup}
+                                            className="flex gap-2"
+                                        >
+                                            <KeyRound
+                                                size={16}
+                                                className="text-muted-foreground"
+                                            />
+                                            Password
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={showTwoFactor()}
+                                            preserveScroll
+                                            onClick={cleanup}
+                                            className="flex gap-2"
+                                        >
+                                            <ShieldCheck
+                                                size={16}
+                                                className="text-muted-foreground"
+                                            />
+                                            Two-factor authentication
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link
+                                            href={editAppearance()}
+                                            preserveScroll
+                                            onClick={cleanup}
+                                            className="flex gap-2"
+                                        >
+                                            <Palette
+                                                size={16}
+                                                className="text-muted-foreground"
+                                            />
+                                            Appearance
                                         </Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuGroup>
