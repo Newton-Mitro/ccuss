@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { CashAdjustmentFormPageProps } from '@/modules/treasury-cash/types/forms';
 import { BreadcrumbItem } from '@/types';
@@ -16,6 +17,7 @@ import {
     ShieldCheck,
     SlidersHorizontal,
     Sparkles,
+    Wallet,
 } from 'lucide-react';
 import { FormEvent } from 'react';
 import { route } from 'ziggy-js';
@@ -31,6 +33,8 @@ export default function TellerCashAdjustment() {
     const selectedSession = teller_sessions.find(
         (session) => String(session.id) === data.teller_session_id,
     );
+    const accountBalance =
+        selectedSession?.expected_cash ?? selectedSession?.opening_cash ?? 0;
 
     useFlashToastHandler();
 
@@ -159,6 +163,15 @@ export default function TellerCashAdjustment() {
                                             {errors.teller_session_id}
                                         </p>
                                     )}
+                                    <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/15 bg-primary/[0.04] px-3 py-2.5">
+                                        <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <Wallet className="size-4 text-primary" />
+                                            Current account balance
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {formatBDTCurrency(accountBalance)}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="grid gap-5 sm:grid-cols-2">
@@ -325,6 +338,15 @@ export default function TellerCashAdjustment() {
                                     </span>
                                     <span className="font-semibold tabular-nums">
                                         {data.amount || '0.00'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center justify-between rounded-xl border border-primary/15 bg-primary/[0.04] px-3.5 py-3">
+                                    <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <Wallet className="size-4 text-primary" />
+                                        Account balance
+                                    </span>
+                                    <span className="font-semibold tabular-nums">
+                                        {formatBDTCurrency(accountBalance)}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 rounded-full bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-700 dark:text-amber-300">

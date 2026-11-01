@@ -89,11 +89,6 @@ export default function CreateVaultSessionPage() {
                                 <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
                                     Open Vault Session
                                 </h1>
-
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/[0.06] px-2 py-1 text-[10px] font-semibold text-primary">
-                                    <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-                                    NEW SESSION
-                                </span>
                             </div>
 
                             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">

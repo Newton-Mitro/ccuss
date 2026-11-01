@@ -54,6 +54,7 @@ export default function CreateTellerSessionPage() {
     const selectedTeller = tellers.find(
         (teller) => String(teller.id) === data.teller_id,
     );
+    const currentLedgerBalance = selectedTeller?.current_balance ?? 0;
     const selectedBranchDay =
         branch_days.find((item) => String(item.id) === data.branch_day_id) ??
         (String(branch_day?.id) === data.branch_day_id
@@ -90,7 +91,7 @@ export default function CreateTellerSessionPage() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open Teller Session" />
 
-            <div className="max-w-6xl space-y-4 pb-6">
+            <div className="max-w-6xl space-y-3 pb-4">
                 {/* Page heading */}
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-start gap-3">
@@ -103,11 +104,6 @@ export default function CreateTellerSessionPage() {
                                 <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
                                     Open Teller Session
                                 </h1>
-
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/[0.06] px-2 py-1 text-[10px] font-semibold text-primary">
-                                    <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-                                    NEW SESSION
-                                </span>
                             </div>
 
                             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
@@ -178,9 +174,9 @@ export default function CreateTellerSessionPage() {
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <div className="grid items-start gap-4 lg:grid-cols-12">
+                    <div className="grid items-start gap-3 lg:grid-cols-12">
                         {/* Left column: Session configuration */}
-                        <div className="space-y-3 lg:col-span-7">
+                        <div className="space-y-2.5 lg:col-span-7">
                             <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm shadow-foreground/[0.02]">
                                 <div className="flex items-center gap-3 border-b bg-gradient-to-r from-muted/40 to-transparent px-4 py-3">
                                     <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/10">
@@ -198,9 +194,9 @@ export default function CreateTellerSessionPage() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-4 p-4">
+                                <div className="grid gap-3 p-3 sm:grid-cols-2">
                                     {/* Branch day */}
-                                    <div>
+                                    <div className="min-w-0">
                                         <label
                                             htmlFor="branch_day_id"
                                             className={labelClass}
@@ -253,7 +249,7 @@ export default function CreateTellerSessionPage() {
                                         )}
 
                                         {branch_day && (
-                                            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                                                 <CheckCircle2 className="size-3.5 text-primary" />
                                                 Active business day:{' '}
                                                 {branch_day.business_date}
@@ -262,7 +258,7 @@ export default function CreateTellerSessionPage() {
                                     </div>
 
                                     {/* Teller */}
-                                    <div>
+                                    <div className="min-w-0">
                                         <label
                                             htmlFor="teller_id"
                                             className={labelClass}
@@ -310,28 +306,6 @@ export default function CreateTellerSessionPage() {
                                                 {errors.teller_id}
                                             </p>
                                         )}
-
-                                        {selectedTeller && (
-                                            <div className="flex items-center justify-between gap-4 rounded-lg border border-primary/15 bg-primary/[0.04] px-3 py-2.5">
-                                                <div>
-                                                    <p className="text-xs font-semibold">
-                                                        Current ledger balance
-                                                    </p>
-                                                    <p className="text-[11px] text-muted-foreground">
-                                                        Reference only; count
-                                                        the physical cash below.
-                                                    </p>
-                                                </div>
-                                                <p className="shrink-0 text-sm font-semibold tabular-nums">
-                                                    {selectedTeller.current_balance ==
-                                                    null
-                                                        ? '-'
-                                                        : formatBDTCurrency(
-                                                              selectedTeller.current_balance,
-                                                          )}
-                                                </p>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             </section>
@@ -353,7 +327,7 @@ export default function CreateTellerSessionPage() {
                                     </div>
                                 </div>
 
-                                <div className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(180px,0.8fr)] sm:items-end">
+                                <div className="grid gap-2.5 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(160px,0.8fr)] sm:items-end">
                                     <div>
                                         <label
                                             htmlFor="opening_cash"
@@ -377,7 +351,7 @@ export default function CreateTellerSessionPage() {
                                                 step="0.0001"
                                                 inputMode="decimal"
                                                 placeholder="0.00"
-                                                className="h-11 border-primary/20 bg-background pl-9 text-xl font-bold tracking-tight tabular-nums shadow-inner shadow-primary/[0.02]"
+                                                className="h-9 border-primary/20 bg-background pl-9 text-lg font-bold tracking-tight tabular-nums shadow-inner shadow-primary/[0.02]"
                                                 value={data.opening_cash}
                                                 onChange={(event) =>
                                                     setData(
@@ -397,12 +371,20 @@ export default function CreateTellerSessionPage() {
                                         )}
                                     </div>
 
-                                    <div className="flex items-start gap-2 rounded-lg border border-primary/10 bg-gradient-to-r from-primary/[0.05] to-transparent p-2.5">
-                                        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-                                        <p className="text-[11px] leading-relaxed text-muted-foreground">
-                                            Count and verify the physical cash
-                                            before opening the session.
-                                        </p>
+                                    <div className="flex min-w-0 items-center gap-2.5 rounded-lg border border-border/70 bg-muted/30 px-3 py-2">
+                                        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background text-primary ring-1 ring-border/70">
+                                            <Wallet className="size-4" />
+                                        </span>
+                                        <div className="min-w-0">
+                                            <p className="text-[10px] font-medium text-muted-foreground">
+                                                Current ledger balance
+                                            </p>
+                                            <p className="truncate text-base font-semibold tabular-nums">
+                                                {formatBDTCurrency(
+                                                    currentLedgerBalance,
+                                                )}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </section>
@@ -429,7 +411,7 @@ export default function CreateTellerSessionPage() {
                                     </span>
                                 </div>
 
-                                <div className="p-4">
+                                <div className="p-3">
                                     <label
                                         htmlFor="opening_note"
                                         className={labelClass}
@@ -521,13 +503,9 @@ export default function CreateTellerSessionPage() {
                                             },
                                             {
                                                 label: 'Ledger balance',
-                                                value:
-                                                    selectedTeller?.current_balance ==
-                                                    null
-                                                        ? '—'
-                                                        : formatBDTCurrency(
-                                                              selectedTeller?.current_balance,
-                                                          ),
+                                                value: formatBDTCurrency(
+                                                    currentLedgerBalance,
+                                                ),
                                                 icon: Wallet,
                                             },
                                         ].map((item) => {
@@ -648,11 +626,11 @@ export default function CreateTellerSessionPage() {
 
                             {/* Actions */}
                             <div className="space-y-3 rounded-xl border border-primary/15 bg-card p-3 shadow-sm shadow-primary/[0.03]">
-                                <div className="flex flex-col gap-3 sm:flex-row">
+                                <div className="flex flex-col gap-2 xl:flex-row">
                                     <Button
                                         type="submit"
                                         disabled={processing || !canOpenSession}
-                                        className="h-10 w-full gap-2 rounded-lg font-semibold shadow-sm transition-all sm:flex-1"
+                                        className="h-10 w-full gap-2 rounded-lg font-semibold shadow-sm transition-all xl:flex-1"
                                     >
                                         <Banknote className="size-4 shrink-0" />
 
@@ -674,7 +652,7 @@ export default function CreateTellerSessionPage() {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        className="h-10 w-full gap-2 rounded-lg sm:w-auto sm:min-w-28"
+                                        className="h-10 w-full gap-2 rounded-lg xl:w-auto xl:min-w-28"
                                         disabled={processing}
                                         onClick={() =>
                                             router.visit(
