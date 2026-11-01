@@ -28,20 +28,21 @@ export function DashboardMetricGrid({
             {metrics.map(({ label, value, detail, icon: Icon }) => (
                 <div
                     key={label}
-                    className="min-w-0 rounded-md border bg-card p-4"
+                    className="group relative min-w-0 overflow-hidden rounded-xl border border-border/80 bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-md"
                 >
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <div className="pointer-events-none absolute -top-8 -right-8 size-24 rounded-full bg-primary/[0.035] blur-2xl transition-colors group-hover:bg-primary/[0.08]" />
+                    <div className="relative flex items-center gap-2.5 text-muted-foreground">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/10">
                             <Icon className="h-4 w-4" />
                         </span>
-                        <span className="truncate text-xs font-medium">
+                        <span className="truncate text-xs font-semibold">
                             {label}
                         </span>
                     </div>
-                    <div className="mt-3 truncate text-xl font-semibold tabular-nums">
+                    <div className="relative mt-4 truncate text-2xl font-semibold tracking-tight tabular-nums">
                         {value}
                     </div>
-                    <div className="mt-1 truncate text-xs text-muted-foreground">
+                    <div className="relative mt-1 truncate text-[11px] text-muted-foreground">
                         {detail}
                     </div>
                 </div>
@@ -76,15 +77,17 @@ export function DashboardQuickLinks({
                 <Link
                     key={`${linkLabel}-${href}`}
                     href={href}
-                    className="group flex min-w-0 items-center justify-between gap-3 rounded-md border bg-card px-3 py-2.5 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-muted/50"
+                    className="group flex min-w-0 items-center justify-between gap-3 rounded-xl border border-border/80 bg-card px-3.5 py-3 text-sm font-medium shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/[0.025] hover:shadow-md"
                 >
                     <span className="flex min-w-0 items-center gap-2">
                         {Icon && (
-                            <Icon className="h-4 w-4 shrink-0 text-primary" />
+                            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <Icon className="size-4" />
+                            </span>
                         )}
                         <span className="truncate">{linkLabel}</span>
                     </span>
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                    <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
                 </Link>
             ))}
         </nav>
