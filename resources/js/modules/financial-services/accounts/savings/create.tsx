@@ -87,7 +87,7 @@ export default function SavingsAccountCreate() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Open savings account" />
 
-            <div className="w-full max-w-6xl space-y-6 pb-24">
+            <div className="w-full max-w-6xl space-y-4 pb-24">
                 <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                     <HeadingSmall
                         title="Open savings account"
@@ -95,20 +95,23 @@ export default function SavingsAccountCreate() {
                     />
                 </div>
 
-                <form onSubmit={submit} className="space-y-5">
-                    <div className="overflow-hidden rounded-xl border bg-card">
+                <form
+                    onSubmit={submit}
+                    className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_280px]"
+                >
+                    <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-sm">
                         {/* Policy notice */}
-                        <div className="border-b p-4 sm:p-5">
-                            <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                    <Info className="size-5" />
+                        <div className="border-b p-3">
+                            <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-primary/[0.04] p-3">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <Info className="size-4" />
                                 </div>
 
-                                <div className="min-w-0 flex-1 space-y-1">
-                                    <h2 className="text-sm font-semibold">
+                                <div className="min-w-0 flex-1 space-y-0.5">
+                                    <h2 className="text-xs font-semibold">
                                         Product minimum-balance policy
                                     </h2>
-                                    <p className="text-sm leading-relaxed text-muted-foreground">
+                                    <p className="text-[11px] leading-relaxed text-muted-foreground">
                                         Select a savings product to view its
                                         minimum opening amount. Make sure the
                                         minimum balance complies with the
@@ -116,21 +119,21 @@ export default function SavingsAccountCreate() {
                                     </p>
                                 </div>
 
-                                <ShieldCheck className="mt-1 hidden size-5 shrink-0 text-primary sm:block" />
+                                <ShieldCheck className="mt-0.5 hidden size-4 shrink-0 text-primary sm:block" />
                             </div>
                         </div>
 
-                        <div className="grid gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_270px] lg:gap-6">
+                        <div className="p-4 sm:p-5">
                             {/* Main form */}
-                            <div className="min-w-0 space-y-6">
-                                <section className="space-y-5">
+                            <div className="min-w-0">
+                                <section className="space-y-4">
                                     <SectionHeading
                                         icon={Wallet}
                                         title="Account details"
-                                        description="Enter the customer and product information for this new savings account."
+                                        description="Customer and product information for this new savings account."
                                     />
 
-                                    <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
+                                    <div className="grid gap-x-4 gap-y-4 sm:grid-cols-2">
                                         <div className="min-w-0 space-y-2">
                                             <Label htmlFor="financial-product">
                                                 Savings product
@@ -281,154 +284,150 @@ export default function SavingsAccountCreate() {
                                     </div>
                                 </section>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Product information sidebar */}
-                            <aside className="min-w-0 space-y-4 rounded-xl border bg-muted/20 p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-background text-muted-foreground">
-                                        <Landmark className="size-5" />
-                                    </div>
+                    {/* Product information sidebar */}
+                    <aside className="min-w-0 space-y-3 rounded-xl border bg-card p-3.5 shadow-sm lg:sticky lg:top-4">
+                        <div className="flex items-center gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border bg-background text-muted-foreground">
+                                <Landmark className="size-5" />
+                            </div>
 
-                                    <div className="min-w-0">
-                                        <h2 className="text-sm font-semibold">
-                                            Product information
-                                        </h2>
-                                        <p className="text-xs text-muted-foreground">
-                                            Selected savings scheme
-                                        </p>
-                                    </div>
-                                </div>
+                            <div className="min-w-0">
+                                <h2 className="text-sm font-semibold">
+                                    Product information
+                                </h2>
+                                <p className="text-xs text-muted-foreground">
+                                    Selected savings scheme
+                                </p>
+                            </div>
+                        </div>
 
-                                {product ? (
-                                    <div className="space-y-4">
-                                        <div className="rounded-lg border bg-background p-3">
-                                            <p className="text-xs text-muted-foreground">
-                                                Product code
-                                            </p>
-                                            <p className="mt-1 text-sm font-semibold break-words">
-                                                {product.code}
-                                            </p>
-
-                                            <p className="mt-3 text-xs text-muted-foreground">
-                                                Product name
-                                            </p>
-                                            <p className="mt-1 text-sm font-medium break-words">
-                                                {product.name}
-                                            </p>
-                                        </div>
-
-                                        <div className="space-y-2 rounded-lg border bg-background p-3">
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <CircleDollarSign className="size-4" />
-                                                <span className="text-xs font-medium">
-                                                    Minimum opening amount
-                                                </span>
-                                            </div>
-
-                                            <p className="text-lg font-semibold tabular-nums">
-                                                {minimumOpeningAmount != null
-                                                    ? minimumOpeningAmount
-                                                    : 'Not specified'}
-                                            </p>
-
-                                            <p className="text-xs leading-relaxed text-muted-foreground">
-                                                {minimumOpeningAmount != null
-                                                    ? 'Refer to this product policy when setting the minimum balance.'
-                                                    : 'No minimum opening amount is specified in the product policy.'}
-                                            </p>
-                                        </div>
-
-                                        <div className="flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-                                            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                                            <p className="text-xs leading-relaxed text-muted-foreground">
-                                                Product selected. Review the
-                                                policy before opening the
-                                                account.
-                                            </p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex min-h-44 flex-col items-center justify-center rounded-lg border border-dashed bg-background/70 px-4 py-6 text-center">
-                                        <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-muted">
-                                            <FileText className="size-6 text-muted-foreground" />
-                                        </div>
-
-                                        <p className="text-sm font-medium">
-                                            No product selected
-                                        </p>
-
-                                        <p className="mt-1 max-w-48 text-xs leading-relaxed text-muted-foreground">
-                                            Choose a savings product to view its
-                                            code and minimum opening amount.
-                                        </p>
-                                    </div>
-                                )}
-
-                                <div className="space-y-3 border-t pt-4">
-                                    <p className="text-xs font-semibold">
-                                        Before you continue
+                        {product ? (
+                            <div className="space-y-4">
+                                <div className="rounded-lg border bg-background p-3">
+                                    <p className="text-xs text-muted-foreground">
+                                        Product code
+                                    </p>
+                                    <p className="mt-1 text-sm font-semibold break-words">
+                                        {product.code}
                                     </p>
 
-                                    <div className="flex items-start gap-2">
-                                        <BadgeCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                        <p className="text-xs leading-relaxed text-muted-foreground">
-                                            Verify the selected customer and
-                                            product.
-                                        </p>
-                                    </div>
-
-                                    <div className="flex items-start gap-2">
-                                        <UserRound className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-                                        <p className="text-xs leading-relaxed text-muted-foreground">
-                                            Confirm the account display name and
-                                            minimum balance.
-                                        </p>
-                                    </div>
+                                    <p className="mt-3 text-xs text-muted-foreground">
+                                        Product name
+                                    </p>
+                                    <p className="mt-1 text-sm font-medium break-words">
+                                        {product.name}
+                                    </p>
                                 </div>
-                            </aside>
-                        </div>
 
-                        {/* Form actions */}
-                        <div
-                            data-slot="page-sticky-action-bar"
-                            className="sticky bottom-0 z-20 flex flex-col-reverse gap-2 border-t bg-background/95 p-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                                <div className="space-y-2 rounded-lg border bg-background p-3">
+                                    <div className="flex items-center gap-2 text-muted-foreground">
+                                        <CircleDollarSign className="size-4" />
+                                        <span className="text-xs font-medium">
+                                            Minimum opening amount
+                                        </span>
+                                    </div>
+
+                                    <p className="text-lg font-semibold tabular-nums">
+                                        {minimumOpeningAmount != null
+                                            ? minimumOpeningAmount
+                                            : 'Not specified'}
+                                    </p>
+
+                                    <p className="text-xs leading-relaxed text-muted-foreground">
+                                        {minimumOpeningAmount != null
+                                            ? 'Refer to this product policy when setting the minimum balance.'
+                                            : 'No minimum opening amount is specified in the product policy.'}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                    <p className="text-xs leading-relaxed text-muted-foreground">
+                                        Product selected. Review the policy
+                                        before opening the account.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex min-h-44 flex-col items-center justify-center rounded-lg border border-dashed bg-background/70 px-4 py-6 text-center">
+                                <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-muted">
+                                    <FileText className="size-6 text-muted-foreground" />
+                                </div>
+
+                                <p className="text-sm font-medium">
+                                    No product selected
+                                </p>
+
+                                <p className="mt-1 max-w-48 text-xs leading-relaxed text-muted-foreground">
+                                    Choose a savings product to view its code
+                                    and minimum opening amount.
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="space-y-2 border-t pt-3">
+                            <p className="text-[11px] font-semibold">
+                                Before you continue
+                            </p>
+
+                            <div className="flex items-start gap-1.5">
+                                <BadgeCheck className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                                    Verify the selected customer and product.
+                                </p>
+                            </div>
+
+                            <div className="flex items-start gap-1.5">
+                                <UserRound className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+                                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                                    Confirm the account display name and minimum
+                                    balance.
+                                </p>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Form actions */}
+                    <div
+                        data-slot="page-sticky-action-bar"
+                        className="sticky bottom-0 z-20 -mx-4 flex flex-col-reverse gap-2 border-t bg-background/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:-mx-5 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:col-span-2"
+                    >
+                        <Button
+                            asChild
+                            type="button"
+                            variant="outline"
+                            disabled={processing}
                         >
-                            <Button
-                                asChild
-                                type="button"
-                                variant="outline"
-                                disabled={processing}
+                            <Link
+                                href={route('financial-accounts.savings.index')}
                             >
-                                <Link
-                                    href={route(
-                                        'financial-accounts.savings.index',
-                                    )}
-                                >
-                                    <ArrowLeft className="mr-2 size-4" />
-                                    Cancel
-                                </Link>
-                            </Button>
+                                <ArrowLeft className="mr-2 size-4" />
+                                Cancel
+                            </Link>
+                        </Button>
 
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                className="w-full sm:w-auto"
-                            >
-                                {processing ? (
-                                    <LoaderCircle className="mr-2 size-4 animate-spin" />
-                                ) : (
-                                    <Landmark className="mr-2 size-4" />
-                                )}
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="w-full sm:w-auto"
+                        >
+                            {processing ? (
+                                <LoaderCircle className="mr-2 size-4 animate-spin" />
+                            ) : (
+                                <Landmark className="mr-2 size-4" />
+                            )}
 
-                                {processing
-                                    ? 'Opening account...'
-                                    : 'Open savings account'}
+                            {processing
+                                ? 'Opening account...'
+                                : 'Open savings account'}
 
-                                {!processing && (
-                                    <ArrowRight className="ml-2 size-4" />
-                                )}
-                            </Button>
-                        </div>
+                            {!processing && (
+                                <ArrowRight className="ml-2 size-4" />
+                            )}
+                        </Button>
                     </div>
                 </form>
             </div>
