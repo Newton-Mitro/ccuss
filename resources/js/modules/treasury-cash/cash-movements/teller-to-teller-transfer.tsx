@@ -145,36 +145,34 @@ export default function TellerToTellerTransfer() {
     const selectedBankAccount = bank_accounts.find(
         (account) => String(account.id) === data.bank_account_id,
     );
+    const sourceBalance = isBankToVault
+        ? (selectedBankAccount?.current_balance ?? 0)
+        : (selectedSource?.current_balance ?? 0);
+    const destinationBalance = isVaultToBank
+        ? (selectedBankAccount?.current_balance ?? 0)
+        : (selectedDestination?.current_balance ?? 0);
     const previewSource = isBankToVault
-        ? selectedBankAccount
-            ? {
-                  name: selectedBankAccount.account_name,
-                  code: selectedBankAccount.account_number,
-                  balance: selectedBankAccount.current_balance,
-              }
-            : null
-        : selectedSource
-          ? {
-                name: selectedSource.name,
-                code: selectedSource.code,
-                balance: selectedSource.current_balance ?? null,
-            }
-          : null;
+        ? {
+              name: selectedBankAccount?.account_name ?? 'No account selected',
+              code: selectedBankAccount?.account_number ?? '',
+              balance: sourceBalance,
+          }
+        : {
+              name: selectedSource?.name ?? 'No account selected',
+              code: selectedSource?.code ?? '',
+              balance: sourceBalance,
+          };
     const previewDestination = isVaultToBank
-        ? selectedBankAccount
-            ? {
-                  name: selectedBankAccount.account_name,
-                  code: selectedBankAccount.account_number,
-                  balance: selectedBankAccount.current_balance,
-              }
-            : null
-        : selectedDestination
-          ? {
-                name: selectedDestination.name,
-                code: selectedDestination.code,
-                balance: selectedDestination.current_balance ?? null,
-            }
-          : null;
+        ? {
+              name: selectedBankAccount?.account_name ?? 'No account selected',
+              code: selectedBankAccount?.account_number ?? '',
+              balance: destinationBalance,
+          }
+        : {
+              name: selectedDestination?.name ?? 'No account selected',
+              code: selectedDestination?.code ?? '',
+              balance: destinationBalance,
+          };
 
     const sourceOptions = isBankToVault
         ? [
@@ -193,7 +191,7 @@ export default function TellerToTellerTransfer() {
                   )
                   .map((location) => ({
                       value: String(location.id),
-                      label: `${location.name} (${location.code}) · ${location.current_balance == null ? 'No open session' : formatBDTCurrency(location.current_balance, false)}`,
+                      label: `${location.name} (${location.code}) · ${formatBDTCurrency(location.current_balance ?? 0, false)}`,
                   })),
           ];
 
@@ -214,7 +212,7 @@ export default function TellerToTellerTransfer() {
                   )
                   .map((location) => ({
                       value: String(location.id),
-                      label: `${location.name} (${location.code}) · ${location.current_balance == null ? 'No open session' : formatBDTCurrency(location.current_balance, false)}`,
+                      label: `${location.name} (${location.code}) · ${formatBDTCurrency(location.current_balance ?? 0, false)}`,
                   })),
           ];
 
@@ -334,39 +332,21 @@ export default function TellerToTellerTransfer() {
                                         </p>
                                     )}
 
-                                    {selectedSource && (
-                                        <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                                            <span className="text-muted-foreground">
-                                                Current{' '}
-                                                {selectedSource.type === 'VAULT'
-                                                    ? 'vault'
-                                                    : 'teller'}{' '}
-                                                balance
-                                            </span>
-                                            <span className="font-semibold tabular-nums">
-                                                {selectedSource.current_balance ==
-                                                null
-                                                    ? 'No open session'
-                                                    : formatBDTCurrency(
-                                                          selectedSource.current_balance,
-                                                          false,
-                                                      )}
-                                            </span>
-                                        </p>
-                                    )}
-                                    {isBankToVault && selectedBankAccount && (
-                                        <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                                            <span className="text-muted-foreground">
-                                                Current bank balance
-                                            </span>
-                                            <span className="font-semibold tabular-nums">
-                                                {formatBDTCurrency(
-                                                    selectedBankAccount.current_balance,
-                                                    false,
-                                                )}
-                                            </span>
-                                        </p>
-                                    )}
+                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                        <span className="text-muted-foreground">
+                                            Current{' '}
+                                            {transferConfig.fromLabel
+                                                .replace('From ', '')
+                                                .toLowerCase()}{' '}
+                                            balance
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {formatBDTCurrency(
+                                                sourceBalance,
+                                                false,
+                                            )}
+                                        </span>
+                                    </p>
 
                                     {isBankToVault &&
                                         errors.bank_account_id && (
@@ -424,40 +404,21 @@ export default function TellerToTellerTransfer() {
                                         </p>
                                     )}
 
-                                    {selectedDestination && (
-                                        <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                                            <span className="text-muted-foreground">
-                                                Current{' '}
-                                                {selectedDestination.type ===
-                                                'VAULT'
-                                                    ? 'vault'
-                                                    : 'teller'}{' '}
-                                                balance
-                                            </span>
-                                            <span className="font-semibold tabular-nums">
-                                                {selectedDestination.current_balance ==
-                                                null
-                                                    ? 'No open session'
-                                                    : formatBDTCurrency(
-                                                          selectedDestination.current_balance,
-                                                          false,
-                                                      )}
-                                            </span>
-                                        </p>
-                                    )}
-                                    {isVaultToBank && selectedBankAccount && (
-                                        <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
-                                            <span className="text-muted-foreground">
-                                                Current bank balance
-                                            </span>
-                                            <span className="font-semibold tabular-nums">
-                                                {formatBDTCurrency(
-                                                    selectedBankAccount.current_balance,
-                                                    false,
-                                                )}
-                                            </span>
-                                        </p>
-                                    )}
+                                    <p className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                                        <span className="text-muted-foreground">
+                                            Current{' '}
+                                            {transferConfig.toLabel
+                                                .replace('To ', '')
+                                                .toLowerCase()}{' '}
+                                            balance
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                            {formatBDTCurrency(
+                                                destinationBalance,
+                                                false,
+                                            )}
+                                        </span>
+                                    </p>
 
                                     {isVaultToBank &&
                                         errors.bank_account_id && (
@@ -668,37 +629,27 @@ export default function TellerToTellerTransfer() {
                                             />
                                             {item.label}
                                         </div>
-                                        {item.location ? (
-                                            <div className="mt-2 min-w-0">
-                                                <p className="text-sm font-semibold">
-                                                    {item.location.name}
-                                                </p>
+                                        <div className="mt-2 min-w-0">
+                                            <p className="text-sm font-semibold">
+                                                {item.location.name}
+                                            </p>
+                                            {item.location.code && (
                                                 <p className="mt-0.5 font-mono text-xs break-all text-muted-foreground">
                                                     {item.location.code}
                                                 </p>
-                                                <div className="mt-2 flex items-center justify-between gap-2 border-t pt-2 text-[11px]">
-                                                    <span className="text-muted-foreground">
-                                                        Current balance
-                                                    </span>
-                                                    <span className="font-medium tabular-nums">
-                                                        {item.location
-                                                            .balance == null
-                                                            ? 'No open session'
-                                                            : formatBDTCurrency(
-                                                                  item.location
-                                                                      .balance,
-                                                                  false,
-                                                              )}
-                                                    </span>
-                                                </div>
+                                            )}
+                                            <div className="mt-2 flex items-center justify-between gap-2 border-t pt-2 text-[11px]">
+                                                <span className="text-muted-foreground">
+                                                    Current balance
+                                                </span>
+                                                <span className="font-medium tabular-nums">
+                                                    {formatBDTCurrency(
+                                                        item.location.balance,
+                                                        false,
+                                                    )}
+                                                </span>
                                             </div>
-                                        ) : (
-                                            <p className="mt-2 text-xs text-muted-foreground">
-                                                Select a{' '}
-                                                {item.label.toLowerCase()} to
-                                                preview it.
-                                            </p>
-                                        )}
+                                        </div>
                                     </div>
                                 ))}
 

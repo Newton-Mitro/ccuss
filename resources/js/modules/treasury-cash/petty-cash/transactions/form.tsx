@@ -468,43 +468,34 @@ export default function Form() {
                                     )}
                                 </div>
 
-                                {selectedFund && (
-                                    <>
-                                        <div className="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
-                                            <span className="text-xs text-muted-foreground">
-                                                Current balance
-                                            </span>
-                                            <span className="text-right text-xs font-medium tabular-nums">
-                                                {formatBDTCurrency(
-                                                    selectedFund.current_balance,
-                                                    false,
-                                                )}
-                                            </span>
-                                        </div>
-                                        {Number(data.amount) > 0 && (
-                                            <div className="flex items-start justify-between gap-3 rounded-xl border border-primary/15 bg-primary/[0.04] p-3">
-                                                <span className="text-xs text-muted-foreground">
-                                                    Estimated balance after
-                                                    posting
-                                                </span>
-                                                <span className="text-right text-xs font-semibold tabular-nums">
-                                                    {formatBDTCurrency(
-                                                        Number(
-                                                            selectedFund.current_balance,
-                                                        ) +
-                                                            (isFunding
-                                                                ? Number(
-                                                                      data.amount,
-                                                                  )
-                                                                : -Number(
-                                                                      data.amount,
-                                                                  )),
-                                                        false,
-                                                    )}
-                                                </span>
-                                            </div>
+                                <div className="flex items-start justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-3">
+                                    <span className="text-xs text-muted-foreground">
+                                        Current balance
+                                    </span>
+                                    <span className="text-right text-xs font-medium tabular-nums">
+                                        {formatBDTCurrency(
+                                            selectedFund?.current_balance ?? 0,
+                                            false,
                                         )}
-                                    </>
+                                    </span>
+                                </div>
+                                {selectedFund && Number(data.amount) > 0 && (
+                                    <div className="flex items-start justify-between gap-3 rounded-xl border border-primary/15 bg-primary/[0.04] p-3">
+                                        <span className="text-xs text-muted-foreground">
+                                            Estimated balance after posting
+                                        </span>
+                                        <span className="text-right text-xs font-semibold tabular-nums">
+                                            {formatBDTCurrency(
+                                                Number(
+                                                    selectedFund.current_balance,
+                                                ) +
+                                                    (isFunding
+                                                        ? Number(data.amount)
+                                                        : -Number(data.amount)),
+                                                false,
+                                            )}
+                                        </span>
+                                    </div>
                                 )}
 
                                 <div className="rounded-xl border border-border/60 bg-muted/20 p-3">

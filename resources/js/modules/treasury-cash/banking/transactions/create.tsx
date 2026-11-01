@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
+import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import type { Props } from '@/modules/treasury-cash/types/banking/transactions/create.interfaces';
 import { BreadcrumbItem } from '@/types';
@@ -387,6 +388,18 @@ export default function Create() {
                                             {selectedBankAccount.account_number}
                                         </p>
                                     )}
+                                </div>
+                                <div className="flex items-center justify-between rounded-xl bg-muted/50 px-3.5 py-3">
+                                    <span className="text-xs text-muted-foreground">
+                                        Current balance
+                                    </span>
+                                    <span className="font-semibold tabular-nums">
+                                        {formatBDTCurrency(
+                                            selectedBankAccount?.current_balance ??
+                                                0,
+                                            false,
+                                        )}
+                                    </span>
                                 </div>
                                 <div className="flex items-center justify-between rounded-xl bg-muted/50 px-3.5 py-3">
                                     <span className="flex items-center gap-2 text-xs text-muted-foreground">

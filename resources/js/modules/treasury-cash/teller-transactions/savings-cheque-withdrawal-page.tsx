@@ -404,35 +404,33 @@ export default function SavingsChequeWithdrawalPage() {
                                         </div>
 
                                         {/* Balance */}
-                                        {selectedAccount && (
-                                            <div className="grid grid-cols-2 overflow-hidden rounded-lg border bg-muted/20">
-                                                <div className="px-3 py-2.5">
-                                                    <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
-                                                        Available balance
-                                                    </div>
-
-                                                    <div className="mt-0.5 text-sm font-semibold tabular-nums">
-                                                        {formatBDTCurrency(
-                                                            selectedAccount.available_balance ||
-                                                                0,
-                                                        )}
-                                                    </div>
+                                        <div className="grid grid-cols-2 overflow-hidden rounded-lg border bg-muted/20">
+                                            <div className="px-3 py-2.5">
+                                                <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                                    Available balance
                                                 </div>
 
-                                                <div className="border-l px-3 py-2.5">
-                                                    <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
-                                                        Current balance
-                                                    </div>
-
-                                                    <div className="mt-0.5 text-sm font-semibold tabular-nums">
-                                                        {formatBDTCurrency(
-                                                            selectedAccount.balance ||
-                                                                0,
-                                                        )}
-                                                    </div>
+                                                <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                                    {formatBDTCurrency(
+                                                        selectedAccount?.available_balance ??
+                                                            0,
+                                                    )}
                                                 </div>
                                             </div>
-                                        )}
+
+                                            <div className="border-l px-3 py-2.5">
+                                                <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
+                                                    Current balance
+                                                </div>
+
+                                                <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                                    {formatBDTCurrency(
+                                                        selectedAccount?.balance ??
+                                                            0,
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div className="grid min-h-0 gap-2 sm:grid-cols-2">
