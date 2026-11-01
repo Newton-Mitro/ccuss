@@ -132,6 +132,30 @@ function SectionHeading({
     );
 }
 
+function AccountBalanceSummary({
+    account,
+}: {
+    account: FinancialAccountSearchResult | null;
+}) {
+    return (
+        <div className="flex items-center gap-3 text-[11px] leading-none text-muted-foreground">
+            <div className="min-w-0">
+                <span>Balance </span>
+                <span className="font-semibold tabular-nums text-foreground">
+                    {formatBDTCurrency(account?.balance ?? 0)}
+                </span>
+            </div>
+            <span className="h-3 border-l" aria-hidden="true" />
+            <div className="min-w-0">
+                <span>Available </span>
+                <span className="font-semibold tabular-nums text-foreground">
+                    {formatBDTCurrency(account?.available_balance ?? 0)}
+                </span>
+            </div>
+        </div>
+    );
+}
+
 export default function TransactionWorkflow() {
     const [destinationSearchResetKey, setDestinationSearchResetKey] =
         useState(0);
@@ -279,7 +303,7 @@ export default function TransactionWorkflow() {
                                         />
                                     </div>
 
-                                    <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7">
+                                    <div className="grid gap-3 p-4 sm:grid-cols-2 sm:gap-4">
                                         <Field
                                             label="Source account"
                                             required
@@ -321,6 +345,9 @@ export default function TransactionWorkflow() {
                                                     setSelectedSource(null);
                                                 }}
                                             />
+                                            <AccountBalanceSummary
+                                                account={selectedSource}
+                                            />
                                         </Field>
 
                                         <Field
@@ -361,6 +388,9 @@ export default function TransactionWorkflow() {
                                                         null,
                                                     );
                                                 }}
+                                            />
+                                            <AccountBalanceSummary
+                                                account={selectedDestination}
                                             />
                                         </Field>
 
