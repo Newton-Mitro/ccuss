@@ -1,8 +1,8 @@
 function BolderLessInfoBox({ label, value }: { label: string; value: string }) {
     return (
-        <div>
-            <span className="text-muted-foreground">{label}</span>
-            <p className="font-medium">{value}</p>
+        <div className="min-w-0">
+            <span className="block text-xs text-muted-foreground">{label}</span>
+            <p className="text-sm leading-5 font-medium break-words">{value}</p>
         </div>
     );
 }

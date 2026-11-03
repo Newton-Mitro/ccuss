@@ -9,7 +9,6 @@ import {
     CheckCircle2,
     Coins,
     FileCheck2,
-    FileClock,
     Layers3,
     Pencil,
     Plus,
@@ -164,84 +163,58 @@ export default function CashDenominationsIndex() {
                     </div>
 
                     {denominations.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-180 text-[13px]">
-                                <thead className="bg-muted/40 text-[10px] tracking-wide text-muted-foreground uppercase">
-                                    <tr className="border-b border-border">
-                                        <th className="px-4 py-2.5 text-left font-medium">
-                                            Denomination
-                                        </th>
-                                        <th className="px-3 py-2.5 text-left font-medium">
-                                            Type
-                                        </th>
-                                        <th className="px-3 py-2.5 text-right font-medium">
-                                            Face value
-                                        </th>
-                                        <th className="px-3 py-2.5 text-center font-medium">
-                                            Count history
-                                        </th>
-                                        <th className="px-3 py-2.5 text-left font-medium">
-                                            Status
-                                        </th>
-                                        {canUpdate && (
-                                            <th className="px-4 py-2.5 text-right font-medium">
-                                                Actions
+                        <>
+                            <div className="hidden h-[calc(100vh-420px)] overflow-auto rounded-md border bg-card md:block">
+                                <table className="w-full border-collapse">
+                                    <thead className="sticky top-0 bg-muted text-sm text-muted-foreground">
+                                        <tr>
+                                            <th className="border-b p-2 text-left text-sm font-medium">
+                                                Denomination
                                             </th>
-                                        )}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border/70">
-                                    {denominations.map((denomination) => {
-                                        const TypeIcon =
-                                            denomination.type === 'NOTE'
-                                                ? Banknote
-                                                : Coins;
-                                        return (
-                                            <tr
-                                                key={denomination.id}
-                                                className="transition-colors odd:bg-muted/[0.025] hover:bg-primary/[0.04]"
-                                            >
-                                                <td className="px-4 py-2.5">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <div
-                                                            className={`flex size-9 shrink-0 items-center justify-center rounded-lg border shadow-sm ${
-                                                                denomination.type ===
-                                                                'NOTE'
-                                                                    ? 'border-sky-500/20 bg-sky-500/8 text-sky-600 dark:text-sky-400'
-                                                                    : 'border-amber-500/20 bg-amber-500/8 text-amber-600 dark:text-amber-400'
-                                                            }`}
-                                                        >
+                                            <th className="border-b p-2 text-left text-sm font-medium">
+                                                Type
+                                            </th>
+                                            <th className="border-b p-2 text-left text-sm font-medium">
+                                                Face value
+                                            </th>
+                                            <th className="border-b p-2 text-left text-sm font-medium">
+                                                Count history
+                                            </th>
+                                            <th className="border-b p-2 text-left text-sm font-medium">
+                                                Status
+                                            </th>
+                                            {canUpdate && (
+                                                <th className="border-b p-2 text-left text-sm font-medium">
+                                                    Actions
+                                                </th>
+                                            )}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {denominations.map((denomination) => {
+                                            const TypeIcon =
+                                                denomination.type === 'NOTE'
+                                                    ? Banknote
+                                                    : Coins;
+                                            return (
+                                                <tr
+                                                    key={denomination.id}
+                                                    className="border-b even:bg-muted hover:bg-accent/20"
+                                                >
+                                                    <td className="px-2 py-1">
+                                                        {denomination.name ||
+                                                            `${denomination.value} ${denomination.currency}`}
+                                                    </td>
+                                                    <td className="px-2 py-1">
+                                                        <span className="inline-flex items-center gap-1">
                                                             <TypeIcon className="size-4" />
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <p className="leading-4 font-medium">
-                                                                {denomination.name ||
-                                                                    `${denomination.value} ${denomination.currency}`}
-                                                            </p>
-                                                            <p className="text-[11px] text-muted-foreground">
-                                                                {
-                                                                    denomination.currency
-                                                                }{' '}
-                                                                ·{' '}
-                                                                {denomination.type ===
-                                                                'NOTE'
-                                                                    ? 'Banknote'
-                                                                    : 'Coin'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-3 py-2.5">
-                                                    <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-muted/30 px-2 py-1 text-[11px] font-medium">
-                                                        <TypeIcon className="size-3" />
-                                                        {denomination.type ===
-                                                        'NOTE'
-                                                            ? 'Banknote'
-                                                            : 'Coin'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-3 py-2.5 text-right">
-                                                    <div className="font-semibold tabular-nums">
+                                                            {denomination.type ===
+                                                            'NOTE'
+                                                                ? 'Banknote'
+                                                                : 'Coin'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-2 py-1 tabular-nums">
                                                         {Number(
                                                             denomination.value,
                                                         ).toLocaleString(
@@ -250,68 +223,141 @@ export default function CashDenominationsIndex() {
                                                                 minimumFractionDigits: 2,
                                                                 maximumFractionDigits: 2,
                                                             },
-                                                        )}
-                                                    </div>
-                                                    <div className="mt-0.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                                                        )}{' '}
                                                         {denomination.currency}
-                                                    </div>
-                                                </td>
-                                                <td className="px-3 py-2.5 text-center">
-                                                    {denomination.count_lines_count >
-                                                    0 ? (
-                                                        <span className="inline-flex items-center gap-1 rounded-lg border bg-muted/40 px-2 py-1 text-[11px] font-medium tabular-nums">
-                                                            <FileClock className="size-3 text-muted-foreground" />
-                                                            {
-                                                                denomination.count_lines_count
-                                                            }{' '}
-                                                            <span className="text-muted-foreground">
-                                                                records
-                                                            </span>
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-[11px] text-muted-foreground">
-                                                            No history
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-3 py-2.5">
-                                                    <StatusBadge
-                                                        active={
-                                                            denomination.is_active
-                                                        }
-                                                    />
-                                                </td>
-                                                {canUpdate && (
-                                                    <td className="px-4 py-2.5">
-                                                        <div className="flex justify-end">
+                                                    </td>
+                                                    <td className="px-2 py-1">
+                                                        {denomination.count_lines_count >
+                                                        0
+                                                            ? `${denomination.count_lines_count} records`
+                                                            : 'No history'}
+                                                    </td>
+                                                    <td className="px-2 py-1 capitalize">
+                                                        <StatusBadge
+                                                            active={
+                                                                denomination.is_active
+                                                            }
+                                                        />
+                                                    </td>
+                                                    {canUpdate && (
+                                                        <td className="px-2 py-1">
                                                             <Button
                                                                 asChild
-                                                                variant="outline"
+                                                                variant="ghost"
                                                                 size="sm"
-                                                                className="h-8 gap-1.5"
+                                                                aria-label={`Edit ${denomination.name ?? denomination.value}`}
                                                             >
                                                                 <Link
                                                                     href={route(
                                                                         'cash-denominations.edit',
                                                                         denomination.id,
                                                                     )}
-                                                                    aria-label={`Edit ${denomination.name ?? denomination.value}`}
                                                                 >
-                                                                    <Pencil className="size-3.5" />
-                                                                    <span className="hidden lg:inline">
-                                                                        Edit
-                                                                    </span>
+                                                                    <Pencil className="size-4" />
                                                                 </Link>
                                                             </Button>
-                                                        </div>
-                                                    </td>
-                                                )}
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                                                        </td>
+                                                    )}
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className="space-y-3 p-3 md:hidden">
+                                {denominations.map((denomination) => {
+                                    const TypeIcon =
+                                        denomination.type === 'NOTE'
+                                            ? Banknote
+                                            : Coins;
+                                    return (
+                                        <div
+                                            key={denomination.id}
+                                            className="space-y-2 rounded-md border bg-card p-3"
+                                        >
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex min-w-0 items-start gap-2">
+                                                    <TypeIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium">
+                                                            {denomination.name ||
+                                                                `${denomination.value} ${denomination.currency}`}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {
+                                                                denomination.currency
+                                                            }{' '}
+                                                            ·{' '}
+                                                            {denomination.type ===
+                                                            'NOTE'
+                                                                ? 'Banknote'
+                                                                : 'Coin'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <StatusBadge
+                                                    active={
+                                                        denomination.is_active
+                                                    }
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Face value
+                                                    </p>
+                                                    <p className="font-medium tabular-nums">
+                                                        {Number(
+                                                            denomination.value,
+                                                        ).toLocaleString(
+                                                            'en-BD',
+                                                            {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2,
+                                                            },
+                                                        )}{' '}
+                                                        {denomination.currency}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        Count history
+                                                    </p>
+                                                    <p className="font-medium">
+                                                        {denomination.count_lines_count >
+                                                        0
+                                                            ? `${denomination.count_lines_count} records`
+                                                            : 'No history'}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {canUpdate && (
+                                                <div className="flex justify-end border-t pt-2">
+                                                    <Button
+                                                        asChild
+                                                        variant="outline"
+                                                        size="sm"
+                                                    >
+                                                        <Link
+                                                            href={route(
+                                                                'cash-denominations.edit',
+                                                                denomination.id,
+                                                            )}
+                                                        >
+                                                            <Pencil className="size-4" />
+                                                            Edit
+                                                        </Link>
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     ) : (
                         <div className="flex flex-col items-center px-5 py-14 text-center">
                             <div className="flex size-14 items-center justify-center rounded-2xl border bg-muted/40">

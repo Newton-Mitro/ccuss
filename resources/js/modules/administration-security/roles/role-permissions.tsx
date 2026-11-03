@@ -418,9 +418,9 @@ const RolePermissionForm = ({
                     </div>
                 </header>
 
-                <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(240px,0.24fr)_minmax(0,1fr)]">
+                <div className="grid min-w-0 items-stretch gap-3 lg:grid-cols-[minmax(210px,0.22fr)_minmax(0,1fr)]">
                     {/* Roles sidebar */}
-                    <aside className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:sticky lg:top-3">
+                    <aside className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:flex lg:h-[min(78vh,720px)] lg:min-h-[380px] lg:flex-col">
                         <div className="border-b border-border bg-muted/15 px-3 py-3">
                             <div className="flex items-center justify-between gap-2">
                                 <div>
@@ -469,7 +469,7 @@ const RolePermissionForm = ({
                             </div>
                         </div>
 
-                        <div className="max-h-[40vh] space-y-1 overflow-y-auto p-1.5 lg:max-h-[calc(100vh-250px)]">
+                        <div className="space-y-1 overflow-y-auto p-1.5 lg:min-h-0 lg:flex-1">
                             {visibleRoles.map((role) => {
                                 const active = selectedRole?.id === role.id;
                                 const assignedCount =
@@ -584,9 +584,12 @@ const RolePermissionForm = ({
                     </aside>
 
                     {/* Permissions panel */}
-                    <section className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    <section className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm lg:flex lg:h-[min(78vh,720px)] lg:min-h-[380px] lg:flex-col">
                         {selectedRole ? (
-                            <form onSubmit={handleSubmit}>
+                            <form
+                                onSubmit={handleSubmit}
+                                className="lg:flex lg:min-h-0 lg:flex-1 lg:flex-col"
+                            >
                                 {/* Selected role summary */}
                                 <div className="flex flex-col gap-3 border-b border-border bg-gradient-to-r from-primary/5 to-transparent px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                                     <div className="flex min-w-0 items-center gap-2.5">
@@ -716,7 +719,7 @@ const RolePermissionForm = ({
                                 </div>
 
                                 {/* Dense, scrollable permission groups */}
-                                <div className="max-h-[min(68vh,900px)] space-y-2 overflow-y-auto bg-muted/[0.03] p-3 sm:p-4">
+                                <div className="max-h-[min(68vh,900px)] space-y-2 overflow-y-auto bg-muted/[0.03] p-3 sm:p-4 lg:max-h-none lg:min-h-0 lg:flex-1">
                                     {visiblePermissionGroups.map(
                                         ([module, perms]) => {
                                             const ids = perms.map(
@@ -928,7 +931,7 @@ const RolePermissionForm = ({
                                 )}
                             </form>
                         ) : (
-                            <div className="flex min-h-64 flex-col items-center justify-center px-5 py-10 text-center">
+                            <div className="flex min-h-64 flex-col items-center justify-center px-5 py-10 text-center lg:flex-1">
                                 <div className="flex size-11 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                                     <ShieldCheck className="size-5" />
                                 </div>

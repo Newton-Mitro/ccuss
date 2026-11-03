@@ -114,8 +114,8 @@ const Create = () => {
                                 </span>
                             </div>
 
-                            <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center">
-                                <div className="flex min-w-0 items-center gap-2.5 sm:w-56 sm:shrink-0">
+                            <div className="space-y-3 p-3 sm:p-4">
+                                <div className="flex min-w-0 items-center gap-2.5">
                                     <div className="size-11 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
                                         {customer.photo?.url ? (
                                             <img
@@ -154,7 +154,7 @@ const Create = () => {
                                     </div>
                                 </div>
 
-                                <div className="grid min-w-0 flex-1 grid-cols-1 gap-x-4 gap-y-2 border-t border-border pt-3 sm:grid-cols-2 sm:border-t-0 sm:border-l sm:py-0 sm:pl-4 lg:grid-cols-4">
+                                <div className="grid min-w-0 grid-cols-1 gap-3 border-t border-border pt-3 sm:grid-cols-2 sm:gap-x-5 sm:gap-y-4">
                                     <BolderLessInfoBox
                                         label="Phone"
                                         value={customer.primary_phone}
