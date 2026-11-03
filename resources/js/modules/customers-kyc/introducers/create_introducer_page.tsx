@@ -1,9 +1,9 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
-    ArrowRight,
     CheckCheck,
     ContactRound,
+    Eye,
     GitBranch,
     Handshake,
     Loader2,
@@ -112,75 +112,75 @@ const Create = () => {
                     </Button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-3.5">
-                    {/* Customer being introduced */}
-                    <section className="overflow-hidden rounded-lg border border-border bg-card">
-                        <SectionHeader
-                            icon={<ContactRound className="size-4" />}
-                            title="Customer Being Introduced"
-                            description="The customer who will be linked to an introducer."
-                            step="01"
-                        />
+                {/* Customer being introduced */}
+                <section className="overflow-hidden rounded-lg border border-border bg-card">
+                    <SectionHeader
+                        icon={<ContactRound className="size-4" />}
+                        title="Customer Being Introduced"
+                        description="The customer who will be linked to an introducer."
+                        step="01"
+                    />
 
-                        <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:p-3.5">
-                            <div className="flex min-w-0 items-center gap-3 sm:w-56 sm:shrink-0">
-                                <CustomerAvatar customer={customer} />
+                    <div className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:p-3.5">
+                        <div className="flex min-w-0 items-center gap-3 sm:w-56 sm:shrink-0">
+                            <CustomerAvatar customer={customer} />
 
-                                <div className="min-w-0">
-                                    <Link
-                                        href={route(
-                                            'customers.show',
-                                            customer.id,
-                                        )}
-                                        className="block truncate text-sm font-semibold hover:text-primary"
-                                    >
-                                        {customer.name}
-                                    </Link>
+                            <div className="min-w-0">
+                                <Link
+                                    href={route('customers.show', customer.id)}
+                                    className="block truncate text-sm font-semibold hover:text-primary"
+                                >
+                                    {customer.name}
+                                </Link>
 
-                                    <p className="mt-0.5 text-xs text-muted-foreground">
-                                        {customer.customer_no ||
-                                            'No customer number'}
-                                    </p>
+                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                    {customer.customer_no ||
+                                        'No customer number'}
+                                </p>
 
-                                    <div className="mt-1.5 flex flex-wrap gap-1">
-                                        {customer.status && (
-                                            <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                                {customer.status}
-                                            </span>
-                                        )}
+                                <div className="mt-1.5 flex flex-wrap gap-1">
+                                    {customer.status && (
+                                        <span className="rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                            {customer.status}
+                                        </span>
+                                    )}
 
-                                        {customer.type && (
-                                            <span className="rounded border border-primary/20 bg-primary/5 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                                                {customer.type}
-                                            </span>
-                                        )}
-                                    </div>
+                                    {customer.type && (
+                                        <span className="rounded border border-primary/20 bg-primary/5 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                                            {customer.type}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
-
-                            <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-4 gap-y-3 border-t border-border pt-3 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 lg:grid-cols-4">
-                                <BolderLessInfoBox
-                                    label="Primary Phone"
-                                    value={customer.primary_phone}
-                                />
-                                <BolderLessInfoBox
-                                    label="Primary Email"
-                                    value={customer.primary_email}
-                                />
-                                <BolderLessInfoBox
-                                    label="ID Type"
-                                    value={customer.identification_type}
-                                />
-                                <BolderLessInfoBox
-                                    label="ID Number"
-                                    value={customer.identification_number}
-                                />
-                            </div>
                         </div>
-                    </section>
 
+                        <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-4 gap-y-3 border-t border-border pt-3 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-4 lg:grid-cols-4">
+                            <BolderLessInfoBox
+                                label="Primary Phone"
+                                value={customer.primary_phone}
+                            />
+                            <BolderLessInfoBox
+                                label="Primary Email"
+                                value={customer.primary_email}
+                            />
+                            <BolderLessInfoBox
+                                label="ID Type"
+                                value={customer.identification_type}
+                            />
+                            <BolderLessInfoBox
+                                label="ID Number"
+                                value={customer.identification_number}
+                            />
+                        </div>
+                    </div>
+                </section>
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_300px]"
+                >
                     {/* Introducer selection */}
-                    <section className="overflow-hidden rounded-lg border border-border bg-card">
+                    <section className="overflow-hidden rounded-lg border border-border bg-card xl:col-start-1">
                         <SectionHeader
                             icon={<UserRound className="size-4" />}
                             title="Select Introducer"
@@ -301,7 +301,7 @@ const Create = () => {
                     </section>
 
                     {/* Relationship details */}
-                    <section className="overflow-hidden rounded-lg border border-border bg-card">
+                    <section className="overflow-hidden rounded-lg border border-border bg-card xl:col-start-1">
                         <SectionHeader
                             icon={<GitBranch className="size-4" />}
                             title="Relationship Details"
@@ -309,7 +309,7 @@ const Create = () => {
                             step="03"
                         />
 
-                        <div className="grid gap-3 p-3 sm:p-4 md:grid-cols-2">
+                        <div className="p-3 sm:p-4">
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-medium">
                                     Relationship Type
@@ -331,47 +331,104 @@ const Create = () => {
                                     message={errors.relationship_type}
                                 />
                             </div>
-
-                            <div className="rounded-lg border border-border bg-muted/20 p-3">
-                                <div className="flex items-center gap-2">
-                                    <Handshake className="size-4 text-primary" />
-                                    <p className="text-xs font-semibold">
-                                        Relationship Preview
-                                    </p>
-                                </div>
-
-                                <div className="mt-3 flex flex-wrap items-center gap-2">
-                                    <span className="max-w-full truncate rounded-md border border-border bg-card px-2 py-1 text-xs font-medium">
-                                        {selectedIntroducer?.name ||
-                                            'Introducer'}
-                                    </span>
-
-                                    <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
-
-                                    <span className="max-w-full truncate rounded-md border border-border bg-card px-2 py-1 text-xs font-medium">
-                                        {customer.name}
-                                    </span>
-                                </div>
-
-                                <p className="mt-2 text-[11px] text-muted-foreground">
-                                    {data.relationship_type
-                                        ? `Relationship: ${
-                                              relationshipTypes.find(
-                                                  (item) =>
-                                                      item.value ===
-                                                      data.relationship_type,
-                                              )?.label ?? data.relationship_type
-                                          }`
-                                        : 'Select a relationship type to complete the link.'}
-                                </p>
-                            </div>
                         </div>
                     </section>
+
+                    <aside className="min-w-0 xl:sticky xl:top-4 xl:col-start-2 xl:row-start-1 xl:self-start">
+                        <section className="overflow-hidden rounded-xl border border-border/70 bg-card shadow-lg ring-1 shadow-primary/[0.04] ring-foreground/[0.02]">
+                            <div className="relative overflow-hidden border-b bg-gradient-to-br from-primary/[0.12] via-primary/[0.04] to-transparent px-4 py-4">
+                                <div className="pointer-events-none absolute -top-10 right-0 size-28 rounded-full bg-primary/10 blur-3xl" />
+                                <div className="relative flex items-center gap-2.5">
+                                    <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/15">
+                                        <Eye className="size-4" />
+                                    </span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[10px] font-semibold tracking-[0.14em] text-primary uppercase">
+                                            Customer relationship
+                                        </p>
+                                        <h2 className="text-sm font-semibold">
+                                            Introducer preview
+                                        </h2>
+                                    </div>
+                                    <span className="rounded-full border border-primary/15 bg-background/80 px-2 py-1 text-[10px] font-semibold text-primary">
+                                        LIVE
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-3 p-3">
+                                <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+                                    <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        Introduced customer
+                                    </p>
+                                    <div className="mt-2 flex items-center gap-3">
+                                        <CustomerAvatar customer={customer} />
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-semibold break-words">
+                                                {customer.name}
+                                            </p>
+                                            <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                                {customer.customer_no ||
+                                                    'No customer number'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-center rounded-xl border border-primary/15 bg-primary/[0.06] px-3 py-2.5 text-xs font-medium text-primary">
+                                    <GitBranch className="mr-2 size-3.5 shrink-0" />
+                                    {relationshipTypes.find(
+                                        (item) =>
+                                            item.value ===
+                                            data.relationship_type,
+                                    )?.label || 'Relationship not selected'}
+                                </div>
+
+                                <div className="rounded-xl bg-gradient-to-br from-primary/[0.08] to-muted/30 p-3.5 ring-1 ring-primary/10">
+                                    <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                        Introducer
+                                    </p>
+                                    {selectedIntroducer ? (
+                                        <div className="mt-2 flex items-center gap-3">
+                                            <CustomerAvatar
+                                                customer={selectedIntroducer}
+                                            />
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold break-words">
+                                                    {selectedIntroducer.name}
+                                                </p>
+                                                <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                                    {selectedIntroducer.customer_no ||
+                                                        'No customer number'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <p className="mt-2 text-xs text-muted-foreground">
+                                            Select a customer to preview the
+                                            introducer.
+                                        </p>
+                                    )}
+                                </div>
+
+                                {selectedIntroducer?.primary_phone && (
+                                    <div className="rounded-xl border border-border/60 px-3 py-2.5">
+                                        <p className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            Introducer phone
+                                        </p>
+                                        <p className="mt-1 text-xs font-medium">
+                                            {selectedIntroducer.primary_phone}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+                    </aside>
 
                     {/* Form actions */}
                     <div
                         data-slot="page-sticky-action-bar"
-                        className="sticky bottom-0 z-10 -mx-1 flex flex-col-reverse gap-2 border-t border-border bg-background/95 px-1 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex-row sm:items-center sm:justify-between"
+                        className="sticky bottom-0 z-10 -mx-1 flex flex-col-reverse gap-2 border-t border-border bg-background/95 px-1 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:flex-row sm:items-center sm:justify-between xl:col-span-2"
                     >
                         <p className="hidden text-xs text-muted-foreground md:block">
                             Review the introducer and relationship before
