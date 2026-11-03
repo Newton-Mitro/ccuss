@@ -110,11 +110,11 @@ export default function Form() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={isDeposit ? 'Cash Deposit' : 'Cash Withdrawal'} />
 
-            <div className="w-full max-w-none space-y-4 pb-6 text-foreground">
-                <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex min-w-0 items-center gap-3">
+            <div className="w-full max-w-none space-y-3 pb-6 text-foreground">
+                <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 items-center gap-2.5">
                         <div
-                            className={`flex size-10 shrink-0 items-center justify-center rounded-xl border ${
+                            className={`flex size-9 shrink-0 items-center justify-center rounded-xl border ${
                                 isDeposit
                                     ? 'border-emerald-500/20 bg-muted/40 text-emerald-700 dark:text-emerald-300'
                                     : 'border-orange-500/15 bg-orange-500/[0.08] text-orange-700 dark:text-orange-300'
@@ -147,12 +147,12 @@ export default function Form() {
 
                 <form
                     onSubmit={submit}
-                    className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_300px]"
+                    className="grid min-w-0 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_300px]"
                 >
                     <div className="relative min-w-0 overflow-hidden rounded-xl border border-border/70 bg-card shadow-sm shadow-foreground/[0.02]">
                         {/* Teller Session */}
-                        <div className="border-b bg-gradient-to-r from-muted/40 to-transparent px-4 py-3.5">
-                            <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+                        <div className="border-b bg-gradient-to-r from-muted/40 to-transparent px-4 py-3">
+                            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                                 <div className="flex items-center gap-2.5">
                                     <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/10">
                                         <CalendarDays className="size-4" />
@@ -205,18 +205,18 @@ export default function Form() {
                                 ]}
                             />
 
-                            <div className="mt-2.5 overflow-hidden rounded-lg border border-border/70 bg-background/80">
+                            <div className="mt-2 overflow-hidden rounded-lg border border-border/70 bg-background/80">
                                 <div className="border-b px-3 py-2 text-xs font-medium">
                                     {selectedTellerSession
                                         ? `${selectedTellerSession.teller?.name ?? 'Teller'}${selectedTellerSession.teller?.code ? ` (${selectedTellerSession.teller.code})` : ''}`
                                         : 'Teller cash balance'}
                                 </div>
                                 <div className="grid grid-cols-2">
-                                    <div className="px-3 py-2">
+                                    <div className="px-3 py-1.5">
                                         <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
                                             Opening cash
                                         </div>
-                                        <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                        <div className="text-sm font-semibold tabular-nums">
                                             BDT{' '}
                                             {formatBDTCurrency(
                                                 selectedTellerSession?.opening_cash ??
@@ -225,11 +225,11 @@ export default function Form() {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="border-l px-3 py-2">
+                                    <div className="border-l px-3 py-1.5">
                                         <div className="text-[9px] font-medium tracking-wide text-muted-foreground uppercase">
                                             Current cash
                                         </div>
-                                        <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                                        <div className="text-sm font-semibold tabular-nums">
                                             BDT{' '}
                                             {formatBDTCurrency(
                                                 selectedTellerSession?.expected_cash ??
@@ -259,10 +259,10 @@ export default function Form() {
                         </div>
 
                         {/* Transaction Details */}
-                        <div className="space-y-4 p-4 sm:p-5">
+                        <div className="space-y-3 p-3 sm:p-4">
                             {isDeposit ? (
-                                <section className="space-y-3">
-                                    <div className="flex flex-col gap-3 rounded-xl border border-border/80 bg-muted/20 p-3 sm:flex-row sm:items-center sm:justify-between">
+                                <section className="space-y-2">
+                                    <div className="flex flex-col gap-2 rounded-xl border border-border/80 bg-muted/20 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
                                         <div className="flex min-w-0 items-center gap-2.5">
                                             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-500/20 dark:text-emerald-300">
                                                 <WalletCards className="size-4" />
@@ -299,13 +299,13 @@ export default function Form() {
                                         </Button>
                                     </div>
 
-                                    <div className="space-y-2.5">
+                                    <div className="space-y-2">
                                         {depositLines.map((line, index) => (
                                             <div
                                                 key={index}
-                                                className="relative grid gap-2.5 rounded-xl border border-border/70 bg-background p-3 shadow-sm transition-shadow hover:shadow-md sm:grid-cols-[minmax(0,1fr)_minmax(140px,0.3fr)_2rem] sm:items-end"
+                                                className="relative grid gap-2 rounded-xl border border-border/70 bg-background p-2.5 shadow-sm transition-shadow hover:shadow-md sm:grid-cols-[minmax(0,1fr)_minmax(140px,0.3fr)_2rem] sm:items-end"
                                             >
-                                                <div className="min-w-0 space-y-1.5">
+                                                <div className="min-w-0 space-y-1">
                                                     <div className="flex items-center gap-2">
                                                         <span className="flex size-5 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
                                                             {index + 1}
@@ -373,7 +373,7 @@ export default function Form() {
                                                     />
                                                 </div>
 
-                                                <div className="space-y-1.5">
+                                                <div className="space-y-1">
                                                     <label className="flex items-center gap-1.5 text-xs font-medium">
                                                         <CircleDollarSign className="size-3.5 text-muted-foreground" />
                                                         Deposit amount
@@ -465,7 +465,7 @@ export default function Form() {
                                     )}
 
                                     {/* Total */}
-                                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/80 bg-emerald-500/[0.04] px-3.5 py-3">
+                                    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/80 bg-emerald-500/[0.04] px-3 py-2.5">
                                         <div className="flex items-center gap-2.5">
                                             <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
                                                 <ArrowDownToLine className="size-3.5" />
@@ -494,7 +494,7 @@ export default function Form() {
                                 </section>
                             ) : (
                                 <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(240px,0.7fr)]">
-                                    <div className="space-y-3 rounded-xl border bg-background p-4 sm:p-5">
+                                    <div className="space-y-3 rounded-xl border bg-background p-3 sm:p-4">
                                         <div className="flex items-start gap-3">
                                             <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                                 <UserRound className="size-4" />
@@ -626,7 +626,7 @@ export default function Form() {
                             )}
 
                             {/* Reference + Note */}
-                            <div className="grid gap-3 border-t pt-4 sm:grid-cols-2">
+                            <div className="grid gap-2 border-t pt-3 sm:grid-cols-2">
                                 <div className="space-y-1.5">
                                     <label
                                         htmlFor="reference"
@@ -692,7 +692,7 @@ export default function Form() {
                         </div>
 
                         {/* Footer */}
-                        <div className="flex flex-col gap-3 rounded-b-xl border-t bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                        <div className="flex flex-col gap-2 rounded-b-xl border-t bg-muted/20 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                             <p className="flex items-center gap-2 text-xs text-muted-foreground">
                                 Transaction will be created as
                                 <StatusBadge tone="warning">

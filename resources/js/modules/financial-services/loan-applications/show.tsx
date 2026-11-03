@@ -177,6 +177,7 @@ export default function LoanApplicationShow() {
         disbursed_at: getLocalDate(),
         reference: '',
         note: '',
+        return_to_loan_application: true,
     });
 
     const breadcrumbs: BreadcrumbItem[] = [

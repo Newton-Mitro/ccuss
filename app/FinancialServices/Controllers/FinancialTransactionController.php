@@ -95,11 +95,29 @@ class FinancialTransactionController extends Controller
 
     public function storeLoanDisbursement(StoreLoanDisbursementRequest $request)
     {
+        $data = $request->validated();
+        $returnToLoanApplication = $data['return_to_loan_application'] ?? false;
+        unset($data['return_to_loan_application']);
+
         $transaction = $this->transactionService->createLoanDisbursement(
-            $request->validated(),
+            $data,
             $this->organizationId($request),
             $request->user()->id,
         );
+
+        if ($returnToLoanApplication) {
+            $loanApplication = LoanAccount::query()
+                ->whereHas('financialAccount', fn ($query) => $query
+                    ->where('organization_id', $this->organizationId($request)))
+                ->with('application')
+                ->findOrFail($data['loan_account_id'])
+                ->application;
+
+            if ($loanApplication) {
+                return redirect()->route('loan-applications.show', $loanApplication)
+                    ->with('success', 'Loan disbursement created successfully.');
+            }
+        }
 
         return redirect()->route('financial-transactions.show', $transaction)
             ->with('success', 'Loan disbursement created successfully.');

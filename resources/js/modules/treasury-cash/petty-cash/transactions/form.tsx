@@ -71,7 +71,7 @@ export default function Form() {
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title={pageTitle} />
 
-            <div className="w-full max-w-7xl space-y-5 pb-28 text-foreground">
+            <div className="w-full max-w-7xl space-y-3 pb-24 text-foreground">
                 <HeadingSmall
                     title={pageTitle}
                     description={
@@ -83,9 +83,9 @@ export default function Form() {
 
                 {/* Transaction overview */}
                 <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                    <div className="flex items-start gap-3 p-4 sm:p-5">
+                    <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
                         <div
-                            className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
+                            className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${
                                 isFunding
                                     ? 'bg-primary/10 text-primary'
                                     : 'bg-muted text-foreground'
@@ -120,15 +120,15 @@ export default function Form() {
                         </div>
                     </div>
 
-                    <div className="grid gap-3 border-t bg-muted/20 p-4 sm:grid-cols-2 sm:p-5">
-                        <div className="flex items-start gap-3 rounded-lg border bg-card p-3">
-                            <CalendarDays className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    <div className="grid gap-2 border-t bg-muted/20 px-4 py-2 sm:grid-cols-2 sm:px-5">
+                        <div className="flex items-center gap-2.5 rounded-lg border bg-card px-3 py-2">
+                            <CalendarDays className="size-4 shrink-0 text-muted-foreground" />
 
                             <div className="min-w-0">
                                 <p className="text-xs text-muted-foreground">
                                     Business date
                                 </p>
-                                <p className="mt-1 text-sm font-semibold">
+                                <p className="text-sm font-semibold">
                                     {branch_day
                                         ? formatDate(branch_day.business_date)
                                         : 'Unavailable'}
@@ -136,11 +136,11 @@ export default function Form() {
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-3 rounded-lg border bg-card p-3">
+                        <div className="flex items-center gap-2.5 rounded-lg border bg-card px-3 py-2">
                             {branch_day ? (
-                                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
+                                <CheckCircle2 className="size-4 shrink-0 text-primary" />
                             ) : (
-                                <CircleAlert className="mt-0.5 size-4 shrink-0 text-destructive" />
+                                <CircleAlert className="size-4 shrink-0 text-destructive" />
                             )}
 
                             <div className="min-w-0">
@@ -168,12 +168,12 @@ export default function Form() {
                 {/* Transaction form */}
                 <form
                     onSubmit={submit}
-                    className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_320px]"
+                    className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px]"
                 >
-                    <div className="min-w-0 space-y-4">
+                    <div className="min-w-0 space-y-3">
                         <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                            <div className="flex items-start gap-3 border-b px-4 py-4 sm:px-5">
-                                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <div className="flex items-center gap-3 border-b px-4 py-3 sm:px-5">
+                                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                                     <FileText className="size-4.5" />
                                 </div>
 
@@ -188,9 +188,9 @@ export default function Form() {
                                 </div>
                             </div>
 
-                            <div className="space-y-5 p-4 sm:p-5">
+                            <div className="grid gap-3 p-3 sm:grid-cols-2 sm:p-4">
                                 {/* Fund selection */}
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                     <label
                                         htmlFor="petty_cash_fund_id"
                                         className="text-sm font-medium"
@@ -234,7 +234,7 @@ export default function Form() {
                                 </div>
 
                                 {/* Amount */}
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                     <label
                                         htmlFor="amount"
                                         className="text-sm font-medium"
@@ -269,7 +269,7 @@ export default function Form() {
                                             aria-invalid={Boolean(
                                                 errors.amount,
                                             )}
-                                            className="h-11 pl-8 font-medium tabular-nums"
+                                            className="h-10 pl-8 font-medium tabular-nums"
                                         />
                                     </div>
 
@@ -287,7 +287,7 @@ export default function Form() {
 
                                 {/* Payee: expenses only */}
                                 {!isFunding && (
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5">
                                         <label
                                             htmlFor="payee"
                                             className="text-sm font-medium"
@@ -322,7 +322,7 @@ export default function Form() {
                                 )}
 
                                 {/* Description */}
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                     <label
                                         htmlFor="description"
                                         className="text-sm font-medium"
@@ -369,10 +369,10 @@ export default function Form() {
                         </section>
 
                         {/* Submission actions */}
-                        <div className="fixed inset-x-4 bottom-0 z-30 border-t bg-background/95 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)] md:w-[calc(100%-var(--app-sidebar-offset,0px)-3.25rem)]">
+                        <div className="fixed inset-x-4 bottom-0 z-30 border-t bg-background/95 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:inset-x-auto md:left-[calc(var(--app-sidebar-offset,0px)+1.5rem)] md:w-[calc(100%-var(--app-sidebar-offset,0px)-3.25rem)]">
                             <div
                                 data-slot="form-actions"
-                                className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                                className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                             >
                                 <div className="flex min-w-0 items-start gap-2">
                                     <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
@@ -386,7 +386,7 @@ export default function Form() {
                                 <Button
                                     type="submit"
                                     disabled={!canSubmit}
-                                    className="h-11 w-full shrink-0 gap-2 rounded-lg px-5 font-semibold sm:w-auto sm:min-w-56"
+                                    className="h-10 w-full shrink-0 gap-2 rounded-lg px-5 font-semibold sm:w-auto sm:min-w-56"
                                 >
                                     {processing ? (
                                         <>

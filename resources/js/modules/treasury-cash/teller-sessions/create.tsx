@@ -113,13 +113,16 @@ export default function CreateTellerSessionPage() {
                         </div>
                     </div>
 
-                    <Link
-                        href={route('teller-sessions.index')}
-                        className="inline-flex h-9 items-center justify-center gap-2 self-start rounded-lg border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted sm:self-center"
+                    <Button
+                        asChild
+                        variant="outline"
+                        className="self-start sm:self-center"
                     >
-                        <ArrowLeft className="size-4" />
-                        All sessions
-                    </Link>
+                        <Link href={route('teller-sessions.index')}>
+                            <ArrowLeft className="size-4" />
+                            All sessions
+                        </Link>
+                    </Button>
                 </div>
 
                 {/* Prerequisite alerts */}

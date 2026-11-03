@@ -18,6 +18,7 @@ class StoreLoanDisbursementRequest extends FormRequest
 
         return [
             'idempotency_key' => ['nullable', 'uuid'],
+            'return_to_loan_application' => ['sometimes', 'boolean'],
             'loan_account_id' => [
                 'required',
                 'integer',
