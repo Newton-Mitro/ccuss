@@ -748,6 +748,7 @@ export interface FinancialWorkflowAccount {
 
 export interface FinancialWorkflowLoanAccount {
     id: number;
+    financial_account_id: number;
     loan_no: string;
     principal_amount: string | number;
     disbursed_amount: string | number;

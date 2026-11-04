@@ -20,7 +20,7 @@ export function FinancialAccountSearchInput({
 }: FinancialAccountSearchInputProps) {
     const [query, setQuery] = useState(() =>
         initialAccount
-            ? `${initialAccount.account_no} - ${initialAccount.holder?.name ?? initialAccount.name ?? ''}`
+            ? `${initialAccount.loan_no ?? initialAccount.account_no} - ${initialAccount.holder?.name ?? initialAccount.name ?? ''}`
             : '',
     );
     const [accounts, setAccounts] = useState<FinancialAccountSearchResult[]>(
@@ -34,7 +34,7 @@ export function FinancialAccountSearchInput({
     useEffect(() => {
         if (initialAccount) {
             setQuery(
-                `${initialAccount.account_no} - ${initialAccount.holder?.name ?? initialAccount.name ?? ''}`,
+                `${initialAccount.loan_no ?? initialAccount.account_no} - ${initialAccount.holder?.name ?? initialAccount.name ?? ''}`,
             );
         }
     }, [initialAccount]);
@@ -141,7 +141,7 @@ export function FinancialAccountSearchInput({
                 </div>
             </div>
             {showResults && (
-                <div className="absolute z-30 mt-1 max-h-80 w-full overflow-auto rounded-md border bg-background shadow-lg">
+                <div className="absolute z-50 mt-1 max-h-80 w-full overflow-auto rounded-md border bg-background shadow-lg">
                     {searchError ? (
                         <div className="px-3 py-2 text-sm text-destructive">
                             Unable to search accounts. Please try again.
@@ -164,7 +164,7 @@ export function FinancialAccountSearchInput({
                                             onClick={() => {
                                                 onSelect(account);
                                                 setQuery(
-                                                    `${account.account_no} - ${account.holder?.name ?? account.name ?? ''}`,
+                                                    `${account.loan_no ?? account.account_no} - ${account.holder?.name ?? account.name ?? ''}`,
                                                 );
                                                 setShowResults(false);
                                             }}
@@ -175,7 +175,8 @@ export function FinancialAccountSearchInput({
                                                 <div className="min-w-0 flex-1">
                                                     <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
                                                         <span className="font-medium">
-                                                            {account.account_no}
+                                                            {account.loan_no ??
+                                                                account.account_no}
                                                         </span>
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-xs text-muted-foreground">

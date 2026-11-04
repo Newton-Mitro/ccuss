@@ -455,12 +455,55 @@ it('searches customer deposit accounts by account and holder details', function 
         'account_no' => 'LOAN-ACCOUNT-SEARCH-001',
         'name' => 'Loan Account Search',
     ]);
+    LoanAccount::query()->create([
+        'financial_account_id' => $loanAccount->id,
+        'loan_no' => 'LOAN-SEARCH-NO-001',
+        'principal_amount' => 1000,
+        'disbursed_amount' => 1000,
+        'contractual_rate' => 10,
+        'interest_calculation' => 'SIMPLE',
+        'term_value' => 12,
+        'status' => 'ACTIVE',
+    ]);
+    $approvedLoanFinancialAccount = FinancialAccount::factory()->active(0)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'holder_type' => Customer::class,
+        'holder_id' => $loanCustomer->id,
+        'account_type' => 'LOAN',
+        'account_no' => 'LOAN-DISBURSEMENT-SEARCH-001',
+        'name' => 'Approved Loan Search',
+    ]);
+    LoanAccount::query()->create([
+        'financial_account_id' => $approvedLoanFinancialAccount->id,
+        'loan_no' => 'LOAN-DISBURSEMENT-NO-001',
+        'principal_amount' => 1000,
+        'disbursed_amount' => 0,
+        'contractual_rate' => 10,
+        'interest_calculation' => 'SIMPLE',
+        'term_value' => 12,
+        'status' => 'APPROVED',
+    ]);
     $closedAccount = FinancialAccount::factory()->active(0)->create([
         'organization_id' => $fixture['organization']->id,
         'branch_id' => $fixture['branch']->id,
         'account_no' => 'SAV-CLOSED-STATEMENT-001',
         'name' => 'Closed Statement Account',
         'status' => 'CLOSED',
+    ]);
+    $cashPayoutAccount = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'account_type' => 'CASH',
+        'account_no' => 'CASH-PAYOUT-SEARCH-001',
+        'name' => 'Payout Search Cash',
+    ]);
+    $bankPayoutAccount = FinancialAccount::factory()->active(500)->create([
+        'organization_id' => $fixture['organization']->id,
+        'branch_id' => $fixture['branch']->id,
+        'account_type' => 'BANK',
+        'account_no' => 'BANK-PAYOUT-SEARCH-001',
+        'name' => 'Payout Search Bank',
     ]);
 
     foreach ([
@@ -482,6 +525,17 @@ it('searches customer deposit accounts by account and holder details', function 
     $this->actingAs($fixture['user'])
         ->withSession(['active_organization_id' => $fixture['organization']->id])
         ->getJson(route('teller-transactions.deposit.accounts.search', [
+            'search' => 'PAYOUT-SEARCH-001',
+            'scope' => 'payout',
+        ]))
+        ->assertSuccessful()
+        ->assertJsonFragment(['id' => $cashPayoutAccount->id])
+        ->assertJsonFragment(['id' => $bankPayoutAccount->id])
+        ->assertJsonCount(2);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->getJson(route('teller-transactions.deposit.accounts.search', [
             'search' => $loanCustomer->name,
             'scope' => 'deposit',
         ]))
@@ -497,6 +551,32 @@ it('searches customer deposit accounts by account and holder details', function 
         ]))
         ->assertSuccessful()
         ->assertJsonFragment(['id' => $loanAccount->id])
+        ->assertJsonCount(2);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->getJson(route('teller-transactions.deposit.accounts.search', [
+            'search' => 'LOAN-SEARCH-NO-001',
+            'scope' => 'loan_repayment',
+        ]))
+        ->assertSuccessful()
+        ->assertJsonFragment([
+            'id' => $loanAccount->id,
+            'loan_no' => 'LOAN-SEARCH-NO-001',
+        ])
+        ->assertJsonCount(1);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->getJson(route('teller-transactions.deposit.accounts.search', [
+            'search' => 'LOAN-DISBURSEMENT-NO-001',
+            'scope' => 'loan_disbursement',
+        ]))
+        ->assertSuccessful()
+        ->assertJsonFragment([
+            'id' => $approvedLoanFinancialAccount->id,
+            'loan_no' => 'LOAN-DISBURSEMENT-NO-001',
+        ])
         ->assertJsonCount(1);
 
     $this->actingAs($fixture['user'])

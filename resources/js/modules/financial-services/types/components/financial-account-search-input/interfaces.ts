@@ -4,6 +4,7 @@ import type { FinancialAccountSearchScope } from '@/modules/financial-services/t
 export interface FinancialAccountSearchResult {
     id: number;
     account_no: string;
+    loan_no?: string | null;
     name: string | null;
     account_type: string;
     status: string;

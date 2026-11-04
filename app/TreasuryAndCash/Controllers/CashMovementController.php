@@ -408,6 +408,9 @@ class CashMovementController extends Controller
         $accountTypes = [
             'deposit' => ['SAVINGS', 'SHARE', 'FIXED_DEPOSIT', 'RECURRING_DEPOSIT'],
             'loan' => ['LOAN'],
+            'loan_disbursement' => ['LOAN'],
+            'loan_repayment' => ['LOAN'],
+            'payout' => ['CASH', 'BANK'],
             'all' => null,
         ];
 
@@ -420,6 +423,15 @@ class CashMovementController extends Controller
             ->where(function ($query) use ($scope, $accountTypes): void {
                 if (isset($accountTypes[$scope]) && $accountTypes[$scope] !== null) {
                     $query->whereIn('account_type', $accountTypes[$scope]);
+                    if (in_array($scope, ['loan_disbursement', 'loan_repayment'], true)) {
+                        $query->whereHas('loanAccount', fn ($loan) => $loan
+                            ->whereIn(
+                                'status',
+                                $scope === 'loan_disbursement'
+                                    ? ['APPROVED', 'PARTIALLY_DISBURSED']
+                                    : ['ACTIVE', 'PARTIALLY_DISBURSED'],
+                            ));
+                    }
                 } elseif (in_array($scope, ['teller', 'vault', 'petty_cash'], true)) {
                     $query->whereExists(function ($locationQuery) use ($scope): void {
                         $locationQuery
@@ -437,7 +449,7 @@ class CashMovementController extends Controller
                     });
                 }
             })
-            ->where(function ($query) use ($pattern): void {
+            ->where(function ($query) use ($pattern, $scope): void {
                 $query->where('account_no', 'like', $pattern)
                     ->orWhere('name', 'like', $pattern)
                     ->orWhereHasMorph('holder', [Customer::class], fn ($customer) => $customer
@@ -445,9 +457,18 @@ class CashMovementController extends Controller
                         ->orWhere('customer_no', 'like', $pattern))
                     ->orWhereHas('holders', fn ($holder) => $holder
                         ->where('name', 'like', $pattern)
-                        ->orWhere('customer_no', 'like', $pattern));
+                        ->orWhere('customer_no', 'like', $pattern))
+                    ->when(in_array($scope, ['loan_disbursement', 'loan_repayment'], true), fn ($query) => $query
+                        ->orWhereHas('loanAccount', fn ($loan) => $loan
+                            ->where('loan_no', 'like', $pattern)));
             })
-            ->with(['holder', 'holders'])
+            ->with([
+                'holder',
+                'holders',
+                ...(in_array($scope, ['loan_disbursement', 'loan_repayment'], true)
+                    ? ['loanAccount']
+                    : []),
+            ])
             ->orderBy('account_no')
             ->limit(12);
 
@@ -974,6 +995,9 @@ class CashMovementController extends Controller
         return [
             'id' => $account->id,
             'account_no' => $account->account_no,
+            'loan_no' => $account->relationLoaded('loanAccount')
+                ? $account->loanAccount?->loan_no
+                : null,
             'name' => $account->name,
             'account_type' => $account->account_type,
             'status' => $account->status,

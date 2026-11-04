@@ -232,6 +232,8 @@ export default function TransactionWorkflow() {
         useState<FinancialAccountSearchResult | null>(null);
     const [selectedDestination, setSelectedDestination] =
         useState<FinancialAccountSearchResult | null>(null);
+    const [selectedPayoutSearchAccount, setSelectedPayoutSearchAccount] =
+        useState<FinancialAccountSearchResult | null>(null);
     const {
         workflow,
         accounts = [],
@@ -291,9 +293,11 @@ export default function TransactionWorkflow() {
     const selectedLoan = loan_accounts.find(
         (loan) => String(loan.id) === data.loan_account_id,
     );
-    const selectedPayoutAccount = payout_accounts.find(
-        (account) => String(account.id) === data.payout_account_id,
-    );
+    const selectedPayoutAccount =
+        selectedPayoutSearchAccount ??
+        payout_accounts.find(
+            (account) => String(account.id) === data.payout_account_id,
+        );
     const workflowError = isDisbursement
         ? errors.disbursement
         : isRepayment
@@ -817,7 +821,7 @@ export default function TransactionWorkflow() {
                                 )}
 
                                 {/* Loan selection */}
-                                <section className="overflow-hidden rounded-xl border bg-card">
+                                <section className="relative z-20 overflow-visible rounded-xl border bg-card">
                                     <div className="border-b bg-muted/20 px-4 py-4 sm:px-5">
                                         <SectionHeading
                                             icon={Landmark}
@@ -832,100 +836,131 @@ export default function TransactionWorkflow() {
                                             required
                                             error={errors.loan_account_id}
                                         >
-                                            <Select
-                                                value={data.loan_account_id}
-                                                onChange={(value) => {
-                                                    const loan =
-                                                        loan_accounts.find(
-                                                            (item) =>
-                                                                String(
-                                                                    item.id,
-                                                                ) === value,
-                                                        );
-                                                    if (isRepayment && loan) {
-                                                        setData({
-                                                            ...data,
-                                                            loan_account_id:
-                                                                value,
-                                                            ...repaymentFormDefaults(
-                                                                loan,
-                                                                data.repayment_date,
-                                                            ),
-                                                        });
-                                                    } else if (
-                                                        isRepayment &&
-                                                        !loan
-                                                    ) {
-                                                        setData({
-                                                            ...data,
-                                                            loan_account_id:
-                                                                value,
-                                                            principal_amount:
-                                                                '0.00',
-                                                            interest_amount:
-                                                                '0.00',
-                                                            fine_amount:
-                                                                '0.00',
-                                                            protection_fee_amount:
-                                                                '0.00',
-                                                            protection_renewal_fee:
-                                                                '0.00',
-                                                            amount: '0.00',
-                                                        });
-                                                    } else {
+                                            {isLoanWorkflow ? (
+                                                <FinancialAccountSearchInput
+                                                    scope={
+                                                        isRepayment
+                                                            ? 'loan_repayment'
+                                                            : 'loan_disbursement'
+                                                    }
+                                                    placeholder={
+                                                        isRepayment
+                                                            ? 'Search loan number or borrower'
+                                                            : 'Search approved loan number or borrower'
+                                                    }
+                                                    onSelect={(account) => {
+                                                        const loan =
+                                                            loan_accounts.find(
+                                                                (item) =>
+                                                                    item.financial_account_id ===
+                                                                    account.id,
+                                                            );
+                                                        if (!loan) return;
+
+                                                        if (isRepayment) {
+                                                            setData({
+                                                                ...data,
+                                                                loan_account_id:
+                                                                    String(
+                                                                        loan.id,
+                                                                    ),
+                                                                ...repaymentFormDefaults(
+                                                                    loan,
+                                                                    data.repayment_date,
+                                                                ),
+                                                            });
+                                                        } else {
+                                                            setData(
+                                                                'loan_account_id',
+                                                                String(loan.id),
+                                                            );
+                                                        }
+                                                    }}
+                                                    clearSelectedAccount={() => {
+                                                        if (isRepayment) {
+                                                            setData({
+                                                                ...data,
+                                                                loan_account_id:
+                                                                    '',
+                                                                principal_amount:
+                                                                    '0.00',
+                                                                interest_amount:
+                                                                    '0.00',
+                                                                fine_amount:
+                                                                    '0.00',
+                                                                protection_fee_amount:
+                                                                    '0.00',
+                                                                protection_renewal_fee:
+                                                                    '0.00',
+                                                                amount: '0.00',
+                                                            });
+                                                        } else {
+                                                            setData(
+                                                                'loan_account_id',
+                                                                '',
+                                                            );
+                                                        }
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Select
+                                                    value={data.loan_account_id}
+                                                    onChange={(value) =>
                                                         setData(
                                                             'loan_account_id',
                                                             value,
-                                                        );
+                                                        )
                                                     }
-                                                }}
-                                                options={[
-                                                    {
-                                                        value: '',
-                                                        label: isDisbursement
-                                                            ? 'Select approved loan'
-                                                            : 'Select active loan',
-                                                    },
-                                                    ...loan_accounts.map(
-                                                        (loan) => ({
-                                                            value: String(
-                                                                loan.id,
-                                                            ),
-                                                            label: `${loan.loan_no} - ${loan.financial_account?.customer?.name ?? 'Customer'}`,
-                                                        }),
-                                                    ),
-                                                ]}
-                                            />
+                                                    options={[
+                                                        {
+                                                            value: '',
+                                                            label: 'Select approved loan',
+                                                        },
+                                                        ...loan_accounts.map(
+                                                            (loan) => ({
+                                                                value: String(
+                                                                    loan.id,
+                                                                ),
+                                                                label: `${loan.loan_no} - ${loan.financial_account?.customer?.name ?? 'Customer'}`,
+                                                            }),
+                                                        ),
+                                                    ]}
+                                                />
+                                            )}
                                         </Field>
 
                                         <Field
                                             label="Payout account"
                                             required
                                             error={errors.payout_account_id}
-                                            hint="Select the cash or bank account for this transaction."
+                                            hint="Choose the cash or bank account used for this transaction."
                                         >
-                                            <Select
-                                                value={data.payout_account_id}
-                                                onChange={(value) =>
+                                            <FinancialAccountSearchInput
+                                                scope="payout"
+                                                placeholder="Search cash or bank account"
+                                                onSelect={(account) => {
                                                     setData(
                                                         'payout_account_id',
-                                                        value,
-                                                    )
+                                                        String(account.id),
+                                                    );
+                                                    setSelectedPayoutSearchAccount(
+                                                        account,
+                                                    );
+                                                }}
+                                                clearSelectedAccount={() => {
+                                                    setData(
+                                                        'payout_account_id',
+                                                        '',
+                                                    );
+                                                    setSelectedPayoutSearchAccount(
+                                                        null,
+                                                    );
+                                                }}
+                                            />
+                                            <AccountBalanceSummary
+                                                account={
+                                                    selectedPayoutSearchAccount
                                                 }
-                                                options={[
-                                                    {
-                                                        value: '',
-                                                        label: 'Select cash or bank account',
-                                                    },
-                                                    ...payout_accounts.map(
-                                                        (account) => ({
-                                                            value: String(
-                                                                account.id,
-                                                            ),
-                                                            label: `${account.account_no} - ${account.name ?? account.account_type}`,
-                                                        }),
-                                                    ),
-                                                ]}
                                             />
                                         </Field>
 

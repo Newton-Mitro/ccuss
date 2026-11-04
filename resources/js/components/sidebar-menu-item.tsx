@@ -14,9 +14,22 @@ interface Props {
     menuAction?: 'expand-all' | 'collapse-all' | null;
 }
 
+function matchesItemPath(
+    matchPath: string | undefined,
+    matchExact: boolean | undefined,
+    url: string,
+): boolean {
+    if (!matchPath) return false;
+    if (!matchExact) return url.includes(matchPath);
+
+    const currentPath = url.split('?')[0].replace(/\/+$/, '');
+    const normalizedMatchPath = `/${matchPath.replace(/^\/+|\/+$/g, '')}`;
+    return currentPath === normalizedMatchPath;
+}
+
 /** Recursively check if item or its children are active */
 function isItemActive(item: SidebarItem, url: string): boolean {
-    if (item.match_path && url.includes(item.match_path)) return true;
+    if (matchesItemPath(item.match_path, item.match_exact, url)) return true;
     return !!item.children?.some((c) => isItemActive(c, url));
 }
 
@@ -30,8 +43,8 @@ export function SidebarMenuItem({
     const hasChildren = !!item.children?.length;
 
     const isSelfActive = useMemo(
-        () => !!item.match_path && url.includes(item.match_path),
-        [url, item.match_path],
+        () => matchesItemPath(item.match_path, item.match_exact, url),
+        [url, item.match_path, item.match_exact],
     );
 
     const hasActiveChild = useMemo(

@@ -51,6 +51,7 @@ export interface SidebarItem {
     icon?: React.ReactNode;
     path?: string;
     match_path?: string;
+    match_exact?: boolean;
     children_expanded?: boolean;
     permission?: string[];
     description?: string;

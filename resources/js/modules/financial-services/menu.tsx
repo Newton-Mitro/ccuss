@@ -255,6 +255,7 @@ export const financialServices: SidebarItem[] = [
                 icon: <i className="fa-solid fa-list" />,
                 path: '/financial-transactions',
                 match_path: 'financial-transactions',
+                match_exact: true,
                 permission: ['financial.transactions.view'],
             },
 
