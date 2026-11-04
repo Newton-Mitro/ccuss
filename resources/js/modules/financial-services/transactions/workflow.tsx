@@ -27,6 +27,75 @@ import {
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { route } from 'ziggy-js';
 
+type RepaymentAmountField =
+    | 'principal_amount'
+    | 'interest_amount'
+    | 'fine_amount'
+    | 'protection_fee_amount'
+    | 'protection_renewal_fee';
+
+type RepaymentLoan = NonNullable<
+    FinancialTransactionWorkflowPageProps['loan_accounts']
+>[number];
+
+function getRepaymentDue(loan: RepaymentLoan, repaymentDate: string) {
+    const due = (loan.schedules ?? [])
+        .filter(
+            (schedule) =>
+                schedule.due_date <= repaymentDate &&
+                !['PAID', 'WAIVED'].includes(schedule.status),
+        )
+        .flatMap((schedule) => schedule.components ?? [])
+        .filter((component) => !['PAID', 'WAIVED'].includes(component.status))
+        .reduce(
+            (totals, component) => {
+                const outstanding = Math.max(
+                    0,
+                    Number(component.amount_due) -
+                        Number(component.amount_paid),
+                );
+                if (component.type === 'PRINCIPAL') {
+                    totals.principal += outstanding;
+                } else if (component.type === 'INTEREST') {
+                    totals.interest += outstanding;
+                } else if (component.type === 'PROTECTION_FEE') {
+                    totals.protection += outstanding;
+                } else {
+                    totals.fine += outstanding;
+                }
+                return totals;
+            },
+            { principal: 0, interest: 0, protection: 0, fine: 0 },
+        );
+    const policy = loan.protection_policy;
+    const renewal =
+        policy?.status === 'ACTIVE' &&
+        policy.next_renewal_at &&
+        policy.next_renewal_at <= repaymentDate
+            ? Number(policy.renewal_fee)
+            : 0;
+
+    return { ...due, renewal };
+}
+
+function repaymentFormDefaults(loan: RepaymentLoan, repaymentDate: string) {
+    const due = getRepaymentDue(loan, repaymentDate);
+    const amounts = {
+        principal_amount: due.principal.toFixed(2),
+        interest_amount: due.interest.toFixed(2),
+        fine_amount: due.fine.toFixed(2),
+        protection_fee_amount: due.protection.toFixed(2),
+        protection_renewal_fee: due.renewal.toFixed(2),
+    };
+
+    return {
+        ...amounts,
+        amount: Object.values(amounts)
+            .reduce((sum, value) => sum + Number(value), 0)
+            .toFixed(2),
+    };
+}
+
 const details: Record<
     string,
     {
@@ -190,6 +259,11 @@ export default function TransactionWorkflow() {
         payout_account_id: '',
         disbursed_at: getLocalDate(),
         repayment_date: getLocalDate(),
+        principal_amount: '',
+        interest_amount: '',
+        fine_amount: '',
+        protection_fee_amount: '',
+        protection_renewal_fee: '',
         note: '',
     });
 
@@ -220,6 +294,81 @@ export default function TransactionWorkflow() {
     const selectedPayoutAccount = payout_accounts.find(
         (account) => String(account.id) === data.payout_account_id,
     );
+    const workflowError = isDisbursement
+        ? errors.disbursement
+        : isRepayment
+          ? errors.repayment
+          : undefined;
+    const repaymentDue = selectedLoan
+        ? getRepaymentDue(selectedLoan, data.repayment_date)
+        : null;
+    const totalRepaymentDue = repaymentDue
+        ? repaymentDue.principal +
+          repaymentDue.interest +
+          repaymentDue.protection +
+          repaymentDue.fine +
+          repaymentDue.renewal
+        : 0;
+    const repaymentAmountFields: Array<{
+        field: RepaymentAmountField;
+        label: string;
+        due: number;
+    }> = [
+        {
+            field: 'principal_amount',
+            label: 'Monthly principal repayment',
+            due: repaymentDue?.principal ?? 0,
+        },
+        {
+            field: 'interest_amount',
+            label: 'Interest',
+            due: repaymentDue?.interest ?? 0,
+        },
+        {
+            field: 'fine_amount',
+            label: 'Fine',
+            due: repaymentDue?.fine ?? 0,
+        },
+        {
+            field: 'protection_fee_amount',
+            label: 'Loan protection fee',
+            due: repaymentDue?.protection ?? 0,
+        },
+        {
+            field: 'protection_renewal_fee',
+            label: 'Loan protection renewal fee',
+            due: repaymentDue?.renewal ?? 0,
+        },
+    ];
+
+    const updateRepaymentAmount = (
+        field: RepaymentAmountField,
+        value: string,
+    ) => {
+        const amounts = {
+            principal_amount: data.principal_amount,
+            interest_amount: data.interest_amount,
+            fine_amount: data.fine_amount,
+            protection_fee_amount: data.protection_fee_amount,
+            protection_renewal_fee: data.protection_renewal_fee,
+            [field]: value,
+        };
+        const total = Object.values(amounts).reduce(
+            (sum, amount) => sum + (Number(amount) || 0),
+            0,
+        );
+
+        setData({ ...data, ...amounts, amount: total.toFixed(2) });
+    };
+
+    const fillScheduledRepayment = () => {
+        if (selectedLoan) {
+            setData({
+                ...data,
+                ...repaymentFormDefaults(selectedLoan, data.repayment_date),
+            });
+        }
+    };
 
     const remainingAmount = selectedLoan
         ? Math.max(
@@ -658,6 +807,15 @@ export default function TransactionWorkflow() {
                     ) : isLoanWorkflow ? (
                         <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
                             <div className="min-w-0 space-y-4">
+                                {workflowError && (
+                                    <div
+                                        role="alert"
+                                        className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+                                    >
+                                        {workflowError}
+                                    </div>
+                                )}
+
                                 {/* Loan selection */}
                                 <section className="overflow-hidden rounded-xl border bg-card">
                                     <div className="border-b bg-muted/20 px-4 py-4 sm:px-5">
@@ -676,12 +834,51 @@ export default function TransactionWorkflow() {
                                         >
                                             <Select
                                                 value={data.loan_account_id}
-                                                onChange={(value) =>
-                                                    setData(
-                                                        'loan_account_id',
-                                                        value,
-                                                    )
-                                                }
+                                                onChange={(value) => {
+                                                    const loan =
+                                                        loan_accounts.find(
+                                                            (item) =>
+                                                                String(
+                                                                    item.id,
+                                                                ) === value,
+                                                        );
+                                                    if (isRepayment && loan) {
+                                                        setData({
+                                                            ...data,
+                                                            loan_account_id:
+                                                                value,
+                                                            ...repaymentFormDefaults(
+                                                                loan,
+                                                                data.repayment_date,
+                                                            ),
+                                                        });
+                                                    } else if (
+                                                        isRepayment &&
+                                                        !loan
+                                                    ) {
+                                                        setData({
+                                                            ...data,
+                                                            loan_account_id:
+                                                                value,
+                                                            principal_amount:
+                                                                '0.00',
+                                                            interest_amount:
+                                                                '0.00',
+                                                            fine_amount:
+                                                                '0.00',
+                                                            protection_fee_amount:
+                                                                '0.00',
+                                                            protection_renewal_fee:
+                                                                '0.00',
+                                                            amount: '0.00',
+                                                        });
+                                                    } else {
+                                                        setData(
+                                                            'loan_account_id',
+                                                            value,
+                                                        );
+                                                    }
+                                                }}
                                                 options={[
                                                     {
                                                         value: '',
@@ -753,6 +950,56 @@ export default function TransactionWorkflow() {
                                                     </div>
                                                 </div>
                                             )}
+                                        {isRepayment && selectedLoan && repaymentDue && (
+                                            <div className="space-y-3 rounded-xl border border-primary/15 bg-primary/5 p-4 sm:col-span-2">
+                                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                                    <div>
+                                                        <p className="text-sm font-semibold">
+                                                            Editable repayment breakdown
+                                                        </p>
+                                                        <p className="mt-1 text-xs text-muted-foreground">
+                                                            Adjust each amount up to its outstanding balance for the selected date.
+                                                        </p>
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        disabled={totalRepaymentDue <= 0}
+                                                        onClick={fillScheduledRepayment}
+                                                    >
+                                                        Fill scheduled amounts
+                                                    </Button>
+                                                </div>
+                                                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                                    {repaymentAmountFields.map(
+                                                        ({ field, label, due }) => (
+                                                            <Field
+                                                                key={field}
+                                                                label={label}
+                                                                error={errors[field]}
+                                                                hint={`Outstanding: ${formatBDTCurrency(due)}`}
+                                                            >
+                                                                <Input
+                                                                    type="number"
+                                                                    min="0"
+                                                                    max={due.toFixed(2)}
+                                                                    step="0.01"
+                                                                    required
+                                                                    value={data[field]}
+                                                                    onChange={(event) =>
+                                                                        updateRepaymentAmount(
+                                                                            field,
+                                                                            event.target.value,
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </Field>
+                                                        ),
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </section>
 
@@ -767,32 +1014,48 @@ export default function TransactionWorkflow() {
                                     </div>
 
                                     <div className="grid gap-5 p-5 sm:grid-cols-2 sm:gap-6 sm:p-7 xl:grid-cols-4">
-                                        <Field
-                                            label="Transaction amount"
-                                            required
-                                            error={errors.amount}
-                                        >
-                                            <div className="relative">
-                                                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-semibold text-muted-foreground">
-                                                    ৳
-                                                </span>
+                                        {isRepayment ? (
+                                            <Field
+                                                label="Total repayment collected"
+                                                required
+                                                error={errors.amount}
+                                                hint="Calculated from the editable component amounts."
+                                            >
                                                 <Input
                                                     type="number"
-                                                    min="0.0001"
-                                                    step="0.0001"
-                                                    required
-                                                    className="pl-8 tabular-nums"
-                                                    placeholder="0.00"
+                                                    readOnly
+                                                    className="bg-muted/40 font-semibold tabular-nums"
                                                     value={data.amount}
-                                                    onChange={(event) =>
-                                                        setData(
-                                                            'amount',
-                                                            event.target.value,
-                                                        )
-                                                    }
                                                 />
-                                            </div>
-                                        </Field>
+                                            </Field>
+                                        ) : (
+                                            <Field
+                                                label="Transaction amount"
+                                                required
+                                                error={errors.amount}
+                                            >
+                                                <div className="relative">
+                                                    <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm font-semibold text-muted-foreground">
+                                                        ৳
+                                                    </span>
+                                                    <Input
+                                                        type="number"
+                                                        min="0.0001"
+                                                        step="0.0001"
+                                                        required
+                                                        className="pl-8 tabular-nums"
+                                                        placeholder="0.00"
+                                                        value={data.amount}
+                                                        onChange={(event) =>
+                                                            setData(
+                                                                'amount',
+                                                                event.target.value,
+                                                            )
+                                                        }
+                                                    />
+                                                </div>
+                                            </Field>
+                                        )}
 
                                         <Field
                                             label={
@@ -813,14 +1076,31 @@ export default function TransactionWorkflow() {
                                                         ? data.disbursed_at
                                                         : data.repayment_date
                                                 }
-                                                onChange={(value) =>
+                                                onChange={(value) => {
+                                                    if (isDisbursement) {
+                                                        setData(
+                                                            'disbursed_at',
+                                                            value,
+                                                        );
+                                                        return;
+                                                    }
+                                                    if (isRepayment && selectedLoan) {
+                                                        setData({
+                                                            ...data,
+                                                            repayment_date:
+                                                                value,
+                                                            ...repaymentFormDefaults(
+                                                                selectedLoan,
+                                                                value,
+                                                            ),
+                                                        });
+                                                        return;
+                                                    }
                                                     setData(
-                                                        isDisbursement
-                                                            ? 'disbursed_at'
-                                                            : 'repayment_date',
+                                                        'repayment_date',
                                                         value,
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                             />
                                         </Field>
 

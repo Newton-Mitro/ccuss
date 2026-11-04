@@ -21,6 +21,8 @@ class LoanRepayment extends Model
         'interest_amount',
         'fine_amount',
         'extra_principal_amount',
+        'protection_renewal_fee',
+        'protection_renewal_date',
         'status',
         'note',
         'created_by',
@@ -29,6 +31,8 @@ class LoanRepayment extends Model
     protected $casts = [
         'amount' => 'decimal:4',
         'repayment_at' => 'datetime',
+        'protection_renewal_fee' => 'decimal:4',
+        'protection_renewal_date' => 'date',
     ];
 
     protected $appends = ['repayment_date', 'reference'];

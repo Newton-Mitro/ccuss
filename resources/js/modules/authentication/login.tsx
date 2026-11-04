@@ -1,3 +1,4 @@
+import AppLogo from '@/components/app-logo';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,6 @@ import { request } from '@/routes/password';
 import { Form, Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { useEffect } from 'react';
-import AppLogo from '@/components/app-logo';
 
 export default function Login({ status, canResetPassword, canRegister }) {
     useEffect(() => {
@@ -54,9 +54,9 @@ export default function Login({ status, canResetPassword, canRegister }) {
             </motion.div>
 
             {/* Right Form Section */}
-            <div className="mx-6 flex w-full flex-col items-center justify-center md:mx-24 lg:mx-32 lg:w-5/12">
+            <div className="mx-6 flex w-full flex-col items-center justify-center md:mx-6 lg:w-5/12">
                 <div className="flex h-[calc(90vh)] w-full flex-col items-center justify-center rounded border bg-card p-6 shadow">
-                    <div className="w-full md:px-10 lg:px-14 xl:px-20">
+                    <div className="w-full px-2 md:px-10 lg:px-14 xl:px-20">
                         {/* Header */}
                         <div className="mb-6 text-center">
                             <div className="flex items-center justify-center">

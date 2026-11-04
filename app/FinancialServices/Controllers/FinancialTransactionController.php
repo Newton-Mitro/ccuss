@@ -66,7 +66,12 @@ class FinancialTransactionController extends Controller
                     ->whereHas('financialAccount', fn($query) => $query
                         ->where('organization_id', $this->organizationId($request)))
                     ->whereIn('status', $workflow === 'loan-disbursement' ? ['APPROVED', 'PARTIALLY_DISBURSED'] : ['ACTIVE', 'PARTIALLY_DISBURSED'])
-                    ->with('financialAccount.customer:id,name')
+                    ->with([
+                        'financialAccount.customer:id,name',
+                        ...($workflow === 'loan-repayment'
+                            ? ['schedules.components', 'protectionPolicy']
+                            : []),
+                    ])
                     ->orderBy('loan_no')
                     ->get(['id', 'loan_no', 'financial_account_id', 'principal_amount', 'disbursed_amount'])
                 : [],
@@ -99,11 +104,15 @@ class FinancialTransactionController extends Controller
         $returnToLoanApplication = $data['return_to_loan_application'] ?? false;
         unset($data['return_to_loan_application']);
 
-        $transaction = $this->transactionService->createLoanDisbursement(
-            $data,
-            $this->organizationId($request),
-            $request->user()->id,
-        );
+        try {
+            $transaction = $this->transactionService->createLoanDisbursement(
+                $data,
+                $this->organizationId($request),
+                $request->user()->id,
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['disbursement' => $exception->getMessage()]);
+        }
 
         if ($returnToLoanApplication) {
             $loanApplication = LoanAccount::query()
@@ -125,11 +134,15 @@ class FinancialTransactionController extends Controller
 
     public function storeLoanRepayment(StoreLoanRepaymentRequest $request)
     {
-        $transaction = $this->transactionService->createLoanRepayment(
-            $request->validated(),
-            $this->organizationId($request),
-            $request->user()->id,
-        );
+        try {
+            $transaction = $this->transactionService->createLoanRepayment(
+                $request->validated(),
+                $this->organizationId($request),
+                $request->user()->id,
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['repayment' => $exception->getMessage()]);
+        }
 
         return redirect()->route('financial-transactions.show', $transaction)
             ->with('success', 'Loan repayment created successfully.');

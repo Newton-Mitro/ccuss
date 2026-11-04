@@ -198,8 +198,8 @@ it('allocates, posts, and reverses a loan repayment idempotently', function () {
         'holder_type' => Customer::class,
         'holder_id' => $customer->id,
         'account_type' => 'LOAN',
-        'balance' => 1000,
-        'available_balance' => 1000,
+        'balance' => 2000,
+        'available_balance' => 2000,
     ]);
     $payoutAccount = FinancialAccount::factory()->active()->create([
         'organization_id' => $organization->id,
@@ -218,28 +218,74 @@ it('allocates, posts, and reverses a loan repayment idempotently', function () {
         'term_months' => 1,
         'status' => 'ACTIVE',
     ]);
-    app(LoanScheduleService::class)->generate($loan, ['frequency' => 'MONTHLY', 'start_date' => now()->subMonth()->toDateString()]);
+    $renewalDate = now()->subDay()->toDateString();
+    \App\FinancialServices\Models\LoanProtectionPolicy::create([
+        'loan_account_id' => $loan->id,
+        'renewal_fee' => 50,
+        'renewal_frequency' => 'MONTHLY',
+        'next_renewal_at' => $renewalDate,
+        'status' => 'ACTIVE',
+    ]);
+    app(LoanScheduleService::class)->generate($loan, [
+        'frequency' => 'MONTHLY',
+        'start_date' => now()->subMonth()->toDateString(),
+    ]);
+    $schedule = $loan->schedules()->firstOrFail();
+    foreach ([
+        'PRINCIPAL' => 700,
+        'INTEREST' => 100,
+        'FEE' => 50,
+        'PROTECTION_FEE' => 150,
+    ] as $type => $due) {
+        $schedule->components()->where('type', $type)->update([
+            'amount_due' => $due,
+            'status' => 'PENDING',
+        ]);
+    }
+    $schedule->update([
+        'scheduled_principal' => 700,
+        'scheduled_interest' => 100,
+        'scheduled_fee' => 50,
+        'scheduled_protection_fee' => 150,
+        'total_due' => 1000,
+    ]);
     $service = app(FinancialTransactionService::class);
     $data = [
         'loan_account_id' => $loan->id,
         'payout_account_id' => $payoutAccount->id,
-        'amount' => 1000,
+        'amount' => 1050,
+        'principal_amount' => 700,
+        'interest_amount' => 100,
+        'fine_amount' => 50,
+        'protection_fee_amount' => 150,
+        'protection_renewal_fee' => 50,
         'repayment_date' => now()->toDateString(),
         'idempotency_key' => (string) Str::uuid(),
     ];
 
     $first = $service->createLoanRepayment($data, $organization->id, $user->id);
     $retry = $service->createLoanRepayment($data, $organization->id, $user->id);
+    $allocations = $first->source->allocations()->with('component')->get();
+    expect((float) $first->source->protection_renewal_fee)->toBe(50.0)
+        ->and((float) $first->source->principal_amount)->toBe(700.0)
+        ->and((float) $first->source->interest_amount)->toBe(100.0)
+        ->and((float) $first->source->fine_amount)->toBe(50.0)
+        ->and((float) $allocations->filter(fn ($allocation) => $allocation->component->type === 'PROTECTION_FEE')->sum('amount'))->toBe(150.0)
+        ->and($first->source->protection_renewal_date->toDateString())->toBe($renewalDate);
+
     $service->post($first, $organization->id, $user->id);
 
     expect($retry->id)->toBe($first->id)
         ->and($loan->schedules()->first()->fresh()->status)->toBe('PAID')
-        ->and($loan->repayments()->first()->fresh()->status)->toBe('POSTED');
+        ->and($loan->repayments()->first()->fresh()->status)->toBe('POSTED')
+        ->and($loan->protectionPolicy()->first()->fresh()->next_renewal_at->toDateString())
+        ->toBe(\Carbon\CarbonImmutable::parse($renewalDate)->addMonthNoOverflow()->toDateString());
 
     $service->reverse($first->fresh(), $organization->id);
 
     expect($loan->schedules()->first()->fresh()->status)->toBe('PENDING')
-        ->and($loan->repayments()->first()->fresh()->status)->toBe('REVERSED');
+        ->and($loan->repayments()->first()->fresh()->status)->toBe('REVERSED')
+        ->and($loan->protectionPolicy()->first()->fresh()->next_renewal_at->toDateString())->toBe($renewalDate);
 });
 
 it('does not expose the fine payment transaction workflow', function () {
@@ -261,4 +307,21 @@ it('loads the loan disbursement entry workflow', function () {
         ->assertInertia(fn($page) => $page
             ->component('financial-services/transactions/workflow')
             ->where('workflow', 'loan-disbursement'));
+});
+
+it('loads the loan repayment entry workflow with repayment details', function () {
+    $organization = Organization::factory()->create();
+    $branch = Branch::factory()->create(['organization_id' => $organization->id]);
+    $user = User::factory()->create([
+        'organization_id' => $organization->id,
+        'branch_id' => $branch->id,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['active_organization_id' => $organization->id])
+        ->get('/financial-transactions/loan-repayment/create')
+        ->assertSuccessful()
+        ->assertInertia(fn($page) => $page
+            ->component('financial-services/transactions/workflow')
+            ->where('workflow', 'loan-repayment'));
 });

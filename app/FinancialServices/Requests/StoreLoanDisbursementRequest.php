@@ -22,7 +22,15 @@ class StoreLoanDisbursementRequest extends FormRequest
             'loan_account_id' => [
                 'required',
                 'integer',
-                Rule::exists('loan_accounts', 'id'),
+                Rule::exists('loan_accounts', 'id')->where(function ($query) use ($organizationId) {
+                    $query->whereIn('status', ['APPROVED', 'PARTIALLY_DISBURSED'])
+                        ->whereExists(function ($subquery) use ($organizationId) {
+                            $subquery->selectRaw('1')
+                                ->from('financial_accounts')
+                                ->whereColumn('financial_accounts.id', 'loan_accounts.financial_account_id')
+                                ->where('financial_accounts.organization_id', $organizationId);
+                        });
+                }),
             ],
             'payout_account_id' => [
                 'required',

@@ -197,6 +197,13 @@ export const financialServices: SidebarItem[] = [
                         match_path: 'financial-transactions/loan-disbursement',
                         permission: ['financial.transactions.create'],
                     },
+                    {
+                        name: 'Loan Repayment Entry',
+                        icon: <i className="fa-solid fa-hand-holding-dollar" />,
+                        path: '/financial-transactions/loan-repayment/create',
+                        match_path: 'financial-transactions/loan-repayment',
+                        permission: ['financial.transactions.create'],
+                    },
                 ],
             },
 

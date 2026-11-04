@@ -752,6 +752,21 @@ export interface FinancialWorkflowLoanAccount {
     principal_amount: string | number;
     disbursed_amount: string | number;
     financial_account?: { customer?: { name?: string } | null } | null;
+    schedules?: Array<{
+        due_date: string;
+        status: string;
+        components?: Array<{
+            type: 'PRINCIPAL' | 'INTEREST' | 'FEE' | 'PROTECTION_FEE';
+            amount_due: string | number;
+            amount_paid: string | number;
+            status: string;
+        }>;
+    }>;
+    protection_policy?: {
+        status: string;
+        renewal_fee: string | number;
+        next_renewal_at: string | null;
+    } | null;
 }
 
 export interface FinancialTransactionWorkflowPageProps extends SharedData {

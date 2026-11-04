@@ -15,6 +15,7 @@ use App\FinancialServices\Models\RecurringDepositInstallment;
 use App\FinancialServices\Models\ShareDividendAllocation;
 use App\GeneralAccounting\Application\FinancialTransactionAccountingService;
 use App\TreasuryAndCash\Models\BranchDay;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -251,7 +252,7 @@ class FinancialTransactionService
         return DB::transaction(function () use ($data, $organizationId, $userId) {
             $existing = $this->findIdempotentTransaction($data['idempotency_key'] ?? null, $organizationId);
             if ($existing) {
-                if ($existing->transaction_type !== 'LOAN_DISBURSEMENT' || (float) $existing->amount !== (float) $data['amount'] * 2) {
+                if ($existing->transaction_type !== 'LOAN_DISBURSEMENT' || (float) $existing->amount !== (float) $data['amount']) {
                     throw new RuntimeException('The idempotency key is already used for a different transaction.');
                 }
 
@@ -327,10 +328,42 @@ class FinancialTransactionService
     public function createLoanRepayment(array $data, int $organizationId, int $userId): FinancialTransaction
     {
         return DB::transaction(function () use ($data, $organizationId, $userId) {
+            $hasBreakdown = collect([
+                'principal_amount',
+                'interest_amount',
+                'fine_amount',
+                'protection_fee_amount',
+                'protection_renewal_fee',
+            ])->every(fn (string $field): bool => array_key_exists($field, $data));
             $existing = $this->findIdempotentTransaction($data['idempotency_key'] ?? null, $organizationId);
             if ($existing) {
-                if ($existing->transaction_type !== 'LOAN_REPAYMENT' || (float) $existing->amount !== (float) $data['amount'] * 2) {
+                if ($existing->transaction_type !== 'LOAN_REPAYMENT' || (float) $existing->amount !== (float) $data['amount']) {
                     throw new RuntimeException('The idempotency key is already used for a different transaction.');
+                }
+                if ($hasBreakdown) {
+                    $repayment = LoanRepayment::query()
+                        ->with('allocations.component')
+                        ->where('financial_transaction_id', $existing->id)
+                        ->first();
+                    $entries = $existing->entries->sortBy('line_no')->values();
+                    $protectionFee = $repayment?->allocations
+                        ->filter(fn ($allocation) => $allocation->component?->type === 'PROTECTION_FEE')
+                        ->sum(fn ($allocation): float => (float) $allocation->amount) ?? 0;
+                    $matchesPayload = $repayment
+                        && $repayment->loan_account_id === (int) $data['loan_account_id']
+                        && $existing->transaction_date->toDateString() === $data['repayment_date']
+                        && $existing->reference === ($data['reference'] ?? null)
+                        && $entries->count() === 2
+                        && $entries[0]->financial_account_id === (int) $data['payout_account_id']
+                        && $entries[1]->financial_account_id === $repayment->loanAccount()->value('financial_account_id')
+                        && round((float) $repayment->principal_amount, 4) === round((float) $data['principal_amount'], 4)
+                        && round((float) $repayment->interest_amount, 4) === round((float) $data['interest_amount'], 4)
+                        && round((float) $repayment->fine_amount, 4) === round((float) $data['fine_amount'], 4)
+                        && round((float) $protectionFee, 4) === round((float) $data['protection_fee_amount'], 4)
+                        && round((float) $repayment->protection_renewal_fee, 4) === round((float) $data['protection_renewal_fee'], 4);
+                    if (! $matchesPayload) {
+                        throw new RuntimeException('The idempotency key is already used for a different repayment.');
+                    }
                 }
 
                 return $existing;
@@ -339,7 +372,7 @@ class FinancialTransactionService
             $loan = LoanAccount::query()
                 ->whereHas('financialAccount', fn ($query) => $query->where('organization_id', $organizationId))
                 ->whereIn('status', ['ACTIVE', 'PARTIALLY_DISBURSED'])
-                ->with(['financialAccount', 'schedules.components'])
+                ->with(['financialAccount', 'schedules.components', 'protectionPolicy'])
                 ->lockForUpdate()
                 ->findOrFail($data['loan_account_id']);
             $payoutAccount = FinancialAccount::query()
@@ -348,8 +381,46 @@ class FinancialTransactionService
                 ->whereIn('status', ['PENDING', 'ACTIVE'])
                 ->findOrFail($data['payout_account_id']);
             $amount = (float) $data['amount'];
-            $allocations = $this->repaymentAllocations($loan, $amount, $data['repayment_date'], (bool) ($data['allow_advance'] ?? false));
-            if (round(collect($allocations)->sum('amount'), 4) < round($amount, 4)) {
+            if ($hasBreakdown) {
+                $breakdownTotal = round(
+                    (float) $data['principal_amount']
+                    + (float) $data['interest_amount']
+                    + (float) $data['fine_amount']
+                    + (float) $data['protection_fee_amount']
+                    + (float) $data['protection_renewal_fee'],
+                    4,
+                );
+                if ($breakdownTotal <= 0 || $breakdownTotal !== round($amount, 4)) {
+                    throw new RuntimeException('The repayment total must equal the sum of its component amounts.');
+                }
+                $allocations = $this->repaymentAllocationsByComponents($loan, [
+                    'PRINCIPAL' => (float) $data['principal_amount'],
+                    'INTEREST' => (float) $data['interest_amount'],
+                    'FEE' => (float) $data['fine_amount'],
+                    'PROTECTION_FEE' => (float) $data['protection_fee_amount'],
+                ], $data['repayment_date']);
+                $renewalFee = round((float) $data['protection_renewal_fee'], 4);
+                $unallocatedAmount = $renewalFee;
+            } else {
+                $allocations = $this->repaymentAllocations($loan, $amount, $data['repayment_date'], (bool) ($data['allow_advance'] ?? false));
+                $unallocatedAmount = round($amount - collect($allocations)->sum('amount'), 4);
+                $renewalFee = 0.0;
+            }
+            $renewalDate = null;
+            $policy = $loan->protectionPolicy;
+            if ($unallocatedAmount > 0 && $policy?->status === 'ACTIVE'
+                && $policy->next_renewal_at
+                && $policy->next_renewal_at->toDateString() <= $data['repayment_date']
+                && (float) $policy->renewal_fee > 0) {
+                if (! in_array($policy->renewal_frequency, ['MONTHLY', 'QUARTERLY', 'HALF_YEARLY', 'YEARLY'], true)) {
+                    throw new RuntimeException('Configure a renewal frequency before collecting the loan protection renewal fee.');
+                }
+                if (round($unallocatedAmount, 4) !== round((float) $policy->renewal_fee, 4)) {
+                    throw new RuntimeException('Include the full loan protection renewal fee with the scheduled amount due.');
+                }
+                $renewalFee = (float) $policy->renewal_fee;
+                $renewalDate = $policy->next_renewal_at->toDateString();
+            } elseif ($unallocatedAmount > 0) {
                 throw new RuntimeException('The repayment exceeds the outstanding scheduled balance.');
             }
 
@@ -374,6 +445,11 @@ class FinancialTransactionService
                 'financial_transaction_id' => $transaction->id,
                 'amount' => $amount,
                 'repayment_at' => $data['repayment_date'],
+                'principal_amount' => $data['principal_amount'] ?? 0,
+                'interest_amount' => $data['interest_amount'] ?? 0,
+                'fine_amount' => $data['fine_amount'] ?? 0,
+                'protection_renewal_fee' => $renewalFee,
+                'protection_renewal_date' => $renewalDate,
                 'status' => 'PENDING',
                 'note' => $data['reference'] ?? null,
                 'created_by' => $userId,
@@ -784,6 +860,49 @@ class FinancialTransactionService
         return $allocations;
     }
 
+    private function repaymentAllocationsByComponents(LoanAccount $loan, array $requested, string $repaymentDate): array
+    {
+        $schedules = $loan->schedules
+            ->filter(fn ($schedule) => ! in_array($schedule->status, ['PAID', 'WAIVED'], true))
+            ->filter(fn ($schedule) => $schedule->due_date->toDateString() <= $repaymentDate)
+            ->sortBy('due_date');
+        $allocations = [];
+
+        foreach ($requested as $type => $amount) {
+            $remaining = round($amount, 4);
+            if ($remaining < 0) {
+                throw new RuntimeException('Repayment component amounts cannot be negative.');
+            }
+
+            foreach ($schedules as $schedule) {
+                $component = $schedule->components->firstWhere('type', $type);
+                if (! $component || in_array($component->status, ['PAID', 'WAIVED'], true)) {
+                    continue;
+                }
+                $outstanding = max(0, (float) $component->amount_due - (float) $component->amount_paid);
+                $allocated = min($remaining, $outstanding);
+                if ($allocated <= 0) {
+                    continue;
+                }
+                $allocations[] = [
+                    'loan_schedule_id' => $schedule->id,
+                    'loan_schedule_component_id' => $component->id,
+                    'amount' => round($allocated, 4),
+                ];
+                $remaining = round($remaining - $allocated, 4);
+                if ($remaining <= 0) {
+                    break;
+                }
+            }
+
+            if ($remaining > 0) {
+                throw new RuntimeException("The selected {$type} repayment exceeds its outstanding amount due.");
+            }
+        }
+
+        return $allocations;
+    }
+
     private function postLoanRepayment(LoanRepayment $repayment): void
     {
         $repayment->load(['allocations.component', 'allocations.schedule']);
@@ -795,6 +914,25 @@ class FinancialTransactionService
             $totalPaid = $schedule->components->sum(fn ($item) => (float) $item->amount_paid);
             $fullyPaid = $totalPaid >= (float) $schedule->total_due;
             $schedule->update(['total_paid' => $totalPaid, 'status' => $fullyPaid ? 'PAID' : 'PARTIAL', 'paid_at' => $fullyPaid ? now() : null]);
+        }
+        if ((float) $repayment->protection_renewal_fee > 0 && $repayment->protection_renewal_date) {
+            $policy = $repayment->loanAccount()->firstOrFail()->protectionPolicy()->lockForUpdate()->firstOrFail();
+            if (
+                $policy->status !== 'ACTIVE'
+                || $policy->next_renewal_at?->toDateString() !== $repayment->protection_renewal_date
+                || round((float) $policy->renewal_fee, 2) !== round((float) $repayment->protection_renewal_fee, 2)
+            ) {
+                throw new RuntimeException('The loan protection renewal date changed; refresh the repayment before posting.');
+            }
+            $nextRenewalDate = CarbonImmutable::parse($repayment->protection_renewal_date);
+            $nextRenewalDate = match ($policy->renewal_frequency) {
+                'MONTHLY' => $nextRenewalDate->addMonthNoOverflow(),
+                'QUARTERLY' => $nextRenewalDate->addMonthsNoOverflow(3),
+                'HALF_YEARLY' => $nextRenewalDate->addMonthsNoOverflow(6),
+                'YEARLY' => $nextRenewalDate->addMonthsNoOverflow(12),
+                default => throw new RuntimeException('The loan protection renewal frequency is not configured.'),
+            };
+            $policy->update(['next_renewal_at' => $nextRenewalDate->toDateString()]);
         }
         $repayment->update(['status' => 'POSTED']);
     }
@@ -860,6 +998,21 @@ class FinancialTransactionService
             $schedule = $allocation->schedule->fresh('components');
             $totalPaid = $schedule->components->sum(fn ($item) => (float) $item->amount_paid);
             $schedule->update(['total_paid' => $totalPaid, 'status' => $totalPaid <= 0 ? 'PENDING' : 'PARTIAL', 'paid_at' => null]);
+        }
+
+        if ((float) $repayment->protection_renewal_fee > 0 && $repayment->protection_renewal_date) {
+            $hasLaterRenewal = LoanRepayment::query()
+                ->where('loan_account_id', $repayment->loan_account_id)
+                ->where('id', '!=', $repayment->id)
+                ->where('status', 'POSTED')
+                ->whereNotNull('protection_renewal_date')
+                ->where('protection_renewal_date', '>', $repayment->protection_renewal_date)
+                ->exists();
+            if ($hasLaterRenewal) {
+                throw new RuntimeException('Reverse later loan protection renewal payments first.');
+            }
+            $repayment->loanAccount()->firstOrFail()->protectionPolicy()->lockForUpdate()->firstOrFail()
+                ->update(['next_renewal_at' => $repayment->protection_renewal_date]);
         }
 
         $repayment->update(['status' => 'REVERSED']);
