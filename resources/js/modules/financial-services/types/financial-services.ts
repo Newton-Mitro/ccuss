@@ -754,8 +754,11 @@ export interface FinancialWorkflowLoanAccount {
     disbursed_amount: string | number;
     financial_account?: { customer?: { name?: string } | null } | null;
     schedules?: Array<{
+        installment_no: number;
         due_date: string;
         status: string;
+        total_due?: string | number;
+        total_paid?: string | number;
         components?: Array<{
             type: 'PRINCIPAL' | 'INTEREST' | 'FEE' | 'PROTECTION_FEE';
             amount_due: string | number;

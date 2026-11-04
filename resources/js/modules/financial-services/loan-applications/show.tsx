@@ -15,7 +15,10 @@ import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import { formatBDTCurrency } from '@/lib/bdtCurrencyFormatter';
+import {
+    formatBDTCurrency,
+    formatBDTWholeTaka,
+} from '@/lib/bdtCurrencyFormatter';
 import { formatDate } from '@/lib/date_util';
 import { CustomerSearchInput } from '@/modules/customers-kyc/customers/components/customer-search-input';
 import { FinancialAccountSearchInput } from '@/modules/financial-services/components/financial-account-search-input';
@@ -1169,13 +1172,13 @@ export default function LoanApplicationShow() {
                                                             )}
                                                         </TableCell>
                                                         <TableCell align="right">
-                                                            {formatBDTCurrency(
+                                                            {formatBDTWholeTaka(
                                                                 schedule.scheduled_principal,
                                                                 false,
                                                             )}
                                                         </TableCell>
                                                         <TableCell align="right">
-                                                            {formatBDTCurrency(
+                                                            {formatBDTWholeTaka(
                                                                 schedule.scheduled_interest,
                                                                 false,
                                                             )}

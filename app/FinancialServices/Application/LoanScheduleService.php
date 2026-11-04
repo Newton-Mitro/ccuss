@@ -66,6 +66,7 @@ class LoanScheduleService
         return DB::transaction(function () use ($loan, $frequency, $periods, $principal, $annualRate, $calculation, $startDate, $version, $fee, $fixedProtectionFee, $protectionPeriodRate, $inputs): array {
             $loan->schedules()->delete();
             $openingPrincipal = $principal;
+            $regularPrincipal = round($principal / $periods);
 
             for ($index = 1; $index <= $periods; $index++) {
                 $periodRate = match ($frequency) {
@@ -73,13 +74,12 @@ class LoanScheduleService
                     'QUARTERLY' => $annualRate / 100 / 4,
                     default => $annualRate / 100 / 12,
                 };
-                $remainingPeriods = $periods - $index + 1;
                 $scheduledPrincipal = $index === $periods
                     ? round($openingPrincipal, 4)
-                    : round($principal / $periods, 4);
+                    : min($regularPrincipal, $openingPrincipal);
                 $scheduledInterest = match ($calculation) {
-                    'REDUCING_BALANCE' => round($openingPrincipal * $periodRate, 4),
-                    'FLAT', 'SIMPLE' => round(($principal * $annualRate / 100 * $this->periodYears($frequency, $periods)) / $periods, 4),
+                    'REDUCING_BALANCE' => round($openingPrincipal * $periodRate),
+                    'FLAT', 'SIMPLE' => round(($principal * $annualRate / 100 * $this->periodYears($frequency, $periods)) / $periods),
                     default => 0.0,
                 };
                 $dueDate = $this->dueDate($startDate, $frequency, $index);

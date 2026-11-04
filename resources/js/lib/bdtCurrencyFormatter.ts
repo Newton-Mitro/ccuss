@@ -20,3 +20,15 @@ export function formatBDTCurrency(
 
     return `${showSymbol ? '৳ ' : ''}${formatted}`;
 }
+
+export function formatBDTWholeTaka(
+    amount: number | string | null | undefined,
+    showSymbol: boolean = true,
+): string {
+    const value = Number(amount);
+    const formatted = new Intl.NumberFormat('en-BD', {
+        maximumFractionDigits: 0,
+    }).format(Number.isFinite(value) ? value : 0);
+
+    return `${showSymbol ? '৳ ' : ''}${formatted}`;
+}

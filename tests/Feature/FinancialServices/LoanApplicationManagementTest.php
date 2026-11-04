@@ -433,6 +433,9 @@ it('generates a reproducible reducing-balance schedule across month boundaries',
     $schedules = app(LoanScheduleService::class)->generate($loan, ['frequency' => 'MONTHLY', 'start_date' => '2026-01-31']);
 
     expect($schedules)->toHaveCount(3)
+        ->and(array_map(fn ($schedule): float => (float) $schedule->scheduled_principal, $schedules))->toBe([333.0, 333.0, 334.0])
+        ->and(array_sum(array_map(fn ($schedule): float => (float) $schedule->scheduled_principal, $schedules)))->toBe(1000.0)
+        ->and(array_map(fn ($schedule): float => (float) $schedule->scheduled_interest, $schedules))->toBe([10.0, 7.0, 3.0])
         ->and($schedules[0]->due_date->toDateString())->toBe('2026-02-28')
         ->and((float) $schedules[2]->scheduled_principal)->toBeGreaterThan(0)
         ->and($schedules[0]->generation_inputs['frequency'])->toBe('MONTHLY');

@@ -56,7 +56,7 @@ export interface FiscalPeriodFormPageProps extends SharedData {
         end_date: string;
         status: 'OPEN' | 'CLOSED';
     };
-    fiscalYears: { id: number; code: string }[];
+    fiscalYears: { id: number; name: string }[];
 }
 
 export interface FiscalYearFormPageProps extends SharedData {

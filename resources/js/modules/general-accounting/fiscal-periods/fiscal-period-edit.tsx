@@ -170,7 +170,7 @@ export default function FiscalPeriodForm() {
                                         }
                                         options={fiscalYears.map((fy) => ({
                                             value: String(fy.id),
-                                            label: fy.code,
+                                            label: fy.name,
                                         }))}
                                         placeholder="Select a fiscal year"
                                         aria-label="Parent fiscal year"
@@ -335,7 +335,7 @@ export default function FiscalPeriodForm() {
                                                 (fy) =>
                                                     String(fy.id) ===
                                                     data.fiscal_year_id,
-                                            )?.code ?? 'Not selected'}
+                                            )?.name ?? 'Not selected'}
                                         </span>
                                     </div>
 

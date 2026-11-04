@@ -825,8 +825,16 @@ export default function TransactionWorkflow() {
                                     <div className="border-b bg-muted/20 px-4 py-4 sm:px-5">
                                         <SectionHeading
                                             icon={Landmark}
-                                            title="Loan and payout accounts"
-                                            description="Select the loan and the authorized account used for the transaction."
+                                            title={
+                                                isRepayment
+                                                    ? 'Loan and collection accounts'
+                                                    : 'Loan and payout accounts'
+                                            }
+                                            description={
+                                                isRepayment
+                                                    ? "Select the customer's loan and the cash or bank account receiving the repayment."
+                                                    : 'Select the approved loan and the authorized account used to disburse funds.'
+                                            }
                                         />
                                     </div>
 
@@ -930,10 +938,18 @@ export default function TransactionWorkflow() {
                                         </Field>
 
                                         <Field
-                                            label="Payout account"
+                                            label={
+                                                isRepayment
+                                                    ? 'Collection account'
+                                                    : 'Payout account'
+                                            }
                                             required
                                             error={errors.payout_account_id}
-                                            hint="Choose the cash or bank account used for this transaction."
+                                            hint={
+                                                isRepayment
+                                                    ? 'Repayment funds will be received into this cash or bank account.'
+                                                    : 'Loan funds will be disbursed from this cash or bank account.'
+                                            }
                                         >
                                             <FinancialAccountSearchInput
                                                 scope="payout"
@@ -1035,6 +1051,202 @@ export default function TransactionWorkflow() {
                                                 </div>
                                             </div>
                                         )}
+                                        {isRepayment &&
+                                            selectedLoan &&
+                                            (selectedLoan.schedules?.length ?? 0) >
+                                                0 && (
+                                                <div className="overflow-hidden rounded-xl border bg-card sm:col-span-2">
+                                                    <div className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/30 px-4 py-3">
+                                                        <div>
+                                                            <h3 className="text-sm font-semibold">
+                                                                Repayment schedule
+                                                            </h3>
+                                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                                                Installments for
+                                                                the selected
+                                                                loan, including
+                                                                paid and
+                                                                outstanding
+                                                                amounts.
+                                                            </p>
+                                                        </div>
+                                                        <span className="rounded-full border bg-background px-2.5 py-1 text-xs text-muted-foreground">
+                                                            {
+                                                                selectedLoan
+                                                                    .schedules
+                                                                    ?.length
+                                                            }{' '}
+                                                            installments
+                                                        </span>
+                                                    </div>
+                                                    <div className="overflow-x-auto">
+                                                        <table className="w-full min-w-[880px] text-sm">
+                                                            <thead className="bg-muted/50 text-xs text-muted-foreground">
+                                                                <tr>
+                                                                    {[
+                                                                        'Installment',
+                                                                        'Due date',
+                                                                        'Principal due',
+                                                                        'Interest due',
+                                                                        'Fine due',
+                                                                        'Protection due',
+                                                                        'Outstanding',
+                                                                        'Status',
+                                                                    ].map(
+                                                                        (
+                                                                            heading,
+                                                                            index,
+                                                                        ) => (
+                                                                            <th
+                                                                                key={
+                                                                                    heading
+                                                                                }
+                                                                                className={`px-3 py-2.5 font-medium ${index >= 2 && index <= 6 ? 'text-right' : 'text-left'}`}
+                                                                            >
+                                                                                {
+                                                                                    heading
+                                                                                }
+                                                                            </th>
+                                                                        ),
+                                                                    )}
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {[
+                                                                    ...(selectedLoan.schedules ??
+                                                                        []),
+                                                                ]
+                                                                    .sort(
+                                                                        (
+                                                                            first,
+                                                                            second,
+                                                                        ) =>
+                                                                            first.installment_no -
+                                                                            second.installment_no,
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            schedule,
+                                                                        ) => {
+                                                                            const outstandingFor =
+                                                                                (
+                                                                                    type: string,
+                                                                                ) =>
+                                                                                    (
+                                                                                        schedule.components ??
+                                                                                        []
+                                                                                    )
+                                                                                        .filter(
+                                                                                            (
+                                                                                                component,
+                                                                                            ) =>
+                                                                                                component.type ===
+                                                                                                type,
+                                                                                        )
+                                                                                        .reduce(
+                                                                                            (
+                                                                                                total,
+                                                                                                component,
+                                                                                            ) =>
+                                                                                                total +
+                                                                                                Math.max(
+                                                                                                    0,
+                                                                                                    Number(
+                                                                                                        component.amount_due,
+                                                                                                    ) -
+                                                                                                        Number(
+                                                                                                            component.amount_paid,
+                                                                                                        ),
+                                                                                                ),
+                                                                                            0,
+                                                                                        );
+                                                                            const principal =
+                                                                                outstandingFor(
+                                                                                    'PRINCIPAL',
+                                                                                );
+                                                                            const interest =
+                                                                                outstandingFor(
+                                                                                    'INTEREST',
+                                                                                );
+                                                                            const fine =
+                                                                                outstandingFor(
+                                                                                    'FEE',
+                                                                                );
+                                                                            const protection =
+                                                                                outstandingFor(
+                                                                                    'PROTECTION_FEE',
+                                                                                );
+                                                                            const outstanding =
+                                                                                principal +
+                                                                                interest +
+                                                                                fine +
+                                                                                protection;
+
+                                                                            return (
+                                                                                <tr
+                                                                                    key={
+                                                                                        schedule.installment_no
+                                                                                    }
+                                                                                    className="border-t"
+                                                                                >
+                                                                                    <td className="px-3 py-2.5 font-medium">
+                                                                                        #
+                                                                                        {
+                                                                                            schedule.installment_no
+                                                                                        }
+                                                                                    </td>
+                                                                                    <td className="px-3 py-2.5 text-muted-foreground">
+                                                                                        {new Date(
+                                                                                            `${schedule.due_date}T00:00:00`,
+                                                                                        ).toLocaleDateString(
+                                                                                            undefined,
+                                                                                            {
+                                                                                                year: 'numeric',
+                                                                                                month: 'short',
+                                                                                                day: 'numeric',
+                                                                                            },
+                                                                                        )}
+                                                                                    </td>
+                                                                                    {[
+                                                                                        principal,
+                                                                                        interest,
+                                                                                        fine,
+                                                                                        protection,
+                                                                                        outstanding,
+                                                                                    ].map(
+                                                                                        (
+                                                                                            amount,
+                                                                                            index,
+                                                                                        ) => (
+                                                                                            <td
+                                                                                                key={
+                                                                                                    index
+                                                                                                }
+                                                                                                className="px-3 py-2.5 text-right tabular-nums"
+                                                                                            >
+                                                                                                {formatBDTCurrency(
+                                                                                                    amount,
+                                                                                                )}
+                                                                                            </td>
+                                                                                        ),
+                                                                                    )}
+                                                                                    <td className="px-3 py-2.5">
+                                                                                        <span className="rounded-full border bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground">
+                                                                                            {schedule.status.replaceAll(
+                                                                                                '_',
+                                                                                                ' ',
+                                                                                            )}
+                                                                                        </span>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            );
+                                                                        },
+                                                                    )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            )}
                                     </div>
                                 </section>
 
