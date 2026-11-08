@@ -185,6 +185,19 @@ it('does not expose bank accounts without banking permission', function () {
         ->assertForbidden();
 });
 
+it('provides bank account balances on the transaction creation page', function () {
+    $fixture = bankAccountFixture();
+    grantBankTransactionPermissions($fixture['user']);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->get(route('bank-transactions.create'))
+        ->assertSuccessful()
+        ->assertInertia(fn ($page) => $page
+            ->component('treasury-cash/banking/transactions/create')
+            ->where('bank_accounts.0.current_balance', fn ($balance) => (float) $balance === 25000.0));
+});
+
 it('creates and posts a bank transaction for an open branch day', function () {
     $fixture = bankAccountFixture();
     $branchDay = \App\TreasuryAndCash\Models\BranchDay::create([

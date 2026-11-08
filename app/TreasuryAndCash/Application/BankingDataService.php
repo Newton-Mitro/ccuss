@@ -4,6 +4,7 @@ namespace App\TreasuryAndCash\Application;
 
 use App\TreasuryAndCash\Models\BankAccount;
 use App\TreasuryAndCash\Models\BankTransaction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class BankingDataService
@@ -33,21 +34,7 @@ class BankingDataService
 
     public function listAccounts(int $organizationId, ?string $search = null, int $perPage = 18): LengthAwarePaginator
     {
-        $postedTransactionNet = BankTransaction::query()
-            ->selectRaw(
-                'COALESCE(SUM(CASE WHEN type IN (?, ?, ?) THEN amount ELSE -amount END), 0)',
-                ['DEPOSIT', 'TRANSFER_IN', 'INTEREST'],
-            )
-            ->whereColumn('bank_account_id', 'bank_accounts.id')
-            ->where('status', 'POSTED');
-
-        $query = BankAccount::query()
-            ->select('bank_accounts.*')
-            ->selectRaw(
-                '(bank_accounts.opening_balance + ('.$postedTransactionNet->toSql().')) as balance',
-                $postedTransactionNet->getBindings(),
-            )
-            ->where('organization_id', $organizationId)
+        $query = $this->accountsWithBalance($organizationId)
             ->with('branch')
             ->latest();
 
@@ -64,6 +51,21 @@ class BankingDataService
         }
 
         return $query->paginate($perPage)->withQueryString();
+    }
+
+    public function activeAccountOptions(int $organizationId): array
+    {
+        return $this->accountsWithBalance($organizationId)
+            ->where('status', 'ACTIVE')
+            ->orderBy('account_name')
+            ->get(['id', 'account_name', 'account_number', 'balance'])
+            ->map(fn (BankAccount $account) => [
+                'id' => $account->id,
+                'account_name' => $account->account_name,
+                'account_number' => $account->account_number,
+                'current_balance' => $account->balance,
+            ])
+            ->all();
     }
 
     public function findAccount(int $organizationId, int $accountId): ?BankAccount
@@ -85,5 +87,24 @@ class BankingDataService
             ->where('organization_id', $organizationId)
             ->with(['branch', 'financialAccount:id,account_no,name'])
             ->find($accountId);
+    }
+
+    private function accountsWithBalance(int $organizationId): Builder
+    {
+        $postedTransactionNet = BankTransaction::query()
+            ->selectRaw(
+                'COALESCE(SUM(CASE WHEN type IN (?, ?, ?) THEN amount ELSE -amount END), 0)',
+                ['DEPOSIT', 'TRANSFER_IN', 'INTEREST'],
+            )
+            ->whereColumn('bank_account_id', 'bank_accounts.id')
+            ->where('status', 'POSTED');
+
+        return BankAccount::query()
+            ->select('bank_accounts.*')
+            ->selectRaw(
+                '(bank_accounts.opening_balance + ('.$postedTransactionNet->toSql().')) as balance',
+                $postedTransactionNet->getBindings(),
+            )
+            ->where('organization_id', $organizationId);
     }
 }

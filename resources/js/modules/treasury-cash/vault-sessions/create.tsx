@@ -26,7 +26,16 @@ export default function CreateVaultSessionPage() {
         branch_days = [],
         vaults = [],
         user_branch_id,
+        auth,
     } = usePage<PageProps>().props;
+
+    const permissions = new Set([
+        ...(auth.user.permissions ?? []).map((permission) => permission.slug),
+        ...auth.user.roles.flatMap((role) =>
+            (role.permissions ?? []).map((permission) => permission.slug),
+        ),
+    ]);
+    const canViewSessions = permissions.has('vault_sessions.view');
 
     const userHasBranch = !!user_branch_id;
     const hasBranchDay = !!branch_day;
@@ -98,13 +107,18 @@ export default function CreateVaultSessionPage() {
                         </div>
                     </div>
 
-                    <Link
-                        href={route('vault-sessions.index')}
-                        className="inline-flex h-9 items-center justify-center gap-2 self-start rounded-lg border bg-background px-3 text-sm font-medium transition-colors hover:bg-muted sm:self-center"
-                    >
-                        <ArrowLeft className="size-4" />
-                        All sessions
-                    </Link>
+                    {canViewSessions && (
+                        <Button
+                            asChild
+                            variant="outline"
+                            className="self-start sm:self-center"
+                        >
+                            <Link href={route('vault-sessions.index')}>
+                                <ArrowLeft className="size-4" />
+                                All sessions
+                            </Link>
+                        </Button>
+                    )}
                 </div>
 
                 {/* Prerequisite alerts */}
@@ -287,24 +301,6 @@ export default function CreateVaultSessionPage() {
                                             <p className={errorClass}>
                                                 {errors.vault_id}
                                             </p>
-                                        )}
-
-                                        {selectedVault && (
-                                            <div className="mt-1.5 flex items-center gap-2 rounded-lg border bg-muted/30 px-2.5 py-2">
-                                                <Vault className="size-4 shrink-0 text-muted-foreground" />
-
-                                                <div className="min-w-0 flex-1">
-                                                    <p className="truncate text-xs font-medium">
-                                                        {selectedVault.name}
-                                                    </p>
-                                                    <p className="text-[11px] text-muted-foreground">
-                                                        Vault code:{' '}
-                                                        {selectedVault.code}
-                                                    </p>
-                                                </div>
-
-                                                <CheckCircle2 className="size-4 shrink-0 text-primary" />
-                                            </div>
                                         )}
 
                                         {!vaults.length && canOpenSession && (

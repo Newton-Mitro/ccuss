@@ -5,6 +5,7 @@ export interface Props extends SharedData {
         id: number;
         account_name: string;
         account_number: string;
+        current_balance: string | number;
     }[];
     ledger_accounts: {
         id: number;

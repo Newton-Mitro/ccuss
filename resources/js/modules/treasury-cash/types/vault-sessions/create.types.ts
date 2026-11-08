@@ -1,3 +1,5 @@
+import type { SharedData } from '@/types';
+
 export type BranchDay = {
     id: number;
     business_date: string;
@@ -11,7 +13,7 @@ export type VaultOption = {
     current_balance?: string | number | null;
 };
 
-export type PageProps = {
+export type PageProps = SharedData & {
     branch_day?: BranchDay;
     branch_days?: BranchDay[];
     vaults?: VaultOption[];

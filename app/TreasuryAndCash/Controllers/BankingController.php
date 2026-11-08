@@ -203,11 +203,7 @@ class BankingController extends Controller
         $organizationId = $request->attributes->get('active_organization')->id;
 
         return Inertia::render('treasury-cash/banking/transactions/create', [
-            'bank_accounts' => BankAccount::query()
-                ->where('organization_id', $organizationId)
-                ->where('status', 'ACTIVE')
-                ->orderBy('account_name')
-                ->get(['id', 'account_name', 'account_number']),
+            'bank_accounts' => $this->bankingDataService->activeAccountOptions($organizationId),
             'ledger_accounts' => $this->counterpartLedgerAccounts($organizationId),
         ]);
     }
