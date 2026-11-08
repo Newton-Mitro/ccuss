@@ -207,6 +207,24 @@ test('user service can assign a user to multiple organizations', function () {
         ->and($updatedUser->organization_id)->toBe($organizationTwo->id);
 });
 
+test('user service preserves organization memberships when updating profile details', function () {
+    $primaryOrganization = Organization::factory()->create();
+    $secondaryOrganization = Organization::factory()->create();
+    $user = User::factory()->create([
+        'organization_id' => $primaryOrganization->id,
+    ]);
+    $user->organizations()->sync([
+        $primaryOrganization->id,
+        $secondaryOrganization->id,
+    ]);
+
+    app(UserService::class)->updateUser($user, ['name' => 'Updated User']);
+
+    expect($user->fresh()->organizations()->pluck('organizations.id')->all())
+        ->toContain($primaryOrganization->id, $secondaryOrganization->id)
+        ->and($user->fresh()->organization_id)->toBe($primaryOrganization->id);
+});
+
 test('role permission service syncs the selected permissions to a role', function () {
     $role = Role::create([
         'name' => 'Manager',

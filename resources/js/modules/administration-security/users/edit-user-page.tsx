@@ -1,14 +1,8 @@
-import type { UserFormPageProps } from '@/modules/administration-security/types/page-props';
-import { Head, Link, router, useForm } from '@inertiajs/react';
-import { CheckCheck, Key, Loader2 } from 'lucide-react';
-import React, { useState } from 'react';
-import { route } from 'ziggy-js';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import {
     Tooltip,
     TooltipContent,
@@ -16,16 +10,15 @@ import {
 } from '@/components/ui/tooltip';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
-import { BreadcrumbItem } from '@/types';
+import type { UserFormPageProps } from '@/modules/administration-security/types/page-props';
 import type { Permission } from '@/modules/administration-security/types/user';
+import { BreadcrumbItem } from '@/types';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { CheckCheck, Key, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { route } from 'ziggy-js';
 
-const UserForm = ({
-    user,
-    roles,
-    organizations,
-    permissions,
-    auth,
-}: UserFormPageProps) => {
+const UserForm = ({ user, roles, permissions, auth }: UserFormPageProps) => {
     useFlashToastHandler();
 
     const isEdit = !!user;
@@ -35,7 +28,6 @@ const UserForm = ({
         email: user?.email || '',
         password: '',
         password_confirmation: '',
-        organization_id: user?.organization_id || '',
         roles: user?.roles?.map((r: any) => r.id) || [],
         permissions: user?.permissions?.map((p: any) => p.id) || [],
         photo: null as File | null,
@@ -161,22 +153,6 @@ const UserForm = ({
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
                     {/* LEFT: FORM */}
                     <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        <div>
-                            <Label className="text-xs">Organization</Label>
-                            <Select
-                                value={data.organization_id?.toString()}
-                                onChange={(val) =>
-                                    setData('organization_id', Number(val))
-                                }
-                                options={organizations.map((org) => ({
-                                    value: org.id.toString(),
-                                    label: org.name,
-                                }))}
-                                placeholder="Select Organization"
-                            />
-                            <InputError message={errors.organization_id} />
-                        </div>
-
                         <div>
                             <Label className="text-xs">Name</Label>
                             <Input

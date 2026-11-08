@@ -5,9 +5,12 @@ namespace App\SystemAdministration\Controllers;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Application\OrganizationService;
 use App\SystemAdministration\Models\Organization;
+use App\SystemAdministration\Models\User;
 use App\SystemAdministration\Requests\StoreOrganizationRequest;
 use App\SystemAdministration\Requests\UpdateOrganizationRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class OrganizationController extends Controller
@@ -98,13 +101,93 @@ class OrganizationController extends Controller
     /**
      * Show single organization
      */
-    public function show(Organization $organization)
+    public function show(Request $request, Organization $organization)
     {
-        $this->authorizeAccess(request(), $organization);
+        $this->authorizeAccess($request, $organization);
+
+        $users = User::query()
+            ->forOrganization($organization->id)
+            ->orderBy('name')
+            ->get(['users.id', 'users.name', 'users.email'])
+            ->map(fn (User $user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ])
+            ->values();
+        $canManageUsers = $request->user()->hasPermission('users.update');
 
         return Inertia::render('organization-settings/organizations/show', [
             'organization' => $organization->load('branches.manager'),
+            'users' => $users,
+            'canManageUsers' => $canManageUsers,
         ]);
+    }
+
+    public function addUser(Request $request, Organization $organization)
+    {
+        $this->authorizeAccess($request, $organization);
+
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'max:255'],
+        ]);
+        $email = mb_strtolower(trim($validated['email']));
+        $user = User::query()
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'email' => 'No user account was found with this email address.',
+            ]);
+        }
+
+        DB::transaction(function () use ($user, $organization): void {
+            $user->organizations()->syncWithoutDetaching([$organization->id]);
+
+            if ($user->organization_id === null) {
+                $user->forceFill(['organization_id' => $organization->id])->save();
+            }
+        });
+
+        return redirect()->route('organizations.show', $organization)
+            ->with('success', $user->name . ' added to ' . $organization->name . '.');
+    }
+
+    public function removeUser(Request $request, Organization $organization, User $user)
+    {
+        $this->authorizeAccess($request, $organization);
+
+        abort_unless(
+            $user->organization_id === $organization->id
+            || $user->organizations()->whereKey($organization->id)->exists(),
+            404,
+        );
+
+        DB::transaction(function () use ($user, $organization): void {
+            $organizationBranchIds = $organization->branches()->pluck('id');
+            $remainingOrganizationId = $user->organizations()
+                ->where('organizations.id', '!=', $organization->id)
+                ->value('organizations.id');
+
+            $user->organizations()->detach($organization->id);
+            $user->branches()->detach($organizationBranchIds);
+
+            $updates = [];
+            if ($user->organization_id === $organization->id) {
+                $updates['organization_id'] = $remainingOrganizationId;
+            }
+            if ($user->branch_id && $organizationBranchIds->contains($user->branch_id)) {
+                $updates['branch_id'] = null;
+            }
+
+            if ($updates) {
+                $user->forceFill($updates)->save();
+            }
+        });
+
+        return redirect()->route('organizations.show', $organization)
+            ->with('success', $user->name . ' removed from ' . $organization->name . '.');
     }
 
     /**

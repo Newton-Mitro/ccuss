@@ -251,24 +251,6 @@ export default function ShowUserPage() {
                     <section className="rounded-xl border border-border bg-card shadow-sm">
                         <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
                             <PanelHeading icon={Building2} title="Placement" />
-                            {canUpdate && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7"
-                                    asChild
-                                >
-                                    <Link
-                                        href={route(
-                                            'users.organization.edit',
-                                            user.id,
-                                        )}
-                                    >
-                                        <Pencil />
-                                        Manage
-                                    </Link>
-                                </Button>
-                            )}
                         </div>
                         <div className="divide-y divide-border/70 px-4">
                             <InfoRow

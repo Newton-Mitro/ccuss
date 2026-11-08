@@ -2,7 +2,6 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select } from '@/components/ui/select';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import type { UserFormPageProps } from '@/modules/administration-security/types/page-props';
@@ -10,7 +9,6 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
-    Building2,
     Camera,
     CheckCheck,
     KeyRound,
@@ -23,7 +21,7 @@ import {
 import React, { useState } from 'react';
 import { route } from 'ziggy-js';
 
-const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
+const UserForm = ({ user, roles, auth }: UserFormPageProps) => {
     useFlashToastHandler();
 
     const isEdit = !!user;
@@ -33,11 +31,6 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
         email: user?.email || '',
         password: '',
         password_confirmation: '',
-        organization_id:
-            user?.organization_id || user?.organizations?.[0]?.id || '',
-        organization_ids:
-            user?.organizations?.map((org) => org.id) ||
-            (user?.organization_id ? [user.organization_id] : []),
         roles: user?.roles?.map((r: any) => r.id) || [],
         photo: null as File | null,
     });
@@ -64,46 +57,12 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
         }
     };
 
-    const toggleOrganization = (orgId: number) => {
-        const current = Array.isArray(data.organization_ids)
-            ? [...data.organization_ids]
-            : [];
-        const next = current.includes(orgId)
-            ? current.filter((id) => id !== orgId)
-            : [...current, orgId];
-
-        setData('organization_ids', next);
-
-        if (!next.length) {
-            setData('organization_id', '');
-            return;
-        }
-
-        const selectedPrimary = Number(data.organization_id) || next[0];
-        const primaryIsSelected = next.includes(Number(selectedPrimary));
-
-        setData(
-            'organization_id',
-            primaryIsSelected ? selectedPrimary : next[0],
-        );
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const selectedOrgIds = Array.isArray(data.organization_ids)
-            ? [...new Set(data.organization_ids.map(Number).filter(Boolean))]
-            : [];
-        const primaryOrganizationId =
-            Number(data.organization_id) || selectedOrgIds[0] || '';
-
         const payload = new FormData();
 
-        Object.entries({
-            ...data,
-            organization_id: primaryOrganizationId,
-            organization_ids: selectedOrgIds,
-        }).forEach(([key, value]) => {
+        Object.entries(data).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
                 if (Array.isArray(value)) {
                     value.forEach((v) => payload.append(`${key}[]`, String(v)));
@@ -139,9 +98,6 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
     );
 
     const allRoles = [...systemAdminRole, ...filteredRoles];
-    const selectedOrganizations = organizations.filter((organization) =>
-        data.organization_ids.includes(organization.id),
-    );
     const selectedRoles = allRoles.filter((role) =>
         data.roles.includes(role.id),
     );
@@ -178,8 +134,8 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                     : 'Create a user account'}
                             </h1>
                             <p className="max-w-2xl text-sm leading-5 text-muted-foreground">
-                                Add profile details, choose organization access,
-                                and assign the roles this user needs.
+                                Add profile details and assign the roles this
+                                user needs.
                             </p>
                         </div>
                         <Link
@@ -254,113 +210,6 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                             />
                                         </div>
                                         <InputError message={errors.email} />
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-                                <div className="flex items-start gap-2.5 border-b px-4 py-3">
-                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground">
-                                        <Building2 className="size-4" />
-                                    </div>
-                                    <div className="space-y-0.5">
-                                        <h2 className="text-sm font-semibold tracking-tight">
-                                            Organization access
-                                        </h2>
-                                        <p className="text-xs text-muted-foreground">
-                                            Select where this user can work and
-                                            choose their primary organization.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="space-y-3 p-4">
-                                    <div className="space-y-1.5">
-                                        <div className="flex flex-wrap items-center justify-between gap-2">
-                                            <Label>
-                                                Available organizations
-                                            </Label>
-                                            <span className="text-xs text-muted-foreground">
-                                                {selectedOrganizations.length}{' '}
-                                                selected
-                                            </span>
-                                        </div>
-                                        {organizations.length ? (
-                                            <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-3">
-                                                {organizations.map(
-                                                    (organization) => {
-                                                        const selected =
-                                                            data.organization_ids.includes(
-                                                                organization.id,
-                                                            );
-                                                        return (
-                                                            <label
-                                                                key={
-                                                                    organization.id
-                                                                }
-                                                                className={`flex min-h-10 cursor-pointer items-center gap-2.5 rounded-lg border px-3 py-2 transition ${
-                                                                    selected
-                                                                        ? 'border-primary/40 bg-primary/5'
-                                                                        : 'hover:bg-muted/50'
-                                                                }`}
-                                                            >
-                                                                <Input
-                                                                    type="checkbox"
-                                                                    checked={
-                                                                        selected
-                                                                    }
-                                                                    onChange={() =>
-                                                                        toggleOrganization(
-                                                                            organization.id,
-                                                                        )
-                                                                    }
-                                                                    className="size-4"
-                                                                />
-                                                                <span className="min-w-0 truncate text-sm font-medium">
-                                                                    {
-                                                                        organization.name
-                                                                    }
-                                                                </span>
-                                                            </label>
-                                                        );
-                                                    },
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="rounded-lg border border-dashed px-4 py-4 text-center text-xs text-muted-foreground">
-                                                No organizations are available.
-                                            </div>
-                                        )}
-                                        <InputError
-                                            message={errors.organization_ids}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <Label htmlFor="primary-organization">
-                                            Primary organization
-                                        </Label>
-                                        <Select
-                                            value={
-                                                data.organization_id?.toString() ||
-                                                ''
-                                            }
-                                            onChange={(value) =>
-                                                setData(
-                                                    'organization_id',
-                                                    Number(value),
-                                                )
-                                            }
-                                            options={selectedOrganizations.map(
-                                                (organization) => ({
-                                                    value: organization.id.toString(),
-                                                    label: organization.name,
-                                                }),
-                                            )}
-                                            placeholder="Select primary organization"
-                                        />
-                                        <InputError
-                                            message={errors.organization_id}
-                                        />
                                     </div>
                                 </div>
                             </section>
@@ -550,14 +399,6 @@ const UserForm = ({ user, roles, organizations, auth }: UserFormPageProps) => {
                                     </div>
 
                                     <div className="space-y-2.5 border-t pt-3">
-                                        <div className="flex items-center justify-between gap-3 text-xs">
-                                            <span className="text-muted-foreground">
-                                                Organizations
-                                            </span>
-                                            <span className="font-medium">
-                                                {selectedOrganizations.length}
-                                            </span>
-                                        </div>
                                         <div className="flex items-center justify-between gap-3 text-xs">
                                             <span className="text-muted-foreground">
                                                 Assigned roles

@@ -5,7 +5,6 @@ namespace App\SystemAdministration\Controllers;
 use App\Http\Controllers\Controller;
 use App\SystemAdministration\Application\UserService;
 use App\SystemAdministration\Models\Branch;
-use App\SystemAdministration\Models\Organization;
 use App\SystemAdministration\Models\Permission;
 use App\SystemAdministration\Models\Role;
 use App\SystemAdministration\Models\User;
@@ -71,11 +70,10 @@ class UserController extends Controller
     /* ==========================
      * CREATE
      * ========================== */
-    public function create(Request $request)
+    public function create()
     {
         return Inertia::render('administration-security/users/user-form-page', [
             'roles' => Role::all(),
-            'organizations' => Organization::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -107,44 +105,6 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', $user->name . ' assigned to the selected branch.');
-    }
-
-    public function editOrganization(User $user, Request $request)
-    {
-        $this->authorizeOrganization($user, $request);
-
-        return Inertia::render('administration-security/users/assign-organization-page', [
-            'user' => $user->load(['organization', 'organizations']),
-            'organizations' => Organization::query()->orderBy('name')->get(),
-        ]);
-    }
-
-    public function assignOrganization(Request $request, User $user)
-    {
-        $this->authorizeOrganization($user, $request);
-
-        $validated = $request->validate([
-            'organization_ids' => ['required', 'array'],
-            'organization_ids.*' => ['integer', 'exists:organizations,id'],
-            'organization_id' => ['nullable', 'integer', 'exists:organizations,id'],
-        ]);
-
-        $organizationIds = array_values(array_unique(array_map('intval', $validated['organization_ids'])));
-
-        if (!empty($organizationIds)) {
-            $primaryOrganizationId = (int) ($validated['organization_id'] ?? $organizationIds[0]);
-            if (!in_array($primaryOrganizationId, $organizationIds, true)) {
-                $primaryOrganizationId = $organizationIds[0];
-            }
-            $user->forceFill(['organization_id' => $primaryOrganizationId])->save();
-        } else {
-            $user->forceFill(['organization_id' => null])->save();
-        }
-
-        $user->organizations()->sync($organizationIds);
-
-        return redirect()->route('users.index')
-            ->with('success', $user->name . ' organization memberships updated.');
     }
 
     /* ==========================
@@ -197,10 +157,9 @@ class UserController extends Controller
         $permissions = Permission::all();
 
         return Inertia::render('administration-security/users/user-form-page', [
-            'user' => $user->load(['roles', 'organizations']),
+            'user' => $user->load('roles'),
             'roles' => $roles,
             'permissions' => $permissions,
-            'organizations' => Organization::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -211,7 +170,6 @@ class UserController extends Controller
     {
         $validated = $request->validated();
         $this->authorizeOrganization($user, $request);
-        $validated['organization_id'] = $this->activeOrganizationId($request);
 
         try {
             $user = $this->userService->updateUser(

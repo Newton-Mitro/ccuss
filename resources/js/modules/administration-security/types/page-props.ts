@@ -4,7 +4,6 @@ import type {
     User,
 } from '@/modules/administration-security/types/user';
 import type { Branch } from '@/modules/branch-operations/types/branch';
-import type { Organization } from '@/modules/organization-settings/types/organization';
 import type { SharedData } from '@/types';
 import type { ListFilters } from '@/types/base_types';
 import type { PaginatedResponse } from '@/types/paginated_response';
@@ -26,7 +25,6 @@ export interface RolePermissionPageProps extends SharedData {
 export interface UserFormPageProps extends SharedData {
     user?: User;
     roles: Role[];
-    organizations: Organization[];
     permissions?: Permission[];
 }
 

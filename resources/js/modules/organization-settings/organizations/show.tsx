@@ -10,27 +10,42 @@ import {
     Pencil,
     Plus,
     Trash2,
+    UserPlus,
+    UsersRound,
 } from 'lucide-react';
 import { useState } from 'react';
 import { route } from 'ziggy-js';
 
-import type { OrganizationShowPageProps } from '@/modules/organization-settings/types/page-props';
 import BolderLessInfoBox from '@/components/borderless-info-box';
 import HeadingSmall from '@/components/heading-small';
 import useFlashToastHandler from '@/hooks/use-flash-toast-handler';
 import CustomAuthLayout from '@/layouts/custom-auth-layout';
 import { appSwal } from '@/lib/appSwal';
-import type { BreadcrumbItem } from '@/types';
 import type { Branch } from '@/modules/branch-operations/types/branch';
-import { BranchDetailsDialog, BranchFormDialog } from '@/modules/organization-settings/organizations/branch-dialogs';
+import {
+    BranchDetailsDialog,
+    BranchFormDialog,
+} from '@/modules/organization-settings/organizations/branch-dialogs';
+import type { OrganizationShowPageProps } from '@/modules/organization-settings/types/page-props';
+import type { BreadcrumbItem } from '@/types';
 
 function Show() {
-    const { organization } = usePage<OrganizationShowPageProps>().props;
+    const { organization, users, canManageUsers } =
+        usePage<OrganizationShowPageProps>().props;
     const [branchFormOpen, setBranchFormOpen] = useState(false);
     const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
     const [viewingBranch, setViewingBranch] = useState<Branch | null>(null);
 
     const { delete: destroy, processing } = useForm();
+    const {
+        data: userForm,
+        setData: setUserForm,
+        post: addUser,
+        delete: removeUser,
+        processing: addingUser,
+        errors: userErrors,
+        reset: resetUserForm,
+    } = useForm({ email: '' });
 
     useFlashToastHandler();
 
@@ -57,6 +72,31 @@ function Show() {
                     destroy(route('branches.destroy', branch.id), {
                         preserveScroll: true,
                     });
+                }
+            });
+    };
+
+    const handleRemoveUser = (user: { id: number; name: string }) => {
+        appSwal
+            .fire({
+                title: 'Remove organization user?',
+                text: `${user.name} will lose access to ${organization.name}.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Remove user',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                focusCancel: true,
+            })
+            .then((result) => {
+                if (result.isConfirmed) {
+                    removeUser(
+                        route('organizations.users.destroy', {
+                            organization: organization.id,
+                            user: user.id,
+                        }),
+                        { preserveScroll: true },
+                    );
                 }
             });
     };
@@ -492,6 +532,116 @@ function Show() {
                             </p>
                         </div>
                     )}
+                </section>
+
+                {/* Organization users */}
+                <section className={sectionClass}>
+                    <div className={sectionHeaderClass}>
+                        <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                                <UsersRound className="size-5" />
+                            </div>
+                            <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <h3 className="text-sm font-semibold">
+                                        Organization Users
+                                    </h3>
+                                    <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                                        {users.length}
+                                    </span>
+                                </div>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Users who can access this organization.
+                                </p>
+                            </div>
+                        </div>
+                        {canManageUsers && (
+                            <form
+                                className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
+                                onSubmit={(event) => {
+                                    event.preventDefault();
+                                    addUser(
+                                        route(
+                                            'organizations.users.store',
+                                            organization.id,
+                                        ),
+                                        {
+                                            preserveScroll: true,
+                                            onSuccess: () => resetUserForm(),
+                                        },
+                                    );
+                                }}
+                            >
+                                <input
+                                    type="email"
+                                    value={userForm.email}
+                                    onChange={(event) =>
+                                        setUserForm('email', event.target.value)
+                                    }
+                                    disabled={addingUser}
+                                    placeholder="Enter user email"
+                                    aria-label="User email"
+                                    autoComplete="email"
+                                    required
+                                    className="h-9 min-w-56 rounded-md border border-input bg-background px-3 text-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={
+                                        addingUser || !userForm.email.trim()
+                                    }
+                                    className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    <UserPlus className="size-4" />
+                                    Add User
+                                </button>
+                            </form>
+                        )}
+                    </div>
+                    {userErrors.email && (
+                        <p className="px-5 pb-3 text-xs text-destructive">
+                            {userErrors.email}
+                        </p>
+                    )}
+                    <div className="divide-y divide-border/60">
+                        {users.length ? (
+                            users.map((user) => (
+                                <div
+                                    key={user.id}
+                                    className="flex items-center gap-3 px-4 py-3"
+                                >
+                                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+                                        {user.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="truncate text-sm font-medium">
+                                            {user.name}
+                                        </p>
+                                        <p className="truncate text-xs text-muted-foreground">
+                                            {user.email}
+                                        </p>
+                                    </div>
+                                    {canManageUsers && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handleRemoveUser(user)
+                                            }
+                                            aria-label={`Remove ${user.name} from ${organization.name}`}
+                                            title="Remove from organization"
+                                            className="ml-auto inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+                                        >
+                                            <Trash2 className="size-4" />
+                                        </button>
+                                    )}
+                                </div>
+                            ))
+                        ) : (
+                            <p className="px-5 py-8 text-center text-sm text-muted-foreground">
+                                No users are assigned to this organization yet.
+                            </p>
+                        )}
+                    </div>
                 </section>
             </div>
             <BranchFormDialog

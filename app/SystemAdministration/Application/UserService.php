@@ -77,6 +77,8 @@ class UserService
 
         unset($data['branch_id']);
 
+        $hasOrganizationAssignment = array_key_exists('organization_ids', $data)
+            || array_key_exists('organization_id', $data);
         $organizationIds = array_values(array_unique(array_filter(array_map(
             'intval',
             (array) ($data['organization_ids'] ?? [])
@@ -111,9 +113,11 @@ class UserService
 
         $updated = $this->userRepository->update($user, $data);
 
-        if (!empty($organizationIds)) {
+        if ($hasOrganizationAssignment) {
             $updated->organizations()->sync($organizationIds);
-            $updated->forceFill(['organization_id' => $data['organization_id']])->save();
+            $updated->forceFill([
+                'organization_id' => $organizationIds ? $data['organization_id'] : null,
+            ])->save();
         }
 
         if (isset($data['roles']) && is_array($data['roles'])) {
