@@ -195,101 +195,94 @@ export default function OpeningBalancesCreate() {
                                     Add line
                                 </Button>
                             </div>
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 {data.entries.map((entry, index) => (
                                     <fieldset
                                         key={index}
-                                        className="space-y-4 rounded-xl border bg-muted/20 p-4 sm:p-5"
+                                        className="grid gap-3 rounded-xl border bg-muted/20 p-3 sm:grid-cols-[minmax(0,2fr)_minmax(7rem,1fr)_minmax(0,1.5fr)_auto] sm:items-end"
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <legend className="text-sm font-semibold">
-                                                Entry {index + 1}
-                                            </legend>
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon"
-                                                title="Remove line"
-                                                aria-label={`Remove entry ${index + 1}`}
-                                                disabled={
-                                                    data.entries.length === 1
-                                                }
-                                                onClick={() =>
-                                                    setData(
-                                                        'entries',
-                                                        data.entries.filter(
-                                                            (_, current) =>
-                                                                current !==
-                                                                index,
-                                                        ),
+                                        <legend className="sr-only">
+                                            Entry {index + 1}
+                                        </legend>
+                                        <div className="space-y-2">
+                                            <Label>Account</Label>
+                                            <Select
+                                                value={entry.account_id}
+                                                onChange={(value) =>
+                                                    updateEntry(
+                                                        index,
+                                                        'account_id',
+                                                        value,
                                                     )
                                                 }
-                                            >
-                                                <Trash2 className="size-4 text-destructive" />
-                                            </Button>
+                                                options={[
+                                                    {
+                                                        value: '',
+                                                        label: 'Select account',
+                                                    },
+                                                    ...accounts.map(
+                                                        (account: any) => ({
+                                                            value: String(
+                                                                account.id,
+                                                            ),
+                                                            label: `${account.code} - ${account.name}`,
+                                                        }),
+                                                    ),
+                                                ]}
+                                            />
                                         </div>
-                                        <div className="grid gap-4 sm:grid-cols-2">
-                                            <div className="space-y-2 sm:col-span-2">
-                                                <Label>Account</Label>
-                                                <Select
-                                                    value={entry.account_id}
-                                                    onChange={(value) =>
-                                                        updateEntry(
-                                                            index,
-                                                            'account_id',
-                                                            value,
-                                                        )
-                                                    }
-                                                    options={[
-                                                        {
-                                                            value: '',
-                                                            label: 'Select account',
-                                                        },
-                                                        ...accounts.map(
-                                                            (account: any) => ({
-                                                                value: String(
-                                                                    account.id,
-                                                                ),
-                                                                label: `${account.code} - ${account.name}`,
-                                                            }),
-                                                        ),
-                                                    ]}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Amount</Label>
-                                                <Input
-                                                    type="number"
-                                                    min="0"
-                                                    step="0.0001"
-                                                    value={entry.amount}
-                                                    onChange={(event) =>
-                                                        updateEntry(
-                                                            index,
-                                                            'amount',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    placeholder="0.00"
-                                                    className="h-11"
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Description</Label>
-                                                <Input
-                                                    value={entry.description}
-                                                    onChange={(event) =>
-                                                        updateEntry(
-                                                            index,
-                                                            'description',
-                                                            event.target.value,
-                                                        )
-                                                    }
-                                                    placeholder="Optional entry description"
-                                                    className="h-11"
-                                                />
-                                            </div>
+                                        <div className="space-y-2">
+                                            <Label>Amount</Label>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                step="0.0001"
+                                                value={entry.amount}
+                                                onChange={(event) =>
+                                                    updateEntry(
+                                                        index,
+                                                        'amount',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="0.00"
+                                                className="h-11"
+                                            />
                                         </div>
+                                        <div className="space-y-2">
+                                            <Label>Description</Label>
+                                            <Input
+                                                value={entry.description}
+                                                onChange={(event) =>
+                                                    updateEntry(
+                                                        index,
+                                                        'description',
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="Optional entry description"
+                                                className="h-11"
+                                            />
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            title="Remove line"
+                                            aria-label={`Remove entry ${index + 1}`}
+                                            disabled={data.entries.length === 1}
+                                            onClick={() =>
+                                                setData(
+                                                    'entries',
+                                                    data.entries.filter(
+                                                        (_, current) =>
+                                                            current !== index,
+                                                    ),
+                                                )
+                                            }
+                                        >
+                                            <Trash2 className="size-4 text-destructive" />
+                                        </Button>
                                     </fieldset>
                                 ))}
                                 <InputError message={errors.entries} />

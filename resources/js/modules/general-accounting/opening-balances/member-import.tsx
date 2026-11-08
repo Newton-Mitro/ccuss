@@ -69,21 +69,19 @@ export default function MemberOpeningBalanceImport() {
     return (
         <CustomAuthLayout breadcrumbs={breadcrumbs}>
             <Head title="Import member opening balances" />
-            <div className="mx-auto max-w-3xl space-y-6">
-                <header className="flex items-start gap-4 rounded-2xl border bg-card p-6 shadow-sm">
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <FileSpreadsheet className="size-6" />
+            <div className="mx-auto max-w-5xl space-y-4">
+                <header className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm sm:flex-row sm:items-center">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <FileSpreadsheet className="size-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                        <h1 className="text-xl font-semibold">
+                        <h1 className="text-lg font-semibold tracking-tight">
                             Import member opening balances
                         </h1>
-                        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                        <p className="mt-0.5 text-xs leading-5 text-muted-foreground sm:text-sm">
                             Import starting balances for existing savings,
-                            share, fixed-deposit, and recurring-deposit
-                            accounts. The import records member-account opening
-                            activity and posts one balanced general ledger
-                            voucher.
+                            share, and deposit accounts; posts one balanced
+                            general-ledger voucher.
                         </p>
                     </div>
                     <Button asChild variant="outline" size="sm">
@@ -96,18 +94,20 @@ export default function MemberOpeningBalanceImport() {
 
                 <form
                     onSubmit={submit}
-                    className="space-y-6 rounded-2xl border bg-card p-5 shadow-sm sm:p-7"
+                    className="grid gap-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5 lg:grid-cols-2"
                 >
-                    <section className="space-y-4">
+                    <section className="space-y-3 rounded-lg border p-4">
                         <div>
-                            <h2 className="font-semibold">Cutover details</h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <h2 className="text-sm font-semibold">
+                                Cutover details
+                            </h2>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
                                 Choose the open period containing your first
                                 software date.
                             </p>
                         </div>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            <div className="space-y-2">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="space-y-1.5">
                                 <Label htmlFor="fiscal_period_id">
                                     Fiscal period
                                 </Label>
@@ -170,7 +170,7 @@ export default function MemberOpeningBalanceImport() {
                                     })),
                                 ]}
                             />
-                            <p className="text-xs leading-5 text-muted-foreground">
+                            <p className="text-[11px] leading-4 text-muted-foreground">
                                 The voucher uses this account only for the net
                                 amount needed to balance the imported
                                 control-account totals.
@@ -179,11 +179,13 @@ export default function MemberOpeningBalanceImport() {
                         </div>
                     </section>
 
-                    <section className="space-y-4 border-t pt-5">
+                    <section className="space-y-3 rounded-lg border p-4">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                                <h2 className="font-semibold">CSV file</h2>
-                                <p className="mt-1 text-sm text-muted-foreground">
+                                <h2 className="text-sm font-semibold">
+                                    CSV file
+                                </h2>
+                                <p className="mt-0.5 text-xs text-muted-foreground">
                                     One row per member account; do not include
                                     thousands separators in amounts.
                                 </p>
@@ -198,34 +200,41 @@ export default function MemberOpeningBalanceImport() {
                                 </a>
                             </Button>
                         </div>
-                        <div className="rounded-lg border bg-muted/30 p-4 text-xs leading-6 text-muted-foreground">
-                            Required columns:{' '}
-                            <code className="font-mono text-foreground">
-                                account_no,opening_balance,ledger_account_code
-                            </code>
-                            <br />
-                            Example:{' '}
-                            <code className="font-mono text-foreground">
-                                SAV-00000001,1250.00,2100
-                            </code>
-                            <br />
-                            The account must already exist, belong to a member,
-                            be active, and have its account-type details but no
-                            balance or transaction history. Map savings,
-                            fixed-deposit, and recurring-deposit balances to a
-                            credit-normal liability account; map shares to a
-                            credit-normal equity account.
+                        <div className="space-y-1.5 rounded-lg bg-muted/40 p-3 text-[11px] leading-4 text-muted-foreground">
+                            <p>
+                                <span className="font-medium text-foreground">
+                                    Columns:
+                                </span>{' '}
+                                <code className="font-mono text-foreground">
+                                    account_no,opening_balance,ledger_account_code
+                                </code>
+                                <span className="mx-1.5">·</span>
+                                <span className="font-medium text-foreground">
+                                    Example:
+                                </span>{' '}
+                                <code className="font-mono text-foreground">
+                                    SAV-00000001,1250.00,2100
+                                </code>
+                            </p>
+                            <p>
+                                Use existing active member accounts with no
+                                balance or transaction history. Savings and
+                                deposit balances map to a credit-normal
+                                liability; shares map to credit-normal equity.
+                            </p>
                         </div>
                         <label
                             htmlFor="member-opening-file"
-                            className="flex min-h-32 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed bg-background px-4 py-6 text-center hover:bg-muted/30"
+                            className="flex min-h-16 cursor-pointer items-center gap-3 rounded-lg border border-dashed bg-background px-3 py-3 text-left hover:bg-muted/30"
                         >
-                            <FileUp className="mb-2 size-6 text-primary" />
-                            <span className="text-sm font-medium">
-                                {data.file?.name ?? 'Choose a CSV file'}
-                            </span>
-                            <span className="mt-1 text-xs text-muted-foreground">
-                                CSV only, maximum 10 MB
+                            <FileUp className="size-5 shrink-0 text-primary" />
+                            <span className="min-w-0">
+                                <span className="block truncate text-sm font-medium">
+                                    {data.file?.name ?? 'Choose a CSV file'}
+                                </span>
+                                <span className="block text-xs text-muted-foreground">
+                                    CSV only · Maximum 10 MB
+                                </span>
                             </span>
                             <input
                                 id="member-opening-file"
@@ -243,21 +252,18 @@ export default function MemberOpeningBalanceImport() {
                         <InputError message={errors.file} />
                     </section>
 
-                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4 text-sm leading-6">
-                        <strong>Current scope:</strong> this import initializes
-                        existing active savings, share, fixed-deposit, and
-                        recurring-deposit accounts only. Share memberships must
-                        already be active. Customer records and financial
-                        accounts/contracts must exist before importing. Loan
-                        contracts and their remaining repayment schedules, as
-                        well as bank and cash-location setup, are not included
-                        in this CSV import yet. Imports are atomic: any invalid
-                        row prevents all changes.
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2.5 text-xs leading-5 lg:col-span-2">
+                        <strong>Import scope:</strong> existing active savings,
+                        share, fixed-deposit, and recurring-deposit accounts
+                        only. Share memberships and account details must already
+                        exist. Loans, repayment schedules, banks, and cash
+                        locations are not included. Imports are atomic: one
+                        invalid row prevents all changes.
                     </div>
 
                     <footer
                         data-slot="form-actions"
-                        className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end"
+                        className="flex flex-col-reverse gap-2 border-t pt-3 sm:flex-row sm:justify-end lg:col-span-2"
                     >
                         <Button
                             type="submit"
