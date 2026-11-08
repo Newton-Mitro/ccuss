@@ -3,6 +3,8 @@
 namespace App\TreasuryAndCash\Application;
 
 use App\GeneralAccounting\Application\TreasurySummaryPostingService;
+use App\GeneralAccounting\Application\VoucherService;
+use App\GeneralAccounting\Models\Voucher;
 use App\TreasuryAndCash\Models\BranchDay;
 use App\TreasuryAndCash\Models\PettyCashFund;
 use App\TreasuryAndCash\Models\PettyCashTransaction;
@@ -13,6 +15,7 @@ class PettyCashTransactionService
     public function __construct(
         private readonly TreasurySummaryPostingService $summaryPostingService,
         private readonly CashLocationFinancialAccountService $cashLocationFinancialAccountService,
+        private readonly VoucherService $voucherService,
     ) {}
 
     public function create(int $organizationId, int $branchId, int $userId, string $type, array $data): PettyCashTransaction
@@ -137,6 +140,114 @@ class PettyCashTransactionService
             );
 
             $transaction->update(['status' => 'POSTED']);
+
+            return $transaction->fresh();
+        });
+    }
+
+    public function cancelPending(
+        int $organizationId,
+        int $branchId,
+        int $transactionId,
+        int $userId,
+        string $reason,
+    ): PettyCashTransaction {
+        return DB::transaction(function () use ($organizationId, $branchId, $transactionId, $userId, $reason) {
+            $transaction = PettyCashTransaction::query()
+                ->whereKey($transactionId)
+                ->where('status', 'PENDING')
+                ->whereHas('branchDay', fn ($query) => $query
+                    ->where('organization_id', $organizationId)
+                    ->where('branch_id', $branchId))
+                ->lockForUpdate()
+                ->first();
+
+            if (! $transaction) {
+                throw new \RuntimeException('Only a pending petty cash transaction in the active branch can be cancelled.');
+            }
+
+            $transaction->update([
+                'status' => 'CANCELLED',
+                'cancelled_by' => $userId,
+                'cancelled_at' => now(),
+                'cancellation_reason' => $reason,
+            ]);
+
+            return $transaction->fresh();
+        });
+    }
+
+    public function reversePosted(
+        int $organizationId,
+        int $branchId,
+        int $transactionId,
+        int $userId,
+        string $reason,
+    ): PettyCashTransaction {
+        return DB::transaction(function () use ($organizationId, $branchId, $transactionId, $userId, $reason) {
+            $transaction = PettyCashTransaction::query()
+                ->whereKey($transactionId)
+                ->where('status', 'POSTED')
+                ->whereHas('branchDay', fn ($query) => $query
+                    ->where('organization_id', $organizationId)
+                    ->where('branch_id', $branchId))
+                ->lockForUpdate()
+                ->first();
+
+            if (! $transaction) {
+                throw new \RuntimeException('Only a posted petty cash transaction in the active branch can be reversed.');
+            }
+
+            $fund = PettyCashFund::query()
+                ->whereKey($transaction->petty_cash_fund_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $fund) {
+                throw new \RuntimeException('The petty cash fund for this transaction no longer exists.');
+            }
+
+            $increasesBalance = in_array($transaction->type, ['FUNDING', 'REPLENISHMENT'], true);
+            $balance = (float) $fund->current_balance;
+            $amount = (float) $transaction->amount;
+            $newBalance = $increasesBalance ? $balance - $amount : $balance + $amount;
+
+            if ($newBalance < 0) {
+                throw new \RuntimeException('The reversal would make the petty cash balance negative.');
+            }
+            if ($newBalance > (float) $fund->fund_limit) {
+                throw new \RuntimeException('The reversal would exceed the petty cash fund limit.');
+            }
+
+            $voucher = Voucher::query()
+                ->where('organization_id', $organizationId)
+                ->where('voucher_no', 'PETTY-GL-'.$transaction->id)
+                ->with(['entries', 'fiscalPeriod'])
+                ->lockForUpdate()
+                ->first();
+
+            if (! $voucher || $voucher->status !== 'POSTED') {
+                throw new \RuntimeException('The posted General Ledger voucher for this transaction could not be found.');
+            }
+
+            $this->voucherService->reverse($voucher, $organizationId, $userId);
+
+            $fund->update(['current_balance' => $newBalance]);
+            $cashAccount = $this->cashLocationFinancialAccountService->ensureLinked(
+                $fund->cashLocation,
+                $newBalance,
+            );
+            $cashAccount->update([
+                'balance' => $newBalance,
+                'available_balance' => $newBalance,
+            ]);
+
+            $transaction->update([
+                'status' => 'REVERSED',
+                'reversed_by' => $userId,
+                'reversed_at' => now(),
+                'reversal_reason' => $reason,
+            ]);
 
             return $transaction->fresh();
         });

@@ -33,7 +33,7 @@ class PettyCashController extends Controller
         $this->middleware('permission:petty_cash.update')->only(['edit', 'update']);
         $this->middleware('permission:petty_cash.expense')->only(['expense', 'storeExpense']);
         $this->middleware('permission:petty_cash.view')->only(['transactions']);
-        $this->middleware('permission:petty_cash.expense')->only(['postTransaction']);
+        $this->middleware('permission:petty_cash.expense')->only(['postTransaction', 'cancelTransaction', 'reverseTransaction']);
     }
 
     public function accounts(Request $request): Response
@@ -96,6 +96,52 @@ class PettyCashController extends Controller
 
         return redirect()->route('petty-cash-transactions.index')
             ->with('success', 'Petty cash transaction posted successfully.');
+    }
+
+    public function cancelTransaction(Request $request, \App\TreasuryAndCash\Models\PettyCashTransaction $transaction): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for petty cash transactions.');
+        $data = $request->validate(['reason' => ['required', 'string', 'max:1000']]);
+
+        try {
+            $this->pettyCashTransactionService->cancelPending(
+                $organization->id,
+                $user->branch_id,
+                $transaction->id,
+                $user->id,
+                $data['reason'],
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('petty-cash-transactions.index')
+            ->with('success', 'Petty cash transaction cancelled.');
+    }
+
+    public function reverseTransaction(Request $request, \App\TreasuryAndCash\Models\PettyCashTransaction $transaction): RedirectResponse
+    {
+        $organization = $request->attributes->get('active_organization');
+        $user = $request->user();
+        abort_unless($user?->branch_id, 422, 'A branch assignment is required for petty cash transactions.');
+        $data = $request->validate(['reason' => ['required', 'string', 'max:1000']]);
+
+        try {
+            $this->pettyCashTransactionService->reversePosted(
+                $organization->id,
+                $user->branch_id,
+                $transaction->id,
+                $user->id,
+                $data['reason'],
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('petty-cash-transactions.index')
+            ->with('success', 'Petty cash transaction reversed.');
     }
 
     public function create(Request $request): Response

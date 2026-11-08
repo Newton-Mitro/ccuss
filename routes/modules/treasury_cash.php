@@ -230,6 +230,12 @@ Route::middleware(['auth', 'verified', 'organization'])
         Route::post('/petty-cash-transactions/{transaction}/post', [PettyCashController::class, 'postTransaction'])
             ->middleware('permission:petty_cash.expense')
             ->name('petty-cash-transactions.post');
+        Route::post('/petty-cash-transactions/{transaction}/cancel', [PettyCashController::class, 'cancelTransaction'])
+            ->middleware('permission:petty_cash.expense')
+            ->name('petty-cash-transactions.cancel');
+        Route::post('/petty-cash-transactions/{transaction}/reverse', [PettyCashController::class, 'reverseTransaction'])
+            ->middleware('permission:petty_cash.expense')
+            ->name('petty-cash-transactions.reverse');
         Route::post('/petty-cash-transactions/funding', [PettyCashController::class, 'storeFunding'])
             ->middleware('permission:petty_cash.create')
             ->name('petty-cash-transactions.funding.store');

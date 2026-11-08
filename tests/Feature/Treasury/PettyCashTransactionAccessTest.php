@@ -278,6 +278,87 @@ it('posts petty cash opening funding and creates a voucher', function () {
         ->and(\App\GeneralAccounting\Models\Voucher::query()->where('voucher_no', 'PETTY-GL-'.$transaction->id)->exists())->toBeTrue();
 });
 
+it('cancels a pending petty cash transaction with an audit reason', function () {
+    $fixture = pettyCashTransactionFixture();
+    grantPettyCashPostPermission($fixture['user']);
+    $transaction = PettyCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'petty_cash_fund_id' => $fixture['fund']->id,
+        'transaction_no' => 'PETTY-CANCEL-001',
+        'type' => 'EXPENSE',
+        'amount' => 125,
+        'status' => 'PENDING',
+        'created_by' => $fixture['user']->id,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('petty-cash-transactions.cancel', $transaction), [
+            'reason' => 'Entered in error',
+        ])
+        ->assertRedirect(route('petty-cash-transactions.index'));
+
+    expect($transaction->fresh()->status)->toBe('CANCELLED')
+        ->and($transaction->fresh()->cancellation_reason)->toBe('Entered in error')
+        ->and($fixture['fund']->fresh()->current_balance)->toBe('3500.0000');
+});
+
+it('reverses a posted petty cash transaction and its ledger voucher', function () {
+    $fixture = pettyCashTransactionFixture();
+    grantPettyCashPostPermission($fixture['user']);
+    $transaction = PettyCashTransaction::create([
+        'branch_day_id' => $fixture['branchDay']->id,
+        'petty_cash_fund_id' => $fixture['fund']->id,
+        'transaction_no' => 'PETTY-REVERSE-001',
+        'type' => 'EXPENSE',
+        'amount' => 125,
+        'description' => 'Stationery purchase',
+        'status' => 'PENDING',
+        'created_by' => $fixture['user']->id,
+    ]);
+
+    $group = AccountGroup::factory()->create(['organization_id' => $fixture['organization']->id]);
+    $expenseAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    $cashAccount = LedgerAccount::factory()->create([
+        'organization_id' => $fixture['organization']->id,
+        'account_group_id' => $group->id,
+    ]);
+    TreasuryGlMapping::query()->create([
+        'organization_id' => $fixture['organization']->id,
+        'source_type' => 'PETTY_CASH_TRANSACTION',
+        'source_code' => 'DEFAULT',
+        'transaction_type' => 'EXPENSE',
+        'debit_account_id' => $expenseAccount->id,
+        'credit_account_id' => $cashAccount->id,
+        'status' => true,
+    ]);
+
+    $this->actingAs($fixture['user'])
+        ->withSession(['active_organization_id' => $fixture['organization']->id])
+        ->post(route('petty-cash-transactions.post', $transaction))
+        ->assertRedirect(route('petty-cash-transactions.index'));
+
+    $this->post(route('petty-cash-transactions.reverse', $transaction), [
+        'reason' => 'Duplicate expense entry',
+    ])->assertRedirect(route('petty-cash-transactions.index'));
+
+    expect($transaction->fresh()->status)->toBe('REVERSED')
+        ->and($transaction->fresh()->reversal_reason)->toBe('Duplicate expense entry')
+        ->and($fixture['fund']->fresh()->current_balance)->toBe('3500.0000')
+        ->and($fixture['location']->fresh()->financialAccount->balance)->toBe('3500.0000')
+        ->and(\App\GeneralAccounting\Models\Voucher::query()
+            ->where('organization_id', $fixture['organization']->id)
+            ->where('status', 'POSTED')
+            ->count())->toBe(1)
+        ->and(\App\GeneralAccounting\Models\Voucher::query()
+            ->where('organization_id', $fixture['organization']->id)
+            ->where('status', 'REVERSED')
+            ->count())->toBe(1);
+});
+
 it('keeps a petty cash transaction pending when its GL mapping is missing', function () {
     $fixture = pettyCashTransactionFixture();
     grantPettyCashPostPermission($fixture['user']);

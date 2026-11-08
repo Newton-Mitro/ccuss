@@ -23,10 +23,18 @@ class PettyCashTransaction extends Model
         'expense_account_id',
         'status',
         'created_by',
+        'cancelled_by',
+        'cancelled_at',
+        'cancellation_reason',
+        'reversed_by',
+        'reversed_at',
+        'reversal_reason',
     ];
 
     protected $casts = [
         'amount' => 'decimal:4',
+        'cancelled_at' => 'datetime',
+        'reversed_at' => 'datetime',
     ];
 
     public function branchDay(): BelongsTo
@@ -47,5 +55,15 @@ class PettyCashTransaction extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function cancelledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    public function reversedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reversed_by');
     }
 }

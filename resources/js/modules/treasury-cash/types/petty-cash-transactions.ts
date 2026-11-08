@@ -11,7 +11,11 @@ export type PettyCashTransactionType =
     | 'RETURN'
     | 'ADJUSTMENT';
 
-export type PettyCashTransactionStatus = 'PENDING' | 'POSTED' | 'CANCELLED';
+export type PettyCashTransactionStatus =
+    | 'PENDING'
+    | 'POSTED'
+    | 'CANCELLED'
+    | 'REVERSED';
 
 export interface PettyCashTransactionListItem {
     id: number;
@@ -21,6 +25,8 @@ export interface PettyCashTransactionListItem {
     status: PettyCashTransactionStatus;
     payee?: string | null;
     description?: string | null;
+    cancellation_reason?: string | null;
+    reversal_reason?: string | null;
     branch_day?: { business_date: string } | null;
     petty_cash_fund?: { code: string; name: string } | null;
 }
